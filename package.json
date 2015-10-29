@@ -1,0 +1,24 @@
+{
+  "name": "hero",
+  "version": "1.0.0",
+  "description": "A JavaScript roguelike",
+  "main": "index.html",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jakofranko/hero.git"
+  },
+  "keywords": [
+    "roguelike",
+    "rotjs",
+    "hero"
+  ],
+  "author": "Jake Franklin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jakofranko/hero/issues"
+  },
+  "homepage": "https://github.com/jakofranko/hero"
+}
