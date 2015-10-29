@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/jakofranko/hero/issues"
   },
-  "homepage": "https://github.com/jakofranko/hero"
+  "homepage": "https://github.com/jakofranko/hero",
+  "dependencies": {
+    "bower": "^1.6.5"
+  }
 }
