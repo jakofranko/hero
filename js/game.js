@@ -1,39 +1,42 @@
 var Game = {
-	display: null,
 	map: {},
+	display: new ROT.Display(),
+	scheduler: new ROT.Scheduler.Simple(),
+	engine: new ROT.Engine(this.scheduler),
+
+	layout: null,
+	buildings: null,
 	player: null,
-	engine: null,
+
 	init: function() {
-		this.display = new ROT.Display();
-        document.getElementById('game').appendChild(this.display.getContainer());
-        this._generateMap();
-        var scheduler = new ROT.Scheduler.Simple();
-	    scheduler.add(this.player, true);
-	    this.engine = new ROT.Engine(scheduler);
-	    this.engine.start();
+		window.addEventListener("load", this);
 	},
-	_generateMap: function() {
-	    var digger = new ROT.Map.Digger();
-	    var freeCells = [];
-	 
-	    var digCallback = function(x, y, value) {
-	        if (value) { return; } /* do not store walls */
-	 
-	        var key = x+","+y;
-	        freeCells.push(key);
-	        this.map[key] = ".";
-	    }
-	    digger.create(digCallback.bind(this));
-	    this._drawWholeMap();
-	    this.player = this._createBeing(Player, freeCells);
+	handleEvent: function(e) {
+		switch (e.type) {
+			case "load":
+				window.removeEventListener("load", this);
+				this._load();
+			break;
+
+			case "resize":
+				this._resize();
+			break;
+		}
 	},
-	_drawWholeMap: function() {
-	    for (var key in this.map) {
-	        var parts = key.split(",");
-	        var x = parseInt(parts[0]);
-	        var y = parseInt(parts[1]);
-	        this.display.draw(x, y, this.map[key]);
-	    }
+	_load: function() {
+		// this._generateMap();
+        document.querySelector('#level').appendChild(this.display.getContainer());
+        this.layout = new Game.Layout(28, 20);
+        this.layout.init();
+	    // this.scheduler.add(this.player, true);	    
+	    // this.engine.start();
+	},
+	_resize: function() {
+		if (!this.layout) { return; }
+		var level = document.querySelector("#level");
+		this.layout.resize(parent.offsetWidth, parent.offsetHeight);
+		// var position = this.player.getPosition();
+		// Game.legend.update(position[0], position[1]);
 	},
 	_createBeing: function(Being, freeCells) {
 	    var index = Math.floor(ROT.RNG.getUniform() * freeCells.length);
