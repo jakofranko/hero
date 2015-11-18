@@ -10,6 +10,7 @@ var Game = {
 
 	init: function() {
 		window.addEventListener("load", this);
+		window.addEventListener("resize", this);
 	},
 	handleEvent: function(e) {
 		switch (e.type) {
