@@ -12,11 +12,26 @@ Game.Feature.prototype.get = function(x, y, z) {
 };
 
 Game.Feature.Building = function() {
-	var hw = ROT.RNG.getNormal(5, 1);
-	this._width = hw;
-	this._height = hw;
-	this._stories = ROT.RNG.getNormal(5, 3);
+	var wh = ROT.RNG.getNormal(5, 1);
+	this._width = wh;
+	this._height = wh;
+	this._stories = Math.round(ROT.RNG.getNormal(5, 3));
 	this.ch = "B";
-	this.name = Game.Feature.Building.randomName();
-	this._blueprint = {};
+	// this.name = Game.Feature.Building.randomName();
+	this._blueprint = [];
+
+	this.init();
+	console.log(this._blueprint);
+};
+Game.Feature.Building.prototype.init = function() {
+	// Since a building is going to basically be a cube, only need to have one arena object
+	var map = new ROT.Map.Arena(this._width, this._height);
+	for(var z = 0; z < this._stories; z++) {
+		var story = {};
+		map.create(function(x, y, value) {
+			var key = x + "," + y;
+			story[key] = value;
+		});
+		this._blueprint.push(story);
+	}
 };
