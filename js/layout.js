@@ -19,6 +19,11 @@ Game.Layout = function(width, height) {
 	this._node.appendChild(this._display.getContainer());
 
 	document.querySelector("#sidebar").appendChild(this._node);
+
+	this.resize();
+};
+Game.Layout.prototype.getNode = function() {
+	return this._node;
 };
 Game.Layout.prototype.init = function() {
 	// Generate a random grid
@@ -94,15 +99,9 @@ Game.Layout.prototype._draw = function() {
 	}
 };
 Game.Layout.prototype.resize = function(width, height) {
-	console.log("hello");
 	var fontSize = this._display.computeFontSize(width, height);
 	this._display.setOptions({fontSize:fontSize});
-	var canvas = this._display.getContainer();
-	canvas.style.top = Math.floor((height-canvas.height)/2) + "px";
+	// var canvas = this._display.getContainer();
+	// canvas.style.top = Math.floor((height-canvas.height)/2) + "px";
 	return this;
 }
-
-// var layout = new Game.Layout();
-// layout.init();
-// layout.draw();
-// console.log(layout.grid);

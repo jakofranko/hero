@@ -1,6 +1,5 @@
 var Game = {
 	map: {},
-	display: new ROT.Display(),
 	scheduler: new ROT.Scheduler.Simple(),
 	engine: new ROT.Engine(this.scheduler),
 
@@ -8,9 +7,19 @@ var Game = {
 	buildings: null,
 	player: null,
 
-	init: function() {
-		window.addEventListener("load", this);
-		window.addEventListener("resize", this);
+	_display: null,
+	_currentScreen: null,
+	_screenWidth: 80,
+	_screenHeight: 24,
+
+	getDisplay: function() {
+		return this._display;
+	},
+	getScreenWidth: function() {
+	    return this._screenWidth;
+	},
+	getScreenHeight: function() {
+	    return this._screenHeight;
 	},
 	handleEvent: function(e) {
 		switch (e.type) {
@@ -24,27 +33,60 @@ var Game = {
 			break;
 		}
 	},
+	init: function() {
+		window.addEventListener("load", this);
+		window.addEventListener("resize", this);
+
+		// TODO: Make width and height constants accessible throughout the game
+	    this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight});
+	    // Create a helper function for binding to an event
+	    // and making it send it to the screen
+	    var game = this; // So that we don't lose this
+	    var bindEventToScreen = function(event) {
+	        window.addEventListener(event, function(e) {
+	            // When an event is received, send it to the
+	            // screen if there is one
+	            if (game._currentScreen !== null) {
+	                // Send the event type and data to the screen
+	                game._currentScreen.handleInput(event, e);
+	                // Clear the screen
+                    game._display.clear();
+                    // Render the screen
+                    game._currentScreen.render(game._display);
+	            }
+	        });
+	    }
+	    // Bind keyboard input events
+	    bindEventToScreen('keydown');
+	    // bindEventToScreen('keyup');
+	    // bindEventToScreen('keypress');
+	},
+	switchScreen: function(screen) {
+	    // If we had a screen before, notify it that we exited
+	    if (this._currentScreen !== null) {
+	        this._currentScreen.exit();
+	    }
+	    // Clear the display
+	    this.getDisplay().clear();
+	    // Update our current screen, notify it we entered
+	    // and then render it
+	    this._currentScreen = screen;
+	    if (!this._currentScreen !== null) {
+	        this._currentScreen.enter();
+	        this._currentScreen.render(this._display);
+	    }
+	},
 	_load: function() {
-		// this._generateMap();
-        document.querySelector('#level').appendChild(this.display.getContainer());
+        document.querySelector('#level').appendChild(this.getDisplay().getContainer());
+        // Load the start screen
+        Game.switchScreen(Game.Screen.startScreen);
         this.layout = new Game.Layout(28, 20);
         this.layout.init();
-	    // this.scheduler.add(this.player, true);	    
-	    // this.engine.start();
 	},
 	_resize: function() {
 		if (!this.layout) { return; }
 		var level = document.querySelector("#level");
-		this.layout.resize(parent.offsetWidth, parent.offsetHeight);
-		// var position = this.player.getPosition();
-		// Game.legend.update(position[0], position[1]);
-	},
-	_createBeing: function(Being, freeCells) {
-	    var index = Math.floor(ROT.RNG.getUniform() * freeCells.length);
-	    var key = freeCells.splice(index, 1)[0];
-	    var parts = key.split(",");
-	    var x = parseInt(parts[0]);
-	    var y = parseInt(parts[1]);
-	    return new Being(x, y);
+		var overview = this.layout.getNode();
+		this.layout.resize(overview.offsetWidth, overview.offsetHeight);
 	}
 }
