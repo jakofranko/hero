@@ -3,6 +3,7 @@ html, body {
 }
 body {
 	position: relative;
+	margin: 0;
 }
 #level {
 	position: absolute;

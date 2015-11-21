@@ -1,8 +1,6 @@
 var Game = {
 	map: {},
-	scheduler: new ROT.Scheduler.Simple(),
-	engine: new ROT.Engine(this.scheduler),
-
+	
 	layout: null,
 	buildings: null,
 	player: null,
@@ -21,22 +19,7 @@ var Game = {
 	getScreenHeight: function() {
 	    return this._screenHeight;
 	},
-	handleEvent: function(e) {
-		switch (e.type) {
-			case "load":
-				window.removeEventListener("load", this);
-				this._load();
-			break;
-
-			case "resize":
-				this._resize();
-			break;
-		}
-	},
 	init: function() {
-		window.addEventListener("load", this);
-		window.addEventListener("resize", this);
-
 		// TODO: Make width and height constants accessible throughout the game
 	    this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight});
 	    // Create a helper function for binding to an event
@@ -49,18 +32,20 @@ var Game = {
 	            if (game._currentScreen !== null) {
 	                // Send the event type and data to the screen
 	                game._currentScreen.handleInput(event, e);
-	                // Clear the screen
-                    game._display.clear();
-                    // Render the screen
-                    game._currentScreen.render(game._display);
 	            }
 	        });
-	    }
+	    };
 	    // Bind keyboard input events
 	    bindEventToScreen('keydown');
 	    // bindEventToScreen('keyup');
 	    // bindEventToScreen('keypress');
 	},
+	refresh: function() {
+        // Clear the screen
+        this._display.clear();
+        // Render the screen
+        this._currentScreen.render(this._display);
+    },
 	switchScreen: function(screen) {
 	    // If we had a screen before, notify it that we exited
 	    if (this._currentScreen !== null) {
@@ -73,20 +58,21 @@ var Game = {
 	    this._currentScreen = screen;
 	    if (!this._currentScreen !== null) {
 	        this._currentScreen.enter();
-	        this._currentScreen.render(this._display);
+	        this.refresh();
 	    }
-	},
-	_load: function() {
-        document.querySelector('#level').appendChild(this.getDisplay().getContainer());
+	}
+};
+
+window.onload = function() {
+    // Check if rot.js can work on this browser
+    if (!ROT.isSupported()) {
+        alert("The rot.js library isn't supported by your browser.");
+    } else {
+        // Initialize the game
+        Game.init();
+        // Add the container to our HTML page
+        document.body.appendChild(Game.getDisplay().getContainer());
         // Load the start screen
         Game.switchScreen(Game.Screen.startScreen);
-        this.layout = new Game.Layout(28, 20);
-        this.layout.init();
-	},
-	_resize: function() {
-		if (!this.layout) { return; }
-		var level = document.querySelector("#level");
-		var overview = this.layout.getNode();
-		this.layout.resize(overview.offsetWidth, overview.offsetHeight);
-	}
+    }
 }
