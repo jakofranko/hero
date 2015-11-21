@@ -20,8 +20,8 @@ var Game = {
 	    return this._screenHeight;
 	},
 	init: function() {
-		// TODO: Make width and height constants accessible throughout the game
-	    this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight});
+		// Add one to height for displaying stats
+	    this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight + 1});
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
 	    var game = this; // So that we don't lose this
