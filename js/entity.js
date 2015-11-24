@@ -89,4 +89,40 @@ Game.Entity.prototype.hasMixin = function(obj) {
     } else {
         return this._attachedMixins[obj] || this._attachedMixinGroups[obj];
     }
+};
+
+Game.Entity.prototype.tryMove = function(x, y, z, map) {
+	// Must use starting z
+	var tile = map.getTile(x, y, this.getZ());
+	var target = map.getEntityAt(x, y, this.getZ());
+	// If our z level changed, check if we are on stair
+	if(z < this.getZ()) {
+		if(tile != Game.Tile.stairsUpTile) {
+			Game.sendMessage(this, "You can't go up here!");
+		} else {
+			Game.sendMessage(this, "You ascend to level %s!", [z + 1]);
+			this.setPosition(x, y, z);
+		}
+	} else if(z > this.getZ()) {
+		if(tile != Game.Tile.stairsDownTile) {
+			Game.sendMessage(this, "You can't go down here!");
+		} else {
+			Game.sendMessage(this, "You descend to level %s!", [z + 1]);
+			this.setPosition(x, y, z);
+		}
+	} else if(target) {
+		if(this.hasMixin('Attacker')) {
+			this.attack(target);
+			return true;
+		} else {
+			return false;	
+		}
+	} else if(tile.isWalkable()) {
+		this.setPosition(x, y, z);
+		return true;
+	} else if(tile.isDiggable()) {
+		map.dig(x, y, z);
+		return true;
+	}
+	return false;
 }
