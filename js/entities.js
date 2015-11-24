@@ -40,6 +40,17 @@ Game.Mixins.Moveable = {
 	}
 };
 
+Game.Mixins.Sight = {
+	name: 'Sight',
+	groupName: 'Sight',
+	init: function(template) {
+		this._sightRadius = template['sightRadius'] || 5;
+	},
+	getSightRadius: function() {
+		return this._sightRadius;
+	}
+}
+
 Game.Mixins.Destructible = {
 	name: 'Destructible',
 	init: function(template) {
@@ -186,11 +197,13 @@ Game.PlayerTemplate = {
 	foreground: 'white',
 	maxHp: 40,
 	attackValue: 10,
+	sightRadius: 6,
 	mixins: [
-		Game.Mixins.Moveable, 
+		Game.Mixins.Moveable,
+		Game.Mixins.Sight, 
 		Game.Mixins.PlayerActor, 
 		Game.Mixins.Destructible, 
-		Game.Mixins.Attacker, 
+		Game.Mixins.Attacker,
 		Game.Mixins.MessageRecipient
 	]
 };

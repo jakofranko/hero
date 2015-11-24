@@ -50,39 +50,58 @@ Game.Screen.playScreen = {
     	// Make sure Y doesn't get less than the top while at the bottom of the map
     	topLeftY = Math.min(topLeftY, this._map.getHeight() - screenHeight);
 
+    	var visibleCells = {};
+    	// Store this._map and player's z to prevent losing it in callbacks
+        var map = this._map;
+        var currentDepth = this._player.getZ();
+
+    	//Find all visible cells
+    	map.getFov(currentDepth).compute(this._player.getX(), this._player.getY(), this._player.getSightRadius(), function(x, y, radius, visibility) {
+    		// console.log(visibility);
+    		visibleCells[x + "," + y] = true;
+    		// Mark cell as explored
+            map.setExplored(x, y, currentDepth, true);
+    	});
+
         // Iterate through visible map cells
         for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
         	for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
-        		// Fetch the glyph for the tile and render it to the screen
-	            var tile = this._map.getTile(x, y, this._player.getZ());
-	            display.draw(
-	            	x - topLeftX,
-	            	y - topLeftY,
-	            	tile.getChar(), 
-	            	tile.getForeground(),
-	            	tile.getBackground()
-	            );
+        		if(map.isExplored(x, y, currentDepth)) {
+        			// Fetch the glyph for the tile and render it to the screen
+		            var tile = this._map.getTile(x, y, currentDepth);
+		            // The foreground color becomes dark gray if the tile has been explored but is not visible
+                    var foreground = visibleCells[x + ',' + y] ? tile.getForeground() : 'darkGray';
+		            display.draw(
+		            	x - topLeftX,
+		            	y - topLeftY,
+		            	tile.getChar(), 
+		            	foreground,
+		            	tile.getBackground()
+		            );
+        		}
         	};
         };
 
         // Render the entities
         var entities = this._map.getEntities();
         for (var i = 0; i < entities.length; i++) {
-        	var e = entities[i];
-        	// Only render the entity if they would show up on the screen
-        	if(e.getX() < topLeftX + screenWidth && 
-        		e.getX() >= topLeftX && 
-        		e.getY() < topLeftY + screenHeight && 
-        		e.getY() >= topLeftY &&
-        		e.getZ() == this._player.getZ()) {
-        		display.draw(
-        			e.getX() - topLeftX,
-        			e.getY() - topLeftY,
-        			e.getChar(),
-        			e.getForeground(),
-        			e.getBackground()
-        		);
-        	}
+        	var entity = entities[i];
+        	if (visibleCells[entity.getX() + ',' + entity.getY()]) {
+	        	// Only render the entity if they would show up on the screen
+	        	if(entity.getX() < topLeftX + screenWidth && 
+	        		entity.getX() >= topLeftX && 
+	        		entity.getY() < topLeftY + screenHeight && 
+	        		entity.getY() >= topLeftY &&
+	        		entity.getZ() == this._player.getZ()) {
+	        		display.draw(
+	        			entity.getX() - topLeftX,
+	        			entity.getY() - topLeftY,
+	        			entity.getChar(),
+	        			entity.getForeground(),
+	        			entity.getBackground()
+	        		);
+	        	}
+	        }
         };
 
         // Get the messages in the player's queue and render them
