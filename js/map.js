@@ -25,10 +25,11 @@ Game.Map = function(tiles, player) {
 
     // add the player
     this.addEntityAtRandomPosition(player, 0);
-    // add random fungi
+    // add random monsters
+    var monsters = [Game.FungusTemplate, Game.BatTemplate, Game.NewtTemplate];
     for (var z = 0; z < this._depth; z++) {
-    	for (var i = 0; i < 25; i++) {
-	        this.addEntityAtRandomPosition(new Game.Entity(Game.FungusTemplate), z);
+    	for (var i = 0; i < 100; i++) {
+	        this.addEntityAtRandomPosition(new Game.Entity(Game.BatTemplate), z);
 	    }	
     };
 };
@@ -100,7 +101,7 @@ Game.Map.prototype.removeEntity = function(entity) {
     if(this._entities[key] == entity) {
     	delete this._entities[key]
     }
-    
+
     // If the entity is an actor, remove them from the scheduler
     if (entity.hasMixin('Actor')) {
         this._scheduler.remove(entity);

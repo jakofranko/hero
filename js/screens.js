@@ -24,6 +24,7 @@ Game.Screen.startScreen = {
 Game.Screen.playScreen = {
 	_map: null,
 	_player: null,
+	_gameEnded: false,
     enter: function() { 
     	var width = 100;
     	var height = 48;
@@ -128,29 +129,29 @@ Game.Screen.playScreen = {
         this._player.tryMove(newX, newY, newZ, this._map);
     },
     handleInput: function(inputType, inputData) {
-        if (inputType === 'keydown') {
-            // If enter is pressed, go to the win screen
-            // If escape is pressed, go to lose screen
-            if (inputData.keyCode === ROT.VK_RETURN) {
-                Game.switchScreen(Game.Screen.winScreen);
-            } else if (inputData.keyCode === ROT.VK_ESCAPE) {
+    	// If the game is over, enter will bring the user to the losing screen.
+        if(this._gameEnded) {
+            if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
                 Game.switchScreen(Game.Screen.loseScreen);
-            } else {
-		        if (inputData.keyCode === ROT.VK_LEFT) {
-		            this.move(-1, 0, 0);
-		        } else if (inputData.keyCode === ROT.VK_RIGHT) {
-		            this.move(1, 0, 0);
-		        } else if (inputData.keyCode === ROT.VK_UP) {
-		            this.move(0, -1, 0);
-		        } else if (inputData.keyCode === ROT.VK_DOWN) {
-		            this.move(0, 1, 0);
-		        } else {
-		        	// Not a valid key
-		        	return;
-		        }
-		        // Unlock the engine
-            	this._map.getEngine().unlock();
-		    }
+            }
+            // Return to make sure the user can't still play
+            return;
+        }
+        if (inputType === 'keydown') {
+	        if (inputData.keyCode === ROT.VK_LEFT) {
+	            this.move(-1, 0, 0);
+	        } else if (inputData.keyCode === ROT.VK_RIGHT) {
+	            this.move(1, 0, 0);
+	        } else if (inputData.keyCode === ROT.VK_UP) {
+	            this.move(0, -1, 0);
+	        } else if (inputData.keyCode === ROT.VK_DOWN) {
+	            this.move(0, 1, 0);
+	        } else {
+	        	// Not a valid key
+	        	return;
+	        }
+	        // Unlock the engine
+        	this._map.getEngine().unlock();
         } else if (inputType === 'keypress') {
         	var keyChar = String.fromCharCode(inputData.charCode);
         	if(keyChar === '>') {
@@ -164,6 +165,9 @@ Game.Screen.playScreen = {
         	// Unlock the engine
         	this._map.getEngine().unlock();
         }
+    },
+    setGameEnded: function(gameEnded) {
+        this._gameEnded = gameEnded;
     }
 }
 
