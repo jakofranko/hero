@@ -151,7 +151,7 @@ Game.Mixins.FungusActor = {
                     // Check if we can actually spawn at that location, and if so
                     // then we grow!
                     if (this.getMap().isEmptyFloor(this.getX() + xOffset, this.getY() + yOffset, this.getZ())) {
-                        var entity = new Game.Entity(Game.FungusTemplate);
+                        var entity = Game.EntityRepository.create('fungus');
                         entity.setPosition(this.getX() + xOffset, this.getY() + yOffset, this.getZ());
                         this.getMap().addEntity(entity);
                         this._growthsRemaining--;
@@ -195,28 +195,31 @@ Game.PlayerTemplate = {
 	]
 };
 
-Game.FungusTemplate = {
-	name: 'fungus',
-	character: 'F',
-	foreground: 'green',
-	maxHp: 10,
-	mixins: [Game.Mixins.FungusActor, Game.Mixins.Destructible]
-};
+// Create our central entity repository
+Game.EntityRepository = new Game.Repository('entities', Game.Entity);
 
-Game.BatTemplate = {
+Game.EntityRepository.define('fungus', {
+    name: 'fungus',
+    character: 'F',
+    foreground: 'green',
+    maxHp: 10,
+    mixins: [Game.Mixins.FungusActor, Game.Mixins.Destructible]
+});
+
+Game.EntityRepository.define('bat', {
     name: 'bat',
     character: 'B',
     foreground: 'white',
     maxHp: 5,
     attackValue: 4,
     mixins: [Game.Mixins.WanderActor, Game.Mixins.Attacker, Game.Mixins.Destructible]
-};
+});
 
-Game.NewtTemplate = {
+Game.EntityRepository.define('newt', {
     name: 'newt',
     character: ':',
     foreground: 'yellow',
     maxHp: 3,
     attackValue: 2,
     mixins: [Game.Mixins.WanderActor, Game.Mixins.Attacker, Game.Mixins.Destructible]
-};
+});
