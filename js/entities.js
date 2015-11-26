@@ -24,6 +24,7 @@ Game.EntityRepository.define('fungus', {
     character: 'F',
     foreground: 'green',
     maxHp: 10,
+    speed: 250,
     mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible]
 });
 
@@ -33,6 +34,7 @@ Game.EntityRepository.define('bat', {
     foreground: 'white',
     maxHp: 5,
     attackValue: 4,
+    speed: 2000,
     mixins: [Game.EntityMixins.WanderActor, Game.EntityMixins.Attacker, Game.EntityMixins.CorpseDropper, Game.EntityMixins.Destructible]
 });
 

@@ -23,7 +23,7 @@ Game.Map = function(tiles, player) {
     this._items = {};
 
     // Engine and scheduler
-    this._scheduler = new ROT.Scheduler.Simple();
+    this._scheduler = new ROT.Scheduler.Speed();
     this._engine = new ROT.Engine(this._scheduler);
 
     // Add the player
@@ -34,7 +34,7 @@ Game.Map = function(tiles, player) {
     for (var i = 0; i < templates.length; i++) {
         this.addItemAtRandomPosition(Game.ItemRepository.create(templates[i]), Math.floor(this._depth * Math.random()));
     }
-    
+
     // Add random entities and items to each floor.
     for (var z = 0; z < this._depth; z++) {
     	for (var i = 0; i < 15; i++) {
@@ -63,6 +63,9 @@ Game.Map.prototype.getEngine = function() {
 };
 Game.Map.prototype.getEntities = function() {
 	return this._entities;
+};
+Game.Map.prototype.getPlayer = function() {
+    return this._player;
 };
 
 // Entities
