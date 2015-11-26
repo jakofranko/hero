@@ -35,27 +35,32 @@ Game.EntityMixins.Attacker = {
         }
     }
 };
-
-Game.EntityMixins.Sight = {
-	name: 'Sight',
-	groupName: 'Sight',
-	init: function(template) {
-		this._sightRadius = template['sightRadius'] || 5;
-	},
-	getSightRadius: function() {
-		return this._sightRadius;
-	}
-}
-
+Game.EntityMixins.CorpseDropper = {
+    name: 'CorpseDropper',
+    init: function(template) {
+        // Chance of dropping a corpse (out of 100).
+        this._corpseDropRate = template['corpseDropRate'] || 100;
+    },
+    tryDropCorpse: function() {
+        if (Math.round(Math.random() * 100) < this._corpseDropRate) {
+            // Create a new corpse item and drop it.
+            this._map.addItem(this.getX(), this.getY(), this.getZ(),
+                Game.ItemRepository.create('corpse', {
+                    name: this._name + ' corpse',
+                    foreground: this._foreground
+                }));
+        }
+    }
+};
 Game.EntityMixins.Destructible = {
-	name: 'Destructible',
-	init: function(template) {
-		this._maxHp = template['maxHp'] || 10;
-		this._hp = template['hp'] || this._maxHp;
-		this._defenseValue = template['defenseValue'] || 0;
-	},
-	getDefenseValue: function() {
-		var modifier = 0;
+    name: 'Destructible',
+    init: function(template) {
+        this._maxHp = template['maxHp'] || 10;
+        this._hp = template['hp'] || this._maxHp;
+        this._defenseValue = template['defenseValue'] || 0;
+    },
+    getDefenseValue: function() {
+        var modifier = 0;
         // If we can equip items, then have to take into 
         // consideration weapon and armor
         if (this.hasMixin(Game.EntityMixins.Equipper)) {
@@ -67,28 +72,59 @@ Game.EntityMixins.Destructible = {
             }
         }
         return this._defenseValue + modifier;
-	},
-	getHp: function() {
-		return this._hp;
-	},
-	getMaxHp: function() {
-		return this._maxHp;
-	},
-	takeDamage: function(attacker, damage) {
-		this._hp -= damage;
-		if(this._hp <= 0) {
-			Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
+    },
+    getHp: function() {
+        return this._hp;
+    },
+    getMaxHp: function() {
+        return this._maxHp;
+    },
+    takeDamage: function(attacker, damage) {
+        this._hp -= damage;
+        if(this._hp <= 0) {
+            Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
             // If the entity is a corpse dropper, try to add a corpse
             if (this.hasMixin(Game.EntityMixins.CorpseDropper)) {
                 this.tryDropCorpse();
             }
-        	this.kill();
-		}
-	}
+            this.kill();
+        }
+    }
 };
-
-
-
+Game.EntityMixins.Equipper = {
+    name: 'Equipper',
+    init: function(template) {
+        this._weapon = null;
+        this._armor = null;
+    },
+    wield: function(item) {
+        this._weapon = item;
+    },
+    unwield: function() {
+        this._weapon = null;
+    },
+    wear: function(item) {
+        this._armor = item;
+    },
+    takeOff: function() {
+        this._armor = null;
+    },
+    getWeapon: function() {
+        return this._weapon;
+    },
+    getArmor: function() {
+        return this._armor;
+    },
+    unequip: function(item) {
+        // Helper function to be called before getting rid of an item.
+        if (this._weapon === item) {
+            this.unwield();
+        }
+        if (this._armor === item) {
+            this.takeOff();
+        }
+    }
+};
 Game.EntityMixins.FoodConsumer = {
     name: 'FoodConsumer',
     init: function(template) {
@@ -131,60 +167,39 @@ Game.EntityMixins.FoodConsumer = {
         }
     }
 };
-
-Game.EntityMixins.CorpseDropper = {
-    name: 'CorpseDropper',
-    init: function(template) {
-        // Chance of dropping a corpse (out of 100).
-        this._corpseDropRate = template['corpseDropRate'] || 100;
+Game.EntityMixins.FungusActor = {
+    name: 'FungusActor',
+    groupName: 'Actor',
+    init: function() {
+        this._growthsRemaining = 5;
     },
-    tryDropCorpse: function() {
-        if (Math.round(Math.random() * 100) < this._corpseDropRate) {
-            // Create a new corpse item and drop it.
-            this._map.addItem(this.getX(), this.getY(), this.getZ(),
-                Game.ItemRepository.create('corpse', {
-                    name: this._name + ' corpse',
-                    foreground: this._foreground
-                }));
+    act: function() {
+        if(this._growthsRemaining > 0) {
+            if(Math.random() <= 0.02) {
+                // Generate the coordinates of a random adjacent square by
+                // generating an offset between [-1, 0, 1] for both the x and
+                // y directions. To do this, we generate a number from 0-2 and then
+                // subtract 1.
+                var xOffset = Math.floor(Math.random() * 3) - 1;
+                var yOffset = Math.floor(Math.random() * 3) - 1;
+                // Make sure we aren't trying to spawn on the same tile as us
+                if (xOffset != 0 || yOffset != 0) {
+                    // Check if we can actually spawn at that location, and if so
+                    // then we grow!
+                    if (this.getMap().isEmptyFloor(this.getX() + xOffset, this.getY() + yOffset, this.getZ())) {
+                        var entity = Game.EntityRepository.create('fungus');
+                        entity.setPosition(this.getX() + xOffset, this.getY() + yOffset, this.getZ());
+                        this.getMap().addEntity(entity);
+                        this._growthsRemaining--;
+
+                        // Send a message nearby!
+                        Game.sendMessageNearby(this.getMap(), entity.getX(), entity.getY(), entity.getZ(), 'The fungus is spreading!');
+                    }
+                }
+            }
         }
     }
 };
-
-Game.EntityMixins.Equipper = {
-    name: 'Equipper',
-    init: function(template) {
-        this._weapon = null;
-        this._armor = null;
-    },
-    wield: function(item) {
-        this._weapon = item;
-    },
-    unwield: function() {
-        this._weapon = null;
-    },
-    wear: function(item) {
-        this._armor = item;
-    },
-    takeOff: function() {
-        this._armor = null;
-    },
-    getWeapon: function() {
-        return this._weapon;
-    },
-    getArmor: function() {
-        return this._armor;
-    },
-    unequip: function(item) {
-        // Helper function to be called before getting rid of an item.
-        if (this._weapon === item) {
-            this.unwield();
-        }
-        if (this._armor === item) {
-            this.takeOff();
-        }
-    }
-};
-
 Game.EntityMixins.InventoryHolder = {
     name: 'InventoryHolder',
     init: function(template) {
@@ -259,121 +274,154 @@ Game.EntityMixins.InventoryHolder = {
         }
     }
 };
-
 Game.EntityMixins.MessageRecipient = {
-	name: 'MessageRecipient',
-	init: function(template) {
-		this._messages = [];
-	},
-	receiveMessage: function(message) {
-		this._messages.push(message);
-	},
-	getMessages: function() {
-		return this._messages;
-	},
-	clearMessages: function() {
-		this._messages = [];
-	}
-};
-
-Game.sendMessage = function(recipient, message, args) {
-	// Make sure the recipient can receive messages
-	if(recipient.hasMixin('MessageRecipient')) {
-		// If args were passed, format the message
-		// Elsewise, don't format the message
-		if(args) {
-			message = message.format.apply(message, args);
-		}
-		recipient.receiveMessage(message);
-	}
-};
-Game.sendMessageNearby = function(map, centerX, centerY, centerZ, message, args) {
-    // If args were passed, then we format the message, else
-    // no formatting is necessary
-    if(args) {
-        message = message.format.apply(this, args);
+    name: 'MessageRecipient',
+    init: function(template) {
+        this._messages = [];
+    },
+    receiveMessage: function(message) {
+        this._messages.push(message);
+    },
+    getMessages: function() {
+        return this._messages;
+    },
+    clearMessages: function() {
+        this._messages = [];
     }
-    // Get the nearby entities
-    entities = map.getEntitiesWithinRadius(centerX, centerY, centerZ, 5);
-    // Iterate through nearby entities, sending the message if
-    // they can receive it.
-    for(var i = 0; i < entities.length; i++) {
-        if(entities[i].hasMixin(Game.EntityMixins.MessageRecipient)) {
-            entities[i].receiveMessage(message);
-        }
-    }
-}
-
+};
 Game.EntityMixins.PlayerActor = {
-	name: 'PlayerActor',
-	groupName: 'Actor',
-	act: function() {
+    name: 'PlayerActor',
+    groupName: 'Actor',
+    act: function() {
         if (this._acting) {
             return;
         }
         this._acting = true;
         this.addTurnHunger();
-		// Detect if the game is over
+        // Detect if the game is over
         if(!this.isAlive()) {
             Game.Screen.playScreen.setGameEnded(true);
             // Send a last message to the player
             Game.sendMessage(this, 'Press [Enter] to continue!');
         }
-		// Re-render the screen
-		Game.refresh();
-		// Lock the engine and wait asynchronously
+        // Re-render the screen
+        Game.refresh();
+        // Lock the engine and wait asynchronously
         // for the player to press a key.
         this.getMap().getEngine().lock();
         this.clearMessages();
         this._acting = false;
-	}
+    }
 };
+Game.EntityMixins.Sight = {
+	name: 'Sight',
+	groupName: 'Sight',
+	init: function(template) {
+		this._sightRadius = template['sightRadius'] || 5;
+	},
+	getSightRadius: function() {
+		return this._sightRadius;
+	},
+    canSee: function(entity) {
+        // If not on the same map or on different floors, then exit early
+        if (!entity || this._map !== entity.getMap() || this._z !== entity.getZ()) {
+            return false;
+        }
 
-Game.EntityMixins.FungusActor = {
-	name: 'FungusActor',
-	groupName: 'Actor',
-	init: function() {
-        this._growthsRemaining = 5;
-    },
-	act: function() {
-		if(this._growthsRemaining > 0) {
-			if(Math.random() <= 0.02) {
-				// Generate the coordinates of a random adjacent square by
-                // generating an offset between [-1, 0, 1] for both the x and
-                // y directions. To do this, we generate a number from 0-2 and then
-                // subtract 1.
-                var xOffset = Math.floor(Math.random() * 3) - 1;
-                var yOffset = Math.floor(Math.random() * 3) - 1;
-                // Make sure we aren't trying to spawn on the same tile as us
-                if (xOffset != 0 || yOffset != 0) {
-                    // Check if we can actually spawn at that location, and if so
-                    // then we grow!
-                    if (this.getMap().isEmptyFloor(this.getX() + xOffset, this.getY() + yOffset, this.getZ())) {
-                        var entity = Game.EntityRepository.create('fungus');
-                        entity.setPosition(this.getX() + xOffset, this.getY() + yOffset, this.getZ());
-                        this.getMap().addEntity(entity);
-                        this._growthsRemaining--;
+        var otherX = entity.getX();
+        var otherY = entity.getY();
 
-                        // Send a message nearby!
-                        Game.sendMessageNearby(this.getMap(), entity.getX(), entity.getY(), entity.getZ(), 'The fungus is spreading!');
-                    }
+        // If we're not in a square field of view, then we won't be in a real
+        // field of view either.
+        if ((otherX - this._x) * (otherX - this._x) +
+            (otherY - this._y) * (otherY - this._y) >
+            this._sightRadius * this._sightRadius) {
+            return false;
+        }
+
+        // Compute the FOV and check if the coordinates are in there.
+        // TODO: This should use the existing FOV isntead of re-computing
+        var found = false;
+        this.getMap().getFov(this.getZ()).compute(
+            this.getX(), this.getY(), 
+            this.getSightRadius(), 
+            function(x, y, radius, visibility) {
+                if (x === otherX && y === otherY) {
+                    found = true;
                 }
-			}
-		}
-	}
-}
+            });
+        return found;
+    }
+};
+Game.EntityMixins.TaskActor = {
+    name: 'TaskActor',
+    groupName: 'Actor',
+    init: function(template) {
+        // Load tasks
+        this._tasks = template['tasks'] || ['wander']; 
+    },
+    act: function() {
+        // Iterate through all our tasks
+        for (var i = 0; i < this._tasks.length; i++) {
+            if (this.canDoTask(this._tasks[i])) {
+                // If we can perform the task, execute the function for it.
+                this[this._tasks[i]]();
+                return;
+            }
+        }
+    },
+    // TODO: Tasks should have their own 'canDo' function and this should just do that
+    canDoTask: function(task) {
+        if (task === 'hunt') {
+            return this.hasMixin('Sight') && this.canSee(this.getMap().getPlayer());
+        } else if (task === 'wander') {
+            return true;
+        } else {
+            throw new Error('Tried to perform undefined task ' + task);
+        }
+    },
+    hunt: function() {
+        var player = this.getMap().getPlayer();
 
-Game.EntityMixins.WanderActor = {
-	name: 'WanderActor',
-	groupName: 'Actor',
-	act: function() {
-		// Flip coin to determine if moving by 1 in the positive or negative direction
-		var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
-		// Flip coin to determine if moving in x or y direction
-		if(Math.round(Math.random()) === 1) {
-			this.tryMove(this.getX() + moveOffset, this.getY(), this.getZ());
-		} else {
-			this.tryMove(this.getX(), this.getY() + moveOffset, this.getZ());
-		}
-	}
-}
+        // If we are adjacent to the player, then attack instead of hunting.
+        // TODO: if I'm not mistaken, this enforces a topology 4 and doesn't account for diagnally adjacent
+        var offsets = Math.abs(player.getX() - this.getX()) + Math.abs(player.getY() - this.getY());
+        if (offsets === 1) {
+            if (this.hasMixin('Attacker')) {
+                this.attack(player);
+                return;
+            }
+        }
+
+        // Generate the path and move to the first tile.
+        var source = this;
+        var z = source.getZ();
+        var path = new ROT.Path.AStar(player.getX(), player.getY(), function(x, y) {
+            // If an entity is present at the tile, can't move there.
+            var entity = source.getMap().getEntityAt(x, y, z);
+            if (entity && entity !== player && entity !== source) {
+                return false;
+            }
+            return source.getMap().getTile(x, y, z).isWalkable();
+        }, {topology: 4});
+        // Once we've gotten the path, we want to move to the second cell that is
+        // passed in the callback (the first is the entity's strting point)
+        var count = 0;
+        path.compute(source.getX(), source.getY(), function(x, y) {
+            if (count == 1) {
+                source.tryMove(x, y, z);
+            }
+            count++;
+        });
+    },
+    wander: function() {
+        // Flip coin to determine if moving by 1 in the positive or negative direction
+        var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
+        // Flip coin to determine if moving in x direction or y direction
+        if (Math.round(Math.random()) === 1) {
+            this.tryMove(this.getX() + moveOffset, this.getY(), this.getZ());
+        } else {
+            this.tryMove(this.getX(), this.getY() + moveOffset, this.getZ());
+        }
+    }
+};

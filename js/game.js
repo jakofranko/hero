@@ -46,6 +46,33 @@ var Game = {
         // Render the screen
         this._currentScreen.render(this._display);
     },
+    sendMessage: function(recipient, message, args) {
+		// Make sure the recipient can receive messages
+		if(recipient.hasMixin('MessageRecipient')) {
+			// If args were passed, format the message
+			// Elsewise, don't format the message
+			if(args) {
+				message = message.format.apply(message, args);
+			}
+			recipient.receiveMessage(message);
+		}
+	},
+	sendMessageNearby: function(map, centerX, centerY, centerZ, message, args) {
+	    // If args were passed, then we format the message, else
+	    // no formatting is necessary
+	    if(args) {
+	        message = message.format.apply(this, args);
+	    }
+	    // Get the nearby entities
+	    entities = map.getEntitiesWithinRadius(centerX, centerY, centerZ, 5);
+	    // Iterate through nearby entities, sending the message if
+	    // they can receive it.
+	    for(var i = 0; i < entities.length; i++) {
+	        if(entities[i].hasMixin(Game.EntityMixins.MessageRecipient)) {
+	            entities[i].receiveMessage(message);
+	        }
+	    }
+	},
 	switchScreen: function(screen) {
 	    // If we had a screen before, notify it that we exited
 	    if (this._currentScreen !== null) {

@@ -27,6 +27,7 @@ Game.Map = function(tiles, player) {
     this._engine = new ROT.Engine(this._scheduler);
 
     // Add the player
+    this._player = player;
     this.addEntityAtRandomPosition(player, 0);
 
     // Add weapons and armor to the map in random positions
