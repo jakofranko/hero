@@ -28,6 +28,13 @@ Game.Map = function(tiles, player) {
 
     // Add the player
     this.addEntityAtRandomPosition(player, 0);
+
+    // Add weapons and armor to the map in random positions
+    var templates = ['dagger', 'sword', 'staff', 'tunic', 'chainmail', 'platemail'];
+    for (var i = 0; i < templates.length; i++) {
+        this.addItemAtRandomPosition(Game.ItemRepository.create(templates[i]), Math.floor(this._depth * Math.random()));
+    }
+    
     // Add random entities and items to each floor.
     for (var z = 0; z < this._depth; z++) {
     	for (var i = 0; i < 15; i++) {
@@ -116,7 +123,7 @@ Game.Map.prototype.removeEntity = function(entity) {
 };
 Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
 	// Delete the old key if it is the same entity and we have old positons
-	if(oldX) {
+	if(typeof oldX === 'number') {
 		var oldKey = oldX + "," + oldY + "," + oldZ;
 		if(this._entities[oldKey] == entity) {
 			delete this._entities[oldKey];

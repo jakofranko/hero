@@ -1,5 +1,24 @@
 Game.EntityRepository = new Game.Repository('entities', Game.Entity);
 
+Game.PlayerTemplate = {
+    character: '@',
+    foreground: 'white',
+    maxHp: 40,
+    attackValue: 10,
+    sightRadius: 6,
+    inventorySlots: 22,
+    mixins: [
+        Game.EntityMixins.Sight, 
+        Game.EntityMixins.PlayerActor, 
+        Game.EntityMixins.Destructible,
+        Game.EntityMixins.Equipper,
+        Game.EntityMixins.Attacker,
+        Game.EntityMixins.FoodConsumer,
+        Game.EntityMixins.InventoryHolder,
+        Game.EntityMixins.MessageRecipient
+    ]
+};
+
 Game.EntityRepository.define('fungus', {
     name: 'fungus',
     character: 'F',

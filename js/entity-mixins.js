@@ -1,6 +1,41 @@
 // From http://www.codingcookies.com/2013/04/20/building-a-roguelike-in-javascript-part-4/
 Game.EntityMixins = {};
 
+Game.EntityMixins.Attacker = {
+    name: 'Attacker',
+    groupName: 'Attacker',
+    init: function(template) {
+        this._attackValue = template['attackValue'] || 1;
+    },
+    getAttackValue: function() {
+        var modifier = 0;
+        // If we can equip items, then have to take into 
+        // consideration weapon and armor
+        if (this.hasMixin(Game.EntityMixins.Equipper)) {
+            if (this.getWeapon()) {
+                modifier += this.getWeapon().getAttackValue();
+            }
+            if (this.getArmor()) {
+                modifier += this.getArmor().getAttackValue();
+            }
+        }
+        return this._attackValue + modifier;
+    },
+    attack: function(target) {
+        // Only remove the entity if they were attackable
+        if (target.hasMixin('Destructible')) {
+            var attack = this.getAttackValue();
+            var defense = target.getDefenseValue();
+            var max = Math.max(0, attack - defense);
+            var damage = 1 + Math.floor(Math.random() * max);
+
+            Game.sendMessage(this, 'You strike the %s for %s damage!', [target.getName(), damage]);
+            Game.sendMessage(target, 'The %s strikes you for %s damage!', [this.getName(), damage]);
+            target.takeDamage(this, damage);
+        }
+    }
+};
+
 Game.EntityMixins.Sight = {
 	name: 'Sight',
 	groupName: 'Sight',
@@ -20,7 +55,18 @@ Game.EntityMixins.Destructible = {
 		this._defenseValue = template['defenseValue'] || 0;
 	},
 	getDefenseValue: function() {
-		return this._defenseValue;
+		var modifier = 0;
+        // If we can equip items, then have to take into 
+        // consideration weapon and armor
+        if (this.hasMixin(Game.EntityMixins.Equipper)) {
+            if (this.getWeapon()) {
+                modifier += this.getWeapon().getDefenseValue();
+            }
+            if (this.getArmor()) {
+                modifier += this.getArmor().getDefenseValue();
+            }
+        }
+        return this._defenseValue + modifier;
 	},
 	getHp: function() {
 		return this._hp;
@@ -41,29 +87,7 @@ Game.EntityMixins.Destructible = {
 	}
 };
 
-Game.EntityMixins.Attacker = {
-    name: 'Attacker',
-    groupName: 'Attacker',
-    init: function(template) {
-    	this._attackValue = template['attackValue'] || 1;
-    },
-    getAttackValue: function() {
-    	return this._attackValue;
-    },
-    attack: function(target) {
-        // Only remove the entity if they were attackable
-        if (target.hasMixin('Destructible')) {
-        	var attack = this.getAttackValue();
-        	var defense = target.getDefenseValue();
-        	var max = Math.max(0, attack - defense);
-        	var damage = 1 + Math.floor(Math.random() * max);
 
-        	Game.sendMessage(this, 'You strike the %s for %s damage!', [target.getName(), damage]);
-            Game.sendMessage(target, 'The %s strikes you for %s damage!', [this.getName(), damage]);
-            target.takeDamage(this, damage);
-        }
-    }
-};
 
 Game.EntityMixins.FoodConsumer = {
     name: 'FoodConsumer',
@@ -126,6 +150,41 @@ Game.EntityMixins.CorpseDropper = {
     }
 };
 
+Game.EntityMixins.Equipper = {
+    name: 'Equipper',
+    init: function(template) {
+        this._weapon = null;
+        this._armor = null;
+    },
+    wield: function(item) {
+        this._weapon = item;
+    },
+    unwield: function() {
+        this._weapon = null;
+    },
+    wear: function(item) {
+        this._armor = item;
+    },
+    takeOff: function() {
+        this._armor = null;
+    },
+    getWeapon: function() {
+        return this._weapon;
+    },
+    getArmor: function() {
+        return this._armor;
+    },
+    unequip: function(item) {
+        // Helper function to be called before getting rid of an item.
+        if (this._weapon === item) {
+            this.unwield();
+        }
+        if (this._armor === item) {
+            this.takeOff();
+        }
+    }
+};
+
 Game.EntityMixins.InventoryHolder = {
     name: 'InventoryHolder',
     init: function(template) {
@@ -151,6 +210,10 @@ Game.EntityMixins.InventoryHolder = {
         return false;
     },
     removeItem: function(i) {
+        // If we can equip items, then make sure we unequip the item we are removing.
+        if (this._items[i] && this.hasMixin(Game.EntityMixins.Equipper)) {
+            this.unequip(this._items[i]);
+        }
         // Simply clear the inventory slot.
         this._items[i] = null;
     },
@@ -314,21 +377,3 @@ Game.EntityMixins.WanderActor = {
 		}
 	}
 }
-
-Game.PlayerTemplate = {
-	character: '@',
-	foreground: 'white',
-	maxHp: 40,
-	attackValue: 10,
-	sightRadius: 6,
-	inventorySlots: 22,
-	mixins: [
-		Game.EntityMixins.Sight, 
-		Game.EntityMixins.PlayerActor, 
-		Game.EntityMixins.Destructible, 
-		Game.EntityMixins.Attacker,
-        Game.EntityMixins.FoodConsumer,
-		Game.EntityMixins.InventoryHolder,
-		Game.EntityMixins.MessageRecipient
-	]
-};
