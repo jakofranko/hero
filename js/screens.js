@@ -149,7 +149,13 @@ Game.Screen.playScreen = {
 
         // Render player HP 
         var stats = '%c{white}%b{black}';
-        stats += String.format('HP: %s/%s ', this._player.getHp(), this._player.getMaxHp());
+        stats += String.format(
+            'HP: %s/%s Level: %s XP: %s', 
+            this._player.getHp(), 
+            this._player.getMaxHp(), 
+            this._player.getLevel(), 
+            this._player.getExperience()
+        );
         display.drawText(0, screenHeight, stats);
 
         // Render hunger state
@@ -277,7 +283,6 @@ Game.Screen.ItemListScreen = function(template) {
     // Whether a 'no item' option should appear.
     this._hasNoItemOption = template['hasNoItemOption'];
 };
-
 Game.Screen.ItemListScreen.prototype.setup = function(player, items) {
     this._player = player;
     // Should be called before switching to the screen.
@@ -298,7 +303,6 @@ Game.Screen.ItemListScreen.prototype.setup = function(player, items) {
     this._selectedIndices = {};
     return count;
 };
-
 Game.Screen.ItemListScreen.prototype.render = function(display) {
     var letters = 'abcdefghijklmnopqrstuvwxyz';
     // Render the no item row if enabled
@@ -323,7 +327,6 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
         }
     }
 };
-
 Game.Screen.ItemListScreen.prototype.executeOkFunction = function() {
     // Gather the selected items.
     var selectedItems = {};
@@ -339,7 +342,6 @@ Game.Screen.ItemListScreen.prototype.executeOkFunction = function() {
         this._player.getMap().getEngine().unlock();
     }
 };
-
 Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData) {
     if(inputType === 'keydown') {
         // If the user hit escape, hit enter and can't select an item, or hit
@@ -376,14 +378,13 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
             }
         }
     }
-}
+};
 
 // Inventory sub-screens
 Game.Screen.inventoryScreen = new Game.Screen.ItemListScreen({
     caption: 'Inventory',
     canSelect: false
 });
-
 Game.Screen.pickupScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the items you wish to pickup',
     canSelect: true,
@@ -396,7 +397,6 @@ Game.Screen.pickupScreen = new Game.Screen.ItemListScreen({
         return true;
     }
 });
-
 Game.Screen.dropScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to drop',
     canSelect: true,
@@ -407,7 +407,6 @@ Game.Screen.dropScreen = new Game.Screen.ItemListScreen({
         return true;
     }
 });
-
 Game.Screen.eatScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to eat',
     canSelect: true,
@@ -427,7 +426,6 @@ Game.Screen.eatScreen = new Game.Screen.ItemListScreen({
         return true;
     }
 });
-
 Game.Screen.wieldScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to wield',
     canSelect: true,
@@ -452,7 +450,6 @@ Game.Screen.wieldScreen = new Game.Screen.ItemListScreen({
         return true;
     }
 });
-
 Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to wear',
     canSelect: true,
@@ -478,6 +475,51 @@ Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
     }
 });
 
+// Level-up screen
+Game.Screen.gainStatScreen = {
+    setup: function(entity) {
+        // Must be called before rendering.
+        this._entity = entity;
+        this._options = entity.getStatOptions();
+    },
+    render: function(display) {
+        var letters = 'abcdefghijklmnopqrstuvwxyz';
+        display.drawText(0, 0, 'Choose a stat to increase: ');
+
+        // Iterate through each of our options
+        for (var i = 0; i < this._options.length; i++) {
+            display.drawText(0, 2 + i, letters.substring(i, i + 1) + ' - ' + this._options[i][0]);
+        }
+
+        // Render remaining stat points
+        display.drawText(0, 4 + this._options.length, "Remaining points: " + this._entity.getStatPoints());
+    },
+    handleInput: function(inputType, inputData) {
+        console.log(this._options);
+        if (inputType === 'keydown') {
+            // If a letter was pressed, check if it matches to a valid option.
+            if (inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
+                // Check if it maps to a valid item by subtracting 'a' from the character
+                // to know what letter of the alphabet we used.
+                var index = inputData.keyCode - ROT.VK_A;
+                console.log(inputData.keyCode, ROT.VK_A, index);
+                if (this._options[index]) {
+                    // Call the stat increasing function
+                    this._options[index][1].call(this._entity);
+                    // Decrease stat points
+                    this._entity.setStatPoints(this._entity.getStatPoints() - 1);
+                    // If we have no stat points left, exit the screen, else refresh
+                    if (this._entity.getStatPoints() == 0) {
+                        Game.Screen.playScreen.setSubScreen(undefined);
+                    } else {
+                        Game.refresh();
+                    }
+                }
+            }
+        }
+    }
+};
+
 // Define our winning screen
 Game.Screen.winScreen = {
     enter: function() {    console.log("Entered win screen."); },
@@ -498,7 +540,7 @@ Game.Screen.winScreen = {
 			Game.switchScreen(Game.Screen.playScreen);
 		}   
     }
-}
+};
 
 // Define our winning screen
 Game.Screen.loseScreen = {
@@ -515,4 +557,4 @@ Game.Screen.loseScreen = {
 			Game.switchScreen(Game.Screen.startScreen);
 		}     
     }
-}
+};

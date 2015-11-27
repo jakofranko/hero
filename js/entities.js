@@ -15,7 +15,9 @@ Game.PlayerTemplate = {
         Game.EntityMixins.Attacker,
         Game.EntityMixins.FoodConsumer,
         Game.EntityMixins.InventoryHolder,
-        Game.EntityMixins.MessageRecipient
+        Game.EntityMixins.MessageRecipient,
+        Game.EntityMixins.ExperienceGainer,
+        Game.EntityMixins.PlayerStatGainer
     ]
 };
 
@@ -25,7 +27,12 @@ Game.EntityRepository.define('fungus', {
     foreground: 'green',
     maxHp: 10,
     speed: 250,
-    mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible]
+    mixins: [
+        Game.EntityMixins.FungusActor, 
+        Game.EntityMixins.Destructible, 
+        Game.EntityMixins.ExperienceGainer, 
+        Game.EntityMixins.RandomStatGainer
+    ]
 });
 
 Game.EntityRepository.define('bat', {
@@ -35,7 +42,14 @@ Game.EntityRepository.define('bat', {
     maxHp: 5,
     attackValue: 4,
     speed: 2000,
-    mixins: [Game.EntityMixins.TaskActor, Game.EntityMixins.Attacker, Game.EntityMixins.CorpseDropper, Game.EntityMixins.Destructible]
+    mixins: [
+        Game.EntityMixins.TaskActor, 
+        Game.EntityMixins.Attacker, 
+        Game.EntityMixins.CorpseDropper, 
+        Game.EntityMixins.Destructible, 
+        Game.EntityMixins.ExperienceGainer, 
+        Game.EntityMixins.RandomStatGainer
+    ]
 });
 
 Game.EntityRepository.define('newt', {
@@ -48,7 +62,9 @@ Game.EntityRepository.define('newt', {
         Game.EntityMixins.TaskActor,
         Game.EntityMixins.Attacker,
         Game.EntityMixins.CorpseDropper,
-        Game.EntityMixins.Destructible
+        Game.EntityMixins.Destructible, 
+        Game.EntityMixins.ExperienceGainer, 
+        Game.EntityMixins.RandomStatGainer
     ]
 });
 
@@ -65,6 +81,8 @@ Game.EntityRepository.define('kobold', {
         Game.EntityMixins.Sight,
         Game.EntityMixins.Attacker, 
         Game.EntityMixins.Destructible,
-        Game.EntityMixins.CorpseDropper
+        Game.EntityMixins.CorpseDropper, 
+        Game.EntityMixins.ExperienceGainer, 
+        Game.EntityMixins.RandomStatGainer
     ]
 });
