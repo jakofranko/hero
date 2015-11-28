@@ -11,10 +11,14 @@ Game.Glyph = function(properties) {
 // Create standard getters for glyphs
 Game.Glyph.prototype.getChar = function(){ 
     return this._char; 
-}
+};
 Game.Glyph.prototype.getBackground = function(){
     return this._background;
-}
+};
 Game.Glyph.prototype.getForeground = function(){ 
     return this._foreground; 
-}
+};
+Game.Glyph.prototype.getRepresentation = function() {
+    return '%c{' + this._foreground + '}%b{' + this._background + '}' + this._char +
+        '%c{white}%b{black}';
+};

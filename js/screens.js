@@ -49,90 +49,8 @@ Game.Screen.playScreen = {
     	var screenWidth = Game.getScreenWidth();
     	var screenHeight = Game.getScreenHeight();
 
-    	// Make sure top X isn't less than the zero corner
-    	var topLeftX = Math.max(0, this._player.getX() - (screenWidth / 2));
-    	// Make sure it doesn't get greater than the far right side of the screen
-    	// (Make sure to still have enough room to fit the game screen)
-    	topLeftX = Math.min(topLeftX, this._player.getMap().getWidth() - screenWidth);
-    	// Make sure the top Y doesn't go past the top of the map
-    	var topLeftY = Math.max(0, this._player.getY() - (screenHeight / 2));
-    	// Make sure Y doesn't get less than the top while at the bottom of the map
-    	topLeftY = Math.min(topLeftY, this._player.getMap().getHeight() - screenHeight);
-
-    	var visibleCells = {};
-    	// Store this._player.getMap() and player's z to prevent losing it in callbacks
-        var map = this._player.getMap();
-        var currentDepth = this._player.getZ();
-
-    	//Find all visible cells
-    	map.getFov(currentDepth).compute(this._player.getX(), this._player.getY(), this._player.getSightRadius(), function(x, y, radius, visibility) {
-    		visibleCells[x + "," + y] = true;
-    		// Mark cell as explored
-            map.setExplored(x, y, currentDepth, true);
-    	});
-
-        // Iterate through visible map cells
-        for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
-        	for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
-        		if (map.isExplored(x, y, currentDepth)) {
-                    // Fetch the glyph for the tile and render it to the screen
-                    // at the offset position.
-                    var glyph = map.getTile(x, y, currentDepth);
-                    var foreground = glyph.getForeground();
-                    // If we are at a cell that is in the field of vision, we need
-                    // to check if there are items or entities.
-                    if (visibleCells[x + ',' + y]) {
-                        // Check for items first, since we want to draw entities
-                        // over items.
-                        var items = map.getItemsAt(x, y, currentDepth);
-                        // If we have items, we want to render the top most item
-                        if (items) {
-                            glyph = items[items.length - 1];
-                        }
-                        // Check if we have an entity at the position
-                        if (map.getEntityAt(x, y, currentDepth)) {
-                            glyph = map.getEntityAt(x, y, currentDepth);
-                        }
-                        // Update the foreground color in case our glyph changed
-                        foreground = glyph.getForeground();
-                    } else {
-                        // Since the tile was previously explored but is not 
-                        // visible, we want to change the foreground color to
-                        // dark gray.
-                        foreground = 'darkGray';
-                    }
-                    
-                    display.draw(
-                        x - topLeftX,
-                        y - topLeftY,
-                        glyph.getChar(), 
-                        foreground, 
-                        glyph.getBackground());
-                }
-        	};
-        };
-
-        // Render the entities
-        var entities = this._player.getMap().getEntities();
-        for (var key in entities) {
-        	var entity = entities[key];
-        	if (visibleCells[entity.getX() + ',' + entity.getY()]) {
-	        	// Only render the entity if they would show up on the screen
-	        	if(entity.getX() < topLeftX + screenWidth && 
-	        		entity.getX() >= topLeftX && 
-	        		entity.getY() < topLeftY + screenHeight && 
-	        		entity.getY() >= topLeftY &&
-	        		entity.getZ() == this._player.getZ()) {
-	        		display.draw(
-	        			entity.getX() - topLeftX,
-	        			entity.getY() - topLeftY,
-	        			entity.getChar(),
-	        			entity.getForeground(),
-	        			entity.getBackground()
-	        		);
-	        	}
-	        }
-        };
+        // Render the tiles
+        this.renderTiles(display);
 
         // Get the messages in the player's queue and render them
         var messages = this._player.getMessages();
@@ -250,6 +168,104 @@ Game.Screen.playScreen = {
         	// Unlock the engine
         	this._player.getMap().getEngine().unlock();
         }
+    },
+    getScreenOffsets: function() {
+        // Make sure we still have enough space to fit an entire game screen
+        var topLeftX = Math.max(0, this._player.getX() - (Game.getScreenWidth() / 2));
+        // Make sure we still have enough space to fit an entire game screen
+        topLeftX = Math.min(topLeftX, this._player.getMap().getWidth() -
+            Game.getScreenWidth());
+        // Make sure the y-axis doesn't above the top bound
+        var topLeftY = Math.max(0, this._player.getY() - (Game.getScreenHeight() / 2));
+        // Make sure we still have enough space to fit an entire game screen
+        topLeftY = Math.min(topLeftY, this._player.getMap().getHeight() - Game.getScreenHeight());
+        return {
+            x: topLeftX,
+            y: topLeftY
+        };
+    },
+    renderTiles: function(display) {
+        var screenWidth = Game.getScreenWidth();
+        var screenHeight = Game.getScreenHeight();
+        var offsets = this.getScreenOffsets();
+        var topLeftX = offsets.x;
+        var topLeftY = offsets.y;
+        // This object will keep track of all visible map cells
+        var visibleCells = {};
+        // Store this._player.getMap() and player's z to prevent losing it in callbacks
+        var map = this._player.getMap();
+        var currentDepth = this._player.getZ();
+        // Find all visible cells and update the object
+        map.getFov(currentDepth).compute(
+            this._player.getX(), this._player.getY(), 
+            this._player.getSightRadius(), 
+            function(x, y, radius, visibility) {
+                visibleCells[x + "," + y] = true;
+                // Mark cell as explored
+                map.setExplored(x, y, currentDepth, true);
+            });
+        // Iterate through visible map cells
+        for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
+            for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
+                if (map.isExplored(x, y, currentDepth)) {
+                    // Fetch the glyph for the tile and render it to the screen
+                    // at the offset position.
+                    var glyph = map.getTile(x, y, currentDepth);
+                    var foreground = glyph.getForeground();
+                    // If we are at a cell that is in the field of vision, we need
+                    // to check if there are items or entities.
+                    if (visibleCells[x + ',' + y]) {
+                        // Check for items first, since we want to draw entities
+                        // over items.
+                        var items = map.getItemsAt(x, y, currentDepth);
+                        // If we have items, we want to render the top most item
+                        if (items) {
+                            glyph = items[items.length - 1];
+                        }
+                        // Check if we have an entity at the position
+                        if (map.getEntityAt(x, y, currentDepth)) {
+                            glyph = map.getEntityAt(x, y, currentDepth);
+                        }
+                        // Update the foreground color in case our glyph changed
+                        foreground = glyph.getForeground();
+                    } else {
+                        // Since the tile was previously explored but is not 
+                        // visible, we want to change the foreground color to
+                        // dark gray.
+                        foreground = 'darkGray';
+                    }
+                    
+                    display.draw(
+                        x - topLeftX,
+                        y - topLeftY,
+                        glyph.getChar(), 
+                        foreground, 
+                        glyph.getBackground());
+                }
+            };
+        };
+
+        // Render the entities
+        var entities = this._player.getMap().getEntities();
+        for (var key in entities) {
+            var entity = entities[key];
+            if (visibleCells[entity.getX() + ',' + entity.getY()]) {
+                // Only render the entity if they would show up on the screen
+                if(entity.getX() < topLeftX + screenWidth && 
+                    entity.getX() >= topLeftX && 
+                    entity.getY() < topLeftY + screenHeight && 
+                    entity.getY() >= topLeftY &&
+                    entity.getZ() == this._player.getZ()) {
+                    display.draw(
+                        entity.getX() - topLeftX,
+                        entity.getY() - topLeftY,
+                        entity.getChar(),
+                        entity.getForeground(),
+                        entity.getBackground()
+                    );
+                }
+            }
+        };
     },
     setGameEnded: function(gameEnded) {
         this._gameEnded = gameEnded;
