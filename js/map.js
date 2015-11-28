@@ -1,59 +1,23 @@
 // From http://www.codingcookies.com/2013/04/05/building-a-roguelike-in-javascript-part-3a/
-Game.Map = function(tiles, player) {
+Game.Map = function(tiles) {
     this._tiles = tiles;
-    // cache the width and height based
-    // on the length of the dimensions of
-    // the tiles array
-    this._depth = tiles.length;
+    // Cache dimensions
+    this._depth = tiles.length
     this._width = tiles[0].length;
     this._height = tiles[0][0].length;
-
     // Setup the field of visions
     this._fov = [];
     this.setupFov();
-
+    // Create a table which will hold the entities
+    this._entities = {};
+    // Create a table which will hold the items
+    this._items = {};
+    // Create the engine and scheduler
+    this._scheduler = new ROT.Scheduler.Speed();
+    this._engine = new ROT.Engine(this._scheduler);
     // Setup the explored array
     this._explored = new Array(this._depth);
     this._setupExploredArray();
-
-    // A table for entities
-    this._entities = {};
-
-    // Create a table which will hold the items
-    this._items = {};
-
-    // Engine and scheduler
-    this._scheduler = new ROT.Scheduler.Speed();
-    this._engine = new ROT.Engine(this._scheduler);
-
-    // Add the player
-    this._player = player;
-    this.addEntityAtRandomPosition(player, 0);
-
-    // Add weapons and armor to the map in random positions
-    var templates = ['dagger', 'sword', 'staff', 'tunic', 'chainmail', 'platemail'];
-    for (var i = 0; i < templates.length; i++) {
-        this.addItemAtRandomPosition(Game.ItemRepository.create(templates[i]), Math.floor(this._depth * Math.random()));
-    }
-
-    // Add random entities and items to each floor.
-    for (var z = 0; z < this._depth; z++) {
-    	for (var i = 0; i < 15; i++) {
-            var entity = Game.EntityRepository.createRandom();
-	        this.addEntityAtRandomPosition(entity, z);
-            // Level up the entity based on the floor
-            if (entity.hasMixin('ExperienceGainer')) {
-                for (var level = 0; level < z; level++) {
-                    entity.giveExperience(entity.getNextLevelExperience() - entity.getExperience());
-                }
-            }
-	    }
-         // 15 items per floor
-        for (var i = 0; i < 15; i++) {
-            // Add a random entity
-            this.addItemAtRandomPosition(Game.ItemRepository.createRandom(), z);
-        }
-    };
 };
 
 // Standard getters
@@ -89,6 +53,11 @@ Game.Map.prototype.addEntity = function(entity) {
 	if(entity.hasMixin('Actor')) {
 		this._scheduler.add(entity, true);
 	}
+
+    // If the entity is the player, set the player.
+    if (entity.hasMixin(Game.EntityMixins.PlayerActor)) {
+        this._player = entity;
+    }
 };
 Game.Map.prototype.addEntityAtRandomPosition = function(entity, z) {
 	var position = this.getRandomFloorPosition(z);
@@ -130,6 +99,11 @@ Game.Map.prototype.removeEntity = function(entity) {
     // If the entity is an actor, remove them from the scheduler
     if (entity.hasMixin('Actor')) {
         this._scheduler.remove(entity);
+    }
+
+    // If the entity is the player, update the player field.
+    if (entity.hasMixin(Game.EntityMixins.PlayerActor)) {
+        this._player = undefined;
     }
 };
 Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
@@ -197,8 +171,8 @@ Game.Map.prototype.setupFov = function() {
             // if light can pass through a given tile.
             var depth = z;
             map._fov.push(new ROT.FOV.PreciseShadowcasting(function(x, y) {
-                    return !map.getTile(x, y, depth).isBlockingLight();
-                }));
+                return !map.getTile(x, y, depth).isBlockingLight();
+            }));
         })();
     }
 };

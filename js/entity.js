@@ -72,12 +72,15 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
 			this.setPosition(x, y, z);
 		}
 	} else if(z > this.getZ()) {
-		if(tile != Game.Tile.stairsDownTile) {
-			Game.sendMessage(this, "You can't go down here!");
-		} else {
-			Game.sendMessage(this, "You descend to level %s!", [z + 1]);
-			this.setPosition(x, y, z);
-		}
+		if (tile === Game.Tile.holeToCavernTile && this.hasMixin(Game.EntityMixins.PlayerActor)) {
+            // Switch the entity to a boss cavern!
+            this.switchMap(new Game.Map.BossCavern());
+        } else if (tile != Game.Tile.stairsDownTile) {
+            Game.sendMessage(this, "You can't go down here!");
+        } else {
+            this.setPosition(x, y, z);
+            Game.sendMessage(this, "You descend to level %s!", [z + 1]);
+        }
 	} else if(target) {
 		// An entity can only attack if the entity has the Attacker mixin and 
         // either the entity or the target is the player.
@@ -133,4 +136,17 @@ Game.Entity.prototype.kill = function(message) {
     } else {
         this.getMap().removeEntity(this);
     }
+};
+Game.Entity.prototype.switchMap = function(newMap) {
+    // If it's the same map, nothing to do!
+    if (newMap === this.getMap()) {
+        return;
+    }
+    this.getMap().removeEntity(this);
+    // Clear the position
+    this._x = 0;
+    this._y = 0;
+    this._z = 0;
+    // Add to the new map
+    newMap.addEntity(this);
 };

@@ -22,7 +22,6 @@ Game.Screen.startScreen = {
 
 // Define our playing screen
 Game.Screen.playScreen = {
-	_map: null,
 	_player: null,
 	_gameEnded: false,
     _subScreen: null,
@@ -31,11 +30,12 @@ Game.Screen.playScreen = {
     	var height = 48;
     	var depth = 6;
 
-    	// Create a map based on our size parameters
-    	var tiles = new Game.Builder(width, height, depth).getTiles();
-	    this._player = new Game.Entity(Game.PlayerTemplate);
-	    this._map = new Game.Map(tiles, this._player);
-	    this._map.getEngine().start();
+    	// Create our map from the tiles and player
+        this._player = new Game.Entity(Game.PlayerTemplate);
+        var tiles = new Game.Builder(width, height, depth).getTiles();
+        var map = new Game.Map.Cave(tiles, this._player);
+        // Start the map's engine
+        map.getEngine().start();
     },
     exit: function() { console.log("Exited play screen."); },
     render: function(display) {
@@ -53,20 +53,19 @@ Game.Screen.playScreen = {
     	var topLeftX = Math.max(0, this._player.getX() - (screenWidth / 2));
     	// Make sure it doesn't get greater than the far right side of the screen
     	// (Make sure to still have enough room to fit the game screen)
-    	topLeftX = Math.min(topLeftX, this._map.getWidth() - screenWidth);
+    	topLeftX = Math.min(topLeftX, this._player.getMap().getWidth() - screenWidth);
     	// Make sure the top Y doesn't go past the top of the map
     	var topLeftY = Math.max(0, this._player.getY() - (screenHeight / 2));
     	// Make sure Y doesn't get less than the top while at the bottom of the map
-    	topLeftY = Math.min(topLeftY, this._map.getHeight() - screenHeight);
+    	topLeftY = Math.min(topLeftY, this._player.getMap().getHeight() - screenHeight);
 
     	var visibleCells = {};
-    	// Store this._map and player's z to prevent losing it in callbacks
-        var map = this._map;
+    	// Store this._player.getMap() and player's z to prevent losing it in callbacks
+        var map = this._player.getMap();
         var currentDepth = this._player.getZ();
 
     	//Find all visible cells
     	map.getFov(currentDepth).compute(this._player.getX(), this._player.getY(), this._player.getSightRadius(), function(x, y, radius, visibility) {
-    		// console.log(visibility);
     		visibleCells[x + "," + y] = true;
     		// Mark cell as explored
             map.setExplored(x, y, currentDepth, true);
@@ -78,7 +77,7 @@ Game.Screen.playScreen = {
         		if (map.isExplored(x, y, currentDepth)) {
                     // Fetch the glyph for the tile and render it to the screen
                     // at the offset position.
-                    var glyph = this._map.getTile(x, y, currentDepth);
+                    var glyph = map.getTile(x, y, currentDepth);
                     var foreground = glyph.getForeground();
                     // If we are at a cell that is in the field of vision, we need
                     // to check if there are items or entities.
@@ -114,7 +113,7 @@ Game.Screen.playScreen = {
         };
 
         // Render the entities
-        var entities = this._map.getEntities();
+        var entities = this._player.getMap().getEntities();
         for (var key in entities) {
         	var entity = entities[key];
         	if (visibleCells[entity.getX() + ',' + entity.getY()]) {
@@ -166,7 +165,7 @@ Game.Screen.playScreen = {
         var newX = this._player.getX() + dX;
         var newY = this._player.getY() + dY;
         var newZ = this._player.getZ() + dZ;
-        this._player.tryMove(newX, newY, newZ, this._map);
+        this._player.tryMove(newX, newY, newZ, this._player.getMap());
     },
     handleInput: function(inputType, inputData) {
     	// If the game is over, enter will bring the user to the losing screen.
@@ -215,7 +214,7 @@ Game.Screen.playScreen = {
                 }
                 return;
             } else if (inputData.keyCode === ROT.VK_COMMA) {
-                var items = this._map.getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
+                var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
                 // If there is only one item, directly pick it up
                 if (items && items.length === 1) {
                     var item = items[0];
@@ -232,7 +231,7 @@ Game.Screen.playScreen = {
                 return;
             }
 	        // Unlock the engine
-        	this._map.getEngine().unlock();
+        	this._player.getMap().getEngine().unlock();
         } else if (inputType === 'keypress') {
         	var keyChar = String.fromCharCode(inputData.charCode);
         	if(keyChar === '>') {
@@ -244,7 +243,7 @@ Game.Screen.playScreen = {
         		return;
         	}
         	// Unlock the engine
-        	this._map.getEngine().unlock();
+        	this._player.getMap().getEngine().unlock();
         }
     },
     setGameEnded: function(gameEnded) {
