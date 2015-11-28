@@ -2,7 +2,7 @@ Game.Map.Cave = function(tiles, player) {
     // Call the Map constructor
     Game.Map.call(this, tiles);
     // Add the player
-    this.addEntityAtRandomPosition(player, 5);
+    this.addEntityAtRandomPosition(player, 0);
     // Add random entities and items to each floor.
     for (var z = 0; z < this._depth; z++) {
         // 15 entities per floor
