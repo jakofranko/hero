@@ -65,7 +65,21 @@ Game.DynamicGlyph.prototype.setName = function(name) {
 Game.DynamicGlyph.prototype.getName = function() {
     return this._name;
 };
-
+Game.DynamicGlyph.prototype.details = function() {
+    var details = [];
+    var detailGroups = this.raiseEvent('details');
+    // Iterate through each return value, grabbing the details from the arrays.
+    if (detailGroups) {
+        for (var i = 0, l = detailGroups.length; i < l; i++) {
+            if (detailGroups[i]) {
+                for (var j = 0; j < detailGroups[i].length; j++) {
+                    details.push(detailGroups[i][j].key + ': ' +  detailGroups[i][j].value);          
+                }
+            }
+        }
+    }
+    return details.join(', ');
+};
 Game.DynamicGlyph.prototype.describe = function() {
     return this._name;
 };
@@ -92,7 +106,9 @@ Game.DynamicGlyph.prototype.raiseEvent = function(event) {
     // Extract any arguments passed, removing the event name
     var args = Array.prototype.slice.call(arguments, 1)
     // Invoke each listener, with this entity as the context and the arguments
+    var results = [];
     for (var i = 0; i < this._listeners[event].length; i++) {
-        this._listeners[event][i].apply(this, args);
+        results.push(this._listeners[event][i].apply(this, args));
     }
+    return results;
 };

@@ -213,6 +213,11 @@ Game.Screen.playScreen = {
                     this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(), 'You have nothing to wield.');
                 }
                 return;
+            } else if (inputData.keyCode === ROT.VK_X) {
+                // Show the drop screen
+                this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(),
+                   'You have nothing to examine.');
+                return;
             } else if (inputData.keyCode === ROT.VK_COMMA) {
                 var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
                 // If there is only one item, directly pick it up
@@ -411,7 +416,7 @@ Game.Screen.eatScreen = new Game.Screen.ItemListScreen({
     canSelect: true,
     canSelectMultipleItems: false,
     isAcceptable: function(item) {
-        return item && item.hasMixin('Edible');
+        return item && item.hasMixin('Edible') && item !== this._player._armor && item !== this._player._weapon;
     },
     ok: function(selectedItems) {
         // Eat the item, removing it if there are no consumptions remaining.
@@ -469,6 +474,34 @@ Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
             this._player.unequip(item);
             this._player.wear(item);
             Game.sendMessage(this._player, "You are wearing %s.", [item.describeA()]);
+        }
+        return true;
+    }
+});
+Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
+    caption: 'Choose the item you wish to examine',
+    canSelect: true,
+    canSelectMultipleItems: false,
+    isAcceptable: function(item) {
+        return true;
+    },
+    ok: function(selectedItems) {
+        var keys = Object.keys(selectedItems);
+        if (keys.length > 0) {
+            var item = selectedItems[keys[0]];
+            var description = "It's %s";
+            var details = item.details();
+            if(details && details != "") {
+                description += " (%s).";
+                Game.sendMessage(this._player, description, 
+                [
+                    item.describeA(false),
+                    item.details()
+                ]);
+            } else {
+                Game.sendMessage(this._player, description, [item.describeA(false)]);
+            }
+            
         }
         return true;
     }
