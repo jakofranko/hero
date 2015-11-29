@@ -20,7 +20,6 @@ Game.Builder = function(width, height, depth) {
         }
     }
 
-
     // Now that the regions and tiles have been initialized, set the regions up and then connect them
     for (var z = 0; z < this._depth; z++) {
         this._setupRegions(z);

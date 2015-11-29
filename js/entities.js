@@ -1,6 +1,7 @@
 Game.EntityRepository = new Game.Repository('entities', Game.Entity);
 
 Game.PlayerTemplate = {
+    name: 'human (you)',
     character: '@',
     foreground: 'white',
     maxHp: 40,
