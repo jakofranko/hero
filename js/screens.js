@@ -713,14 +713,12 @@ Game.Screen.gainStatScreen = {
         display.drawText(0, 4 + this._options.length, "Remaining points: " + this._entity.getStatPoints());
     },
     handleInput: function(inputType, inputData) {
-        console.log(this._options);
         if (inputType === 'keydown') {
             // If a letter was pressed, check if it matches to a valid option.
             if (inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
                 // Check if it maps to a valid item by subtracting 'a' from the character
                 // to know what letter of the alphabet we used.
                 var index = inputData.keyCode - ROT.VK_A;
-                console.log(inputData.keyCode, ROT.VK_A, index);
                 if (this._options[index]) {
                     // Call the stat increasing function
                     this._options[index][1].call(this._entity);
