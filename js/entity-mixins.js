@@ -188,6 +188,9 @@ Game.EntityMixins.ExperienceGainer = {
         if (this.hasMixin('Sight')) {
             this._statOptions.push(['Increase sight range', this.increaseSightRadius]);
         }
+        if (this.hasMixin('Thrower')) {
+            this._statOptions.push(['Increase throwing skill', this.increaseThrowingSkill]);
+        }
     },
     getLevel: function() {
         return this._level;
@@ -588,6 +591,67 @@ Game.EntityMixins.TaskActor = {
         }
     }
 };
+Game.EntityMixins.Thrower = {
+    name: 'Thrower',
+    init: function(template) {
+        this._throwing = template['throwing'] || null;
+        this._throwingSkill = template['throwingSkill'] || 1;
+    },
+    getThrowing: function() {
+        return this._throwing;
+    },
+    getThrowingSkill: function() {
+        return this._throwingSkill;
+    },
+    setThrowing: function(i) {
+        this._throwing = i;
+    },
+    increaseThrowingSkill: function(value) {
+        var value = value || 2;
+        this._throwingSkill += 2;
+        Game.sendMessage(this, "You feel better at throwing things!");
+    },
+    _getTarget: function(targetX, targetY) {
+        var linePoints = Game.Geometry.getLine(this.getX(), this.getY(), targetX, targetY);
+        var z = this.getZ();
+        // Check to see if any walls or other creatures other than the thrower in the path
+        var end;
+        var lastPoint;
+        for (var i = 1; i < linePoints.length; i++) {
+            if(!this.getMap().getTile(linePoints[i].x, linePoints[i].y, z).isWalkable()) {
+                end = lastPoint;
+                break;
+            } else if(this.getMap().getEntityAt(linePoints[i].x, linePoints[i].y, z)) {
+                end = linePoints[i];
+                break;
+            } else {
+                lastPoint = linePoints[i];
+            }   
+        };
+
+        // If nothing is in the way, the end point is targetX and targetY
+        if(!end) {
+            end = {x: targetX, y: targetY}
+        }
+        return {x: end.x, y: end.y, distance: linePoints.length};
+    },
+    throwItem: function(i, targetX, targetY) {
+        var item = this._items[i];
+        if(item.isThrowable()) {
+            var target = this._getTarget(targetX, targetY);
+            var entity = this.getMap().getEntityAt(target.x, target.y, this.getZ());
+            if(entity && entity.hasMixin('Destructible')) {
+                var damage = Math.max(0, item.getAttackValue() + this.getThrowingSkill() - Math.floor(target.distance / 3));
+                Game.sendMessage(this, "You throw %s at %s!", [item.describeA(), entity.describeThe()]);
+                Game.sendMessage(entity, "%s throws %s at you!", [this.describeThe(), item.describeA()]);
+                entity.takeDamage(this, damage);
+            }
+            
+            this.getMap().addItem(target.x, target.y, this.getZ(), item);
+            this.removeItem(i);
+        }
+    }
+}
 
 // For some reason, Game.extend has to be called after Game.EntityMixins.TaskActor is defined, since that's the thing it's trying to extend.
 Game.EntityMixins.GiantZombieActor = Game.extend(Game.EntityMixins.TaskActor, {

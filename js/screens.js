@@ -130,11 +130,13 @@ Game.Screen.playScreen = {
                     // Show the wield screen
                     this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(), 'You have nothing to wield.');
                 }
-                return;
             } else if (inputData.keyCode === ROT.VK_X) {
                 // Show the drop screen
                 this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(),
                    'You have nothing to examine.');
+                return;
+            } else if(inputData.keyCode === ROT.VK_T) {
+                this.showItemsSubScreen(Game.Screen.throwScreen, this._player.getItems(), 'You have nothing to throw.');
                 return;
             } else if (inputData.keyCode === ROT.VK_COMMA) {
                 var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
@@ -534,17 +536,68 @@ Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
         return true;
     }
 });
+Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
+    caption: 'Choose the item you wish to throw',
+    canSelect: true,
+    canSelectMultipleItems: false,
+    isAcceptable: function(item) {
+        return item && item.hasMixin('Throwable') && item.isThrowable();
+    },
+    ok: function(selectedItems) {
+        var offsets = Game.Screen.playScreen.getScreenOffsets();
+        // Go to the targetting screen
+        Game.Screen.throwTargetScreen.setup(this._player, this._player.getX(), this._player.getY(), offsets.x, offsets.y);
+        this._player.setThrowing(Object.keys(selectedItems)[0]);
+        Game.Screen.playScreen.setSubScreen(Game.Screen.throwTargetScreen);
+        return;
+    }
+});
 
 // Targetting Screen
 Game.Screen.TargetBasedScreen = function(template) {
     template = template || {};
     // By default, our ok return does nothing and does not consume a turn.
-    this._isAcceptableFunction = template['okFunction'] || function(x, y) {
+    this._okFunction = template['okFunction'] || function(x, y) {
         return false;
     };
-    // The defaut caption function simply returns an empty string.
+    // The defaut caption function returns a description of the tiles or creatures.
     this._captionFunction = template['captionFunction'] || function(x, y) {
-        return '';
+        var z = this._player.getZ();
+        var map = this._player.getMap();
+        // If the tile is explored, we can give a better capton
+        if (map.isExplored(x, y, z)) {
+            // If the tile isn't explored, we have to check if we can actually 
+            // see it before testing if there's an entity or item.
+            if (this._visibleCells[x + ',' + y]) {
+                var items = map.getItemsAt(x, y, z);
+                // If we have items, we want to render the top most item
+                if (items) {
+                    var item = items[items.length - 1];
+                    return String.format('%s - %s (%s)',
+                        item.getRepresentation(),
+                        item.describeA(true),
+                        item.details());
+                // Else check if there's an entity
+                } else if (map.getEntityAt(x, y, z)) {
+                    var entity = map.getEntityAt(x, y, z);
+                    return String.format('%s - %s (%s)',
+                        entity.getRepresentation(),
+                        entity.describeA(true),
+                        entity.details());
+                }
+            }
+            // If there was no entity/item or the tile wasn't visible, then use
+            // the tile information.
+            return String.format('%s - %s',
+                map.getTile(x, y, z).getRepresentation(),
+                map.getTile(x, y, z).getDescription());
+
+        } else {
+            // If the tile is not explored, show the null tile description.
+            return String.format('%s - %s',
+                Game.Tile.nullTile.getRepresentation(),
+                Game.Tile.nullTile.getDescription());
+        }
     }
 };
 
@@ -578,8 +631,13 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
     var points = Game.Geometry.getLine(this._startX, this._startY, this._cursorX, this._cursorY);
 
     // Render stars along the line.
-    for (var i = 0, l = points.length; i < l; i++) {
-        display.drawText(points[i].x, points[i].y, '%c{magenta}*');
+    for (var i = 1, l = points.length; i < l; i++) {
+        if(i == l - 1) {
+            display.drawText(points[i].x, points[i].y, '%c{white}X');
+        } else {
+            display.drawText(points[i].x, points[i].y, '%c{white}*');    
+        }
+        
     }
 
     // Render the caption at the bottom.
@@ -664,6 +722,13 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
         }
     }
 });
+Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
+    okFunction: function(x, y) {
+        this._player.throwItem(this._player.getThrowing(), x, y);
+        return true;
+    }
+});
+
 // Define our help screen
 Game.Screen.helpScreen = {
     render: function(display) {

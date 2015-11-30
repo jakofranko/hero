@@ -68,3 +68,25 @@ Game.ItemMixins.Equippable = {
         }
     }
 };
+Game.ItemMixins.Throwable = {
+    name: 'Throwable',
+    init: function(template) {
+        this._throwable = template['throwable'] || false;
+        this._attackValue = template['attackValue'] || 1;
+    },
+    getAttackValue: function() {
+        return this._attackValue;
+    },
+    isThrowable: function() {
+        return this._throwable;
+    },
+    listeners: {
+        'details': function() {
+            var results = [];
+            if (this._throwable) {
+                results.push({key: 'attack', value: this.getAttackValue()});
+            }
+            return results;
+        }
+    }
+};

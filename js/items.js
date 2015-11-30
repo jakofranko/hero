@@ -3,7 +3,10 @@ Game.ItemRepository = new Game.Repository('items', Game.Item);
 Game.ItemRepository.define('rock', {
     name: 'rock',
     character: '*',
-    foreground: 'white'
+    foreground: 'white',
+    attackValue: 2,
+    throwable: true,
+    mixins: [Game.ItemMixins.Throwable]
 });
 
 Game.ItemRepository.define('apple', {
@@ -40,7 +43,8 @@ Game.ItemRepository.define('dagger', {
     foreground: 'gray',
     attackValue: 5,
     wieldable: true,
-    mixins: [Game.ItemMixins.Equippable]
+    throwable: true,
+    mixins: [Game.ItemMixins.Equippable, Game.ItemMixins.Throwable]
 }, {
     disableRandomCreation: true
 });
@@ -111,5 +115,6 @@ Game.ItemRepository.define('pumpkin', {
     defenseValue: 2,
     wearable: true,
     wieldable: true,
-    mixins: [Game.ItemMixins.Edible, Game.ItemMixins.Equippable]
+    throwable: true,
+    mixins: [Game.ItemMixins.Edible, Game.ItemMixins.Equippable, Game.ItemMixins.Throwable]
 });
