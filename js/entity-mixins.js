@@ -349,12 +349,26 @@ Game.EntityMixins.InventoryHolder = {
     },
     addItem: function(item) {
         // Try to find a slot, returning true only if we could add the item.
-        for (var i = 0; i < this._items.length; i++) {
-            if (!this._items[i]) {
-                this._items[i] = item;
-                return true;
+
+        // Check to see if we can stack the item unless we find an open slot first
+        if(item.hasMixin('Stackable')) {
+            for (var i = 0; i < this._items.length; i++) {
+                if (!this._items[i]) {
+                    this._items[i] = item;
+                    return true;
+                } else if(this._items[i].describe() == item.describe()) {
+                    this._items[i].addToStack();
+                    return true;
+                }
             }
-        }
+        } else {
+            for (var i = 0; i < this._items.length; i++) {
+                if (!this._items[i]) {
+                    this._items[i] = item;
+                    return true;
+                }
+            }
+        }        
         return false;
     },
     removeItem: function(i) {
@@ -362,8 +376,14 @@ Game.EntityMixins.InventoryHolder = {
         if (this._items[i] && this.hasMixin(Game.EntityMixins.Equipper)) {
             this.unequip(this._items[i]);
         }
-        // Simply clear the inventory slot.
-        this._items[i] = null;
+
+        // If the item is in a stack, decrement the stack amount
+        if(this._items[i].hasMixin('Stackable') && this._items[i].amount() > 1) {
+            this.items[i].removeFromStack();
+        } else {
+            // Simply clear the inventory slot.
+            this._items[i] = null;    
+        }
     },
     canAddItem: function() {
         // Check if we have an empty slot.
@@ -384,7 +404,7 @@ Game.EntityMixins.InventoryHolder = {
             // Try to add the item. If our inventory is not full, then splice the 
             // item out of the list of items. In order to fetch the right item, we
             // have to offset the number of items already added.
-            if (this.addItem(mapItems[indices[i]  - added])) {
+            if (this.addItem(mapItems[indices[i] - added])) {
                 mapItems.splice(indices[i] - added, 1);
                 added++;
             } else {

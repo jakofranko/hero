@@ -6,7 +6,8 @@ Game.ItemRepository.define('rock', {
     foreground: 'white',
     attackValue: 2,
     throwable: true,
-    mixins: [Game.ItemMixins.Throwable]
+    stackable: true,
+    mixins: [Game.ItemMixins.Throwable, Game.ItemMixins.Stackable]
 });
 
 Game.ItemRepository.define('apple', {
@@ -14,7 +15,8 @@ Game.ItemRepository.define('apple', {
     character: '%',
     foreground: 'red',
     foodValue: 50,
-    mixins: [Game.ItemMixins.Edible]
+    stackable: true,
+    mixins: [Game.ItemMixins.Edible, Game.ItemMixins.Stackable]
 });
 
 Game.ItemRepository.define('melon', {

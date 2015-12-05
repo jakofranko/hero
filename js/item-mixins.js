@@ -1,6 +1,5 @@
 Game.ItemMixins = {};
 
-// Edible mixins
 Game.ItemMixins.Edible = {
     name: 'Edible',
     init: function(template) {
@@ -34,7 +33,6 @@ Game.ItemMixins.Edible = {
         }
     }
 };
-
 Game.ItemMixins.Equippable = {
     name: 'Equippable',
     init: function(template) {
@@ -65,6 +63,33 @@ Game.ItemMixins.Equippable = {
                 results.push({key: 'defense', value: this.getDefenseValue()});
             }
             return results;
+        }
+    }
+};
+Game.ItemMixins.Stackable = {
+    name: 'Stackable',
+    init: function(template) {
+        this._stackable = template['stackable'] || false;
+        this._count = template['count'] || 0;
+    },
+    amount: function() {
+        return this._count;
+    },
+    addToStack: function(amount) {
+        if(amount) {
+            this._count += amount;
+        } else {
+            this._count++;    
+        }
+    },
+    isStackable: function() {
+        return this._stackable;
+    },
+    removeFromStack: function(amount) {
+        if(amount) {
+            this._count -= amount;
+        } else {
+            this._count--;
         }
     }
 };

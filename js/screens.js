@@ -355,8 +355,12 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
             // If the item is selected, show a +, otherwise show a dash, then the item's name
             var selectionState = (this._canSelectItem && this._canSelectMultipleItems && this._selectedIndices[i]) ? '+' : '-';
 
+            // If the item is stackable, show the number we are currently holding
+            var stack = this._items[i].hasMixin('Stackable') ? ' (' + this._items[i].amount() + ')' : '';
+            console.log(this._items[i].amount());
+
             // Render at the correct row and add 2
-            display.drawText(0, 2 + row, letter + ' ' + selectionState + ' ' + this._items[i].describe());
+            display.drawText(0, 2 + row, letter + ' ' + selectionState + ' ' + this._items[i].describe() + stack);
             row++;
         }
     }
