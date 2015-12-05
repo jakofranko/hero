@@ -375,7 +375,7 @@ Game.EntityMixins.InventoryHolder = {
         }        
         return false;
     },
-    removeItem: function(i) {
+    removeItem: function(i, amount) {
         // If we can equip items, then make sure we unequip the item we are removing.
         if (this._items[i] && this.hasMixin(Game.EntityMixins.Equipper)) {
             this.unequip(this._items[i]);
@@ -671,8 +671,13 @@ Game.EntityMixins.Thrower = {
                 entity.takeDamage(this, damage);
             }
             
+            var amount = 0;
+            if(item.hasMixin('Stackable')) {
+                amount = Math.min(1, item.amount() - 1);
+            }
+
             this.getMap().addItem(target.x, target.y, this.getZ(), item);
-            this.removeItem(i);
+            this.removeItem(i, amount);
         }
     }
 }
