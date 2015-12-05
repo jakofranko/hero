@@ -40,6 +40,8 @@ Game.ItemMixins.Equippable = {
         this._defenseValue = template['defenseValue'] || 0;
         this._wieldable = template['wieldable'] || false;
         this._wearable = template['wearable'] || false;
+        this._wielded = false;
+        this._worn = false;
     },
     getAttackValue: function() {
         return this._attackValue;
@@ -50,8 +52,26 @@ Game.ItemMixins.Equippable = {
     isWieldable: function() {
         return this._wieldable;
     },
+    isWielded: function() {
+        return this._wielded;
+    },
+    wield: function() {
+        this._wielded = true;
+    },
+    unwield: function() {
+        this._wield = false;
+    },
     isWearable: function() {
         return this._wearable;
+    },
+    isWorn: function() {
+        return this._worn;
+    },
+    wear: function() {
+        this._worn = true;
+    },
+    takeOff: function() {
+        this._worn = false;
     },
     listeners: {
         'details': function() {
@@ -70,7 +90,7 @@ Game.ItemMixins.Stackable = {
     name: 'Stackable',
     init: function(template) {
         this._stackable = template['stackable'] || false;
-        this._count = template['count'] || 0;
+        this._count = template['count'] || 1;
     },
     amount: function() {
         return this._count;

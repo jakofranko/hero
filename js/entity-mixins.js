@@ -143,14 +143,18 @@ Game.EntityMixins.Equipper = {
     },
     wield: function(item) {
         this._weapon = item;
+        item.wield();
     },
     unwield: function() {
+        this._weapon.unwield();
         this._weapon = null;
     },
     wear: function(item) {
         this._armor = item;
+        item.wear();
     },
     takeOff: function() {
+        this._armor.takeOff();
         this._armor = null;
     },
     getWeapon: function() {
@@ -379,7 +383,7 @@ Game.EntityMixins.InventoryHolder = {
 
         // If the item is in a stack, decrement the stack amount
         if(this._items[i].hasMixin('Stackable') && this._items[i].amount() > 1) {
-            this.items[i].removeFromStack();
+            this._items[i].removeFromStack();
         } else {
             // Simply clear the inventory slot.
             this._items[i] = null;    

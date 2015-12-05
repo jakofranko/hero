@@ -357,7 +357,6 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
 
             // If the item is stackable, show the number we are currently holding
             var stack = this._items[i].hasMixin('Stackable') ? ' (' + this._items[i].amount() + ')' : '';
-            console.log(this._items[i].amount());
 
             // Render at the correct row and add 2
             display.drawText(0, 2 + row, letter + ' ' + selectionState + ' ' + this._items[i].describe() + stack);
@@ -545,7 +544,13 @@ Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
     canSelect: true,
     canSelectMultipleItems: false,
     isAcceptable: function(item) {
-        return item && item.hasMixin('Throwable') && item.isThrowable();
+        if(!item || !item.hasMixin('Throwable')) {
+            return false;
+        } else if(item.hasMixin('Equippable') && (item.isWielded() || item.isWorn())) {
+            return false
+        } else {
+            return true;
+        }
     },
     ok: function(selectedItems) {
         var offsets = Game.Screen.playScreen.getScreenOffsets();
