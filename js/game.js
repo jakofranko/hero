@@ -1,10 +1,4 @@
 var Game = {
-	map: {},
-	
-	layout: null,
-	buildings: null,
-	player: null,
-
 	_display: null,
 	_currentScreen: null,
 	_screenWidth: 80,

@@ -207,7 +207,7 @@ Game.Map.prototype.isExplored = function(x, y, z) {
     }
 };
 
-// Items
+// Items - TODO: move this?
 Game.Map.prototype.getItemsAt = function(x, y, z) {
     return this._items[x + ',' + y + ',' + z];
 };

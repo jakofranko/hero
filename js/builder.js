@@ -5,7 +5,7 @@ Game.Builder = function(width, height, depth) {
 	this._tiles = new Array(depth);
 	this._regions = new Array(depth);
 
-	// Instantiate the arrays to be multi-dimension
+	// Instantiate the arrays to be multi-dimensional
     for (var z = 0; z < depth; z++) {
         // Create a new cave at each level
         this._tiles[z] = this._generateLevel();

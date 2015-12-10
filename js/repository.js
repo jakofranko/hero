@@ -2,7 +2,7 @@ Game.Repository = function(name, ctor) {
 	this._name = name;
 	this._templates = {};
     this._randomTemplates = {};
-	this._ctor = ctor;
+	this._ctor = ctor; // ctor = 'constructor'
 };
 
 // Define a new named template.

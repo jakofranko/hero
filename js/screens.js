@@ -29,11 +29,13 @@ Game.Screen.playScreen = {
     	var width = 100;
     	var height = 48;
     	var depth = 6;
-
-    	// Create our map from the tiles and player
+    	
         this._player = new Game.Entity(Game.PlayerTemplate);
+
+        // Create overview, then create lots, then create map
         var tiles = new Game.Builder(width, height, depth).getTiles();
         var map = new Game.Map.Cave(tiles, this._player);
+        
         // Start the map's engine
         map.getEngine().start();
     },
