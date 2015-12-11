@@ -1,6 +1,6 @@
-// From http://www.codingcookies.com/2013/04/05/building-a-roguelike-in-javascript-part-3a/
-Game.Map = function(tiles) {
-    this._tiles = tiles;
+Game.Map = function(width, height) {
+    this._city = new Game.Map.City(width, height);
+    this._tiles = this._city.tilesFromLots();
     // Cache dimensions
     this._depth = tiles.length
     this._width = tiles[0].length;

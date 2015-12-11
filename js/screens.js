@@ -25,16 +25,14 @@ Game.Screen.playScreen = {
 	_player: null,
 	_gameEnded: false,
     _subScreen: null,
-    enter: function() { 
-    	var width = 100;
-    	var height = 48;
-    	var depth = 6;
+    enter: function() {
+        // TODO: Player chooses size of city?
+    	var width = 25;
+    	var height = 25;
     	
         this._player = new Game.Entity(Game.PlayerTemplate);
 
-        // Create overview, then create lots, then create map
-        var tiles = new Game.Builder(width, height, depth).getTiles();
-        var map = new Game.Map.Cave(tiles, this._player);
+        var map = new Game.Map(width, height);
         
         // Start the map's engine
         map.getEngine().start();

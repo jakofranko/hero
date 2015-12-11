@@ -1,5 +1,5 @@
 Game.DynamicGlyph = function(properties) {
-	 properties = properties || {};
+	properties = properties || {};
     // Call the glyph's construtor with our set of properties
     Game.Glyph.call(this, properties);
     // Instantiate any properties from the passed object
