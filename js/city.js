@@ -3,24 +3,35 @@
 // TODO: Could be made more interesting by including a highway or two which would cut sort of diagnally across the city. Additionally, a river or nearby lake might be a neat addition as well. Perhaps a large, central park type of construct as well?
 // After generating the roads, lots will be placed semi-randomly in the non-road portions
 
-Game.City = function(width, height) {
-	this._width = width;
-	this._height = height;
-	this._tiles = new Array(width);
-	// Instantiate the tiles array
+Game.City = function(size) {
+	// Cities will be square for easier math
+	this._width = size;
+	this._height = size;
+	this._cX = Math.round(size / 2);
+	this._cY = Math.round(size / 2);
+	this._lots = new Array(size);
+	// Instantiate the lots and tiles array
 	for (var x = 0; x < this._width; x++) {
-		this._tiles[x] = new Array(height);
+		this._lots[x] = new Array(size);
 	};
+
+	// Determine neighborhood sizes based on city size
+	// since dividing by 10, then the multipliers should add up to 5 (leave room for suburbs!)
+	var baseSize = Math.round(size / 10);
+	this._downtown = Math.floor(baseSize * 2);
+	this._midtown = Math.floor(baseSize * 1) + this._downtown;
+	this._uptown = Math.floor(baseSize * 1) + this._midtown;
+	// suburbs will take up the remaining lots
 
 	// How many roads in the city.
 	this._roadFrequency = 0.4;
 };
 Game.City.prototype.init = function() {
-	// Generate a random grid
+	// Generate a random grid or roads
 	var lastKey;
 	// Start by randomly seeding the first row and column
-	for(var y = 0; y < this._height; y++) {
-		for(var x = 0; x < this._width; x++) {
+	for(var x = 0; x < this._width; x++) {
+		for(var y = 0; y < this._height; y++) {
 			var key = x + "," + y;
 			// Only apply random roads on the first row/column,
 			// don't let them be right next to each other,
@@ -35,46 +46,66 @@ Game.City.prototype.init = function() {
 				// Don't put roads within two units of eachother
 				if(lastRow != lastKey && lastColumn != lastKey) {
 					lastKey = key;
-					this.grid[key] = this._legend['Road'].chr;
-				} else {
-					this.grid[key] = " ";
+					this._lots[x][y] = Game.LotsRepository.create('road');
 				}
 			} else {
-				this.grid[key] = " ";
+				continue;
 			}
 		}
 	}
 
-	// Create the rest of the grid based off the randomly seeded first rows and columns
-	for(var key in this.grid) {
-		if(this.grid[key] == this.legend.road) {
-			var pos = key.split(",");
-			var x = pos[0];
-			var y = pos[1];
-
-			// We are on the first row, so draw the roads directly down
-			if(y == 0) {
-				var thisColumn = x;
-				for(var i = 1; i < this._height; i++) {
-					var roadKey = thisColumn + "," + i;
-					this.grid[roadKey] = this.legend.road;
+	// Create the rest of the roads based off the randomly seeded first rows and columns
+	for(var x = 0; x < this._width; x++) {
+		for(var y = 0; y < this._height; y++) {
+			if(this._lots[x][y].getName == 'road') {
+				if(y == 0) {
+					// We are on the first row, so draw the roads directly down
+					var thisColumn = x;
+					for(var i = 1; i < this._height; i++) {
+						var roadKey = thisColumn + "," + i;
+						this._lots[thisColumn][i] = Game.LotsRepository.create('road');
+					}
+				} else if(x == 0) {
+					// Otherwise, we are on the first column, so draw the road directly over
+					var thisRow = y;
+					for(var j = 1; j < this._width; j++) {
+						var roadKey = j + "," + thisRow;
+						this._lots[j][thisRow] = Game.LotsRepository.create('road');
+					}
+				} else {
+					continue;
 				}
-			// Otherwise, we are on the first column, so draw the road directly over
-			} else if(x == 0) {
-				var thisRow = y;
-				for(var j = 1; j < this._width; j++) {
-					var roadKey = j + "," + thisRow;
-					this.grid[roadKey] = this.legend.road;
-				}
+			} else {
+				continue;
 			}
 		}
 	}
 
 	// Now that the grid has been created, randomly place buildings in the empty spaces
-	for(var key in this.grid) {
-		if(this.grid[key] == this.legend.road)
-			continue;
-		else
-			this.grid[key] = ROT.RNG.getWeightedValue(this.legend.feature);
+	for(var x = 0; x < this._width; x++) {
+		for(var y = 0; y < this._height; y++) {
+			if(this._lots[x][y].getName() == 'road') {
+				continue;
+			} else {
+				var lot = Game.LotsRepository.createIf('willSpawn', this.neighborhood(x, y));
+				if(lot) {
+					this._lots[x][y] = lot;	
+				} else {
+					Game.LotsRepository.create('empty');
+				}
+			}
+		}
 	}
 };
+Game.City.prototype.neighborhood = function(x, y) {
+	var dist = Math.round(Game.Geometry.distance(x, y, this._cX, this._cY));
+	if(dist <= this._downtown) {
+		return 'downtown';
+	} else if(dist <= this._midtown) {
+		return 'midtown';
+	} else if(dist <= this._uptown) {
+		return 'uptown';
+	} else {
+		return 'suburbs';
+	}
+}

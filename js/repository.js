@@ -44,7 +44,8 @@ Game.Repository.prototype.createRandom = function() {
 Game.Repository.prototype.createIf = function(criteria) {
     for(var template in this._templates) {
         if(template.hasOwnProperty(criteria)) {
-            var create = template[criteria]();
+            var args = Array.prototype.slice.call(arguments, 1)
+            var create = template[criteria].apply(template, args);
             if(create) {
                 this.create(this._templates[template]);
                 return true;
