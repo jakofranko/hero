@@ -6,17 +6,14 @@
 Game.City = function(width, height) {
 	this._width = width;
 	this._height = height;
+	this._tiles = new Array(width);
+	// Instantiate the tiles array
+	for (var x = 0; x < this._width; x++) {
+		this._tiles[x] = new Array(height);
+	};
 
 	// How many roads in the city.
 	this._roadFrequency = 0.4;
-	this.grid = {};
-	this.legend = {
-		road: ".",
-		feature: {"B": 4, "b": 3, "#": 1, "|":2, "%": 1} // Weighted for ROT.RNG.getWeightedValue()
-	};
-};
-Game.City.prototype.getNode = function() {
-	return this._node;
 };
 Game.City.prototype.init = function() {
 	// Generate a random grid
@@ -38,7 +35,7 @@ Game.City.prototype.init = function() {
 				// Don't put roads within two units of eachother
 				if(lastRow != lastKey && lastColumn != lastKey) {
 					lastKey = key;
-					this.grid[key] = this.legend.road;
+					this.grid[key] = this._legend['Road'].chr;
 				} else {
 					this.grid[key] = " ";
 				}
