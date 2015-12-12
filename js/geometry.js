@@ -25,5 +25,12 @@ Game.Geometry = {
         }
 
         return points;
+    },
+    distance: function(startX, startY, endX, endY) {
+        // Math.pow(a, 2) + Math.pow(b, 2) = Math.pow(c, 2)
+        // c = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2))
+        var horizontalDistance = startX - endX;
+        var verticalDistance = startY - endY;
+        return Math.sqrt(Math.pow(horizontalDistance, 2) + Math.pow(verticalDistance, 2));
     }
 };
