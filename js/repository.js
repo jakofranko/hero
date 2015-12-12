@@ -37,3 +37,21 @@ Game.Repository.prototype.createRandom = function() {
     // Pick a random key and create an object based off of it.
     return this.create(Object.keys(this._randomTemplates).random());
 };
+
+// Cycle through all the templates. If a template has a function that's name
+// matches the criteria string, it will execute that function to determine whether 
+// or not to create the current template. If none are found, return false.
+Game.Repository.prototype.createIf = function(criteria) {
+    for(var template in this._templates) {
+        if(template.hasOwnProperty(criteria)) {
+            var create = template[criteria]();
+            if(create) {
+                this.create(this._templates[template]);
+                return true;
+            } else {
+                continue;
+            }
+        }
+    }
+    return false;
+};
