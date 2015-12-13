@@ -57,7 +57,7 @@ Game.City.prototype.init = function() {
 	// Create the rest of the roads based off the randomly seeded first rows and columns
 	for(var x = 0; x < this._width; x++) {
 		for(var y = 0; y < this._height; y++) {
-			if(this._lots[x][y].getName == 'road') {
+			if(this._lots[x][y] && this._lots[x][y].getName() == 'road') {
 				if(y == 0) {
 					// We are on the first row, so draw the roads directly down
 					var thisColumn = x;
@@ -84,7 +84,7 @@ Game.City.prototype.init = function() {
 	// Now that the grid has been created, randomly place buildings in the empty spaces
 	for(var x = 0; x < this._width; x++) {
 		for(var y = 0; y < this._height; y++) {
-			if(this._lots[x][y].getName() == 'road') {
+			if(this._lots[x][y] && this._lots[x][y].getName() == 'road') {
 				continue;
 			} else {
 				var lot = Game.LotsRepository.createIf('willSpawn', this.neighborhood(x, y));

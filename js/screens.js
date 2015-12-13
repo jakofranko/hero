@@ -27,12 +27,9 @@ Game.Screen.playScreen = {
     _subScreen: null,
     enter: function() {
         // TODO: Player chooses size of city?
-    	var width = 25;
-    	var height = 25;
-    	
+    	var size = 20;
         this._player = new Game.Entity(Game.PlayerTemplate);
-
-        var map = new Game.Map(width, height);
+        var map = new Game.Map(size);
         
         // Start the map's engine
         map.getEngine().start();

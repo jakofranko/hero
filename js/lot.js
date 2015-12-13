@@ -3,10 +3,10 @@ Game.Lot = function(properties) {
 	// Call the glyph's constructor with our set of properties
 	Game.DynamicGlyph.call(this, properties);
 
-	this._downtown = template['downtown'] || 1;
-	this._midtown = template['midtown'] || 1;
-	this._uptown = template['uptown'] || 1;
-	this._suburbs = template['suburbs'] || 1;
+	this._downtown = (typeof properties['downtown'] !== undefined) ? properties['downtown'] : 1;
+	this._midtown = (typeof properties['midtown'] !== undefined) ? properties['midtown'] : 1;
+	this._uptown = (typeof properties['uptown'] !== undefined) ? properties['uptown'] : 1;
+	this._suburbs = (typeof properties['suburbs'] !== undefined) ? properties['suburbs'] : 1;
 };
 // Make items inherit all the functionality from glyphs
 Game.Lot.extend(Game.DynamicGlyph);
