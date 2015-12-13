@@ -42,13 +42,28 @@ Game.Repository.prototype.createRandom = function() {
 // matches the criteria string, it will execute that function to determine whether 
 // or not to create the current template. If none are found, return false.
 Game.Repository.prototype.createIf = function(criteria) {
-    for(var template in this._templates) {
-        if(template.hasOwnProperty(criteria)) {
+    var names = [];
+    for (var name in this._templates) {
+        names.push(name);
+    };
+    var randomized = names.randomize();
+
+    // Loop through a randomized array of templates...
+    for(var i = 0; i < randomized.length; i++) {
+        // Create the object
+        var temp = this.create(randomized[i]);
+
+        // Check to see if the temp object has the function
+        // that's name matches the criteria string
+        if(temp[criteria]) {
+            // Get any additional arguments passed to this function
             var args = Array.prototype.slice.call(arguments, 1)
-            var create = template[criteria].apply(template, args);
+
+            // Execute the criteria function
+            var create = temp[criteria].apply(temp, args);
             if(create) {
-                this.create(this._templates[template]);
-                return true;
+                // If it passes, return the temp object
+                return temp;
             } else {
                 continue;
             }
