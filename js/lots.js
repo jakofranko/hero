@@ -16,13 +16,15 @@ Game.LotsRepository.define('building', {
 	uptown: 1,
 	suburbs: 0
 });
+
+// Roads should really never be placed randomly
 Game.LotsRepository.define('road', {
 	name: 'road',
 	character: '.',
-	downtown: 1,
-	midtown: 1,
-	uptown: 1,
-	suburbs: 1
+	downtown: -1,
+	midtown: -1,
+	uptown: -1,
+	suburbs: -1
 });
 Game.LotsRepository.define('appartments', {
 	name: 'appartments',

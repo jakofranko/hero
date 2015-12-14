@@ -1,10 +1,9 @@
 Game.Map = function(size) {
     this._city = new Game.City(size);
     this._city.init();
-
     console.log(this._city);
-
-    // this._tiles = this._city.tilesFromLots();
+    this._tiles = this._city.tilesFromLots();
+    console.log(this._tiles);
     // Cache dimensions
     this._depth = tiles.length
     this._width = tiles[0].length;

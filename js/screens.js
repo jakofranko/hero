@@ -5,7 +5,7 @@ Game.Screen = {};
 
 // Define start screen
 Game.Screen.startScreen = {
-	enter: function() { console.log('Entered teh start screen'); },
+	enter: function() { console.log('Entered the start screen'); },
 	exit: function() { console.log('Exited the start screen'); },
 	render: function(display) {
 		// Render prompt to the screen
@@ -18,6 +18,32 @@ Game.Screen.startScreen = {
 			Game.switchScreen(Game.Screen.playScreen);
 		}
 	}
+}
+
+Game.Screen.overview = {
+    _city: null,
+    enter: function(size) {
+        this._city = new Game.City(size);
+        this._city.init();
+        console.log(this._city);
+        console.log('Overview screen initianted');
+    },
+    exit: function() { console.log('Exited the overview screen'); },
+    render: function(display) {
+        var lots = this._city.getLots();
+        for(var x = 0; x < this._city.getWidth(); x++) {
+            for (var y = 0; y < this._city.getHeight(); y++) {
+                var lot = lots[x][y];
+                display.draw(x, y, lot.getChar(), lot.getForeground(), lot.getBackground())
+            };
+        }
+    },
+    handleInput: function(inputType, inputData) {
+        // When [Enter] is pressed, go to the play screen
+        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
+            Game.switchScreen(Game.Screen.playScreen);
+        }
+    }
 }
 
 // Define our playing screen

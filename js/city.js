@@ -25,6 +25,22 @@ Game.City = function(size) {
 
 	// How many roads in the city.
 	this._roadFrequency = 0.4;
+
+	// How many in-game tiles a lot should comprise
+	this._lotSize = 10;
+};
+// Getters and setters
+Game.City.prototype.getLotSize = function() {
+	return this._lotSize;
+};
+Game.City.prototype.getWidth = function() {
+	return this._width;
+};
+Game.City.prototype.getHeight = function() {
+	return this._height;
+};
+Game.City.prototype.getLots = function() {
+	return this._lots;
 };
 Game.City.prototype.init = function() {
 	// Generate a random grid or roads
@@ -109,3 +125,14 @@ Game.City.prototype.neighborhood = function(x, y) {
 		return 'suburbs';
 	}
 }
+Game.City.prototype.tilesFromLots = function() {
+	// initialize 3-dimensinal array. Start with z-level
+	var results = [];
+	for(var x = 0; x < this._width; x++) {
+		for (var y = 0; y < this._height; y++) {
+			var tiles = this._lots[x][y].getTiles();
+			results.push(tiles);
+		};
+	}
+	console.log(results);
+};

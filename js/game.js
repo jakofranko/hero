@@ -1,11 +1,25 @@
 var Game = {
 	_display: null,
+	_overview: null,
+	_stats: null,
+	_messageLog: null,
 	_currentScreen: null,
+	_miniMap: null,
 	_screenWidth: 80,
 	_screenHeight: 24,
+	_citySize: 20,
 
 	getDisplay: function() {
 		return this._display;
+	},
+	getOverview: function() {
+		return this._overview;
+	},
+	getStats: function() {
+		return this._stats;
+	},
+	getMessageLog: function() {
+		return this._messageLog;
 	},
 	getScreenWidth: function() {
 	    return this._screenWidth;
@@ -16,6 +30,8 @@ var Game = {
 	init: function() {
 		// Add one to height for displaying stats
 	    this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight + 1});
+	    this._overview = new ROT.Display({width: this._citySize, height: this._citySize});
+
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
 	    var game = this; // So that we don't lose this
@@ -37,8 +53,10 @@ var Game = {
 	refresh: function() {
         // Clear the screen
         this._display.clear();
+        // this._overview.clear();
         // Render the screen
         this._currentScreen.render(this._display);
+        // this._miniMap.render(this._display);
     },
     sendMessage: function(recipient, message, args) {
 		// Make sure the recipient can receive messages
@@ -81,6 +99,14 @@ var Game = {
 	        this._currentScreen.enter();
 	        this.refresh();
 	    }
+	},
+	setMiniMap: function(screen) {
+		this.getOverview().clear();
+		this._miniMap = screen;
+		if(!this._miniMap !== null) {
+			this._miniMap.enter(this._citySize);
+			this._miniMap.render(this._overview);
+		}
 	}
 };
 
@@ -92,8 +118,12 @@ window.onload = function() {
         // Initialize the game
         Game.init();
         // Add the container to our HTML page
-        document.body.appendChild(Game.getDisplay().getContainer());
+        document.getElementById('level').appendChild(Game.getDisplay().getContainer());
+        document.getElementById('overview').appendChild(Game.getOverview().getContainer());
         // Load the start screen
         Game.switchScreen(Game.Screen.startScreen);
+
+        // Load the minimap
+        Game.setMiniMap(Game.Screen.overview);
     }
 }
