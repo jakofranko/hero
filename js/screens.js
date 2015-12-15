@@ -55,7 +55,7 @@ Game.Screen.playScreen = {
         // TODO: Player chooses size of city?
     	var size = 20;
         this._player = new Game.Entity(Game.PlayerTemplate);
-        var map = new Game.Map(size);
+        var map = new Game.Map(size, this._player);
         
         // Start the map's engine
         map.getEngine().start();
@@ -231,6 +231,7 @@ Game.Screen.playScreen = {
         var visibleCells = {};
         // Store this._player.getMap() and player's z to prevent losing it in callbacks
         var map = this._player.getMap();
+        debugger;
         var currentDepth = this._player.getZ();
         // Find all visible cells and update the object
         map.getFov(currentDepth).compute(

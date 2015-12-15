@@ -7,7 +7,7 @@ var Game = {
 	_miniMap: null,
 	_screenWidth: 80,
 	_screenHeight: 24,
-	_citySize: 20,
+	_citySize: 10,
 
 	getDisplay: function() {
 		return this._display;

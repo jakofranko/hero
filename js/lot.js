@@ -43,7 +43,7 @@ Game.Lot.prototype.getTiles = function() {
 	for (var x = 0; x < this._width; x++) {
 		result[x] = new Array(this._height);
 		for (var y = 0; y < this._height; y++) {
-			result[x][y] = this.getChar();
+			result[x][y] = Game.Tile.floorTile;
 		};
 	};
 	return result;

@@ -126,13 +126,34 @@ Game.City.prototype.neighborhood = function(x, y) {
 	}
 }
 Game.City.prototype.tilesFromLots = function() {
-	// initialize 3-dimensinal array. Start with z-level
-	var results = [];
-	for(var x = 0; x < this._width; x++) {
-		for (var y = 0; y < this._height; y++) {
-			var tiles = this._lots[x][y].getTiles();
-			results.push(tiles);
+	// initialize 3-dimensinal array. 
+	// Start with 1 z-level
+	// Width and height should be proportional to the lotSize
+	var map = new Array(1);
+	map[0] = new Array(this._width * this._lotSize)
+
+	// Loop through the city lots
+	for(var cityX = 0; cityX < this._width; cityX++) {
+		for (var cityY = 0; cityY < this._height; cityY++) {
+			// returns a 2-dimensional (hopefully 3D one day) array of lot tiles
+			var tiles = this._lots[cityX][cityY].getTiles();
+
+			// Load these tiles into the results at the appropriate
+			// offset based on which lot we're in
+			for (var x = 0; x < tiles.length; x++) {
+				var offsetX = x + (cityX * this._lotSize);
+
+				// instantiate a new map column if it doesn't exist already
+				if(!map[0][offsetX]) {
+					map[0][offsetX] = new Array(this._height * this._lotSize);
+				}
+
+				for (var y = 0; y < tiles[x].length; y++) {
+					var offsetY = y + (cityY * this._lotSize);
+					map[0][offsetX][offsetY] = tiles[x][y];
+				};
+			};
 		};
 	}
-	console.log(results);
+	return map;
 };

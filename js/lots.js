@@ -45,8 +45,8 @@ Game.LotsRepository.define('houses', {
 Game.LotsRepository.define('empty', {
 	name: 'empty',
 	character: ' ',
-	downtown: 1,
-	midtown: 1,
-	uptown: 1,
-	suburbs: 1
+	downtown: 0.5,
+	midtown: 0.5,
+	uptown: 0.5,
+	suburbs: 0.5
 });

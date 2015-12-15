@@ -1,13 +1,15 @@
-Game.Map = function(size) {
+Game.Map = function(size, player) {
     this._city = new Game.City(size);
     this._city.init();
     console.log(this._city);
     this._tiles = this._city.tilesFromLots();
+    debugger;
     console.log(this._tiles);
     // Cache dimensions
-    this._depth = tiles.length
-    this._width = tiles[0].length;
-    this._height = tiles[0][0].length;
+    this._depth = this._tiles.length
+    this._width = this._tiles[0].length;
+    this._height = this._tiles[0][0].length;
+
     // Setup the field of visions
     this._fov = [];
     this.setupFov();
@@ -21,6 +23,8 @@ Game.Map = function(size) {
     // Setup the explored array
     this._explored = new Array(this._depth);
     this._setupExploredArray();
+
+    this.addEntityAtRandomPosition(player, 0)
 };
 
 // Standard getters
