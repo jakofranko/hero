@@ -1,5 +1,7 @@
+// Create a small grid of roads and lots that will be used to create
+// lots, which will in turn be used to generate the player level
 // This is HEAVILY inspired by Shamus Young's post here:http://www.shamusyoung.com/twentysidedtale/?p=2983.
-// Essentially, creating the city will involve a few steps, the first of which is creating a grid of roads. I want to start off with just creating a semi-random grid.
+// Creating the city will involve a few steps, the first of which is creating a grid of roads. I want to start off with just creating a semi-random grid.
 // TODO: Could be made more interesting by including a highway or two which would cut sort of diagnally across the city. Additionally, a river or nearby lake might be a neat addition as well. Perhaps a large, central park type of construct as well?
 // After generating the roads, lots will be placed semi-randomly in the non-road portions
 
@@ -43,7 +45,7 @@ Game.City.prototype.getLots = function() {
 	return this._lots;
 };
 Game.City.prototype.init = function() {
-	// Generate a random grid or roads
+	// Generate a random grid of roads
 	var lastKey;
 	// Start by randomly seeding the first row and column
 	for(var x = 0; x < this._width; x++) {

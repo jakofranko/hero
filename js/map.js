@@ -1,10 +1,11 @@
+// @size should be square number of lots for a city.
 Game.Map = function(size, player) {
     this._city = new Game.City(size);
     this._city.init();
-    console.log(this._city);
+
+    // Used for drawing to various displays 
     this._tiles = this._city.tilesFromLots();
-    debugger;
-    console.log(this._tiles);
+
     // Cache dimensions
     this._depth = this._tiles.length
     this._width = this._tiles[0].length;
@@ -23,6 +24,8 @@ Game.Map = function(size, player) {
     // Setup the explored array
     this._explored = new Array(this._depth);
     this._setupExploredArray();
+
+    this._player = player;
 
     this.addEntityAtRandomPosition(player, 0)
 };
@@ -46,6 +49,9 @@ Game.Map.prototype.getEntities = function() {
 Game.Map.prototype.getPlayer = function() {
     return this._player;
 };
+Game.Map.prototype.getCity = function() {
+    return this._city;
+}
 
 // Entities
 Game.Map.prototype.addEntity = function(entity) {

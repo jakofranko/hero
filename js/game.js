@@ -1,10 +1,16 @@
 var Game = {
+	_player: null,
+
+	// ROT.Displays
 	_display: null,
 	_overview: null,
 	_stats: null,
 	_messageLog: null,
+
+	// Screens
 	_currentScreen: null,
 	_miniMap: null,
+
 	_screenWidth: 80,
 	_screenHeight: 24,
 	_citySize: 10,
@@ -27,7 +33,13 @@ var Game = {
 	getScreenHeight: function() {
 	    return this._screenHeight;
 	},
+	getCitySize: function() {
+		return this._citySize;
+	},
 	init: function() {
+		// Create player entity
+		this._player = new Game.Entity(Game.PlayerTemplate);
+
 		// Add one to height for displaying stats
 	    this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight + 1});
 	    this._overview = new ROT.Display({width: this._citySize, height: this._citySize});
@@ -56,7 +68,9 @@ var Game = {
         // this._overview.clear();
         // Render the screen
         this._currentScreen.render(this._display);
-        // this._miniMap.render(this._display);
+        if(this._miniMap !== null) {
+        	this._miniMap.render(this._overview);	
+        }
     },
     sendMessage: function(recipient, message, args) {
 		// Make sure the recipient can receive messages
@@ -100,12 +114,11 @@ var Game = {
 	        this.refresh();
 	    }
 	},
-	setMiniMap: function(screen) {
+	setMiniMap: function(screen, player) {
 		this.getOverview().clear();
 		this._miniMap = screen;
 		if(!this._miniMap !== null) {
-			this._miniMap.enter(this._citySize);
-			this._miniMap.render(this._overview);
+			this._miniMap.enter(player);
 		}
 	}
 };
@@ -122,8 +135,5 @@ window.onload = function() {
         document.getElementById('overview').appendChild(Game.getOverview().getContainer());
         // Load the start screen
         Game.switchScreen(Game.Screen.startScreen);
-
-        // Load the minimap
-        Game.setMiniMap(Game.Screen.overview);
     }
 }

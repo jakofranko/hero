@@ -22,11 +22,8 @@ Game.Screen.startScreen = {
 
 Game.Screen.overview = {
     _city: null,
-    enter: function(size) {
-        this._city = new Game.City(size);
-        this._city.init();
-        console.log(this._city);
-        console.log('Overview screen initianted');
+    enter: function(player) {
+        this._city = player.getMap().getCity();
     },
     exit: function() { console.log('Exited the overview screen'); },
     render: function(display) {
@@ -38,12 +35,7 @@ Game.Screen.overview = {
             };
         }
     },
-    handleInput: function(inputType, inputData) {
-        // When [Enter] is pressed, go to the play screen
-        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-            Game.switchScreen(Game.Screen.playScreen);
-        }
-    }
+    handleInput: function(inputType, inputData) {}
 }
 
 // Define our playing screen
@@ -53,10 +45,14 @@ Game.Screen.playScreen = {
     _subScreen: null,
     enter: function() {
         // TODO: Player chooses size of city?
-    	var size = 20;
         this._player = new Game.Entity(Game.PlayerTemplate);
-        var map = new Game.Map(size, this._player);
-        
+        var map = new Game.Map(Game.getCitySize(), this._player);
+
+        // Once player has been created, the map generated and the 
+        // map assigned to the player (happens in map creation),
+        // we can set the minimap to reflect the city overview.
+        Game.setMiniMap(Game.Screen.overview, this._player);
+
         // Start the map's engine
         map.getEngine().start();
     },
@@ -97,10 +93,6 @@ Game.Screen.playScreen = {
             this._player.getExperience()
         );
         display.drawText(0, screenHeight, stats);
-
-        // Render hunger state
-        var hungerState = this._player.getHungerState();
-        display.drawText(screenWidth - hungerState.length, screenHeight, hungerState);
     },
     move: function(dX, dY, dZ) {
         var newX = this._player.getX() + dX;
@@ -231,7 +223,7 @@ Game.Screen.playScreen = {
         var visibleCells = {};
         // Store this._player.getMap() and player's z to prevent losing it in callbacks
         var map = this._player.getMap();
-        debugger;
+        
         var currentDepth = this._player.getZ();
         // Find all visible cells and update the object
         map.getFov(currentDepth).compute(

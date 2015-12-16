@@ -14,7 +14,6 @@ Game.PlayerTemplate = {
         Game.EntityMixins.Destructible,
         Game.EntityMixins.Equipper,
         Game.EntityMixins.Attacker,
-        Game.EntityMixins.FoodConsumer,
         Game.EntityMixins.InventoryHolder,
         Game.EntityMixins.MessageRecipient,
         Game.EntityMixins.PlayerStatGainer,
