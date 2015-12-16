@@ -11,3 +11,5 @@ date:  2015-12-11 11:15am
 * Screen support for multiple displays
 * Ability for our player to walk around in a generated city stitched together from lots
 * Abstraction of some player things to it's own player class?
+* Scraping out some residual mechanics from cave-quest
+  * Remove hunger mechanic
