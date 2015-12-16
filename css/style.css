@@ -1,0 +1,38 @@
+html, body {
+	height: 100%;
+}
+body {
+	position: relative;
+	margin: 0;
+}
+#level {
+	position: absolute;
+	left: 0;
+	width: 80%;
+	height: 100%;
+}
+
+#sidebar {
+	position: absolute;
+	right: 0;
+	width: 20%;
+	height: 100%;
+	overflow: hidden;
+}
+
+#overview {
+	position: relative;
+	height: 50%;
+}
+
+#overview canvas, #level canvas {
+	display: block;
+	position: relative;
+	margin: auto;
+}
+
+#stats {
+	position: relative;
+	width: 100%;
+	height: 30%;
+}
