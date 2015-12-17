@@ -48,5 +48,17 @@ Game.LotRepository.define('empty', {
 	downtown: 0.5,
 	midtown: 0.5,
 	uptown: 0.5,
-	suburbs: 0.5
+	suburbs: 0.5,
+	buildTiles: function() {
+		return this.fillLot('grass', {
+			character: {
+		        random: true,
+		        values: ['.', '"']
+		    },
+		    foreground: {
+		        random: true,
+		        values: ['#F8F8D6', '#B3C67F', '#5D7E62']
+		    }
+		});
+	}
 });
