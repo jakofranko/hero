@@ -9,7 +9,15 @@ Game.TileRepository.define('floor', {
     character: '.',
     walkable: true,
     blocksLight: false,
-    description: 'A cave floor'
+    description: 'The floor'
+});
+Game.TileRepository.define('grass', {
+    name: 'floor',
+    character: '"',
+    foreground: '#B3C67F',
+    walkable: true,
+    blocksLight: false,
+    description: 'The floor'
 });
 Game.TileRepository.define('wall', {
     name: 'wall',
@@ -17,7 +25,7 @@ Game.TileRepository.define('wall', {
 	foreground: 'goldenrod',
 	diggable: true,
 	blocksLight: true,
-    description: 'A cave wall'
+    description: 'A wall'
 });
 Game.TileRepository.define('stairsUp', {
     name: 'stairsUp',
@@ -25,7 +33,7 @@ Game.TileRepository.define('stairsUp', {
     foreground: 'white',
     walkable: true,
     blocksLight: false,
-    description: 'A rock staircase leading upwards'
+    description: 'A staircase leading upwards'
 });
 Game.TileRepository.define('stairsDown', {
     name: 'stairsDown',
@@ -33,7 +41,7 @@ Game.TileRepository.define('stairsDown', {
     foreground: 'white',
     walkable: true,
     blocksLight: false,
-    description: 'A rock staircase leading downwards'
+    description: 'A staircase leading downwards'
 });
 Game.TileRepository.define('water', {
     name: 'water',
@@ -41,5 +49,5 @@ Game.TileRepository.define('water', {
     foreground: 'blue',
     walkable: false,
     blocksLight: false,
-    description: 'Murky blue water'
+    description: 'Clear blue water'
 });
