@@ -1,0 +1,22 @@
+{
+  "name": "heroRL",
+  "description": "A JavaScript roguelike",
+  "main": "index.html",
+  "authors": [
+    "Jake Franklin"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "roguelike",
+    "rotjs",
+    "hero"
+  ],
+  "homepage": "http://jakofranko.github.io/hero",
+  "moduleType": [
+    "node"
+  ],
+  "private": true,
+  "dependencies": {
+    "rot.js": "~0.5.0"
+  }
+}
