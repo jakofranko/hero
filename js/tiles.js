@@ -17,7 +17,7 @@ Game.TileRepository.define('grass', {
     foreground: '#B3C67F',
     walkable: true,
     blocksLight: false,
-    description: 'The floor'
+    description: 'A patch of grass'
 });
 Game.TileRepository.define('wall', {
     name: 'wall',
