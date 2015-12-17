@@ -64,7 +64,7 @@ Game.City.prototype.init = function() {
 				// Don't put roads within two units of eachother
 				if(lastRow != lastKey && lastColumn != lastKey) {
 					lastKey = key;
-					this._lots[x][y] = Game.LotsRepository.create('road');
+					this._lots[x][y] = Game.LotRepository.create('road');
 				}
 			} else {
 				continue;
@@ -81,14 +81,14 @@ Game.City.prototype.init = function() {
 					var thisColumn = x;
 					for(var i = 1; i < this._height; i++) {
 						var roadKey = thisColumn + "," + i;
-						this._lots[thisColumn][i] = Game.LotsRepository.create('road');
+						this._lots[thisColumn][i] = Game.LotRepository.create('road');
 					}
 				} else if(x == 0) {
 					// Otherwise, we are on the first column, so draw the road directly over
 					var thisRow = y;
 					for(var j = 1; j < this._width; j++) {
 						var roadKey = j + "," + thisRow;
-						this._lots[j][thisRow] = Game.LotsRepository.create('road');
+						this._lots[j][thisRow] = Game.LotRepository.create('road');
 					}
 				} else {
 					continue;
@@ -105,11 +105,11 @@ Game.City.prototype.init = function() {
 			if(this._lots[x][y] && this._lots[x][y].getName() == 'road') {
 				continue;
 			} else {
-				var lot = Game.LotsRepository.createIf('willSpawn', this.neighborhood(x, y));
+				var lot = Game.LotRepository.createIf('willSpawn', this.neighborhood(x, y));
 				if(lot) {
 					this._lots[x][y] = lot;	
 				} else {
-					Game.LotsRepository.create('empty');
+					Game.LotRepository.create('empty');
 				}
 			}
 		}

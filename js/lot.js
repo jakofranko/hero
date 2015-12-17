@@ -10,6 +10,22 @@ Game.Lot = function(properties) {
 
 	this._width = 10;
 	this._height = 10;
+
+	this.getTiles;
+	if(typeof properties['buildTiles'] === 'function') {
+		this.getTiles = properties['buildTiles'];	
+	} else {
+		this.getTiles = function() {
+			var result = [];
+			for (var x = 0; x < this._width; x++) {
+				result[x] = new Array(this._height);
+				for (var y = 0; y < this._height; y++) {
+					result[x][y] = Game.TileRepository.create('floorTile');
+				};
+			};
+			return result;
+		};
+	} 
 };
 // Make items inherit all the functionality from glyphs
 Game.Lot.extend(Game.DynamicGlyph);
@@ -38,13 +54,3 @@ Game.Lot.prototype.willSpawn = function(neighborhood) {
 	}
 	return spawn;
 };
-Game.Lot.prototype.getTiles = function() {
-	var result = [];
-	for (var x = 0; x < this._width; x++) {
-		result[x] = new Array(this._height);
-		for (var y = 0; y < this._height; y++) {
-			result[x][y] = Game.Tile.floorTile;
-		};
-	};
-	return result;
-}

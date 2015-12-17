@@ -5,6 +5,7 @@ Game.Tile = function(properties) {
     // Call the Glyph constructor with our properties
     Game.Glyph.call(this, properties);
     // Set up the properties. We use false by default.
+    this._name = properties['name'] || false;
     this._walkable = properties['walkable'] || false;
     this._diggable = properties['diggable'] || false;
     this._blocksLight = properties['blocksLight'] || false;
@@ -26,7 +27,9 @@ Game.Tile.prototype.isBlockingLight = function() {
 Game.Tile.prototype.getDescription = function() {
     return this._description;
 };
-
+Game.Tile.prototype.describe = function() {
+    return this._name;
+};
 Game.getNeighborPositions = function(x, y) {
     var tiles = [];
     // Generate all possible offsets
@@ -41,47 +44,3 @@ Game.getNeighborPositions = function(x, y) {
     }
     return tiles.randomize();
 }
-
-// Tiles
-Game.Tile.nullTile = new Game.Tile({description: '(unknown)'});
-Game.Tile.floorTile = new Game.Tile({
-    character: '.',
-    walkable: true,
-    blocksLight: false,
-    description: 'A cave floor'
-});
-Game.Tile.wallTile = new Game.Tile({
-	character: '#',
-	foreground: 'goldenrod',
-	diggable: true,
-	blocksLight: true,
-    description: 'A cave wall'
-});
-Game.Tile.stairsUpTile = new Game.Tile({
-    character: '<',
-    foreground: 'white',
-    walkable: true,
-    blocksLight: false,
-    description: 'A rock staircase leading upwards'
-});
-Game.Tile.stairsDownTile = new Game.Tile({
-    character: '>',
-    foreground: 'white',
-    walkable: true,
-    blocksLight: false,
-    description: 'A rock staircase leading downwards'
-});
-Game.Tile.holeToCavernTile = new Game.Tile({
-    character: 'O',
-    foreground: 'white',
-    walkable: true,
-    blocksLight: false,
-    description: 'A great dark hole in the ground'
-});
-Game.Tile.waterTile = new Game.Tile({
-    character: '~',
-    foreground: 'blue',
-    walkable: false,
-    blocksLight: false,
-    description: 'Murky blue water'
-});
