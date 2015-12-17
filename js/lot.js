@@ -20,7 +20,7 @@ Game.Lot = function(properties) {
 			for (var x = 0; x < this._width; x++) {
 				result[x] = new Array(this._height);
 				for (var y = 0; y < this._height; y++) {
-					result[x][y] = Game.TileRepository.create('floorTile');
+					result[x][y] = Game.TileRepository.create('floor');
 				};
 			};
 			return result;

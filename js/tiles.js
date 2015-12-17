@@ -1,42 +1,42 @@
 Game.TileRepository = new Game.Repository('tiles', Game.Tile);
 
-Game.TileRepository.define('nullTile', {
-    name: 'nullTile',
+Game.TileRepository.define('null', {
+    name: 'null',
     description: '(unknown)'
 });
-Game.TileRepository.define('floorTile', {
-    name: 'floorTile',
+Game.TileRepository.define('floor', {
+    name: 'floor',
     character: '.',
     walkable: true,
     blocksLight: false,
     description: 'A cave floor'
 });
-Game.TileRepository.define('wallTile', {
-    name: 'wallTile',
+Game.TileRepository.define('wall', {
+    name: 'wall',
 	character: '#',
 	foreground: 'goldenrod',
 	diggable: true,
 	blocksLight: true,
     description: 'A cave wall'
 });
-Game.TileRepository.define('stairsUpTile', {
-    name: 'stairsUpTile',
+Game.TileRepository.define('stairsUp', {
+    name: 'stairsUp',
     character: '<',
     foreground: 'white',
     walkable: true,
     blocksLight: false,
     description: 'A rock staircase leading upwards'
 });
-Game.TileRepository.define('stairsDownTile', {
-    name: 'stairsDownTile',
+Game.TileRepository.define('stairsDown', {
+    name: 'stairsDown',
     character: '>',
     foreground: 'white',
     walkable: true,
     blocksLight: false,
     description: 'A rock staircase leading downwards'
 });
-Game.TileRepository.define('waterTile', {
-    name: 'waterTile',
+Game.TileRepository.define('water', {
+    name: 'water',
     character: '~',
     foreground: 'blue',
     walkable: false,

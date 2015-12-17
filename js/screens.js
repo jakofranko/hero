@@ -618,11 +618,11 @@ Game.Screen.TargetBasedScreen = function(template) {
                 map.getTile(x, y, z).getDescription());
 
         } else {
-            var nullTile = Game.TileRepository.create('nullTile');
+            var null = Game.TileRepository.create('null');
             // If the tile is not explored, show the null tile description.
             return String.format('%s - %s',
-                nullTile.getRepresentation(),
-                nullTile.getDescription());
+                null.getRepresentation(),
+                null.getDescription());
         }
     }
 };
@@ -741,11 +741,11 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
                 map.getTile(x, y, z).getDescription());
 
         } else {
-            var nullTile = Game.TileRepository.create('nullTile');
+            var null = Game.TileRepository.create('null');
             // If the tile is not explored, show the null tile description.
             return String.format('%s - %s',
-                nullTile.getRepresentation(),
-                nullTile.getDescription());
+                null.getRepresentation(),
+                null.getDescription());
         }
     }
 });
