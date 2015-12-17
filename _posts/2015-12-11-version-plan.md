@@ -45,6 +45,8 @@ date:  2015-12-17 09:55am
 * Convert game tiles to repository templates
 * Add a `buildTiles` method for empty lots that generates grass tiles.
 * Add a message log display that is seperate from the playScreen
+* Have displays take up 100% of whatever element they are in
+* Have displays resize appropriately when changing window sizes
 
 # v0.1
 
