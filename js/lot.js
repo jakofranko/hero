@@ -16,17 +16,7 @@ Game.Lot = function(properties) {
 		this.getTiles = properties['buildTiles'];	
 	} else {
 		this.getTiles = function() {
-			var result = [];
-			for (var x = 0; x < this._width; x++) {
-				result[x] = new Array(this._height);
-				for (var y = 0; y < this._height; y++) {
-					result[x][y] = Game.TileRepository.create('grass', {
-						character: ['.', '"'].random(),
-    					foreground: ['#F8F8D6', '#B3C67F', '#5D7E62'].random()
-					});
-				};
-			};
-			return result;
+			return this.fillLot('floor');
 		};
 	} 
 };
@@ -56,4 +46,26 @@ Game.Lot.prototype.willSpawn = function(neighborhood) {
 			break;
 	}
 	return spawn;
+};
+Game.Lot.prototype.fillLot = function(tile, extraProperties) {
+	var result = [];
+	var fill = null;
+	// If no extra properties, then just create one generic tile
+	if(!extraProperties) {
+		fill = Game.TileRepository.create(tile);
+	}
+
+	for (var x = 0; x < this._width; x++) {
+		result[x] = new Array(this._height);
+		for (var y = 0; y < this._height; y++) {
+			// If we've created a fill, populate the lot with that tile
+			if(fill) {
+				result[x][y] = fill;
+			} else {
+				// Otherwise create a new tile every time
+				result[x][y] = Game.TileRepository.create(tile, extraProperties);
+			}
+		};
+	};
+	return result;
 };
