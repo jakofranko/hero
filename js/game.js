@@ -4,12 +4,13 @@ var Game = {
 	// ROT.Displays
 	_display: null,
 	_overview: null,
+	_log: null,
 	_stats: null,
-	_messageLog: null,
 
 	// Screens
 	_currentScreen: null,
 	_miniMap: null,
+	_messages: null,
 
 	_screenWidth: 80,
 	_screenHeight: 24,
@@ -24,8 +25,8 @@ var Game = {
 	getStats: function() {
 		return this._stats;
 	},
-	getMessageLog: function() {
-		return this._messageLog;
+	getLog: function() {
+		return this._log;
 	},
 	getScreenWidth: function() {
 	    return this._screenWidth;
@@ -43,6 +44,7 @@ var Game = {
 		// Add one to height for displaying stats
 	    this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight + 1});
 	    this._overview = new ROT.Display({width: this._citySize, height: this._citySize});
+	    this._log = new ROT.Display({width: 30, height: 20});
 
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
@@ -62,7 +64,7 @@ var Game = {
 	    // bindEventToScreen('keyup');
 	    bindEventToScreen('keypress');
 	},
-	refresh: function() {
+	refresh: function(player) {
         // Clear the screen
         this._display.clear();
         // this._overview.clear();
@@ -71,6 +73,8 @@ var Game = {
         if(this._miniMap !== null) {
         	this._miniMap.render(this._overview);	
         }
+
+        this.displayMessages(player);
     },
     sendMessage: function(recipient, message, args) {
 		// Make sure the recipient can receive messages
@@ -98,6 +102,21 @@ var Game = {
 	            entities[i].receiveMessage(message);
 	        }
 	    }
+	},
+	displayMessages: function(entity) {
+		if(entity && entity.hasMixin('MessageRecipient')) {
+			// Get the messages in the player's queue and render them
+	        var messages = entity.getMessages();
+	        var messageY = 0;
+	        for (var i = 0; i < messages.length; i++) {
+	            // Draw each message, adding the number of lines
+	            messageY += this._log.drawText(
+	                0, 
+	                messageY,
+	                '%c{white}%b{black}' + messages[i]
+	            );
+	        }
+		}
 	},
 	switchScreen: function(screen) {
 	    // If we had a screen before, notify it that we exited
@@ -133,6 +152,7 @@ window.onload = function() {
         // Add the container to our HTML page
         document.getElementById('level').appendChild(Game.getDisplay().getContainer());
         document.getElementById('overview').appendChild(Game.getOverview().getContainer());
+        document.getElementById('log').appendChild(Game.getLog().getContainer());
         // Load the start screen
         Game.switchScreen(Game.Screen.startScreen);
     }

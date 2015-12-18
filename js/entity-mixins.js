@@ -420,7 +420,7 @@ Game.EntityMixins.PlayerActor = {
             Game.sendMessage(this, 'Press [Enter] to continue!');
         }
         // Re-render the screen
-        Game.refresh();
+        Game.refresh(this);
         // Lock the engine and wait asynchronously
         // for the player to press a key.
         this.getMap().getEngine().lock();
