@@ -4,6 +4,11 @@ title: "Version Plan"
 date:  2015-12-17 09:55am
 ---
 
+# v0.6
+
+* Make the display panels responsive and take up 100% width and height of their container element
+* Minimap reflect current location of player by lot
+
 # v0.5
 
 * Features object for things like ponds and fountains
