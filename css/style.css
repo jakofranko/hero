@@ -4,6 +4,7 @@ html, body {
 body {
 	position: relative;
 	margin: 0;
+	background: black;
 }
 #level {
 	position: absolute;
