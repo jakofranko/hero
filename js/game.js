@@ -46,9 +46,15 @@ var Game = {
 	    this._overview = new ROT.Display({width: this._citySize, height: this._citySize});
 	    this._log = new ROT.Display({width: 30, height: 20});
 
+	   
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
 	    var game = this; // So that we don't lose this
+	     window.addEventListener('resize', function() {
+	    	game.resize(game.getDisplay(), true, false);
+	    	game.resize(game.getOverview(), false, true);
+	    	game.resize(game.getLog(), true, false);
+	    });
 	    var bindEventToScreen = function(event) {
 	        window.addEventListener(event, function(e) {
 	            // When an event is received, send it to the
@@ -139,6 +145,20 @@ var Game = {
 		if(!this._miniMap !== null) {
 			this._miniMap.enter(player);
 		}
+	},
+	resize: function(display, setSize, setFontSize) {
+		var options = display.getOptions();
+		var parent = display.getContainer().parentElement;
+		
+		if(setSize) {
+			var size = display.computeSize(parent.clientWidth, parent.clientHeight);
+			display.setOptions({width: size[0], height: size[1]});	
+		}
+		
+		if(setFontSize) {
+			var fontSize = display.computeFontSize(parent.clientWidth, parent.clientHeight);
+			display.setOptions({fontSize:fontSize});	
+		}
 	}
 };
 
@@ -155,5 +175,10 @@ window.onload = function() {
         document.getElementById('log').appendChild(Game.getLog().getContainer());
         // Load the start screen
         Game.switchScreen(Game.Screen.startScreen);
+
+        // Resize canvas elements
+	    Game.resize(Game.getDisplay(), true, false);
+	    Game.resize(Game.getOverview(), false, true);
+	    Game.resize(Game.getLog(), true, false);
     }
 }
