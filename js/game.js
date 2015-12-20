@@ -32,7 +32,8 @@ var Game = {
 	    return this._screenWidth;
 	},
 	getScreenHeight: function() {
-	    return this._screenHeight;
+		// Leave room for stats on the bottom
+	    return this._screenHeight - 1;
 	},
 	getCitySize: function() {
 		return this._citySize;
@@ -51,9 +52,10 @@ var Game = {
 	    // and making it send it to the screen
 	    var game = this; // So that we don't lose this
 	     window.addEventListener('resize', function() {
-	    	game.resize(game.getDisplay(), true, false);
+	    	game.resize(game.getDisplay(), true, false, true);
 	    	game.resize(game.getOverview(), false, true);
 	    	game.resize(game.getLog(), true, false);
+	    	game.refresh();
 	    });
 	    var bindEventToScreen = function(event) {
 	        window.addEventListener(event, function(e) {
@@ -146,19 +148,25 @@ var Game = {
 			this._miniMap.enter(player);
 		}
 	},
-	resize: function(display, setSize, setFontSize) {
+	resize: function(display, setSize, setFontSize, setScreenSize) {
 		var options = display.getOptions();
 		var parent = display.getContainer().parentElement;
 		
 		if(setSize) {
 			var size = display.computeSize(parent.clientWidth, parent.clientHeight);
 			display.setOptions({width: size[0], height: size[1]});	
+			if(setScreenSize) {
+				this._screenWidth = size[0];
+				this._screenHeight = size[1];
+			}
 		}
 		
 		if(setFontSize) {
 			var fontSize = display.computeFontSize(parent.clientWidth, parent.clientHeight);
 			display.setOptions({fontSize:fontSize});	
 		}
+
+
 	}
 };
 
@@ -177,7 +185,7 @@ window.onload = function() {
         Game.switchScreen(Game.Screen.startScreen);
 
         // Resize canvas elements
-	    Game.resize(Game.getDisplay(), true, false);
+	    Game.resize(Game.getDisplay(), true, false, true);
 	    Game.resize(Game.getOverview(), false, true);
 	    Game.resize(Game.getLog(), true, false);
     }
