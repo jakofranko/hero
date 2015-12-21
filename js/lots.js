@@ -16,15 +16,52 @@ Game.LotRepository.define('building', {
 	uptown: 1,
 	suburbs: 0
 });
-
-// Roads should really never be placed randomly
 Game.LotRepository.define('road', {
 	name: 'road',
 	character: '.',
+	// Roads should really never be placed randomly
 	downtown: -1,
 	midtown: -1,
 	uptown: -1,
-	suburbs: -1
+	suburbs: -1,
+	// oreientation == 'vertical' || 'horizontal'
+	buildTiles: function() {
+		var tiles = [];
+		var asphault = Game.TileRepository.create('asphault');
+		var sidewalk = Game.TileRepository.create('sidewalk');
+		var stripe = Game.TileRepository.create('two-way stripe');
+
+		var sidewalkWidth = 2;
+		var centerL = (this._width / 2) - 1;
+		var centerR = this._width / 2;
+
+		if(this._orientation) {
+			for(var x = 0; x < this._width; x++) {
+				tiles[x] = new Array(this._height);
+				for(var y = 0; y < this._height; y++) {
+					if(this._orientation == 'vertical') {
+						if(x < sidewalkWidth || x >= (this._width - sidewalkWidth)) {
+							tiles[x][y] = sidewalk;
+						} else if(x == centerL || x == centerR) {
+							tiles[x][y] = stripe;
+						} else {
+							tiles[x][y] = asphault;
+						}
+					} else if(this._orientation == 'horizontal') {
+						if(y < sidewalkWidth || y >= (this._width - sidewalkWidth)) {
+							tiles[x][y] = sidewalk;
+						} else if(y == centerL || y == centerR) {
+							tiles[x][y] = stripe;
+						} else {
+							tiles[x][y] = asphault;
+						}
+					}
+				}
+			}
+		}
+
+		return tiles;
+	}
 });
 Game.LotRepository.define('appartments', {
 	name: 'appartments',

@@ -7,7 +7,9 @@ Game.Lot = function(properties) {
 	this._midtown = (typeof properties['midtown'] !== undefined) ? properties['midtown'] : 1;
 	this._uptown = (typeof properties['uptown'] !== undefined) ? properties['uptown'] : 1;
 	this._suburbs = (typeof properties['suburbs'] !== undefined) ? properties['suburbs'] : 1;
+	this._orientation = properties['orientation'] || false;
 
+	// TODO: set these dimensions somewhere else?
 	this._width = 10;
 	this._height = 10;
 

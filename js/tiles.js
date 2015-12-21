@@ -51,3 +51,31 @@ Game.TileRepository.define('water', {
     blocksLight: false,
     description: 'Clear blue water'
 });
+
+// Road tiles
+Game.TileRepository.define('asphault', {
+    name: 'asphault',
+    character: '.',
+    foreground: '#302e36',
+    walkable: true,
+    blocksLight: false,
+    description: 'Asphault road'
+});
+Game.TileRepository.define('two-way stripe', {
+    name: 'two-way stripe',
+    character: '.',
+    foreground: '#d7d804',
+    walkable: true,
+    blocksLight: false,
+    description: 'A two-way road stripe'
+});
+
+// Sidewalk
+Game.TileRepository.define('sidewalk', {
+    name: 'sidewalk',
+    character: '.',
+    foreground: '#ada5b2',
+    walkable: true,
+    blocksLight: false,
+    description: 'A sidewalk'
+});

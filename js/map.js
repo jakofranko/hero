@@ -1,6 +1,7 @@
 // @size should be square number of lots for a city.
 Game.Map = function(size, player) {
     this._city = new Game.City(size);
+    console.log(this._city);
     this._city.init();
 
     // Used for drawing to various displays 
