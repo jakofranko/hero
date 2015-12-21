@@ -25,6 +25,10 @@ Game.Lot = function(properties) {
 // Make items inherit all the functionality from glyphs
 Game.Lot.extend(Game.DynamicGlyph);
 
+Game.Lot.prototype.setOrientation = function(orientation) {
+	this._orientation = orientation;
+};
+
 // Used during city generation to determine whether or not
 // a lot will be placed based on the frequency those lots
 // appear in a given neigborhood.

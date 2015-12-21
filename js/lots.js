@@ -24,7 +24,7 @@ Game.LotRepository.define('road', {
 	midtown: -1,
 	uptown: -1,
 	suburbs: -1,
-	// oreientation == 'vertical' || 'horizontal'
+	// oreientation == 'vertical' || 'horizontal' || 'intersection'
 	buildTiles: function() {
 		var tiles = [];
 		var asphault = Game.TileRepository.create('asphault');
@@ -48,9 +48,22 @@ Game.LotRepository.define('road', {
 							tiles[x][y] = asphault;
 						}
 					} else if(this._orientation == 'horizontal') {
-						if(y < sidewalkWidth || y >= (this._width - sidewalkWidth)) {
+						if(y < sidewalkWidth || y >= (this._height - sidewalkWidth)) {
 							tiles[x][y] = sidewalk;
 						} else if(y == centerL || y == centerR) {
+							tiles[x][y] = stripe;
+						} else {
+							tiles[x][y] = asphault;
+						}
+					} else if(this._orientation == 'intersection') {
+						if(
+							(x < sidewalkWidth && y < sidewalkWidth) || 
+							(x >= this._width - sidewalkWidth && y < sidewalkWidth) ||
+							(y >= this._height - sidewalkWidth && x < sidewalkWidth) ||
+							(x >= this._width - sidewalkWidth && y >= this._height - sidewalkWidth)
+						) {
+							tiles[x][y] = sidewalk;
+						} else if(x == centerL || y == centerL || x == centerR || y == centerR) {
 							tiles[x][y] = stripe;
 						} else {
 							tiles[x][y] = asphault;

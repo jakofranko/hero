@@ -84,18 +84,26 @@ Game.City.prototype.init = function() {
 					var thisColumn = x;
 					for(var i = 1; i < this._height; i++) {
 						var roadKey = thisColumn + "," + i;
-						this._lots[thisColumn][i] = Game.LotRepository.create('road', {
-							orientation: 'vertical'
-						});
+						if(this._lots[thisColumn][i] && this._lots[thisColumn][i].getName() == 'road') {
+							this._lots[thisColumn][i].setOrientation('intersection');
+						} else {
+							this._lots[thisColumn][i] = Game.LotRepository.create('road', {
+								orientation: 'vertical'
+							});	
+						}
 					}
 				} else if(x == 0) {
 					// Otherwise, we are on the first column, so draw the road directly over
 					var thisRow = y;
 					for(var j = 1; j < this._width; j++) {
 						var roadKey = j + "," + thisRow;
-						this._lots[j][thisRow] = Game.LotRepository.create('road', {
-							orientation: 'horizontal'
-						});
+						if(this._lots[j][thisRow] && this._lots[j][thisRow].getName() == 'road') {
+							this._lots[j][thisRow].setOrientation('intersection');
+						} else {
+							this._lots[j][thisRow] = Game.LotRepository.create('road', {
+								orientation: 'horizontal'
+							});
+						}
 					}
 				} else {
 					continue;
