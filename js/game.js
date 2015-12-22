@@ -15,6 +15,8 @@ var Game = {
 	_screenWidth: 80,
 	_screenHeight: 24,
 	_citySize: 10,
+	// How many in-game tiles a lot should comprise
+	_lotSize: 5,
 
 	getDisplay: function() {
 		return this._display;
@@ -37,6 +39,9 @@ var Game = {
 	},
 	getCitySize: function() {
 		return this._citySize;
+	},
+	getLotSize: function() {
+		return this._lotSize;
 	},
 	init: function() {
 		// Create player entity

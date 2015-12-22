@@ -9,9 +9,8 @@ Game.Lot = function(properties) {
 	this._suburbs = (typeof properties['suburbs'] !== undefined) ? properties['suburbs'] : 1;
 	this._orientation = properties['orientation'] || false;
 
-	// TODO: set these dimensions somewhere else?
-	this._width = 10;
-	this._height = 10;
+	this._width = properties['width'] || Game.getLotSize();
+	this._height = properties['height'] || Game.getLotSize();
 
 	this.getTiles;
 	if(typeof properties['buildTiles'] === 'function') {

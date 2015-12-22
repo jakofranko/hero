@@ -27,14 +27,8 @@ Game.City = function(size) {
 
 	// How many roads in the city.
 	this._roadFrequency = 0.4;
-
-	// How many in-game tiles a lot should comprise
-	this._lotSize = 10;
 };
 // Getters and setters
-Game.City.prototype.getLotSize = function() {
-	return this._lotSize;
-};
 Game.City.prototype.getWidth = function() {
 	return this._width;
 };
@@ -147,7 +141,7 @@ Game.City.prototype.tilesFromLots = function() {
 	// Start with 1 z-level
 	// Width and height should be proportional to the lotSize
 	var map = new Array(1);
-	map[0] = new Array(this._width * this._lotSize)
+	map[0] = new Array(this._width * Game.getLotSize())
 
 	// Loop through the city lots
 	for(var cityX = 0; cityX < this._width; cityX++) {
@@ -158,15 +152,15 @@ Game.City.prototype.tilesFromLots = function() {
 			// Load these tiles into the results at the appropriate
 			// offset based on which lot we're in
 			for (var x = 0; x < tiles.length; x++) {
-				var offsetX = x + (cityX * this._lotSize);
+				var offsetX = x + (cityX * Game.getLotSize());
 
 				// instantiate a new map column if it doesn't exist already
 				if(!map[0][offsetX]) {
-					map[0][offsetX] = new Array(this._height * this._lotSize);
+					map[0][offsetX] = new Array(this._height * Game.getLotSize());
 				}
 
 				for (var y = 0; y < tiles[x].length; y++) {
-					var offsetY = y + (cityY * this._lotSize);
+					var offsetY = y + (cityY * Game.getLotSize());
 					map[0][offsetX][offsetY] = tiles[x][y];
 				};
 			};
