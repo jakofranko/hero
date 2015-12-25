@@ -79,3 +79,19 @@ Game.TileRepository.define('sidewalk', {
     blocksLight: false,
     description: 'A sidewalk'
 });
+
+// Building Materials
+Game.TileRepository.define('window-vertical', {
+    name: 'window-vertical',
+    character: '|',
+    foreground: '#aadfff',
+    walkable: false,
+    blocksLight: false
+});
+Game.TileRepository.define('window-horizontal', {
+    name: 'window-horizontal',
+    character: '-',
+    foreground: '#aadfff',
+    walkable: false,
+    blocksLight: false
+});
