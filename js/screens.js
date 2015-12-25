@@ -71,13 +71,13 @@ Game.Screen.playScreen = {
         // Render the tiles
         this.renderTiles(display);
 
-        // Render player HP 
+        // Render player HP
         var stats = '%c{white}%b{black}';
         stats += String.format(
-            'HP: %s/%s Level: %s XP: %s', 
-            this._player.getHp(), 
-            this._player.getMaxHp(), 
-            this._player.getLevel(), 
+            'HP: %s/%s Level: %s XP: %s',
+            this._player.getHp(),
+            this._player.getMaxHp(),
+            this._player.getLevel(),
             this._player.getExperience()
         );
         display.drawText(0, screenHeight, stats);
@@ -169,9 +169,13 @@ Game.Screen.playScreen = {
         	} else if (keyChar === ';') {
                 // Setup the look screen.
                 var offsets = this.getScreenOffsets();
-                Game.Screen.lookScreen.setup(this._player,
-                    this._player.getX(), this._player.getY(),
-                    offsets.x, offsets.y);
+                Game.Screen.lookScreen.setup(
+                    this._player,
+                    this._player.getX(),
+                    this._player.getY(),
+                    offsets.x, 
+                    offsets.y
+                );
                 this.setSubScreen(Game.Screen.lookScreen);
                 return;
             } else if (keyChar === '?') {
@@ -215,7 +219,8 @@ Game.Screen.playScreen = {
         var currentDepth = this._player.getZ();
         // Find all visible cells and update the object
         map.getFov(currentDepth).compute(
-            this._player.getX(), this._player.getY(), 
+            this._player.getX(), 
+            this._player.getY(), 
             this._player.getSightRadius(), 
             function(x, y, radius, visibility) {
                 visibleCells[x + "," + y] = true;
@@ -250,7 +255,7 @@ Game.Screen.playScreen = {
                         // Since the tile was previously explored but is not 
                         // visible, we want to change the foreground color to
                         // dark gray.
-                        foreground = 'darkGray';
+                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(foreground)));
                     }
                     
                     display.draw(
