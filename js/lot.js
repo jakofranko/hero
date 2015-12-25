@@ -12,6 +12,19 @@ Game.Lot = function(properties) {
 	this._width = properties['width'] || Game.getLotSize();
 	this._height = properties['height'] || Game.getLotSize();
 
+	// Should be an array of objects like this: [{amount: int, type: string}]
+	this._buildingSpecs = properties['buildingSpecs'] || null;
+	if(this._buildingSpecs) {
+		// Build each building
+		this._buildings = [];
+		for(var spec in this._buildingSpecs) {
+			for(i = 0; i < this._buildingSpecs[spec].amount; i++) {
+				this._buildings.push(Game.BuildingRepository.create(this._buildingSpecs[spec].type));
+			}
+		}
+		console.log(this._buildings);
+	}
+
 	this.getTiles;
 	if(typeof properties['buildTiles'] === 'function') {
 		this.getTiles = properties['buildTiles'];	
@@ -26,6 +39,12 @@ Game.Lot.extend(Game.DynamicGlyph);
 
 Game.Lot.prototype.setOrientation = function(orientation) {
 	this._orientation = orientation;
+};
+Game.Lot.prototype.getBuildingSpecs = function() {
+	return this._buildingSpecs;
+};
+Game.Lot.prototype.getBuilings = function() {
+	return this._buildings || false;
 };
 
 // Used during city generation to determine whether or not

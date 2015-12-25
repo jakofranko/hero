@@ -14,7 +14,13 @@ Game.LotRepository.define('building', {
 	downtown: 1,
 	midtown: 1,
 	uptown: 1,
-	suburbs: 0
+	suburbs: 0,
+	buildingSpecs: [
+		{
+			type: 'office building',
+			amount: 1
+		}
+	]
 });
 Game.LotRepository.define('road', {
 	name: 'road',

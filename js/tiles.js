@@ -12,7 +12,7 @@ Game.TileRepository.define('floor', {
     description: 'The floor'
 });
 Game.TileRepository.define('grass', {
-    name: 'floor',
+    name: 'grass',
     character: '"',
     foreground: '#B3C67F',
     walkable: true,
@@ -22,7 +22,7 @@ Game.TileRepository.define('grass', {
 Game.TileRepository.define('wall', {
     name: 'wall',
 	character: '#',
-	foreground: 'goldenrod',
+	foreground: 'ivory',
 	diggable: true,
 	blocksLight: true,
     description: 'A wall'
