@@ -7,12 +7,45 @@ Game.Lot = function(properties) {
 	this._midtown = (typeof properties['midtown'] !== undefined) ? properties['midtown'] : 1;
 	this._uptown = (typeof properties['uptown'] !== undefined) ? properties['uptown'] : 1;
 	this._suburbs = (typeof properties['suburbs'] !== undefined) ? properties['suburbs'] : 1;
+	this._orientation = properties['orientation'] || false;
 
-	this._width = 10;
-	this._height = 10;
+	this._width = properties['width'] || Game.getLotSize();
+	this._height = properties['height'] || Game.getLotSize();
+
+	// Should be an array of objects like this: [{amount: int, type: string}]
+	this._buildingSpecs = properties['buildingSpecs'] || null;
+	if(this._buildingSpecs) {
+		// Build each building
+		this._buildings = [];
+		for(var spec in this._buildingSpecs) {
+			for(i = 0; i < this._buildingSpecs[spec].amount; i++) {
+				this._buildings.push(Game.BuildingRepository.create(this._buildingSpecs[spec].type));
+			}
+		}
+		console.log(this._buildings);
+	}
+
+	this.getTiles;
+	if(typeof properties['buildTiles'] === 'function') {
+		this.getTiles = properties['buildTiles'];	
+	} else {
+		this.getTiles = function() {
+			return this.fillLot('floor');
+		};
+	} 
 };
 // Make items inherit all the functionality from glyphs
 Game.Lot.extend(Game.DynamicGlyph);
+
+Game.Lot.prototype.setOrientation = function(orientation) {
+	this._orientation = orientation;
+};
+Game.Lot.prototype.getBuildingSpecs = function() {
+	return this._buildingSpecs;
+};
+Game.Lot.prototype.getBuilings = function() {
+	return this._buildings || false;
+};
 
 // Used during city generation to determine whether or not
 // a lot will be placed based on the frequency those lots
@@ -38,13 +71,25 @@ Game.Lot.prototype.willSpawn = function(neighborhood) {
 	}
 	return spawn;
 };
-Game.Lot.prototype.getTiles = function() {
+Game.Lot.prototype.fillLot = function(tile, extraProperties) {
 	var result = [];
+	var fill = null;
+	// If no extra properties, then just create one generic tile
+	if(!extraProperties) {
+		fill = Game.TileRepository.create(tile);
+	}
+
 	for (var x = 0; x < this._width; x++) {
 		result[x] = new Array(this._height);
 		for (var y = 0; y < this._height; y++) {
-			result[x][y] = Game.Tile.floorTile;
+			// If we've created a fill, populate the lot with that tile
+			if(fill) {
+				result[x][y] = fill;
+			} else {
+				// Otherwise create a new tile every time
+				result[x][y] = Game.TileRepository.create(tile, extraProperties);
+			}
 		};
 	};
 	return result;
-}
+};

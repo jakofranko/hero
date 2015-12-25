@@ -1,6 +1,7 @@
 // @size should be square number of lots for a city.
 Game.Map = function(size, player) {
     this._city = new Game.City(size);
+    console.log(this._city);
     this._city.init();
 
     // Used for drawing to various displays 
@@ -148,7 +149,7 @@ Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
 // Floors
 Game.Map.prototype.isEmptyFloor = function(x, y, z) {
     // Check if the tile is floor and also has no entity
-    return this.getTile(x, y, z) == Game.Tile.floorTile && !this.getEntityAt(x, y, z);
+    return this.getTile(x, y, z).describe() == 'floor' && !this.getEntityAt(x, y, z);
 };
 Game.Map.prototype.getRandomFloorPosition = function(z) {
 	var x, y;
@@ -165,9 +166,9 @@ Game.Map.prototype.getTile = function(x, y, z) {
     // Make sure we are inside the bounds. 
     //If we aren't, return null tile.
     if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth) {
-        return Game.Tile.nullTile;
+        return Game.TileRepository.create('null');
     } else {
-        return this._tiles[z][x][y] || Game.Tile.nullTile;
+        return this._tiles[z][x][y] || Game.TileRepository.create('null');
     }
 };
 
@@ -207,13 +208,13 @@ Game.Map.prototype._setupExploredArray = function() {
 };
 Game.Map.prototype.setExplored = function(x, y, z, state) {
     // Only update if the tile is within bounds
-    if (this.getTile(x, y, z) !== Game.Tile.nullTile) {
+    if (this.getTile(x, y, z).describe() !== 'null') {
         this._explored[z][x][y] = state;
     }
 };
 Game.Map.prototype.isExplored = function(x, y, z) {
     // Only return the value if within bounds
-    if (this.getTile(x, y, z) !== Game.Tile.nullTile) {
+    if (this.getTile(x, y, z).describe() !== 'null') {
         return this._explored[z][x][y];
     } else {
         return false;
@@ -256,6 +257,6 @@ Game.Map.prototype.addItemAtRandomPosition = function(item, z) {
 // Map Actions
 Game.Map.prototype.dig = function(x, y, z) {
 	if(this.getTile(x, y, z).isDiggable()) {
-		this._tiles[z][x][y] = Game.Tile.floorTile;
+		this._tiles[z][x][y].describe() = 'floor';
 	}
 };

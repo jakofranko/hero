@@ -4,16 +4,19 @@ var Game = {
 	// ROT.Displays
 	_display: null,
 	_overview: null,
+	_log: null,
 	_stats: null,
-	_messageLog: null,
 
 	// Screens
 	_currentScreen: null,
 	_miniMap: null,
+	_messages: null,
 
 	_screenWidth: 80,
 	_screenHeight: 24,
 	_citySize: 10,
+	// How many in-game tiles a lot should comprise
+	_lotSize: 10,
 
 	getDisplay: function() {
 		return this._display;
@@ -24,17 +27,21 @@ var Game = {
 	getStats: function() {
 		return this._stats;
 	},
-	getMessageLog: function() {
-		return this._messageLog;
+	getLog: function() {
+		return this._log;
 	},
 	getScreenWidth: function() {
 	    return this._screenWidth;
 	},
 	getScreenHeight: function() {
-	    return this._screenHeight;
+		// Leave room for stats on the bottom
+	    return this._screenHeight - 1;
 	},
 	getCitySize: function() {
 		return this._citySize;
+	},
+	getLotSize: function() {
+		return this._lotSize;
 	},
 	init: function() {
 		// Create player entity
@@ -43,10 +50,18 @@ var Game = {
 		// Add one to height for displaying stats
 	    this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight + 1});
 	    this._overview = new ROT.Display({width: this._citySize, height: this._citySize});
+	    this._log = new ROT.Display({width: 30, height: 20});
 
+	   
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
 	    var game = this; // So that we don't lose this
+	     window.addEventListener('resize', function() {
+	    	game.resize(game.getDisplay(), true, false, true);
+	    	game.resize(game.getOverview(), false, true);
+	    	game.resize(game.getLog(), true, false);
+	    	game.refresh();
+	    });
 	    var bindEventToScreen = function(event) {
 	        window.addEventListener(event, function(e) {
 	            // When an event is received, send it to the
@@ -62,7 +77,7 @@ var Game = {
 	    // bindEventToScreen('keyup');
 	    bindEventToScreen('keypress');
 	},
-	refresh: function() {
+	refresh: function(player) {
         // Clear the screen
         this._display.clear();
         // this._overview.clear();
@@ -71,6 +86,8 @@ var Game = {
         if(this._miniMap !== null) {
         	this._miniMap.render(this._overview);	
         }
+
+        this.displayMessages(player);
     },
     sendMessage: function(recipient, message, args) {
 		// Make sure the recipient can receive messages
@@ -99,6 +116,21 @@ var Game = {
 	        }
 	    }
 	},
+	displayMessages: function(entity) {
+		if(entity && entity.hasMixin('MessageRecipient')) {
+			// Get the messages in the player's queue and render them
+	        var messages = entity.getMessages();
+	        var messageY = 0;
+	        for (var i = 0; i < messages.length; i++) {
+	            // Draw each message, adding the number of lines
+	            messageY += this._log.drawText(
+	                0, 
+	                messageY,
+	                '%c{white}%b{black}' + messages[i]
+	            );
+	        }
+		}
+	},
 	switchScreen: function(screen) {
 	    // If we had a screen before, notify it that we exited
 	    if (this._currentScreen !== null) {
@@ -120,6 +152,26 @@ var Game = {
 		if(!this._miniMap !== null) {
 			this._miniMap.enter(player);
 		}
+	},
+	resize: function(display, setSize, setFontSize, setScreenSize) {
+		var options = display.getOptions();
+		var parent = display.getContainer().parentElement;
+		
+		if(setSize) {
+			var size = display.computeSize(parent.clientWidth, parent.clientHeight);
+			display.setOptions({width: size[0], height: size[1]});	
+			if(setScreenSize) {
+				this._screenWidth = size[0];
+				this._screenHeight = size[1];
+			}
+		}
+		
+		if(setFontSize) {
+			var fontSize = display.computeFontSize(parent.clientWidth, parent.clientHeight);
+			display.setOptions({fontSize:fontSize});	
+		}
+
+
 	}
 };
 
@@ -133,7 +185,13 @@ window.onload = function() {
         // Add the container to our HTML page
         document.getElementById('level').appendChild(Game.getDisplay().getContainer());
         document.getElementById('overview').appendChild(Game.getOverview().getContainer());
+        document.getElementById('log').appendChild(Game.getLog().getContainer());
         // Load the start screen
         Game.switchScreen(Game.Screen.startScreen);
+
+        // Resize canvas elements
+	    Game.resize(Game.getDisplay(), true, false, true);
+	    Game.resize(Game.getOverview(), false, true);
+	    Game.resize(Game.getLog(), true, false);
     }
 }

@@ -25,7 +25,18 @@ Game.Repository.prototype.create = function(name, extraProperties) {
     // Apply any extra properties
     if(extraProperties) {
         for (var key in extraProperties) {
-            template[key] = extraProperties[key];
+            // If a template has a property like
+            // {random: true, values: ['val1', 'val2', 'val3']}
+            // then create the element with a random value
+            if (extraProperties[key]['random'] && 
+                extraProperties[key]['random'] === true &&
+                extraProperties[key]['values'] &&
+                extraProperties[key]['values'].constructor === Array)
+            {
+                template[key] = extraProperties[key]['values'].random();
+            } else {
+                template[key] = extraProperties[key];
+            }
         }
     }
     // Create the object, passing the template as an argument

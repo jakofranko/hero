@@ -71,25 +71,13 @@ Game.Screen.playScreen = {
         // Render the tiles
         this.renderTiles(display);
 
-        // Get the messages in the player's queue and render them
-        var messages = this._player.getMessages();
-        var messageY = 0;
-        for (var i = 0; i < messages.length; i++) {
-            // Draw each message, adding the number of lines
-            messageY += display.drawText(
-                0, 
-                messageY,
-                '%c{white}%b{black}' + messages[i]
-            );
-        }
-
-        // Render player HP 
+        // Render player HP
         var stats = '%c{white}%b{black}';
         stats += String.format(
-            'HP: %s/%s Level: %s XP: %s', 
-            this._player.getHp(), 
-            this._player.getMaxHp(), 
-            this._player.getLevel(), 
+            'HP: %s/%s Level: %s XP: %s',
+            this._player.getHp(),
+            this._player.getMaxHp(),
+            this._player.getLevel(),
             this._player.getExperience()
         );
         display.drawText(0, screenHeight, stats);
@@ -181,9 +169,13 @@ Game.Screen.playScreen = {
         	} else if (keyChar === ';') {
                 // Setup the look screen.
                 var offsets = this.getScreenOffsets();
-                Game.Screen.lookScreen.setup(this._player,
-                    this._player.getX(), this._player.getY(),
-                    offsets.x, offsets.y);
+                Game.Screen.lookScreen.setup(
+                    this._player,
+                    this._player.getX(),
+                    this._player.getY(),
+                    offsets.x, 
+                    offsets.y
+                );
                 this.setSubScreen(Game.Screen.lookScreen);
                 return;
             } else if (keyChar === '?') {
@@ -202,12 +194,11 @@ Game.Screen.playScreen = {
         // Make sure we still have enough space to fit an entire game screen
         var topLeftX = Math.max(0, this._player.getX() - (Game.getScreenWidth() / 2));
         // Make sure we still have enough space to fit an entire game screen
-        topLeftX = Math.min(topLeftX, this._player.getMap().getWidth() -
-            Game.getScreenWidth());
+        topLeftX = Math.round(Math.min(topLeftX, this._player.getMap().getWidth() - Game.getScreenWidth()));
         // Make sure the y-axis doesn't above the top bound
         var topLeftY = Math.max(0, this._player.getY() - (Game.getScreenHeight() / 2));
         // Make sure we still have enough space to fit an entire game screen
-        topLeftY = Math.min(topLeftY, this._player.getMap().getHeight() - Game.getScreenHeight());
+        topLeftY = Math.round(Math.min(topLeftY, this._player.getMap().getHeight() - Game.getScreenHeight()));
         return {
             x: topLeftX,
             y: topLeftY
@@ -216,6 +207,7 @@ Game.Screen.playScreen = {
     renderTiles: function(display) {
         var screenWidth = Game.getScreenWidth();
         var screenHeight = Game.getScreenHeight();
+
         var offsets = this.getScreenOffsets();
         var topLeftX = offsets.x;
         var topLeftY = offsets.y;
@@ -227,7 +219,8 @@ Game.Screen.playScreen = {
         var currentDepth = this._player.getZ();
         // Find all visible cells and update the object
         map.getFov(currentDepth).compute(
-            this._player.getX(), this._player.getY(), 
+            this._player.getX(), 
+            this._player.getY(), 
             this._player.getSightRadius(), 
             function(x, y, radius, visibility) {
                 visibleCells[x + "," + y] = true;
@@ -262,7 +255,7 @@ Game.Screen.playScreen = {
                         // Since the tile was previously explored but is not 
                         // visible, we want to change the foreground color to
                         // dark gray.
-                        foreground = 'darkGray';
+                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(foreground)));
                     }
                     
                     display.draw(
@@ -618,10 +611,11 @@ Game.Screen.TargetBasedScreen = function(template) {
                 map.getTile(x, y, z).getDescription());
 
         } else {
+            var nullTile = Game.TileRepository.create('null');
             // If the tile is not explored, show the null tile description.
             return String.format('%s - %s',
-                Game.Tile.nullTile.getRepresentation(),
-                Game.Tile.nullTile.getDescription());
+                nullTile.getRepresentation(),
+                nullTile.getDescription());
         }
     }
 };
@@ -740,10 +734,11 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
                 map.getTile(x, y, z).getDescription());
 
         } else {
+            var nullTile = Game.TileRepository.create('null');
             // If the tile is not explored, show the null tile description.
             return String.format('%s - %s',
-                Game.Tile.nullTile.getRepresentation(),
-                Game.Tile.nullTile.getDescription());
+                nullTile.getRepresentation(),
+                nullTile.getDescription());
         }
     }
 });
