@@ -4,6 +4,7 @@ html, body {
 body {
 	position: relative;
 	margin: 0;
+	background: black;
 }
 #level {
 	position: absolute;
@@ -22,7 +23,7 @@ body {
 
 #overview {
 	position: relative;
-	height: 50%;
+	height: 30%;
 }
 
 #overview canvas, #level canvas {
@@ -31,8 +32,8 @@ body {
 	margin: auto;
 }
 
-#stats {
+#log {
 	position: relative;
 	width: 100%;
-	height: 30%;
+	height: 70%;
 }
