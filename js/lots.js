@@ -39,10 +39,10 @@ Game.LotRepository.define('building', {
 		if(cornerX < 0 || cornerY < 0) {
 			return tiles;
 		}
-		
+		// debugger;
 		// TODO: Make this work with the other z-levels
-		for (var x = cornerX, i = 0; x < building.getWidth(); x++, i++) {
-			for (var y = cornerY, j = 0; y < building.getHeight(); y++, j++) {
+		for (var x = cornerX, i = 0; i < building.getWidth(); x++, i++) {
+			for (var y = cornerY, j = 0; j < building.getHeight(); y++, j++) {
 				tiles[x][y] = b[0][i][j];
 			};
 		};

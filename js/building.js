@@ -40,7 +40,6 @@ Game.Building = function(properties) {
 				var tile = value ? wall : floor;
 				story[x][y] = tile;
 			});
-			console.log(story);
 			this._blueprint[z] = story;
 		}
 	};
