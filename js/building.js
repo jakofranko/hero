@@ -17,25 +17,31 @@ Game.Building = function(properties) {
 		this._stories = Math.max(1, Math.round(ROT.RNG.getNormal(properties['stories'], 3)));
 		// this.name = Game.Building.randomName();
 	}
-	this._blueprint = new Array(this._stories);
-	// Initialize blueprint
-	for(z = 0; z < this._stories; z++) {
-		this._blueprint[z] = new Array(this._width);
-		for(x = 0; x < this._width; x++) {
-			this._blueprint[z][x] = new Array(this._height);
-		}	
-	}
 
-	this._build = properties['build'] || function() {
+	this._roomSize = properties['roomSize'] || false;
+	this._roomNumber = properties['roomNumber'] || false;
+	this._hallwaySize = properties['hallwaySize'] || false;
+	this._hallwayNumber = properties['hallwayNumber'] || false;
+	this._blueprint = new Array(this._stories);
+
+	this.build = properties['build'] || function() {
 		var floor = Game.TileRepository.create('floor');
 		var wall = Game.TileRepository.create('wall');
 		// Since a building is going to basically be a cube, only need to have one arena object
 		var map = new ROT.Map.Arena(this._width, this._height);
 		for(var z = 0; z < this._stories; z++) {
+			// Initialize a new building story
+			var story = new Array(this._width);
+			for(i = 0; i < story.length; i++) {
+				story[i] = new Array(this._height);
+			}
+
 			map.create(function(x, y, value) {
 				var tile = value ? wall : floor;
-				this._blueprint[z][x][y] = tile;
+				story[x][y] = tile;
 			});
+			console.log(story);
+			this._blueprint[z] = story;
 		}
 	};
 };
@@ -44,6 +50,12 @@ Game.Building.prototype.getWidth = function() {
 };
 Game.Building.prototype.getHeight = function() {
 	return this._height;
+};
+Game.Building.prototype.getMidWidth = function() {
+	return Math.round(this._width / 2);
+};
+Game.Building.prototype.getMidHeight = function() {
+	return Math.round(this._height / 2);
 };
 Game.Building.prototype.getNumberOfStories = function() {
 	return this._stories;

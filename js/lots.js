@@ -20,7 +20,35 @@ Game.LotRepository.define('building', {
 			type: 'office building',
 			amount: 1
 		}
-	]
+	],
+	buildTiles: function() {
+		var tiles = this.fillLot('floor');
+		var centerX = this.getMidWidth();
+		var centerY = this.getMidHeight();
+
+		var building = this.getBuildings()[0];
+		building.build();
+		var buildingMidWidth = building.getMidWidth();
+		var buildingMidHeight = building.getMidHeight();
+		var b = building.getBlueprint();
+		
+		// Place the building in the center of the lot
+		// Find upper corner...
+		var cornerX = centerX - buildingMidWidth;
+		var cornerY = centerY - buildingMidHeight;
+		if(cornerX < 0 || cornerY < 0) {
+			return tiles;
+		}
+		
+		// TODO: Make this work with the other z-levels
+		for (var x = cornerX, i = 0; x < building.getWidth(); x++, i++) {
+			for (var y = cornerY, j = 0; y < building.getHeight(); y++, j++) {
+				tiles[x][y] = b[0][i][j];
+			};
+		};
+
+		return tiles;
+	}
 });
 Game.LotRepository.define('road', {
 	name: 'road',

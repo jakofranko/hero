@@ -22,7 +22,6 @@ Game.Lot = function(properties) {
 				this._buildings.push(Game.BuildingRepository.create(this._buildingSpecs[spec].type));
 			}
 		}
-		console.log(this._buildings);
 	}
 
 	this.getTiles;
@@ -43,8 +42,14 @@ Game.Lot.prototype.setOrientation = function(orientation) {
 Game.Lot.prototype.getBuildingSpecs = function() {
 	return this._buildingSpecs;
 };
-Game.Lot.prototype.getBuilings = function() {
+Game.Lot.prototype.getBuildings = function() {
 	return this._buildings || false;
+};
+Game.Lot.prototype.getMidWidth = function() {
+	return Math.round(this._width / 2);
+};
+Game.Lot.prototype.getMidHeight = function() {
+	return Math.round(this._height / 2);
 };
 
 // Used during city generation to determine whether or not
