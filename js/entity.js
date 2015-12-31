@@ -101,15 +101,7 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
             }
         }
 		return true;
-	} else if(tile.isDiggable()) {
-		// Only dig if the the entity is the player
-        if (this.hasMixin(Game.EntityMixins.PlayerActor)) {
-            map.dig(x, y, z);
-            return true;
-        }
-        // If not nothing we can do, but we can't move to the tile
-        return false;
-	}
+	} 
 	return false;
 }
 Game.Entity.prototype.isAlive = function() {

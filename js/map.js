@@ -253,10 +253,3 @@ Game.Map.prototype.addItemAtRandomPosition = function(item, z) {
     var position = this.getRandomFloorPosition(z);
     this.addItem(position.x, position.y, position.z, item);
 };
-
-// Map Actions
-Game.Map.prototype.dig = function(x, y, z) {
-	if(this.getTile(x, y, z).isDiggable()) {
-		this._tiles[z][x][y].describe() = 'floor';
-	}
-};

@@ -16,7 +16,7 @@ var Game = {
 	_screenHeight: 24,
 	_citySize: 10,
 	// How many in-game tiles a lot should comprise
-	_lotSize: 10,
+	_lotSize: 20,
 
 	getDisplay: function() {
 		return this._display;

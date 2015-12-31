@@ -27,6 +27,7 @@ Game.Building = function(properties) {
 	this.build = properties['build'] || function() {
 		var floor = Game.TileRepository.create('floor');
 		var wall = Game.TileRepository.create('wall');
+		var door = Game.TileRepository.create('door');
 		// Since a building is going to basically be a cube, only need to have one arena object
 		var map = new ROT.Map.Arena(this._width, this._height);
 		for(var z = 0; z < this._stories; z++) {
@@ -40,6 +41,34 @@ Game.Building = function(properties) {
 				var tile = value ? wall : floor;
 				story[x][y] = tile;
 			});
+
+			// If it's the first floor, place doors
+			if(z == 0) {
+				var side = Math.floor(Math.random() * 4) + 1;
+				var x, y;
+				switch(side) {
+					case 1:
+						x = 0;
+						y = this.getMidHeight();
+						break;
+					case 2:
+						x = this.getMidWidth();
+						y = 0;
+						break;
+					case 3:
+						x = this.getWidth() - 1;
+						y = this.getMidHeight();
+						break;
+					case 4:
+					default:
+						x = this.getMidWidth();
+						y = this.getHeight() - 1;
+						break;
+				}
+				console.log(x, y, story);
+				story[x][y] = door;
+			}
+
 			this._blueprint[z] = story;
 		}
 	};

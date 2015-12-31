@@ -95,3 +95,17 @@ Game.TileRepository.define('window-horizontal', {
     walkable: false,
     blocksLight: false
 });
+Game.TileRepository.define('door', {
+    name: 'door',
+    character: '+',
+    foreground: '#8b888d',
+    walkable: true,
+    blocksLight: true
+});
+Game.TileRepository.define('glass door', {
+    name: 'glass door',
+    character: '+',
+    foreground: '#aadfff',
+    walkable: true,
+    blocksLight: false
+});
