@@ -117,6 +117,7 @@ var Game = {
 	    }
 	},
 	displayMessages: function(entity) {
+		this._log.clear();
 		if(entity && entity.hasMixin('MessageRecipient')) {
 			// Get the messages in the player's queue and render them
 	        var messages = entity.getMessages();

@@ -28,6 +28,8 @@ Game.Building = function(properties) {
 		var floor = Game.TileRepository.create('floor');
 		var wall = Game.TileRepository.create('wall');
 		var door = Game.TileRepository.create('door');
+		var stairsUp = Game.TileRepository.create('stairsUp');
+		var stairsDown = Game.TileRepository.create('stairsDown');
 		// Since a building is going to basically be a cube, only need to have one arena object
 		var map = new ROT.Map.Arena(this._width, this._height);
 		for(var z = 0; z < this._stories; z++) {
@@ -65,8 +67,17 @@ Game.Building = function(properties) {
 						y = this.getHeight() - 1;
 						break;
 				}
-				console.log(x, y, story);
 				story[x][y] = door;
+			}
+
+			// Place stairs
+			var midWidth = this.getMidWidth();
+			var midHeight = this.getMidHeight();
+			if(z < this.getNumberOfStories() - 1) {
+				story[midWidth][midHeight] = stairsUp;
+			}
+			if(z > 0) {
+				story[midWidth][midHeight + 1] = stairsDown;
 			}
 
 			this._blueprint[z] = story;

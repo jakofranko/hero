@@ -51,6 +51,12 @@ Game.Lot.prototype.getMidWidth = function() {
 Game.Lot.prototype.getMidHeight = function() {
 	return Math.round(this._height / 2);
 };
+Game.Lot.prototype.getWidth = function() {
+	return this._width;
+};
+Game.Lot.prototype.getHeight = function() {
+	return this._height;
+};
 
 // Used during city generation to determine whether or not
 // a lot will be placed based on the frequency those lots
@@ -96,5 +102,7 @@ Game.Lot.prototype.fillLot = function(tile, extraProperties) {
 			}
 		};
 	};
-	return result;
+
+	// Only 1 z-level so return as the only element of an array
+	return [result];
 };

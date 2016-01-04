@@ -163,9 +163,9 @@ Game.Screen.playScreen = {
         } else if (inputType === 'keypress') {
         	var keyChar = String.fromCharCode(inputData.charCode);
         	if(keyChar === '>') {
-        		this.move(0, 0, 1);
+        		this.move(0, 0, -1);
         	} else if(keyChar === '<') {
-        		this.move(0,0, -1);
+        		this.move(0, 0, 1);
         	} else if (keyChar === ';') {
                 // Setup the look screen.
                 var offsets = this.getScreenOffsets();
