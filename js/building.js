@@ -26,7 +26,9 @@ Game.Building = function(properties) {
 
 	this.build = properties['build'] || function() {
 		var floor = Game.TileRepository.create('floor');
-		var wall = Game.TileRepository.create('wall');
+		var wall = Game.TileRepository.create('brick wall', {
+			foreground: ['#ab2e34', '#580004', '#e1de9d', '#d5d0dd'].random()
+		});
 		var door = Game.TileRepository.create('door');
 		var stairsUp = Game.TileRepository.create('stairsUp');
 		var stairsDown = Game.TileRepository.create('stairsDown');

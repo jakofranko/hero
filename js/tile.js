@@ -9,6 +9,8 @@ Game.Tile = function(properties) {
     this._walkable = properties['walkable'] || false;
     this._diggable = properties['diggable'] || false;
     this._blocksLight = properties['blocksLight'] || false;
+    this._outerWall = properties['outerWall'] || false;
+    this._innerWall = properties['innerWall'] || false;
     this._description = properties['description'] || '';
 };
 // Make tiles inherit all the functionality from glyphs
@@ -17,13 +19,19 @@ Game.Tile.extend(Game.Glyph);
 // Standard getters
 Game.Tile.prototype.isWalkable = function() {
     return this._walkable;
-}
+};
 Game.Tile.prototype.isDiggable = function() {
     return this._diggable;
-}
+};
 Game.Tile.prototype.isBlockingLight = function() {
     return this._blocksLight;
-}
+};
+Game.Tile.prototype.isOuterWall = function() {
+    return this._outerWall;
+};
+Game.Tile.prototype.isInnerWall = function() {
+    return this._innerWall;
+};
 Game.Tile.prototype.getDescription = function() {
     return this._description;
 };

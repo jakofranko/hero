@@ -23,11 +23,12 @@ Game.TileRepository.define('grass', {
     blocksLight: false,
     description: 'A patch of grass'
 });
-Game.TileRepository.define('wall', {
-    name: 'wall',
+Game.TileRepository.define('brick wall', {
+    name: 'brick wall',
 	character: '#',
-	foreground: 'ivory',
+	foreground: '#ab2e34',
 	blocksLight: true,
+    outerWall: true,
     description: 'A wall'
 });
 Game.TileRepository.define('stairsUp', {
