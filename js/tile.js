@@ -29,8 +29,14 @@ Game.Tile.prototype.isBlockingLight = function() {
 Game.Tile.prototype.isOuterWall = function() {
     return this._outerWall;
 };
+Game.Tile.prototype.setOuterWall = function(outerWall) {
+    this._outerWall = outerWall;
+};
 Game.Tile.prototype.isInnerWall = function() {
     return this._innerWall;
+};
+Game.Tile.prototype.setInnerWall = function(innerWall) {
+    this._innerWall = innerWall;
 };
 Game.Tile.prototype.getDescription = function() {
     return this._description;

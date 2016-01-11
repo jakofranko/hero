@@ -29,7 +29,7 @@ Game.TileRepository.define('brick wall', {
 	foreground: '#ab2e34',
 	blocksLight: true,
     outerWall: true,
-    description: 'A wall'
+    description: 'A brick wall'
 });
 Game.TileRepository.define('stairsUp', {
     name: 'stairsUp',
@@ -100,6 +100,24 @@ Game.TileRepository.define('window-horizontal', {
     walkable: false,
     blocksLight: false,
     description: "A glass window"
+});
+Game.TileRepository.define('indoor wall-vertical', {
+    name: 'indoor wall-vertical',
+    character: '|',
+    foreground: '#ffffff',
+    walkable: false,
+    blocksLight: true,
+    innerWall: true,
+    description: "A wall"
+});
+Game.TileRepository.define('indoor wall-horizontal', {
+    name: 'indoor wall-horizontal',
+    character: '-',
+    foreground: '#ffffff',
+    walkable: false,
+    blocksLight: true,
+    innerWall: true,
+    description: "A wall"
 });
 Game.TileRepository.define('door', {
     name: 'door',
