@@ -4,22 +4,32 @@ title: "Version Plan"
 date:  2015-12-17 09:55am
 ---
 
+# v0.7
+
+* Houses! Need to start generating places for our NPCs to live. This will be a new building template, with all new method for placing rooms
+* Furniture Repository. Needs to be able to support both single and multi-glyph templates.
+* Continue to flesh out Dynamic Multi-Glyph class; add rotate and move functions?
+
 # v0.6
 
-* Make the display panels responsive and take up 100% width and height of their container element
 * Minimap reflect current location of player by lot
+* Begin revamp of task system to start to support jobs, and 'mugging'
+* Begin time-system for tracking time of day
+* Begin event-system for triggering events at certain times of day.
 
 # v0.5
 
-* Features object for things like ponds and fountains
-  * Constructor
-  * Repository
-* Similar Furniture object that will have more advanced interactivity
-  * Constructor
-  * Repository
-  * Mixin functionality like items and entities
-  * Associate furniture with buildings that house them
-* `tilesFromTemplate` (or something) functionality for placing features and furniture larger than 1 tile
+* "Dynmaic Multi-Glyph" or some such that extends the Dynamic Glyph, but supports a 2D array of characters instead of a single character, for things like large pieces of furniture, trees and potentially vehicles
+* `tilesFromTemplate` (or something) functionality for placing features, furniture, terrain, entities, items etc. larger than 1 tile at a time
+* Add some additional stats to entities (though perhaps not the player) to track:
+  * Hunger
+  * Money?
+* NPCs (Entities)
+  * Civilians
+    * Men
+    * Women
+    * Children
+  * Robbers
 
 # v0.4
 
@@ -38,10 +48,7 @@ date:  2015-12-17 09:55am
   * Associate buildings with lots (will work on rendering buildings that are explorable in next version)
   * Generic building template
 * Additional tiles
-  * Statues
   * Windows
-  * Firehydrant
-  * Manhole
 
 # v0.2
 
