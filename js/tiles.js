@@ -106,7 +106,7 @@ Game.TileRepository.define('indoor wall-vertical', {
     character: '|',
     foreground: '#ffffff',
     walkable: false,
-    blocksLight: true,
+    blocksLight: false,
     innerWall: true,
     description: "A wall"
 });
@@ -115,7 +115,7 @@ Game.TileRepository.define('indoor wall-horizontal', {
     character: '-',
     foreground: '#ffffff',
     walkable: false,
-    blocksLight: true,
+    blocksLight: false,
     innerWall: true,
     description: "A wall"
 });
@@ -124,7 +124,7 @@ Game.TileRepository.define('door', {
     character: '+',
     foreground: '#8b888d',
     walkable: true,
-    blocksLight: true,
+    blocksLight: false,
     description: "A steel door"
 });
 Game.TileRepository.define('glass door', {

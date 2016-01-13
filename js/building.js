@@ -36,8 +36,6 @@ Game.Building = function(properties) {
 		// As this will be going on the outside wall, designate it as such
 		door.setOuterWall(true);
 
-		var stairsUp = Game.TileRepository.create('stairsUp');
-		var stairsDown = Game.TileRepository.create('stairsDown');
 		// Since a building is going to basically be a cube, only need to have one arena object
 		var map = new ROT.Map.Arena(this._width, this._height);
 		for(var z = 0; z < this._stories; z++) {
@@ -78,16 +76,6 @@ Game.Building = function(properties) {
 				story[x][y] = door;
 			}
 
-			// Place stairs
-			var midWidth = this.getMidWidth();
-			var midHeight = this.getMidHeight();
-			if(z < this.getNumberOfStories() - 1) {
-				story[midWidth][midHeight] = stairsUp;
-			}
-			if(z > 0) {
-				story[midWidth][midHeight + 1] = stairsDown;
-			}
-
 			this._blueprint[z] = story;
 		}
 	};
@@ -97,12 +85,72 @@ Game.Building = function(properties) {
 			this._blueprint[z] = newFloor;
 		};
 	};
+	this._placeStairs = properties['placeStairs'] || function() {
+		var stairsUp = Game.TileRepository.create('stairsUp');
+		var stairsDown = Game.TileRepository.create('stairsDown');
+		var horizontalWall = Game.TileRepository.create('indoor wall-horizontal');
+		var verticalWall = Game.TileRepository.create('indoor wall-vertical');
+		var floor = Game.TileRepository.create('floor');
+
+		// Stairwell width and height, big enough to surround an up and down
+		// stair with an inner wall on two sides
+		var sWidth = 3;
+		var sHeight = 4;
+
+		// Depending on the corner, assign the top left corner to start
+		// drawing where the stairs will be placed on the blueprint
+		var corner = Game.getRandomInRange(0, 3);
+		var topLeft = {x: 0, y: 0};
+		switch(corner) {
+			case 1: // top-right corner of blueprint
+				topLeft.x = (this._width) - sWidth;
+				break;
+			case 2: // bottom-right corner of blueprint
+				topLeft.x = (this._width) - sWidth;
+				topLeft.y = (this._height) - sHeight;
+				break;
+			case 3: // bottom-left corner of blueprint
+				topLeft.y = (this._height) - sHeight;
+				break;
+			case 0: // top-left corner of blueprint
+			default:
+				break;
+		}
+
+		for (var z = 0; z < this._blueprint.length; z++) {
+			for (var x = 0; x < sWidth; x++) {
+				for (var y = 0; y < sHeight; y++) {
+					var tile,
+						stairs;
+					if(y == 0 || y == sHeight - 1) {
+						tile = horizontalWall;
+					} else if(x == 0 || x == sWidth - 1) {
+						tile = verticalWall;
+					} else if(z < this.getNumberOfStories() - 1 && y == sHeight - 2) {
+						tile = stairsUp;
+					} else if(z > 0 && y == sHeight - 3) {
+						tile = stairsDown;
+					} else {
+						tile = floor;
+					}
+
+					if(!this._blueprint[z][topLeft.x + x][topLeft.y + y].isOuterWall() && tile) {
+						this._blueprint[z][topLeft.x + x][topLeft.y + y] = tile;
+					}
+				};
+			};
+				
+		};
+	}
 
 	this.build = properties['build'] || function() {
 		// Create the initial 3D array, consisting of the outer wall (including windows), doors, and optional stairways
 		this._createBlueprint();
 		if(this._hallwayNumber !== false && this._hallwaySize !== false) {
 			this._placeHallways();
+		}
+		if(this._stories > 1) {
+			this._placeStairs();
 		}
 		if(this._roomNumber !== false) {
 			this._placeRooms();
@@ -147,6 +195,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 	var horizontalWall = Game.TileRepository.create('indoor wall-horizontal');
 	var door = Game.TileRepository.create('door');
 	var sliceOrientation = Math.round(Math.random()) ? 'veritcal' : 'horizontal';
+
 	
 	// Since dividing a building will give it two rooms, there is no reason to start slicing
 	// if the building specifies less than two rooms
@@ -157,7 +206,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 			if(sliceOrientation == 'veritcal') {
 				var randomX = Game.getRandomInRange(2, this._width - 2);
 				for (var i = 0; i < this._height; i++) {
-					if(floor[randomX][i].describe() == 'floor') {
+					if(floor[randomX][i].describe() == 'floor' && this._noSurroundingWalls(floor, randomX, i, sliceOrientation)) {
 						floor[randomX][i] = verticalWall;
 						currentWall.push({x: randomX, y: i});
 					} else if((floor[randomX][i].isInnerWall() && count + 2 <= this._roomNumber) || floor[randomX][i].isOuterWall()) {
@@ -169,7 +218,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 			} else if(sliceOrientation == 'horizontal') {
 				var randomY = Game.getRandomInRange(2, this._height - 2);
 				for (var i = 0; i < this._width; i++) {
-					if(floor[i][randomY].describe() == 'floor') {
+					if(floor[i][randomY].describe() == 'floor' && this._noSurroundingWalls(floor, i, randomY, sliceOrientation)) {
 						floor[i][randomY] = horizontalWall;
 						currentWall.push({x: i, y: randomY});
 					} else if((floor[i][randomY].isInnerWall() && count + 2 <= this._roomNumber) || floor[i][randomY].isOuterWall()) {
@@ -198,5 +247,13 @@ Game.Building.prototype._flipOrientation = function(sliceOrientation) {
 		return sliceOrientation = 'horizontal';
 	} else if(sliceOrientation == 'horizontal') {
 		return sliceOrientation = 'veritcal';
+	}
+};
+Game.Building.prototype._noSurroundingWalls = function(floor, x, y, sliceOrientation) {
+	debugger;
+	if(sliceOrientation == 'veritcal') {
+		return (!floor[x + 1][y].isInnerWall() && !floor[x - 1][y].isInnerWall() && !floor[x + 1][y].isOuterWall() && !floor[x - 1][y].isOuterWall());
+	} else if(sliceOrientation == 'horizontal') {
+		return (!floor[x][y + 1].isInnerWall() && !floor[x ][y- 1].isInnerWall() && !floor[x][y + 1].isOuterWall() && !floor[x][y - 1].isOuterWall());
 	}
 };
