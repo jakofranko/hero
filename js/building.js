@@ -53,7 +53,7 @@ Game.Building = function(properties) {
 	this._placeRooms = properties['placeRooms'] || function() {
 		for (var z = 0; z < this._blueprint.length; z++) {
 			var newFloor = this._sliceMethod(this._blueprint[z]);
-			var floorRooms = this._generateRoomRegions(newFloor);
+			var floorRooms = this._generateRoomRegions(newFloor, z);
 			this._blueprint[z] = newFloor;
 			this._roomRegions[z] = floorRooms;
 		};
@@ -91,26 +91,30 @@ Game.Building = function(properties) {
 				break;
 		}
 
+		debugger;
 		for (var z = 0; z < this._blueprint.length; z++) {
+			// Only place up-stairs once
+			var stairsPlaced = false;
 			for (var x = 0; x < sWidth; x++) {
 				for (var y = 0; y < sHeight; y++) {
-					var tile,
-						stairs;
+					var tile = null;
 					if(y == 0 || y == sHeight - 1) {
 						tile = horizontalWall;
 					} else if(x == 0 || x == sWidth - 1) {
 						tile = verticalWall;
-					} else if(z < this.getNumberOfStories() - 1 && y == sHeight - 2) {
+					} else if(!stairsPlaced && z < this.getNumberOfStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].describe() !== 'stairsDown') {
 						tile = stairsUp;
-					} else if(z > 0 && y == sHeight - 3) {
-						tile = stairsDown;
-					} else {
-						tile = floor;
+						stairsPlaced = true;
 					}
 
 					if(!this._blueprint[z][topLeft.x + x][topLeft.y + y].isOuterWall() && tile) {
 						this._blueprint[z][topLeft.x + x][topLeft.y + y] = tile;
+						if(tile == stairsUp) {
+							this._blueprint[z + 1][topLeft.x + x][topLeft.y + y] = stairsDown;
+							this._consoleLogGrid(this._blueprint[z + 1], "_char");
+						}
 					}
+					this._consoleLogGrid(this._blueprint[z], "_char");
 				};
 			};
 				
@@ -195,10 +199,10 @@ Game.Building.prototype._sliceMethod = function(floor) {
 	// This assumes that the perimeter tiles are outerWalls, 
 	// and that rooms should be placed within the perimeter.
 
-	// Start with a random orientation. Depending on orientation, then pick a random number
-	// along the length or height of the building floor that's not an edge or right next to an edge.
-	// Place inner walls directly along this line. Then, place a door along this wall,
-	// and then flip the orientation of the slice, 
+	// If on the first z-level, start with a random orientation. Depending on orientation, 
+	// then pick a random number along the length or height of the building floor that's 
+	// not an edge or right next to an edge. Place inner walls directly along this line. 
+	// Then, place a door along this wall, and then flip the orientation of the slice,
 	// and repeat. When placing tiles, it is important to stop along outer walls. When an inner wall is
 	// encountered, count the current number of rooms. If it is equal to the number desired, then stop. 
 	// Other wise, proceed slicing and flipping until the ammount of rooms desired is reached.
@@ -294,7 +298,7 @@ Game.Building.prototype._noSurroundingWalls = function(floor, x, y, sliceOrienta
 //
 // The regions object will simply be an array of the regions, each of which contains the coordinates of
 // that region's tiles.
-Game.Building.prototype._generateRoomRegions = function(floor) {
+Game.Building.prototype._generateRoomRegions = function(floor, z) {
 	// Initialize the regions array
 	var regions = new Array(floor.length);
 	for (var x = 0; x < regions.length; x++) {
@@ -304,84 +308,104 @@ Game.Building.prototype._generateRoomRegions = function(floor) {
 		};
 	};
 
-	// Random starting location for filling that's not an edge or wall
+	// If on z-level 0, random starting location for filling that's not an edge or wall
 	// It is assumed that since walls are placed one tile apart,
 	// there should be a floor tile fairly easily to find
-	var side = Game.getRandomInRange(0, 3);
-	var scanDirection = Math.round(Math.random()) ? 'forwards' : 'backwards';
+	//
+	// If on any other z-level than 0, the starting location needs to be wherever the downstairs are,
+	// since that will be where the player will access the higher levels from (having arived from the
+	// upstairs on the lower z-level)
 	var startX, startY;
-	switch(side) {
-		case 0:
-			startX = 1;
-			startY = this.getMidHeight();
-			if(!floor[startX][startY]) {
-				debugger;
-			}
-			while(!floor[startX][startY].isWalkable()) {
-				if(scanDirection == 'forwards') {
-					startY++;
-				} else {
-					startY--;
-				}
+	if(z == 0) {
+		var side = Game.getRandomInRange(0, 3);
+		var scanDirection = Math.round(Math.random()) ? 'forwards' : 'backwards';
+		switch(side) {
+			case 0:
+				startX = 1;
+				startY = this.getMidHeight();
 				if(!floor[startX][startY]) {
 					debugger;
 				}
-			}
-			break;
-		case 1:
-			startX = this.getMidWidth();
-			startY = 1;
-			if(!floor[startX][startY]) {
-				debugger;
-			}
-			while(!floor[startX][startY].isWalkable()) {
-				if(scanDirection == 'forwards') {
-					startX++;
-				} else {
-					startX--;
+				while(!floor[startX][startY].isWalkable()) {
+					if(scanDirection == 'forwards') {
+						startY++;
+					} else {
+						startY--;
+					}
+					if(!floor[startX][startY]) {
+						debugger;
+					}
 				}
+				break;
+			case 1:
+				startX = this.getMidWidth();
+				startY = 1;
 				if(!floor[startX][startY]) {
 					debugger;
 				}
-			}
-			startY = 1;
-			break;
-		case 2:
-			startX = this.getWidth() - 2;
-			startY = this.getMidHeight();
-			if(!floor[startX][startY]) {
-				debugger;
-			}
-			while(!floor[startX][startY].isWalkable()) {
-				if(scanDirection == 'forwards') {
-					startY++;
-				} else {
-					startY--;
+				while(!floor[startX][startY].isWalkable()) {
+					if(scanDirection == 'forwards') {
+						startX++;
+					} else {
+						startX--;
+					}
+					if(!floor[startX][startY]) {
+						debugger;
+					}
 				}
+				startY = 1;
+				break;
+			case 2:
+				startX = this.getWidth() - 2;
+				startY = this.getMidHeight();
 				if(!floor[startX][startY]) {
 					debugger;
 				}
-			}
-			break;
-		case 3:
-		default:
-			startX = this.getMidWidth();
-			startY = this.getHeight() - 2;
-			if(!floor[startX][startY]) {
-				debugger;
-			}
-			while(!floor[startX][startY].isWalkable()) {
-				if(scanDirection == 'forwards') {
-					startX++;
-				} else {
-					startX--;
+				while(!floor[startX][startY].isWalkable()) {
+					if(scanDirection == 'forwards') {
+						startY++;
+					} else {
+						startY--;
+					}
+					if(!floor[startX][startY]) {
+						debugger;
+					}
 				}
+				break;
+			case 3:
+			default:
+				startX = this.getMidWidth();
+				startY = this.getHeight() - 2;
 				if(!floor[startX][startY]) {
 					debugger;
 				}
+				while(!floor[startX][startY].isWalkable()) {
+					if(scanDirection == 'forwards') {
+						startX++;
+					} else {
+						startX--;
+					}
+					if(!floor[startX][startY]) {
+						debugger;
+					}
+				}
+				break;
+		}
+	} else {
+		for (var x = 0; x < floor.length; x++) {
+			for (var y = 0; y < floor[x].length; y++) {
+				if(floor[x][y].describe() == 'stairsDown') {
+					startX = x;
+					startY = y;
+					break;
+				}
+			};
+			if(typeof startX !== 'undefined' && typeof startY !== 'undefined') {
+				break;
 			}
-			break;
+		};
 	}
+	
 	
 	// Start filling regions. Will return a completed 2D grid of regions.
 	// While filling, if it fails the _canFill check, it should still get the neighbors 
