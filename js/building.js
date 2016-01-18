@@ -11,8 +11,8 @@ Game.Building = function(properties) {
 		this._roomNumber = properties['roomNumber'] || false;
 		this._name = properties['name'];
 	} else {
-		var width = Math.min(Math.round(ROT.RNG.getNormal(properties['width'], 1)), Game.getLotSize());
-		var height = Math.min(Math.round(ROT.RNG.getNormal(properties['height'], 1)), Game.getLotSize());
+		var width = Math.min(Math.round(ROT.RNG.getNormal(properties['width'], 2)), Game.getLotSize());
+		var height = Math.min(Math.round(ROT.RNG.getNormal(properties['height'], 2)), Game.getLotSize());
 		this._width = width;
 		this._height = height;
 		this._stories = Math.max(1, Math.round(ROT.RNG.getNormal(properties['stories'], 3)));
@@ -53,9 +53,7 @@ Game.Building = function(properties) {
 	this._placeRooms = properties['placeRooms'] || function() {
 		for (var z = 0; z < this._blueprint.length; z++) {
 			var newFloor = this._sliceMethod(this._blueprint[z]);
-			var floorRooms = this._generateRoomRegions(newFloor, z);
 			this._blueprint[z] = newFloor;
-			this._roomRegions[z] = floorRooms;
 		};
 	};
 
@@ -91,7 +89,6 @@ Game.Building = function(properties) {
 				break;
 		}
 
-		debugger;
 		for (var z = 0; z < this._blueprint.length; z++) {
 			// Only place up-stairs once
 			var stairsPlaced = false;
@@ -111,50 +108,98 @@ Game.Building = function(properties) {
 						this._blueprint[z][topLeft.x + x][topLeft.y + y] = tile;
 						if(tile == stairsUp) {
 							this._blueprint[z + 1][topLeft.x + x][topLeft.y + y] = stairsDown;
-							this._consoleLogGrid(this._blueprint[z + 1], "_char");
 						}
 					}
-					this._consoleLogGrid(this._blueprint[z], "_char");
 				};
 			};
 				
 		};
 	};
 
+	this._generateRoomRegions = properties['generateRoomRegions'] || function() {
+		for (var z = 0; z < this._blueprint.length; z++) {
+			var floorRooms = this._fillRooms(this._blueprint[z], z);
+			this._roomRegions[z] = floorRooms;
+		};
+	};
+
 	this._placeDoors = properties['placeDoors'] || function() {
 		var door = Game.TileRepository.create('door');
-		// As this will be going on the outside wall, designate it as such
-		door.setOuterWall(true);
+		var diffs = [];
 		// Place the outside door intelligently, and then from there place doors so that
 		// each room is accessible by some path from the front door. Then, on higher floors,
 		// place doors intelligently so that by some path from the stairs all rooms are accessible
-		// If it's the first floor, place doors
+		// (this is achieved by having the stairwell be region 1 on higher floors during region generation)
 		for(var z = 0; z < this._stories; z++) {
 			if(z == 0) {
-				var side = Math.floor(Math.random() * 4) + 1;
-				var x, y;
-				switch(side) {
-					case 1:
-						x = 0;
-						y = this.getMidHeight();
+				// As this will be going on the outside wall, designate it as such
+				door.setOuterWall(true);
+				var doorPlaced = false;
+				// Scan the first and last inner row for region 1
+				for (var x = 0; x < this._blueprint[z].length; x++) {
+					if(this._roomRegions[z].regions[x][1] == 1) {
+						this._blueprint[z][x][0] = door;
+						doorPlaced = true;
 						break;
-					case 2:
-						x = this.getMidWidth();
-						y = 0;
+					} else if(this._roomRegions[z].regions[x][this._height - 2] == 1) {
+						this._blueprint[z][x][this._height - 1] = door;
+						doorPlaced = true;
 						break;
-					case 3:
-						x = this.getWidth() - 1;
-						y = this.getMidHeight();
-						break;
-					case 4:
-					default:
-						x = this.getMidWidth();
-						y = this.getHeight() - 1;
-						break;
+					}
+				};
+				if(!doorPlaced) {
+					// Scan the first and last column for region 1
+					for (var y = 0; y < this._blueprint[z][0].length; y++) {
+						if(this._roomRegions[z].regions[1][y] == 1) {
+							this._blueprint[z][0][y] = door;
+							doorPlaced = true;
+							break;
+						} else if(this._roomRegions[z].regions[this._width - 2][y] == 1) {
+							this._blueprint[z][this._width - 1][y] = door;
+							doorPlaced = true;
+							break;
+						}
+					};	
 				}
-				this._blueprint[z][x][y] = door;
+			}
+
+			door.setOuterWall(false);
+			for(var region in this._roomRegions[z].tree) {
+				for(var connection in this._roomRegions[z].tree[region]) {
+					var pos = this._roomRegions[z].tree[region][connection];
+					// Because of the way room regions are placed sequentially,
+					// it works out that if regions within a certain range of 
+					// each other are linked, it is unnecessary (in fact, cool)
+					// to place door to link to all their connecting rooms.
+					diffs.push(region - connection);
+					if(Math.abs(region - connection) < Math.max(2, this._roomNumber - 2)) {
+						this._blueprint[z][pos.x][pos.y] = door;	
+					}
+				}
 			}
 		}
+
+		// Debug stuff....
+		// var max = diffs.reduce(function(last, current) {
+		// 	return Math.max(last, current);
+		// });
+		// var sum = diffs.reduce(function(last, current) {
+		// 	return Math.abs(last) + Math.abs(current);
+		// });
+		// var diffCount = {};
+		// for (var i = 0; i < diffs.length; i++) {
+		// 	var diff = Math.abs(diffs[i]);
+		// 	if(!diffCount[diff]) {
+		// 		diffCount[diff] = 1;
+		// 	} else {
+		// 		diffCount[diff]++;
+		// 	}
+		// };
+		// console.log("Number of Rooms: ", this._roomNumber);
+		// console.log("Largest Diff: ", max);
+		// console.log("Average Diff: ", Math.round((sum / diffs.length) * 100) / 100);
+		// console.log("Diffs by Frequency: ", diffCount);
+		// console.log("---------------------");
 	}
 
 	this.build = properties['build'] || function() {
@@ -169,6 +214,7 @@ Game.Building = function(properties) {
 			this._placeRooms();
 		}
 
+		this._generateRoomRegions();
 		this._placeDoors();
 		//this._placeItems();
 	};
@@ -298,7 +344,7 @@ Game.Building.prototype._noSurroundingWalls = function(floor, x, y, sliceOrienta
 //
 // The regions object will simply be an array of the regions, each of which contains the coordinates of
 // that region's tiles.
-Game.Building.prototype._generateRoomRegions = function(floor, z) {
+Game.Building.prototype._fillRooms = function(floor, z) {
 	// Initialize the regions array
 	var regions = new Array(floor.length);
 	for (var x = 0; x < regions.length; x++) {
@@ -413,10 +459,9 @@ Game.Building.prototype._generateRoomRegions = function(floor, z) {
 	// If it can, then that starting location is added to the list of starting locations 
 	// to try to fill from, along with its region and parent region
 	regions = this._fillRegions(regions, floor, 1, startX, startY);
-	// return {tree: {}, regions: regions};
+	return regions;
 };
 Game.Building.prototype._fillRegions = function(regions, floor, region, x, y) {
-	this._consoleLogGrid(floor, '_char');
 	var startLocations = [{x: x, y: y}];
 
 	// The regionTree is an object of the regions of a floor. Each region has an object of connections,
@@ -504,9 +549,7 @@ Game.Building.prototype._fillRegions = function(regions, floor, region, x, y) {
 		}
 	}
 	
-	console.log(regionTree);
-	this._consoleLogGrid(regions);
-	return regions;
+	return {tree: regionTree, regions: regions};
 };
 Game.Building.prototype._canFillRegion = function(regions, tiles, x, y) {
 	if(x < 0 || y < 0 || x >= this._width || y >= this._height) {
