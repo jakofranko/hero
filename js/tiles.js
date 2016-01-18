@@ -4,6 +4,10 @@ Game.TileRepository.define('null', {
     name: 'null',
     description: '(unknown)'
 });
+Game.TileRepository.define('air', {
+    name: 'air',
+    description: 'Empty space'
+});
 Game.TileRepository.define('floor', {
     name: 'floor',
     character: '.',
@@ -19,13 +23,13 @@ Game.TileRepository.define('grass', {
     blocksLight: false,
     description: 'A patch of grass'
 });
-Game.TileRepository.define('wall', {
-    name: 'wall',
+Game.TileRepository.define('brick wall', {
+    name: 'brick wall',
 	character: '#',
-	foreground: 'ivory',
-	diggable: true,
+	foreground: '#ab2e34',
 	blocksLight: true,
-    description: 'A wall'
+    outerWall: true,
+    description: 'A brick wall'
 });
 Game.TileRepository.define('stairsUp', {
     name: 'stairsUp',
@@ -86,12 +90,48 @@ Game.TileRepository.define('window-vertical', {
     character: '|',
     foreground: '#aadfff',
     walkable: false,
-    blocksLight: false
+    blocksLight: false,
+    description: "A glass window"
 });
 Game.TileRepository.define('window-horizontal', {
     name: 'window-horizontal',
     character: '-',
     foreground: '#aadfff',
     walkable: false,
-    blocksLight: false
+    blocksLight: false,
+    description: "A glass window"
+});
+Game.TileRepository.define('indoor wall-vertical', {
+    name: 'indoor wall-vertical',
+    character: '|',
+    foreground: '#ffffff',
+    walkable: false,
+    blocksLight: false,
+    innerWall: true,
+    description: "A wall"
+});
+Game.TileRepository.define('indoor wall-horizontal', {
+    name: 'indoor wall-horizontal',
+    character: '-',
+    foreground: '#ffffff',
+    walkable: false,
+    blocksLight: false,
+    innerWall: true,
+    description: "A wall"
+});
+Game.TileRepository.define('door', {
+    name: 'door',
+    character: '+',
+    foreground: '#8b888d',
+    walkable: true,
+    blocksLight: false,
+    description: "A steel door"
+});
+Game.TileRepository.define('glass door', {
+    name: 'glass door',
+    character: '+',
+    foreground: '#aadfff',
+    walkable: true,
+    blocksLight: false,
+    description: "A glass door"
 });

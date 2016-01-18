@@ -1,7 +1,6 @@
 // @size should be square number of lots for a city.
 Game.Map = function(size, player) {
     this._city = new Game.City(size);
-    console.log(this._city);
     this._city.init();
 
     // Used for drawing to various displays 
@@ -252,11 +251,4 @@ Game.Map.prototype.addItem = function(x, y, z, item) {
 Game.Map.prototype.addItemAtRandomPosition = function(item, z) {
     var position = this.getRandomFloorPosition(z);
     this.addItem(position.x, position.y, position.z, item);
-};
-
-// Map Actions
-Game.Map.prototype.dig = function(x, y, z) {
-	if(this.getTile(x, y, z).isDiggable()) {
-		this._tiles[z][x][y].describe() = 'floor';
-	}
 };

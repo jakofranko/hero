@@ -137,34 +137,60 @@ Game.City.prototype.neighborhood = function(x, y) {
 	}
 }
 Game.City.prototype.tilesFromLots = function() {
-	// initialize 3-dimensinal array. 
-	// Start with 1 z-level
+	// The map variable should be a 3-dimensional array,
+	// stitched together from the 3-dimensional array of tiles
+	// returned by each lot's getTiles() function.
 	// Width and height should be proportional to the lotSize
-	var map = new Array(1);
-	map[0] = new Array(this._width * Game.getLotSize())
-
+	var map = [];
 	// Loop through the city lots
 	for(var cityX = 0; cityX < this._width; cityX++) {
 		for (var cityY = 0; cityY < this._height; cityY++) {
-			// returns a 2-dimensional (hopefully 3D one day) array of lot tiles
+			// Returns a 3-dimensional array of lot tiles
 			var tiles = this._lots[cityX][cityY].getTiles();
 
-			// Load these tiles into the results at the appropriate
-			// offset based on which lot we're in
-			for (var x = 0; x < tiles.length; x++) {
-				var offsetX = x + (cityX * Game.getLotSize());
-
-				// instantiate a new map column if it doesn't exist already
-				if(!map[0][offsetX]) {
-					map[0][offsetX] = new Array(this._height * Game.getLotSize());
+			// Load these tiles into the map at the appropriate
+			// offset based on which lot we're in. For reference:
+			// tiles.length == number of z-levels,
+			// tiles[z].length == lot width,
+			// tiles[z][x].length == lot height
+			for (var z = 0; z < tiles.length; z++) {
+				// Instantiate a new z-level if it doesn't exist already
+				if(!map[z]) {
+					map[z] = new Array(this._width * Game.getLotSize());
 				}
 
-				for (var y = 0; y < tiles[x].length; y++) {
-					var offsetY = y + (cityY * Game.getLotSize());
-					map[0][offsetX][offsetY] = tiles[x][y];
+				for (var x = 0; x < tiles[z].length; x++) {
+					var offsetX = x + (cityX * Game.getLotSize());
+
+					// Instantiate a new map column if it doesn't exist already
+					if(!map[z][offsetX]) {
+						map[z][offsetX] = new Array(this._height * Game.getLotSize());
+					}
+
+					for (var y = 0; y < tiles[z][x].length; y++) {
+						var offsetY = y + (cityY * Game.getLotSize());
+						map[z][offsetX][offsetY] = tiles[z][x][y];
+					};
 				};
 			};
 		};
 	}
+
+	// Some z-levels will not have a fully populated grid, since not all lots
+	// will be the same 'tallness'. Fill in these missing cells with air.
+	var air = Game.TileRepository.create('air');
+	for (var z = 0; z < map.length; z++) {
+		for (var x = 0; x < map[z].length; x++) {
+			if(!map[z][x]) {
+				map[z][x] = new Array(this._height * Game.getLotSize());
+			}
+			for (var y = 0; y < map[z][x].length; y++) {
+				if(!map[z][x][y]) {
+					map[z][x][y] = air;
+				}
+			};
+		};
+	};
+	console.log(map);
 	return map;
 };

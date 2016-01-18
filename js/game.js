@@ -16,7 +16,7 @@ var Game = {
 	_screenHeight: 24,
 	_citySize: 10,
 	// How many in-game tiles a lot should comprise
-	_lotSize: 10,
+	_lotSize: 20,
 
 	getDisplay: function() {
 		return this._display;
@@ -117,6 +117,7 @@ var Game = {
 	    }
 	},
 	displayMessages: function(entity) {
+		this._log.clear();
 		if(entity && entity.hasMixin('MessageRecipient')) {
 			// Get the messages in the player's queue and render them
 	        var messages = entity.getMessages();

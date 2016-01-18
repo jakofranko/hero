@@ -20,7 +20,73 @@ Game.LotRepository.define('building', {
 			type: 'office building',
 			amount: 1
 		}
-	]
+	],
+	buildTiles: function() {
+		// Add terrain
+		var tiles = this.fillLot('floor');
+		var air = Game.TileRepository.create('air');
+
+		// Add the building
+		var centerX = this.getMidWidth();
+		var centerY = this.getMidHeight();
+
+		var building = this.getBuildings()[0];
+		building.build();
+		var buildingMidWidth = building.getMidWidth();
+		var buildingMidHeight = building.getMidHeight();
+		var b = building.getBlueprint();
+		
+		// Place the building in the center of the lot
+		// Find upper corner...
+		var cornerX = centerX - buildingMidWidth;
+		var cornerY = centerY - buildingMidHeight;
+		if(cornerX < 0 || cornerY < 0) {
+			return tiles;
+		}
+
+		// debugger;
+		for (var z = 0; z < building.getNumberOfStories(); z++) {
+			if(!tiles[z]) {
+				tiles[z] = new Array(this.getWidth());
+			}
+
+			// If a space (cell) on a higher level of the lot (i.e., not the first z-level)
+			// and it is not where the building should be, then an air tile should be placed
+			for (var x = 0, i = false; x < this.getWidth(); x++) {
+				if(!tiles[z][x]) {
+					tiles[z][x] = new Array(this.getHeight());
+				}
+
+				if(x == cornerX) {
+					i = 0;
+				} else if(x > cornerX && i < building.getWidth() - 1 && i !== false) {
+					i++;
+				} else {
+					i = false;
+				}
+
+				for (var y = 0, j = false; y < this.getHeight(); y++) {
+					if(y == cornerY && i !== false) {
+						j = 0;
+					} else if(y > cornerY && j < building.getHeight() - 1 && i !== false && j !== false) {
+						j++;
+					} else {
+						j = false;
+					}
+
+					if(i !== false && j !== false) {
+						if(b[z][i] == undefined)
+							debugger;
+						tiles[z][x][y] = b[z][i][j];
+					} else if(z > 0) {
+						tiles[z][x][y] = air;
+					}
+				};
+			};
+		};
+
+		return tiles;
+	}
 });
 Game.LotRepository.define('road', {
 	name: 'road',
@@ -79,7 +145,8 @@ Game.LotRepository.define('road', {
 			}
 		}
 
-		return tiles;
+		// Only 1 z-level, so return it as the only element in an array
+		return [tiles];
 	}
 });
 Game.LotRepository.define('appartments', {
