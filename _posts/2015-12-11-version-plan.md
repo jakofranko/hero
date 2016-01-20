@@ -4,32 +4,32 @@ title: "Version Plan"
 date:  2015-12-17 09:55am
 ---
 
+# v0.8
+
+* Crime; some NPCs should get the robber job and take money from buildings at night
+* Revamp player stats to start matching HERO System stats
+* Pathfinding between z-levels
+
 # v0.7
 
 * Houses! Need to start generating places for our NPCs to live. This will be a new building template, with all new method for placing rooms
-* Furniture Repository. Needs to be able to support both single and multi-glyph templates.
-* Continue to flesh out Dynamic Multi-Glyph class; add rotate and move functions?
+* Furniture Repository and some additional pieces of furniture.
+* NPCs should sleep at home, and go to work during the day
 
 # v0.6
 
 * Minimap reflect current location of player by lot
-* Begin revamp of task system to start to support jobs, and 'mugging'
-* Begin time-system for tracking time of day
-* Begin event-system for triggering events at certain times of day.
+* Start placing job locations on z-level 0
+* Begin pathfinding for NPCs
 
 # v0.5
 
-* "Dynmaic Multi-Glyph" or some such that extends the Dynamic Glyph, but supports a 2D array of characters instead of a single character, for things like large pieces of furniture, trees and potentially vehicles
-* `tilesFromTemplate` (or something) functionality for placing features, furniture, terrain, entities, items etc. larger than 1 tile at a time
+* Begin revamp of task system to start to support jobs
+* Begin time-system for tracking time of day
 * Add some additional stats to entities (though perhaps not the player) to track:
   * Hunger
-  * Money?
-* NPCs (Entities)
-  * Civilians
-    * Men
-    * Women
-    * Children
-  * Robbers
+  * Money
+* Base 'Person' entity
 
 # v0.4
 
