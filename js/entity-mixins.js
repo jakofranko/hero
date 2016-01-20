@@ -262,6 +262,48 @@ Game.EntityMixins.ExperienceGainer = {
         }
     }
 };
+Game.EntityMixins.FoodConsumer = {
+    name: 'FoodConsumer',
+    init: function(template) {
+        this._maxFullness = template['maxFullness'] || 1000;
+        // Start halfway to max fullness if no default value
+        this._fullness = template['fullness'] || (this._maxFullness / 2);
+        // Number of points to decrease fullness by every turn.
+        this._fullnessDepletionRate = template['fullnessDepletionRate'] || 1;
+    },
+    addTurnHunger: function() {
+        // Remove the standard depletion points
+        this.modifyFullnessBy(-this._fullnessDepletionRate);
+    },
+    modifyFullnessBy: function(points) {
+        this._fullness = this._fullness + points;
+        if (this._fullness <= 0) {
+            this.kill("You have died of starvation!");
+        } else if (this._fullness > this._maxFullness) {
+            this.kill("You choke and die!");
+        }
+    },
+    getHungerState: function() {
+        // Fullness points per percent of max fullness
+        var perPercent = this._maxFullness / 100;
+        // 5% of max fullness or less = starving
+        if(this._fullness <= perPercent * 5) {
+            return 'Starving';
+        // 25% of max fullness or less = hungry
+        } else if (this._fullness <= perPercent * 25) {
+            return 'Hungry';
+        // 95% of max fullness or more = oversatiated
+        } else if (this._fullness >= perPercent * 95) {
+            return 'Oversatiated';
+        // 75% of max fullness or more = full
+        } else if (this._fullness >= perPercent * 75) {
+            return 'Full';
+        // Anything else = not hungry
+        } else {
+            return 'Not Hungry';
+        }
+    }
+};
 Game.EntityMixins.FungusActor = {
     name: 'FungusActor',
     groupName: 'Actor',
@@ -389,6 +431,56 @@ Game.EntityMixins.InventoryHolder = {
         }
     }
 };
+Game.EntityMixins.MoneyHolder = {
+    name: 'MoneyHolder',
+    init: function(template) {
+        this._money = template['money'] || 1000;
+    },
+    getMoney: function() {
+        return this._money;
+    },
+    pay: function(amount) {
+        this._money += amount;
+    },
+    spend: function(amount) {
+        this._money -= amount;
+    },
+    steal: function(target, amount) {
+        if(target.hasMixin('MoneyHolder')) {
+            // TODO: base the amount stolen off of a dexterity contest or at least the dex of the stealer
+            var money = target.getMoney();
+            this.pay(money);
+            target.spend(money);
+
+            if(target.hasMixin('MessageRecipient')) {
+                Game.sendMessage(target, 'Someone just stole $%s from you!', [money]);
+            }
+            if(this.hasMixin('MessageRecipient')) {
+                Game.sendMessage(this, 'You successfully stole $%s from %s', [money, target.describeThe()]);   
+            }
+        } else if(this.hasMixin('MessageRecipient')) {
+            Game.sendMessage(this, '%s doesn\'t have any money', [target.describeThe()]);   
+        
+        }
+    },
+    give: function(target, amount) {
+        if(target.hasMixin('MoneyHolder')) {
+            // TODO: base the amount stolen off of a dexterity contest or at least the dex of the stealer
+            target.pay(amount);
+            this.spend(amount);
+
+            if(target.hasMixin('MessageRecipient')) {
+                Game.sendMessage(target, '%s just gave you $%s', [this.describeThe(), amount]);
+            }
+            if(this.hasMixin('MessageRecipient')) {
+                Game.sendMessage(this, 'You successfully gave $%s to %s', [amount, target.describeThe()]);   
+            }
+        } else if(this.hasMixin('MessageRecipient')) {
+            Game.sendMessage(this, '%s can\'t take money', [target.describeThe()]);   
+        
+        }
+    }
+}
 Game.EntityMixins.MessageRecipient = {
     name: 'MessageRecipient',
     init: function(template) {

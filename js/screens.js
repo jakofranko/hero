@@ -74,11 +74,12 @@ Game.Screen.playScreen = {
         // Render player HP
         var stats = '%c{white}%b{black}';
         stats += String.format(
-            'HP: %s/%s Level: %s XP: %s',
+            'HP: %s/%s Level: %s XP: %s Money: $%s',
             this._player.getHp(),
             this._player.getMaxHp(),
             this._player.getLevel(),
-            this._player.getExperience()
+            this._player.getExperience(),
+            this._player.getMoney()
         );
         display.drawText(0, screenHeight, stats);
     },
@@ -302,7 +303,7 @@ Game.Screen.playScreen = {
             this.setSubScreen(subScreen);
         } else {
             Game.sendMessage(this._player, emptyMessage);
-            Game.refresh();
+            Game.refresh(this._player);
         }
     }
 }

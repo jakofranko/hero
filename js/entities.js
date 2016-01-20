@@ -9,18 +9,35 @@ Game.PlayerTemplate = {
     sightRadius: 20,
     inventorySlots: 22,
     mixins: [
-        Game.EntityMixins.Sight, 
-        Game.EntityMixins.PlayerActor, 
+        Game.EntityMixins.Sight,
+        Game.EntityMixins.PlayerActor,
         Game.EntityMixins.Destructible,
         Game.EntityMixins.Equipper,
         Game.EntityMixins.Attacker,
         Game.EntityMixins.InventoryHolder,
+        Game.EntityMixins.MoneyHolder,
         Game.EntityMixins.MessageRecipient,
         Game.EntityMixins.PlayerStatGainer,
         Game.EntityMixins.Thrower,
         Game.EntityMixins.ExperienceGainer
     ]
 };
+
+Game.EntityRepository.define('person', {
+    name: 'person',
+    character: 'm',
+    foreground: 'white',
+    maxHp: 10,
+    mixins: [
+        Game.EntityMixins.Attacker,
+        Game.EntityMixins.Destructible,
+        Game.EntityMixins.ExperienceGainer,
+        Game.EntityMixins.MoneyHolder,
+        Game.EntityMixins.Sight,
+        Game.EntityMixins.TaskActor,
+        Game.EntityMixins.RandomStatGainer
+    ]
+});
 
 Game.EntityRepository.define('fungus', {
     name: 'fungus',
@@ -29,9 +46,9 @@ Game.EntityRepository.define('fungus', {
     maxHp: 10,
     speed: 250,
     mixins: [
-        Game.EntityMixins.FungusActor, 
-        Game.EntityMixins.Destructible, 
-        Game.EntityMixins.ExperienceGainer, 
+        Game.EntityMixins.FungusActor,
+        Game.EntityMixins.Destructible,
+        Game.EntityMixins.ExperienceGainer,
         Game.EntityMixins.RandomStatGainer
     ]
 });
