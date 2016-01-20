@@ -53,6 +53,13 @@ Game.Map.prototype.getCity = function() {
     return this._city;
 }
 
+// For just adding actors to the scheduler
+Game.Map.prototype.schedule = function(actor) {
+    if('act' in actor) {
+        this._scheduler.add(actor, true);
+    }
+};
+
 // Entities
 Game.Map.prototype.addEntity = function(entity) {
 	// Set the entity's map

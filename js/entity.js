@@ -6,7 +6,7 @@ Game.Entity = function(properties) {
 	this._x = properties['x'] || 0;
 	this._y = properties['y'] || 0;
 	this._z = properties['z'] || 0;
-    this._speed = properties['speed'] || 1000;
+    this._speed = properties['speed'] || 2;
 	this._map = null;
 };
 // Make entities inherit all the functionality from glyphs

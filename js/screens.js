@@ -41,12 +41,17 @@ Game.Screen.overview = {
 // Define our playing screen
 Game.Screen.playScreen = {
 	_player: null,
+    _time: null,
 	_gameEnded: false,
     _subScreen: null,
     enter: function() {
         // TODO: Player chooses size of city?
         this._player = new Game.Entity(Game.PlayerTemplate);
         var map = new Game.Map(Game.getCitySize(), this._player);
+
+        // Create Time object and add it to the scheduler
+        this._time = new Game.Time();
+        map.schedule(this._time);
 
         // Once player has been created, the map generated and the 
         // map assigned to the player (happens in map creation),
@@ -71,15 +76,16 @@ Game.Screen.playScreen = {
         // Render the tiles
         this.renderTiles(display);
 
-        // Render player HP
+        // Render player stats and time
         var stats = '%c{white}%b{black}';
         stats += String.format(
-            'HP: %s/%s Level: %s XP: %s Money: $%s',
+            'HP: %s/%s Level: %s XP: %s Money: $%s %s',
             this._player.getHp(),
             this._player.getMaxHp(),
             this._player.getLevel(),
             this._player.getExperience(),
-            this._player.getMoney()
+            this._player.getMoney(),
+            this._time.getTime()
         );
         display.drawText(0, screenHeight, stats);
     },

@@ -17,6 +17,7 @@ var Game = {
 	_citySize: 10,
 	// How many in-game tiles a lot should comprise
 	_lotSize: 20,
+	_startTime: '0700',
 
 	getDisplay: function() {
 		return this._display;
@@ -42,6 +43,9 @@ var Game = {
 	},
 	getLotSize: function() {
 		return this._lotSize;
+	},
+	getStartTime: function() {
+		return this._startTime;
 	},
 	init: function() {
 		// Create player entity
