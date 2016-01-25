@@ -35,7 +35,7 @@ Game.Map = function(size, player) {
 
     this.addEntityAtRandomPosition(player, 0);
 
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 100; i++) {
         this.addEntityAtRandomPosition(Game.EntityRepository.create('person'), 0);
     }
 };
