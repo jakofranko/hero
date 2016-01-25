@@ -39,29 +39,57 @@ Game.Time.prototype.act = function() {
 		this._years++;
 	}
 };
-Game.Time.prototype.getSeconds = function() {
-	return this._padDigit(this._seconds);
+Game.Time.prototype.getSeconds = function(pad) {
+	if(pad) {
+		return this._padDigit(this._seconds);
+	} else {
+		return this._seconds;
+	}
 };
-Game.Time.prototype.getMinutes = function() {
-	return this._padDigit(this._minutes);
+Game.Time.prototype.getMinutes = function(pad) {
+	if(pad) {
+		return this._padDigit(this._minutes);
+	} else {
+		return this._minutes;
+	}
 };
-Game.Time.prototype.getHours = function() {
-	return this._padDigit(this._hours);
+Game.Time.prototype.getHours = function(pad) {
+	if(pad) {
+		return this._padDigit(this._hours);
+	} else {
+		return this._hours;
+	}
 };
-Game.Time.prototype.getDays = function() {
-	return this._padDigit(this._days);
+Game.Time.prototype.getDays = function(pad) {
+	if(pad) {
+		return this._padDigit(this._days);
+	} else {
+		return this._days;
+	}
 };
-Game.Time.prototype.getMonths = function() {
-	return this._padDigit(this._months);
+Game.Time.prototype.getMonths = function(pad) {
+	if(pad) {
+		return this._padDigit(this._months);
+	} else {
+		return this._months;
+	}
 };
-Game.Time.prototype.getYears = function() {
-	return this._padDigit(this._years);
+Game.Time.prototype.getYears = function(pad) {
+	if(pad) {
+		return this._padDigit(this._years);
+	} else {
+		return this._years;
+	}
 };
-Game.Time.prototype.getRounds = function() {
-	return this._padDigit(this._rounds);
+Game.Time.prototype.getRounds = function(pad) {
+	if(pad) {
+		return this._padDigit(this._rounds);
+	} else {
+		return this._rounds;
+	}
 };
-Game.Time.prototype.getTime = function() {
-	return '%s:%s:%s'.format(this.getHours(), this.getMinutes(), this.getSeconds());
+Game.Time.prototype.clock = function() {
+	return '%s:%s:%s'.format(this.getHours(true), this.getMinutes(true), this.getSeconds(true));
 };
 Game.Time.prototype.getSpeed = function() {
 	return this._speed;

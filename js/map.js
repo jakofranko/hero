@@ -18,16 +18,26 @@ Game.Map = function(size, player) {
     this._entities = {};
     // Create a table which will hold the items
     this._items = {};
+
     // Create the engine and scheduler
     this._scheduler = new ROT.Scheduler.Speed();
     this._engine = new ROT.Engine(this._scheduler);
+
+    // Create a time object
+    this._time = new Game.Time();
+    this.schedule(this._time);
+
     // Setup the explored array
     this._explored = new Array(this._depth);
     this._setupExploredArray();
 
     this._player = player;
 
-    this.addEntityAtRandomPosition(player, 0)
+    this.addEntityAtRandomPosition(player, 0);
+
+    for (var i = 0; i < 10; i++) {
+        this.addEntityAtRandomPosition(Game.EntityRepository.create('person'), 0);
+    }
 };
 
 // Standard getters
@@ -51,7 +61,10 @@ Game.Map.prototype.getPlayer = function() {
 };
 Game.Map.prototype.getCity = function() {
     return this._city;
-}
+};
+Game.Map.prototype.getTime = function() {
+    return this._time;
+};
 
 // For just adding actors to the scheduler
 Game.Map.prototype.schedule = function(actor) {
