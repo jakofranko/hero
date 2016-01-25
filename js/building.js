@@ -297,7 +297,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 					placeWall = false;
 					break;
 				}
-			};			
+			}
 
 			if(placeWall) {
 				for (var i = 0; i < currentWall.length; i++) {

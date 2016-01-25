@@ -49,10 +49,6 @@ Game.Screen.playScreen = {
         this._player = new Game.Entity(Game.PlayerTemplate);
         var map = new Game.Map(Game.getCitySize(), this._player);
 
-        // Create Time object and add it to the scheduler
-        this._time = new Game.Time();
-        map.schedule(this._time);
-
         // Once player has been created, the map generated and the 
         // map assigned to the player (happens in map creation),
         // we can set the minimap to reflect the city overview.
@@ -85,7 +81,7 @@ Game.Screen.playScreen = {
             this._player.getLevel(),
             this._player.getExperience(),
             this._player.getMoney(),
-            this._time.getTime()
+            this._player.getMap().getTime().clock()
         );
         display.drawText(0, screenHeight, stats);
     },

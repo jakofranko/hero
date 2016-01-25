@@ -431,6 +431,40 @@ Game.EntityMixins.InventoryHolder = {
         }
     }
 };
+Game.EntityMixins.JobActor = {
+    name: 'JobActor',
+    groupName: 'Actor',
+    init: function(template) {
+        this._jobs = template['jobs'] || ['survive'];
+        this._jobPriority = template['jobPriority'] || {};
+        this._lastJobPrioritization = 0;
+    },
+    act: function() {
+        console.log("Entity Jobs: ", this._jobs);
+        // Re-prioritize every hour
+        if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0) {
+            for(var i = 0; i < this._jobs.length; i++) {
+                if(!this._jobPriority[this._jobs[i]]) {
+                    this._jobPriority[this._jobs[i]] = 0;
+                }
+                this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
+            }
+            this._lastJobPrioritization = this._map.getTime().getHours();
+        }
+
+        // Get highest priority job
+        var highestPriority = null;
+        for(var job in this._jobPriority) {
+            if(highestPriority === null) {
+                highestPriority = job;
+            } else if(this._jobPriority[job] > this._jobPriority[highestPriority]) {
+                highestPriority = job;
+            }
+        }
+
+        Game.Jobs[highestPriority].doJob(this);
+    }
+};
 Game.EntityMixins.MoneyHolder = {
     name: 'MoneyHolder',
     init: function(template) {
@@ -480,7 +514,7 @@ Game.EntityMixins.MoneyHolder = {
         
         }
     }
-}
+};
 Game.EntityMixins.MessageRecipient = {
     name: 'MessageRecipient',
     init: function(template) {

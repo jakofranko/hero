@@ -34,7 +34,7 @@ Game.EntityRepository.define('person', {
         Game.EntityMixins.ExperienceGainer,
         Game.EntityMixins.MoneyHolder,
         Game.EntityMixins.Sight,
-        Game.EntityMixins.TaskActor,
+        Game.EntityMixins.JobActor,
         Game.EntityMixins.RandomStatGainer
     ]
 });
