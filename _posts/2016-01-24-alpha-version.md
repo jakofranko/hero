@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Version Plan"
+title: "Alpha Version"
 date:  2016-01-24 08:35pm
 ---
 
