@@ -4,23 +4,35 @@ title: "Version Plan"
 date:  2015-12-17 09:55am
 ---
 
+# 0.10
+
+* Spawn NPCs (all will have the 'mugger' job for right now) according to game settings for number of criminals to start with. Place randomly
+* Update win conditions to display the win screen when the Crime meter drops to 0 (thus bringing the Justice meter up to 100).
+
+# 0.9
+
+* Re-work play screen to include important player information along the side of the screen
+* Re-work NPCs to use HERO System stats (exactly the same as the player)
+
 # v0.8
 
-* Crime; some NPCs should get the robber job and take money from buildings at night
-* Revamp player stats to start matching HERO System stats
-* Pathfinding between z-levels
+* Character creation screen for assigning preliminary experience points
+* Character info screen that shows stats and that will eventually show powers and skills 
+* Updated level-up screen to accomodate new player stats
 
 # v0.7
 
-* Houses! Need to start generating places for our NPCs to live. This will be a new building template, with all new method for placing rooms
-* Furniture Repository and some additional pieces of furniture.
-* NPCs should sleep at home, and go to work during the day
+* Preliminary Justice System
+  * Justice meter
+  * Crime meter
+  * Number of criminals meter
+  * UI menu for viewing these things
 
 # v0.6
 
 * Minimap reflect current location of player by lot
-* Start placing job locations on z-level 0
-* Begin pathfinding for NPCs
+* Begin spawing of NPCs with a job of 'mugger,' that means they will hunt the player after 9pm and before 5am.
+* Revamp player statistics and mixins to support HERO System-like characteristics (not all, but some)
 
 # v0.5
 
