@@ -30,9 +30,11 @@ Corruption would involve some sort of justice process, where police arrest knock
 
 ## Mechanics
 
-The mechanics of this system will involve a tiered system of meters. The first tier will be things like culture, poverty, employment, city-funds/revenue. These will have static values that can be increased or decreased based on the actions of the player and the NPCs. These stats will affect the replenish-rate of the crime and corruption meters. Additionally, there might be city 'modules' that the player can purchase or achieve. For instance, there might be a 'welfare' aspect of the city that the player can activate, which while activated will reduce the city's income, but it will also lessen the poverty level. An increase in jobs can compensate for this.
+The mechanics of this system will involve a tiered system of meters. The first tier will be things like culture, poverty, employment, city-funds/revenue. These will have static values that can be increased or decreased based on the actions of the player and the NPCs. These stats will affect the replenish-rate of the crime and corruption meters. Additionally, there might be city 'modules' that the player can purchase or achieve. For instance, there might be a 'welfare' aspect of the city that the player can activate, which while activated will reduce the city's income, but it will also lessen the poverty level. An increase in jobs can compensate for this. I want to also have a group of statistics that negatively affects the crime rate, like the number of active criminals, corrupt officials, illegal goods, poverty, etc.
 
 The base tiers I'm thinking of are:
+
+### Positive Stats (increase these)
 
 - Culture
 - Employment
@@ -40,6 +42,14 @@ The base tiers I'm thinking of are:
 - Funds
 - Law Enforcement
 - probably more... 
+
+### Negative Stats (decrease these)
+
+- Poverty
+- Corrupt Officials
+- Number of Criminals
+- Illegal Goods
+- probably more...
 
 The second tier will be Crime and Corruption. These increase over time unless the first-tier things can be affected in such a way as to start reducing them on their own. This will be the ultimate goal of the game, to get enough of the first tier stuff taken care of that the city will start to correct itself. The lower the crime and corruption meters get however, the higher chance that a really tough and damaging NPC crime-lord will show up that will start to be a source of bad things. Higher motivation for crime events, can directly attack things like culture, jobs, poverty etc. so that even after the crime-lord is defeated, some repair work needs to be done.
 
