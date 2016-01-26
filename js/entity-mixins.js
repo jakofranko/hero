@@ -440,7 +440,6 @@ Game.EntityMixins.JobActor = {
         this._lastJobPrioritization = 0;
     },
     act: function() {
-        console.log("Entity Jobs: ", this._jobs);
         // Re-prioritize every hour
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0) {
             for(var i = 0; i < this._jobs.length; i++) {
