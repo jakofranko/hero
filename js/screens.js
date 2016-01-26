@@ -157,6 +157,9 @@ Game.Screen.playScreen = {
                 } else {
                     this.showItemsSubScreen(Game.Screen.pickupScreen, items, 'There is nothing here to pick up.');
                 } 
+            } else if(inputData.keyCode === ROT.VK_PERIOD) {
+                // Skip turn
+                this._player.getMap().getEngine().unlock();
             } else {
                 // Not a valid key
                 return;
