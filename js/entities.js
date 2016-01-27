@@ -30,11 +30,13 @@ Game.EntityRepository.define('person', {
     maxHp: 10,
     mixins: [
         Game.EntityMixins.Attacker,
+        Game.EntityMixins.CorpseDropper,
         Game.EntityMixins.Destructible,
         Game.EntityMixins.ExperienceGainer,
+        Game.EntityMixins.JobActor,
         Game.EntityMixins.MoneyHolder,
         Game.EntityMixins.Sight,
-        Game.EntityMixins.JobActor,
+        Game.EntityMixins.Targeting,
         Game.EntityMixins.RandomStatGainer
     ]
 });
