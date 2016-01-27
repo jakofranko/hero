@@ -19,7 +19,7 @@ Game.Jobs.mugger = {
 		Game.Tasks.hunt(entity);
 	},
 	priority: function(entity) {
-		console.log(Math.round(200 / entity.getMoney()));
-		return Math.round(200 / entity.getMoney());
+		console.log("Priority: ", Math.round(200 / entity.getMoney()), "Money: ", entity.getMoney());
+		return Math.round(500 / entity.getMoney());
 	}
 }

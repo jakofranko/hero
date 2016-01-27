@@ -698,6 +698,25 @@ Game.EntityMixins.TaskActor = {
         }
     }
 };
+Game.EntityMixins.Targeting = {
+    name: "Targeting",
+    init: function(template) {
+        this._target = template['target'] || null;
+    },
+    getTarget: function() {
+        return this._target;
+    },
+    setTarget: function(target) {
+        this._target = target;
+    },
+    listeners: {
+        onKill: function(target) {
+            if(this._target == target) {
+                this.setTarget(null);
+            }
+        }
+    }
+}
 Game.EntityMixins.Thrower = {
     name: 'Thrower',
     init: function(template) {
