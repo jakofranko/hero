@@ -37,7 +37,7 @@ Game.Map = function(size, player) {
 
     for (var i = 0; i < 100; i++) {
         this.addEntityAtRandomPosition(Game.EntityRepository.create('person', {
-            money: ROT.RNG.getNormal(200, 100),
+            money: ROT.RNG.getNormal(100, 50),
             jobs: ['mugger', 'survive']
         }), 0);
     }
