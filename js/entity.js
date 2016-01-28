@@ -6,7 +6,6 @@ Game.Entity = function(properties) {
 	this._x = properties['x'] || 0;
 	this._y = properties['y'] || 0;
 	this._z = properties['z'] || 0;
-    this._speed = properties['speed'] || 2;
 	this._map = null;
 };
 // Make entities inherit all the functionality from glyphs
@@ -39,7 +38,13 @@ Game.Entity.prototype.setPosition = function(x, y, z) {
 	}
 };
 Game.Entity.prototype.getSpeed = function() {
-    return this._speed;
+    if(this.hasMixin('Characteristics')) {
+        // SPD is always rounded down
+        return Math.floor(this._SPD);
+    } else {
+        return 1;
+    }
+    
 };
 Game.Entity.prototype.getX = function() {
     return this._x;

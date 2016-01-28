@@ -47,6 +47,26 @@ Game.EntityMixins.Attacker = {
         }
     }
 };
+Game.EntityMixins.Characteristics = {
+    name: 'Characteristics',
+    init: function(template) {
+        this._STR = template['STR'] || 10;
+        this._DEX = template['DEX'] || 10;
+        this._CON = template['CON'] || 10;
+        this._BODY = template['BODY'] || 10;
+        this._INT = template['INT'] || 10;
+        this._EGO = template['EGO'] || 10;
+        this._PRE = template['PRE'] || 10;
+        this._COM = template['COM'] || 10;
+
+        this._PD = template['PD'] || this._STR / 5;
+        this._ED = template['ED'] || this._CON / 5;
+        this._SPD = template['SPD'] || 1 + (this._DEX / 10);
+        this._REC = template['REC'] || (this._STR / 5) + (this._CON / 5);
+        this._END = template['END'] || this._CON * 2;
+        this._STUN = template['STUN'] || this._BODY + (this._STR / 2) + (this._CON / 2);
+    }
+}
 Game.EntityMixins.CorpseDropper = {
     name: 'CorpseDropper',
     init: function(template) {

@@ -9,6 +9,7 @@ Game.PlayerTemplate = {
     sightRadius: 20,
     inventorySlots: 22,
     mixins: [
+        Game.EntityMixins.Characteristics,
         Game.EntityMixins.Sight,
         Game.EntityMixins.PlayerActor,
         Game.EntityMixins.Destructible,
@@ -29,6 +30,7 @@ Game.EntityRepository.define('person', {
     foreground: 'white',
     maxHp: 10,
     mixins: [
+        Game.EntityMixins.Characteristics,
         Game.EntityMixins.Attacker,
         Game.EntityMixins.CorpseDropper,
         Game.EntityMixins.Destructible,
