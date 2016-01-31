@@ -15,6 +15,17 @@ Game.getRandomInRange = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+Game.rollDice = function(XdX) {
+    var dice = XdX.split("d");
+    var num = dice[0];
+    var sides = dice[1];
+    var total = 0;
+    for (var i = 0; i < num; i++) {
+        total += Math.floor(Math.random() * sides) + 1;
+    };
+    return total;
+}
+
 /**
 * Decimal adjustment of a number. Copy/pasted from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
 *
