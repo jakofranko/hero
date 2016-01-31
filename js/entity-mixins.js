@@ -50,6 +50,7 @@ Game.EntityMixins.Attacker = {
 Game.EntityMixins.Characteristics = {
     name: 'Characteristics',
     init: function(template) {
+        // Primary characteristics
         this._STR = template['STR'] || 10;
         this._DEX = template['DEX'] || 10;
         this._CON = template['CON'] || 10;
@@ -59,12 +60,111 @@ Game.EntityMixins.Characteristics = {
         this._PRE = template['PRE'] || 10;
         this._COM = template['COM'] || 10;
 
+        // Figured characteristics
         this._PD = template['PD'] || this._STR / 5;
         this._ED = template['ED'] || this._CON / 5;
         this._SPD = template['SPD'] || 1 + (this._DEX / 10);
         this._REC = template['REC'] || (this._STR / 5) + (this._CON / 5);
         this._END = template['END'] || this._CON * 2;
         this._STUN = template['STUN'] || this._BODY + (this._STR / 2) + (this._CON / 2);
+
+        // Combat values
+        this._CV = Math.round(this._DEX / 3);
+        this._OCVmod = 0;
+        this._DCVmod = 0;
+        this._ECV = Math.round(this._EGO / 3);
+        this._EOCVmod = 0;
+        this._EDCVmod = 0;
+
+    },
+    getSTR: function() {
+        return this._STR;    
+    },
+    getDEX: function() {
+        return this._DEX;    
+    },
+    getCON: function() {
+        return this._CON;    
+    },
+    getBODY: function() {
+        return this._BODY;    
+    },
+    getINT: function() {
+        return this._INT;    
+    },
+    getEGO: function() {
+        return this._EGO;    
+    },
+    getPRE: function() {
+        return this._PRE;    
+    },
+    getCOM: function() {
+        return this._COM;    
+    },
+    getPD: function() {
+        return this._PD;    
+    },
+    getED: function() {
+        return this._ED;    
+    },
+    getSPD: function() {
+        return this._SPD;    
+    },
+    getREC: function() {
+        return this._REC;    
+    },
+    getEND: function() {
+        return this._END;    
+    },
+    getSTUN: function() {
+        return this._STUN;    
+    },
+    getOCV: function() {
+        return this._CV + this._OCVmod;
+    },
+    getDCV: function() {
+        return this._CV + this._DCVmod;
+    },
+    hthAttack: function(target) {
+        var hit = this._attackRoll(target);
+        
+    },
+    presenceAttack: function(target, additionalDice, message) {
+        if(!additionalDice)
+            additionalDice = 0;
+        var dice = Math.floor(this._PRE / 5) + additionalDice;
+        var result = Game.rollDice(dice + "d6");
+
+        if(!message)
+            message = "%s makes a presense attack!".format(this.describe());
+
+        Game.sendMessageNearby(
+            this.getMap(),
+            this.getX(),
+            this.getY(),
+            this.getZ(),
+            message
+        )
+        // Return the margin of success or false
+        var margin;
+        if(result >= target.getPRE()) {
+            margin = result - target.getPRE();
+        }
+        else if(result >= target.getEGO()) {
+            margin = result - target.getEGO();
+        } else {
+            Game.sendMessage(this, "Your presence attack fails to impress %s", [target.describeThe()]);
+            Game.sendMessage(target, "%s attempted and failed to impress you with a presense attack", [this.describe()]);
+            return false;
+        }
+
+        Game.sendMessage(this, "Your presence attack succeeds in impressing %s by %s points!", [target.describeThe(), margin]);
+        Game.sendMessage(target, "%s has impressed you with a presense attack by %s points!", [this.describe(), margin]);
+        return margin;
+    },
+    _attackRoll: function(target) {
+        var roll = Game.rollDice("3d6");
+        return roll <= 11 + this.getOCV() - target.getDCV();
     }
 }
 Game.EntityMixins.CorpseDropper = {
