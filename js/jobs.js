@@ -16,7 +16,12 @@ Game.Jobs.survive = {
 
 Game.Jobs.mugger = {
 	doJob: function(entity) {
-		Game.Tasks.hunt(entity);
+		var adjacent = Game.Tasks.approach(entity);
+		console.log(adjacent);
+		if(adjacent) {
+			var success = entity.presenceAttack(entity.getTarget(), 1, "Give me all your money!");
+			console.log(success);
+		}
 	},
 	priority: function(entity) {
 		console.log("Priority: ", Math.round(200 / entity.getMoney()), "Money: ", entity.getMoney());
