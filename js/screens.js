@@ -23,15 +23,30 @@ Game.Screen.startScreen = {
 Game.Screen.overview = {
     _city: null,
     enter: function(player) {
+        this._player = player;
         this._city = player.getMap().getCity();
     },
     exit: function() { console.log('Exited the overview screen'); },
     render: function(display) {
+        var playerX = Math.floor(this._player.getX() / Game.getLotSize());
+        var playerY = Math.floor(this._player.getY() / Game.getLotSize());
         var lots = this._city.getLots();
         for(var x = 0; x < this._city.getWidth(); x++) {
             for (var y = 0; y < this._city.getHeight(); y++) {
                 var lot = lots[x][y];
-                display.draw(x, y, lot.getChar(), lot.getForeground(), lot.getBackground())
+                var background;
+                if(playerX == x && playerY == y)
+                    background = 'grey';
+                else
+                    background = lot.getBackground();
+
+                display.draw(
+                    x,
+                    y,
+                    lot.getChar(),
+                    lot.getForeground(),
+                    background
+                );
             };
         }
     },
@@ -104,6 +119,14 @@ Game.Screen.playScreen = {
         if (this._subScreen) {
             this._subScreen.handleInput(inputType, inputData);
             return;
+        }
+
+        // If the player is unconscious, all they can do is skip their turn
+        if(!this._player.isConscious()) {
+            if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN)
+                this._player.getMap().getEngine().unlock();
+            else
+                return;
         }
 
         // Otherwise, handle input normally for this screen
