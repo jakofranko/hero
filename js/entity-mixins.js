@@ -89,6 +89,9 @@ Game.EntityMixins.Characteristics = {
     getBODY: function() {
         return this._BODY;    
     },
+    takeBODY: function(BODY) {
+        this._BODY -= BODY;
+    },
     getINT: function() {
         return this._INT;    
     },
@@ -119,15 +122,57 @@ Game.EntityMixins.Characteristics = {
     getSTUN: function() {
         return this._STUN;    
     },
+    takeSTUN: function(STUN) {
+        this._STUN -= STUN;
+        if(this._STUN <= 0) {
+            this.ko();
+        };
+    },
     getOCV: function() {
         return this._CV + this._OCVmod;
     },
     getDCV: function() {
         return this._CV + this._DCVmod;
     },
+    charRoll: function(chr) {
+        var roll = Game.rollDice("3d6");
+        var characteristic = "_" + chr;
+        var targetRoll = 9 + (this[characteristic] / 5);
+        if(roll <= targetRoll) {
+            return targetRoll - roll;
+        } else {
+            return false;
+        }
+    },
     hthAttack: function(target) {
         var hit = this._attackRoll(target);
-        
+        if(hit) {
+            var dice = Math.floor(this._STR / 5);
+            var STUN = 0;
+            var BODY = 0;
+
+            for(var i = 0; i < dice; i++) {
+                var dieRoll = Game.rollDice("1d6");
+
+                STUN += dieRoll;
+                if(dieRoll == 6) {
+                    BODY += 2;
+                } else if(dieRoll > 1) {
+                    BODY += 1;
+                }
+
+            }
+
+            target.takeSTUN(STUN);
+            target.takeBODY(BODY);
+            Game.sendMessage(target, "%s does %s STUN and %s BODY to you!", [this.describeThe(), STUN, BODY]);
+            Game.sendMessage(this, "You do %s STUN and %s BODY to %s!", [STUN, BODY, target.describeThe()]);
+            return true;
+        } else {
+            Game.sendMessage(target, "%s misses you!", [this.describeThe()]);
+            Game.sendMessage(this, "You miss!");
+            return false;
+        } 
     },
     presenceAttack: function(target, additionalDice, message) {
         if(!additionalDice)
@@ -560,6 +605,9 @@ Game.EntityMixins.JobActor = {
         this._lastJobPrioritization = 0;
     },
     act: function() {
+        if(!this._conscious) {
+            return;
+        }
         // Re-prioritize every hour
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0) {
             for(var i = 0; i < this._jobs.length; i++) {
@@ -601,24 +649,28 @@ Game.EntityMixins.MoneyHolder = {
     steal: function(target, amount) {
         if(target.hasMixin('MoneyHolder')) {
             // TODO: base the amount stolen off of a dexterity contest or at least the dex of the stealer
-            var money = target.getMoney();
-            this.pay(money);
-            target.spend(money);
+            if(amount > target.getMoney()) {
+                amount = target.getMoney();
+            }
+
+            target.give(this, amount);
 
             if(target.hasMixin('MessageRecipient')) {
-                Game.sendMessage(target, 'Someone just stole $%s from you!', [money]);
+                Game.sendMessage(target, 'Someone just stole $%s from you!', [amount]);
             }
             if(this.hasMixin('MessageRecipient')) {
-                Game.sendMessage(this, 'You successfully stole $%s from %s', [money, target.describeThe()]);   
+                Game.sendMessage(this, 'You successfully stole $%s from %s', [amount, target.describeThe()]);   
             }
         } else if(this.hasMixin('MessageRecipient')) {
             Game.sendMessage(this, '%s doesn\'t have any money', [target.describeThe()]);   
-        
         }
     },
     give: function(target, amount) {
         if(target.hasMixin('MoneyHolder')) {
-            // TODO: base the amount stolen off of a dexterity contest or at least the dex of the stealer
+            if(this._money < amount) {
+                Game.sendMessage(target, 'I don\'t have that much money');
+                return false;
+            }
             target.pay(amount);
             this.spend(amount);
 
@@ -626,7 +678,7 @@ Game.EntityMixins.MoneyHolder = {
                 Game.sendMessage(target, '%s just gave you $%s', [this.describeThe(), amount]);
             }
             if(this.hasMixin('MessageRecipient')) {
-                Game.sendMessage(this, 'You successfully gave $%s to %s', [amount, target.describeThe()]);   
+                Game.sendMessage(this, 'You just gave $%s to %s', [amount, target.describeThe()]);   
             }
         } else if(this.hasMixin('MessageRecipient')) {
             Game.sendMessage(this, '%s can\'t take money', [target.describeThe()]);   
@@ -653,7 +705,7 @@ Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
     act: function() {
-        if (this._acting) {
+        if (this._acting || !this.isConscious()) {
             return;
         }
         this._acting = true;

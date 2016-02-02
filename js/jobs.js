@@ -16,15 +16,40 @@ Game.Jobs.survive = {
 
 Game.Jobs.mugger = {
 	doJob: function(entity) {
+		var target = entity.getTarget();
+		// If the target is not conscious or out of money, don't target them.
+		if(target != null && target != false && (!target.isConscious() || target.getMoney <= 0)) {
+			entity.setTarget(null);
+			return;	
+		}
+		
 		var adjacent = Game.Tasks.approach(entity);
-		console.log(adjacent);
 		if(adjacent) {
-			var success = entity.presenceAttack(entity.getTarget(), 1, "Give me all your money!");
-			console.log(success);
+			var success = entity.presenceAttack(target, 2, "Give me all your money!");
+			if(success >= 10) {
+				this._attemptTheft(entity, target);
+			} else {
+				var hit = entity.hthAttack(target);
+				if(!target.isConscious()) {
+					this._attemptTheft(entity, target);
+				}
+			}
+		}
+	},
+	_attemptTheft: function(entity, target) {
+		if(target.isConscious()) {
+			// The target can make an EGO roll to determine how much money they give
+			var margin = target.charRoll("EGO");
+			if(margin !== false && margin !== 0) {
+				entity.steal(target, Math.round(target.getMoney() / margin))
+			} else {
+				entity.steal(target, target.getMoney());
+			}
+		} else {
+			entity.steal(target, target.getMoney());
 		}
 	},
 	priority: function(entity) {
-		console.log("Priority: ", Math.round(200 / entity.getMoney()), "Money: ", entity.getMoney());
 		return Math.round(500 / entity.getMoney());
 	}
 }
