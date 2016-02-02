@@ -23,15 +23,30 @@ Game.Screen.startScreen = {
 Game.Screen.overview = {
     _city: null,
     enter: function(player) {
+        this._player = player;
         this._city = player.getMap().getCity();
     },
     exit: function() { console.log('Exited the overview screen'); },
     render: function(display) {
+        var playerX = Math.floor(this._player.getX() / Game.getLotSize());
+        var playerY = Math.floor(this._player.getY() / Game.getLotSize());
         var lots = this._city.getLots();
         for(var x = 0; x < this._city.getWidth(); x++) {
             for (var y = 0; y < this._city.getHeight(); y++) {
                 var lot = lots[x][y];
-                display.draw(x, y, lot.getChar(), lot.getForeground(), lot.getBackground())
+                var background;
+                if(playerX == x && playerY == y)
+                    background = 'grey';
+                else
+                    background = lot.getBackground();
+
+                display.draw(
+                    x,
+                    y,
+                    lot.getChar(),
+                    lot.getForeground(),
+                    background
+                );
             };
         }
     },
@@ -41,6 +56,7 @@ Game.Screen.overview = {
 // Define our playing screen
 Game.Screen.playScreen = {
 	_player: null,
+    _time: null,
 	_gameEnded: false,
     _subScreen: null,
     enter: function() {
@@ -71,14 +87,16 @@ Game.Screen.playScreen = {
         // Render the tiles
         this.renderTiles(display);
 
-        // Render player HP
+        // Render player stats and time
         var stats = '%c{white}%b{black}';
         stats += String.format(
-            'HP: %s/%s Level: %s XP: %s',
+            'HP: %s/%s Level: %s XP: %s Money: $%s %s',
             this._player.getHp(),
             this._player.getMaxHp(),
             this._player.getLevel(),
-            this._player.getExperience()
+            this._player.getExperience(),
+            this._player.getMoney(),
+            this._player.getMap().getTime().clock()
         );
         display.drawText(0, screenHeight, stats);
     },
@@ -101,6 +119,14 @@ Game.Screen.playScreen = {
         if (this._subScreen) {
             this._subScreen.handleInput(inputType, inputData);
             return;
+        }
+
+        // If the player is unconscious, all they can do is skip their turn
+        if(!this._player.isConscious()) {
+            if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN)
+                this._player.getMap().getEngine().unlock();
+            else
+                return;
         }
 
         // Otherwise, handle input normally for this screen
@@ -154,6 +180,9 @@ Game.Screen.playScreen = {
                 } else {
                     this.showItemsSubScreen(Game.Screen.pickupScreen, items, 'There is nothing here to pick up.');
                 } 
+            } else if(inputData.keyCode === ROT.VK_PERIOD) {
+                // Skip turn
+                this._player.getMap().getEngine().unlock();
             } else {
                 // Not a valid key
                 return;
@@ -302,7 +331,7 @@ Game.Screen.playScreen = {
             this.setSubScreen(subScreen);
         } else {
             Game.sendMessage(this._player, emptyMessage);
-            Game.refresh();
+            Game.refresh(this._player);
         }
     }
 }
@@ -619,7 +648,6 @@ Game.Screen.TargetBasedScreen = function(template) {
         }
     }
 };
-
 Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
     this._player = player;
     // Store original position. Subtract the offset to make life easy so we don't
@@ -642,7 +670,6 @@ Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY,
         });
     this._visibleCells = visibleCells;
 };
-
 Game.Screen.TargetBasedScreen.prototype.render = function(display) {
     Game.Screen.playScreen.renderTiles.call(Game.Screen.playScreen, display);
 
@@ -663,7 +690,6 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
     display.drawText(0, Game.getScreenHeight() - 1, 
         this._captionFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY));
 };
-
 Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputData) {
     // Move the cursor
     if (inputType == 'keydown') {
@@ -683,14 +709,12 @@ Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputD
     }
     Game.refresh();
 };
-
 Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
     // Make sure we stay within bounds.
     this._cursorX = Math.max(0, Math.min(this._cursorX + dx, Game.getScreenWidth()));
     // We have to save the last line for the caption.
     this._cursorY = Math.max(0, Math.min(this._cursorY + dy, Game.getScreenHeight() - 1));
 };
-
 Game.Screen.TargetBasedScreen.prototype.executeOkFunction = function() {
     // Switch back to the play screen.
     Game.Screen.playScreen.setSubScreen(undefined);
@@ -776,7 +800,6 @@ Game.Screen.helpScreen = {
         Game.Screen.playScreen.setSubScreen(null);
     }
 };
-
 
 // Level-up screen
 Game.Screen.gainStatScreen = {

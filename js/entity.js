@@ -3,10 +3,10 @@ Game.Entity = function(properties) {
 	Game.DynamicGlyph.call(this, properties);
 	this._name = properties['name'] || '';
 	this._alive = true;
+    this._conscious = true;
 	this._x = properties['x'] || 0;
 	this._y = properties['y'] || 0;
 	this._z = properties['z'] || 0;
-    this._speed = properties['speed'] || 1000;
 	this._map = null;
 };
 // Make entities inherit all the functionality from glyphs
@@ -39,7 +39,13 @@ Game.Entity.prototype.setPosition = function(x, y, z) {
 	}
 };
 Game.Entity.prototype.getSpeed = function() {
-    return this._speed;
+    if(this.hasMixin('Characteristics')) {
+        // SPD is always rounded down
+        return Math.floor(this._SPD);
+    } else {
+        return 1;
+    }
+    
 };
 Game.Entity.prototype.getX = function() {
     return this._x;
@@ -108,6 +114,9 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
 Game.Entity.prototype.isAlive = function() {
     return this._alive;
 };
+Game.Entity.prototype.isConscious = function() {
+    return this._conscious;
+};
 Game.Entity.prototype.kill = function(message) {
     // Only kill once!
     if (!this._alive) {
@@ -125,6 +134,30 @@ Game.Entity.prototype.kill = function(message) {
         this.act();
     } else {
         this.getMap().removeEntity(this);
+    }
+};
+Game.Entity.prototype.ko = function(message) {
+    // Only KO once
+    if(!this._conscious) {
+        return;
+    }
+    this._conscious = false;
+    if (message) {
+        Game.sendMessage(this, message);
+    } else {
+        Game.sendMessage(this, "You have been knocked unconscious!");
+    }
+};
+Game.Entity.prototype.regainConsciousness = function(message) {
+    // Only wake once
+    if(this._conscious) {
+        return;
+    }
+    this._conscious = true;
+    if (message) {
+        Game.sendMessage(this, message);
+    } else {
+        Game.sendMessage(this, "You have regained consciousness");
     }
 };
 Game.Entity.prototype.switchMap = function(newMap) {

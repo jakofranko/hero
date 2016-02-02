@@ -47,6 +47,196 @@ Game.EntityMixins.Attacker = {
         }
     }
 };
+Game.EntityMixins.Characteristics = {
+    name: 'Characteristics',
+    init: function(template) {
+        // Primary characteristics
+        this._STR = template['STR'] || 10;
+        this._DEX = template['DEX'] || 10;
+        this._CON = template['CON'] || 10;
+        this._BODY = template['BODY'] || 10;
+        this._maxBODY = template['maxBODY'] || this._BODY;
+        this._INT = template['INT'] || 10;
+        this._EGO = template['EGO'] || 10;
+        this._PRE = template['PRE'] || 10;
+        this._COM = template['COM'] || 10;
+
+        // Figured characteristics
+        this._PD = template['PD'] || this._STR / 5;
+        this._ED = template['ED'] || this._CON / 5;
+        this._SPD = template['SPD'] || 1 + (this._DEX / 10);
+        this._REC = template['REC'] || (this._STR / 5) + (this._CON / 5);
+        this._END = template['END'] || this._CON * 2;
+        this._STUN = template['STUN'] || this._BODY + (this._STR / 2) + (this._CON / 2);
+        this._maxSTUN = template['maxSTUN'] || this._STUN;
+
+        // Combat values
+        this._CV = Math.round(this._DEX / 3);
+        this._OCVmod = 0;
+        this._DCVmod = 0;
+        this._ECV = Math.round(this._EGO / 3);
+        this._EOCVmod = 0;
+        this._EDCVmod = 0;
+
+    },
+    getSTR: function() {
+        return this._STR;    
+    },
+    getDEX: function() {
+        return this._DEX;    
+    },
+    getCON: function() {
+        return this._CON;    
+    },
+    getBODY: function() {
+        return this._BODY;    
+    },
+    takeBODY: function(BODY) {
+        this._BODY -= BODY;
+    },
+    getMaxBODY: function() {
+        return this._maxBODY;
+    },
+    getINT: function() {
+        return this._INT;    
+    },
+    getEGO: function() {
+        return this._EGO;    
+    },
+    getPRE: function() {
+        return this._PRE;    
+    },
+    getCOM: function() {
+        return this._COM;    
+    },
+    getPD: function() {
+        return this._PD;    
+    },
+    getED: function() {
+        return this._ED;    
+    },
+    getSPD: function() {
+        return this._SPD;    
+    },
+    getREC: function() {
+        return this._REC;    
+    },
+    getEND: function() {
+        return this._END;    
+    },
+    getSTUN: function() {
+        return this._STUN;    
+    },
+    takeSTUN: function(STUN) {
+        this._STUN -= STUN;
+        if(this._STUN <= 0) {
+            this.ko();
+        };
+    },
+    recoverSTUN: function(STUN) {
+        if(!STUN) {
+            var STUN = this._REC;
+        }
+        if(this._STUN + STUN > this._maxSTUN)
+            this._STUN = this._maxSTUN;
+        else
+            this._STUN += STUN;
+
+        if(this._STUN > 0 && !this.isConscious())
+            this.regainConsciousness();
+    },
+    getMaxSTUN: function() {
+        return this._maxSTUN;
+    },
+    getOCV: function() {
+        return this._CV + this._OCVmod;
+    },
+    getDCV: function() {
+        return this._CV + this._DCVmod;
+    },
+    charRoll: function(chr) {
+        var roll = Game.rollDice("3d6");
+        var characteristic = "_" + chr;
+        var targetRoll = 9 + (this[characteristic] / 5);
+        if(roll <= targetRoll) {
+            return targetRoll - roll;
+        } else {
+            return false;
+        }
+    },
+    hthAttack: function(target) {
+        var hit = this._attackRoll(target);
+        if(hit) {
+            var dice = Math.floor(this._STR / 5);
+            var STUN = 0;
+            var BODY = 0;
+
+            for(var i = 0; i < dice; i++) {
+                var dieRoll = Game.rollDice("1d6");
+
+                STUN += dieRoll;
+                if(dieRoll == 6) {
+                    BODY += 2;
+                } else if(dieRoll > 1) {
+                    BODY += 1;
+                }
+
+            }
+
+            target.takeSTUN(STUN);
+            target.takeBODY(BODY);
+            Game.sendMessage(target, "%s does %s STUN and %s BODY to you!", [this.describeThe(), STUN, BODY]);
+            Game.sendMessage(this, "You do %s STUN and %s BODY to %s!", [STUN, BODY, target.describeThe()]);
+            return true;
+        } else {
+            Game.sendMessage(target, "%s misses you!", [this.describeThe()]);
+            Game.sendMessage(this, "You miss!");
+            return false;
+        } 
+    },
+    presenceAttack: function(target, additionalDice, message) {
+        if(!additionalDice)
+            additionalDice = 0;
+        var dice = Math.floor(this._PRE / 5) + additionalDice;
+        var result = Game.rollDice(dice + "d6");
+
+        if(!message)
+            message = "%s makes a presense attack!".format(this.describe());
+
+        Game.sendMessageNearby(
+            this.getMap(),
+            this.getX(),
+            this.getY(),
+            this.getZ(),
+            message
+        )
+        // Return the margin of success or false
+        var margin;
+        if(result >= target.getPRE()) {
+            margin = result - target.getPRE();
+        }
+        else if(result >= target.getEGO()) {
+            margin = result - target.getEGO();
+        } else {
+            Game.sendMessage(this, "Your presence attack fails to impress %s", [target.describeThe()]);
+            Game.sendMessage(target, "%s attempted and failed to impress you with a presense attack", [this.describe()]);
+            return false;
+        }
+
+        Game.sendMessage(this, "Your presence attack succeeds in impressing %s by %s points!", [target.describeThe(), margin]);
+        Game.sendMessage(target, "%s has impressed you with a presense attack by %s points!", [this.describe(), margin]);
+        return margin;
+    },
+    _attackRoll: function(target) {
+        var roll = Game.rollDice("3d6");
+        return roll <= 11 + this.getOCV() - target.getDCV();
+    },
+    listeners: {
+        post12Recovery: function() {
+            this.recoverSTUN();
+        }
+    }
+}
 Game.EntityMixins.CorpseDropper = {
     name: 'CorpseDropper',
     init: function(template) {
@@ -262,6 +452,48 @@ Game.EntityMixins.ExperienceGainer = {
         }
     }
 };
+Game.EntityMixins.FoodConsumer = {
+    name: 'FoodConsumer',
+    init: function(template) {
+        this._maxFullness = template['maxFullness'] || 1000;
+        // Start halfway to max fullness if no default value
+        this._fullness = template['fullness'] || (this._maxFullness / 2);
+        // Number of points to decrease fullness by every turn.
+        this._fullnessDepletionRate = template['fullnessDepletionRate'] || 1;
+    },
+    addTurnHunger: function() {
+        // Remove the standard depletion points
+        this.modifyFullnessBy(-this._fullnessDepletionRate);
+    },
+    modifyFullnessBy: function(points) {
+        this._fullness = this._fullness + points;
+        if (this._fullness <= 0) {
+            this.kill("You have died of starvation!");
+        } else if (this._fullness > this._maxFullness) {
+            this.kill("You choke and die!");
+        }
+    },
+    getHungerState: function() {
+        // Fullness points per percent of max fullness
+        var perPercent = this._maxFullness / 100;
+        // 5% of max fullness or less = starving
+        if(this._fullness <= perPercent * 5) {
+            return 'Starving';
+        // 25% of max fullness or less = hungry
+        } else if (this._fullness <= perPercent * 25) {
+            return 'Hungry';
+        // 95% of max fullness or more = oversatiated
+        } else if (this._fullness >= perPercent * 95) {
+            return 'Oversatiated';
+        // 75% of max fullness or more = full
+        } else if (this._fullness >= perPercent * 75) {
+            return 'Full';
+        // Anything else = not hungry
+        } else {
+            return 'Not Hungry';
+        }
+    }
+};
 Game.EntityMixins.FungusActor = {
     name: 'FungusActor',
     groupName: 'Actor',
@@ -389,6 +621,96 @@ Game.EntityMixins.InventoryHolder = {
         }
     }
 };
+Game.EntityMixins.JobActor = {
+    name: 'JobActor',
+    groupName: 'Actor',
+    init: function(template) {
+        this._jobs = template['jobs'] || ['survive'];
+        this._jobPriority = template['jobPriority'] || {};
+        this._lastJobPrioritization = 0;
+    },
+    act: function() {
+        if(!this._conscious) {
+            return;
+        }
+        // Re-prioritize every hour
+        if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0) {
+            for(var i = 0; i < this._jobs.length; i++) {
+                if(!this._jobPriority[this._jobs[i]]) {
+                    this._jobPriority[this._jobs[i]] = 0;
+                }
+                this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
+            }
+            this._lastJobPrioritization = this._map.getTime().getHours();
+        }
+
+        // Get highest priority job
+        var highestPriority = null;
+        for(var job in this._jobPriority) {
+            if(highestPriority === null) {
+                highestPriority = job;
+            } else if(this._jobPriority[job] > this._jobPriority[highestPriority]) {
+                highestPriority = job;
+            }
+        }
+
+        Game.Jobs[highestPriority].doJob(this);
+    }
+};
+Game.EntityMixins.MoneyHolder = {
+    name: 'MoneyHolder',
+    init: function(template) {
+        this._money = template['money'] || 1000;
+    },
+    getMoney: function() {
+        return this._money;
+    },
+    pay: function(amount) {
+        this._money += amount;
+    },
+    spend: function(amount) {
+        this._money -= amount;
+    },
+    steal: function(target, amount) {
+        if(target.hasMixin('MoneyHolder')) {
+            // TODO: base the amount stolen off of a dexterity contest or at least the dex of the stealer
+            if(amount > target.getMoney()) {
+                amount = target.getMoney();
+            }
+
+            target.give(this, amount);
+
+            if(target.hasMixin('MessageRecipient')) {
+                Game.sendMessage(target, 'Someone just stole $%s from you!', [amount]);
+            }
+            if(this.hasMixin('MessageRecipient')) {
+                Game.sendMessage(this, 'You successfully stole $%s from %s', [amount, target.describeThe()]);   
+            }
+        } else if(this.hasMixin('MessageRecipient')) {
+            Game.sendMessage(this, '%s doesn\'t have any money', [target.describeThe()]);   
+        }
+    },
+    give: function(target, amount) {
+        if(target.hasMixin('MoneyHolder')) {
+            if(this._money < amount) {
+                Game.sendMessage(target, 'I don\'t have that much money');
+                return false;
+            }
+            target.pay(amount);
+            this.spend(amount);
+
+            if(target.hasMixin('MessageRecipient')) {
+                Game.sendMessage(target, '%s just gave you $%s', [this.describeThe(), amount]);
+            }
+            if(this.hasMixin('MessageRecipient')) {
+                Game.sendMessage(this, 'You just gave $%s to %s', [amount, target.describeThe()]);   
+            }
+        } else if(this.hasMixin('MessageRecipient')) {
+            Game.sendMessage(this, '%s can\'t take money', [target.describeThe()]);   
+        
+        }
+    }
+};
 Game.EntityMixins.MessageRecipient = {
     name: 'MessageRecipient',
     init: function(template) {
@@ -408,7 +730,7 @@ Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
     act: function() {
-        if (this._acting) {
+        if(this._acting) {
             return;
         }
         this._acting = true;
@@ -418,6 +740,8 @@ Game.EntityMixins.PlayerActor = {
             Game.Screen.playScreen.setGameEnded(true);
             // Send a last message to the player
             Game.sendMessage(this, 'Press [Enter] to continue!');
+        } else if(!this.isConscious()) {
+            Game.sendMessage(this, 'You\'re unconscious. Press [Enter] to continue!');
         }
         // Re-render the screen
         Game.refresh(this);
@@ -573,6 +897,25 @@ Game.EntityMixins.TaskActor = {
         }
     }
 };
+Game.EntityMixins.Targeting = {
+    name: "Targeting",
+    init: function(template) {
+        this._target = template['target'] || null;
+    },
+    getTarget: function() {
+        return this._target;
+    },
+    setTarget: function(target) {
+        this._target = target;
+    },
+    listeners: {
+        onKill: function(target) {
+            if(this._target == target) {
+                this.setTarget(null);
+            }
+        }
+    }
+}
 Game.EntityMixins.Thrower = {
     name: 'Thrower',
     init: function(template) {

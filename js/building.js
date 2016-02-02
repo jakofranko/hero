@@ -84,7 +84,8 @@ Game.Building = function(properties) {
 			case 3: // bottom-left corner of blueprint
 				topLeft.y = (this._height) - sHeight;
 				break;
-			case 0: // top-left corner of blueprint
+			case 0:
+				break; // top-left corner of blueprint
 			default:
 				break;
 		}
@@ -95,9 +96,9 @@ Game.Building = function(properties) {
 			for (var x = 0; x < sWidth; x++) {
 				for (var y = 0; y < sHeight; y++) {
 					var tile = null;
-					if(y == 0 || y == sHeight - 1) {
+					if(y === 0 || y == sHeight - 1) {
 						tile = horizontalWall;
-					} else if(x == 0 || x == sWidth - 1) {
+					} else if(x === 0 || x == sWidth - 1) {
 						tile = verticalWall;
 					} else if(!stairsPlaced && z < this.getNumberOfStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].describe() !== 'stairsDown') {
 						tile = stairsUp;
@@ -110,17 +111,16 @@ Game.Building = function(properties) {
 							this._blueprint[z + 1][topLeft.x + x][topLeft.y + y] = stairsDown;
 						}
 					}
-				};
-			};
-				
-		};
+				}
+			}
+		}
 	};
 
 	this._generateRoomRegions = properties['generateRoomRegions'] || function() {
 		for (var z = 0; z < this._blueprint.length; z++) {
 			var floorRooms = this._fillRooms(this._blueprint[z], z);
 			this._roomRegions[z] = floorRooms;
-		};
+		}
 	};
 
 	this._placeDoors = properties['placeDoors'] || function() {
@@ -131,7 +131,7 @@ Game.Building = function(properties) {
 		// place doors intelligently so that by some path from the stairs all rooms are accessible
 		// (this is achieved by having the stairwell be region 1 on higher floors during region generation)
 		for(var z = 0; z < this._stories; z++) {
-			if(z == 0) {
+			if(z === 0) {
 				// As this will be going on the outside wall, designate it as such
 				door.setOuterWall(true);
 				var doorPlaced = false;
@@ -146,7 +146,7 @@ Game.Building = function(properties) {
 						doorPlaced = true;
 						break;
 					}
-				};
+				}
 				if(!doorPlaced) {
 					// Scan the first and last column for region 1
 					for (var y = 0; y < this._blueprint[z][0].length; y++) {
@@ -159,7 +159,7 @@ Game.Building = function(properties) {
 							doorPlaced = true;
 							break;
 						}
-					};	
+					}
 				}
 			}
 
@@ -200,7 +200,7 @@ Game.Building = function(properties) {
 		// console.log("Average Diff: ", Math.round((sum / diffs.length) * 100) / 100);
 		// console.log("Diffs by Frequency: ", diffCount);
 		// console.log("---------------------");
-	}
+	};
 
 	this.build = properties['build'] || function() {
 		// Create the initial 3D array, consisting of the outer 
@@ -275,7 +275,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 					} else {
 						break;
 					}
-				};
+				}
 			} else if(sliceOrientation == 'horizontal') {
 				var randomY = Game.getRandomInRange(2, this._height - 2);
 				for (var i = 0; i < this._width; i++) {
@@ -286,7 +286,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 					} else {
 						break;
 					}
-				};
+				}
 			}
 
 			var placeWall = true;
@@ -297,13 +297,13 @@ Game.Building.prototype._sliceMethod = function(floor) {
 					placeWall = false;
 					break;
 				}
-			};			
+			}
 
 			if(placeWall) {
 				for (var i = 0; i < currentWall.length; i++) {
 					var cw = currentWall[i];
 					floor[cw.x][cw.y] = (sliceOrientation == 'vertical') ? verticalWall : horizontalWall;
-				};	
+				}
 				sliceOrientation = this._flipOrientation(sliceOrientation);
 				count += 2;
 			} else {
@@ -351,8 +351,8 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 		regions[x] = new Array(floor[0].length);
 		for (var y = 0; y < regions[x].length; y++) {
 			regions[x][y] = 0;
-		};
-	};
+		}
+	}
 
 	// If on z-level 0, random starting location for filling that's not an edge or wall
 	// It is assumed that since walls are placed one tile apart,

@@ -17,6 +17,7 @@ var Game = {
 	_citySize: 10,
 	// How many in-game tiles a lot should comprise
 	_lotSize: 20,
+	_startTime: '0700',
 
 	getDisplay: function() {
 		return this._display;
@@ -43,6 +44,9 @@ var Game = {
 	getLotSize: function() {
 		return this._lotSize;
 	},
+	getStartTime: function() {
+		return this._startTime;
+	},
 	init: function() {
 		// Create player entity
 		this._player = new Game.Entity(Game.PlayerTemplate);
@@ -56,7 +60,7 @@ var Game = {
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
 	    var game = this; // So that we don't lose this
-	     window.addEventListener('resize', function() {
+	    window.addEventListener('resize', function() {
 	    	game.resize(game.getDisplay(), true, false, true);
 	    	game.resize(game.getOverview(), false, true);
 	    	game.resize(game.getLog(), true, false);

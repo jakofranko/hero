@@ -191,6 +191,6 @@ Game.City.prototype.tilesFromLots = function() {
 			};
 		};
 	};
-	console.log(map);
+
 	return map;
 };
