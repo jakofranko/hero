@@ -1,4 +1,5 @@
 Game.Time = function() {
+	this._map = null;
 	this._seconds = 0;
 	this._minutes = Game.getStartTime().slice(2, 2) || 0;
 	this._hours = Game.getStartTime().slice(0, 2) || 0;
@@ -38,6 +39,10 @@ Game.Time.prototype.act = function() {
 		this._months = 0;
 		this._years++;
 	}
+
+	// Raise the 'post phase 12 recovery' for all entities
+	this._map.post12Recovery();
+
 };
 Game.Time.prototype.getSeconds = function(pad) {
 	if(pad) {

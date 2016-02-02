@@ -60,7 +60,7 @@ var Game = {
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
 	    var game = this; // So that we don't lose this
-	     window.addEventListener('resize', function() {
+	    window.addEventListener('resize', function() {
 	    	game.resize(game.getDisplay(), true, false, true);
 	    	game.resize(game.getOverview(), false, true);
 	    	game.resize(game.getLog(), true, false);

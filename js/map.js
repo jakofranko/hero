@@ -74,6 +74,9 @@ Game.Map.prototype.schedule = function(actor) {
     if('act' in actor) {
         this._scheduler.add(actor, true);
     }
+    if('_map' in actor) {
+        actor._map = this;
+    }
 };
 
 // Entities
@@ -166,6 +169,12 @@ Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
 
     // Add the entity to the table of entities
     this._entities[key] = entity;
+};
+Game.Map.prototype.post12Recovery = function() {
+    for(var e in this._entities) {
+        if(this._entities[e].hasMixin('Characteristics'))
+            this._entities[e].raiseEvent('post12Recovery');
+    }
 };
 
 // Floors

@@ -55,6 +55,7 @@ Game.EntityMixins.Characteristics = {
         this._DEX = template['DEX'] || 10;
         this._CON = template['CON'] || 10;
         this._BODY = template['BODY'] || 10;
+        this._maxBODY = template['maxBODY'] || this._BODY;
         this._INT = template['INT'] || 10;
         this._EGO = template['EGO'] || 10;
         this._PRE = template['PRE'] || 10;
@@ -67,6 +68,7 @@ Game.EntityMixins.Characteristics = {
         this._REC = template['REC'] || (this._STR / 5) + (this._CON / 5);
         this._END = template['END'] || this._CON * 2;
         this._STUN = template['STUN'] || this._BODY + (this._STR / 2) + (this._CON / 2);
+        this._maxSTUN = template['maxSTUN'] || this._STUN;
 
         // Combat values
         this._CV = Math.round(this._DEX / 3);
@@ -91,6 +93,9 @@ Game.EntityMixins.Characteristics = {
     },
     takeBODY: function(BODY) {
         this._BODY -= BODY;
+    },
+    getMaxBODY: function() {
+        return this._maxBODY;
     },
     getINT: function() {
         return this._INT;    
@@ -127,6 +132,21 @@ Game.EntityMixins.Characteristics = {
         if(this._STUN <= 0) {
             this.ko();
         };
+    },
+    recoverSTUN: function(STUN) {
+        if(!STUN) {
+            var STUN = this._REC;
+        }
+        if(this._STUN + STUN > this._maxSTUN)
+            this._STUN = this._maxSTUN;
+        else
+            this._STUN += STUN;
+
+        if(this._STUN > 0 && !this.isConscious())
+            this.regainConsciousness();
+    },
+    getMaxSTUN: function() {
+        return this._maxSTUN;
     },
     getOCV: function() {
         return this._CV + this._OCVmod;
@@ -210,6 +230,11 @@ Game.EntityMixins.Characteristics = {
     _attackRoll: function(target) {
         var roll = Game.rollDice("3d6");
         return roll <= 11 + this.getOCV() - target.getDCV();
+    },
+    listeners: {
+        post12Recovery: function() {
+            this.recoverSTUN();
+        }
     }
 }
 Game.EntityMixins.CorpseDropper = {
@@ -705,7 +730,7 @@ Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
     act: function() {
-        if (this._acting || !this.isConscious()) {
+        if(this._acting) {
             return;
         }
         this._acting = true;
@@ -715,6 +740,8 @@ Game.EntityMixins.PlayerActor = {
             Game.Screen.playScreen.setGameEnded(true);
             // Send a last message to the player
             Game.sendMessage(this, 'Press [Enter] to continue!');
+        } else if(!this.isConscious()) {
+            Game.sendMessage(this, 'You\'re unconscious. Press [Enter] to continue!');
         }
         // Re-render the screen
         Game.refresh(this);
