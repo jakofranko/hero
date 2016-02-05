@@ -16,6 +16,9 @@
 //		The resolution of these 'third tier' elements will thus be the
 //		main gameplay, such as defeating criminals, gaining arrests,
 //		shutting down drug labs, and defeating crime bosses.
+// 4.	Justice will eventually be a city-level mechanic (as opposed to game-level or map-level) in
+//		the eventuality that the character could travel between multiple cities, each
+//		with their own justice rating. For now it is map-level though.
 Game.Justice = function() {
 	this._justice = 0;
 
@@ -24,7 +27,10 @@ Game.Justice = function() {
 	this._corruption = 0;
 
 	// Third Tier meters
-	this._criminals = 0;
+	this._criminals = 10;
+
+	// Initialize justice level based on other starting levels
+	this.updateJustice();
 };
 Game.Justice.prototype.getJustice = function() {
 	return this._justice;
@@ -32,7 +38,7 @@ Game.Justice.prototype.getJustice = function() {
 Game.Justice.prototype.updateJustice = function() {
 	// Update second tier meters
 	this.updateCrime();
-	
+
 	// Justice is a function of the second tier meters (crime and corruption)
 	this._justice = 100 - this._crime - this._corruption;
 };
@@ -52,7 +58,9 @@ Game.Justice.prototype.getCriminals = function() {
 };
 Game.Justice.prototype.addCriminals = function(criminals) {
 	this._criminals += criminals;
+	this.updateJustice();
 };
 Game.Justice.prototype.removeCriminals = function(criminals) {
 	this._criminals -= criminals;
+	this.updateJustice();
 };
