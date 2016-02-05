@@ -35,6 +35,10 @@ Game.Map = function(size, player) {
 
     this.addEntityAtRandomPosition(player, 0);
 
+    // Justice System for this city
+    this._justice = new Game.Justice();
+    console.log(this._justice);
+
     for (var i = 0; i < 100; i++) {
         this.addEntityAtRandomPosition(Game.EntityRepository.create('person', {
             money: ROT.RNG.getNormal(100, 50),
@@ -67,6 +71,9 @@ Game.Map.prototype.getCity = function() {
 };
 Game.Map.prototype.getTime = function() {
     return this._time;
+};
+Game.Map.prototype.getJustice = function() {
+    return this._justice;
 };
 
 // For just adding actors to the scheduler
