@@ -161,8 +161,7 @@ Game.Screen.playScreen = {
                 }
             } else if (inputData.keyCode === ROT.VK_X) {
                 // Show the drop screen
-                this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(),
-                   'You have nothing to examine.');
+                this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(), 'You have nothing to examine.');
                 return;
             } else if(inputData.keyCode === ROT.VK_T) {
                 this.showItemsSubScreen(Game.Screen.throwScreen, this._player.getItems(), 'You have nothing to throw.');
