@@ -88,9 +88,9 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
 	} else if(target) {
 		// An entity can only attack if the entity has the Attacker mixin and 
         // either the entity or the target is the player.
-        if (this.hasMixin('Attacker') &&
+        if (this.hasMixin('Characteristics') &&
         	(this.hasMixin(Game.EntityMixins.PlayerActor) || target.hasMixin(Game.EntityMixins.PlayerActor))) {
-            this.attack(target);
+            this.hthAttack(target);
             return true;
         } 
 

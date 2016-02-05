@@ -91,8 +91,19 @@ Game.EntityMixins.Characteristics = {
     getBODY: function() {
         return this._BODY;    
     },
-    takeBODY: function(BODY) {
+    takeBODY: function(attacker, BODY) {
         this._BODY -= BODY;
+        if(this._BODY <= -this._maxBODY) {
+            Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
+            // Raise events
+            this.raiseEvent('onDeath', attacker);
+            attacker.raiseEvent('onKill', this);
+
+            this.kill();
+            if(this.hasMixin('JobActor') && this.hasJob('mugger')) {
+                this.getMap().getJustice().removeCriminals(1);
+            }
+        }
     },
     getMaxBODY: function() {
         return this._maxBODY;
@@ -127,7 +138,7 @@ Game.EntityMixins.Characteristics = {
     getSTUN: function() {
         return this._STUN;    
     },
-    takeSTUN: function(STUN) {
+    takeSTUN: function(attacker, STUN) {
         this._STUN -= STUN;
         if(this._STUN <= 0) {
             this.ko();
@@ -142,8 +153,23 @@ Game.EntityMixins.Characteristics = {
         else
             this._STUN += STUN;
 
-        if(this._STUN > 0 && !this.isConscious())
+        if(this._STUN > 0 && !this.isConscious()) {
+            // TODO: upon waking up, the NPC loses 'petty crime' jobs?
             this.regainConsciousness();
+            if(Math.random() > 0.5) {
+                Game.sendMessageNearby(
+                    this.getMap(),
+                    this.getX(),
+                    this.getY(),
+                    this.getZ(),
+                    "Ok ok! I'll never do it again!"
+                );
+                this.removeJob('mugger');
+                this.getMap().getJustice().removeCriminals(1);
+                this.reprioritizeJobs();
+                console.log(this.getMap().getJustice());
+            }
+        }
     },
     getMaxSTUN: function() {
         return this._maxSTUN;
@@ -183,8 +209,8 @@ Game.EntityMixins.Characteristics = {
 
             }
 
-            target.takeSTUN(STUN);
-            target.takeBODY(BODY);
+            target.takeSTUN(this, STUN);
+            target.takeBODY(this, BODY);
             Game.sendMessage(target, "%s does %s STUN and %s BODY to you!", [this.describeThe(), STUN, BODY]);
             Game.sendMessage(this, "You do %s STUN and %s BODY to %s!", [STUN, BODY, target.describeThe()]);
             return true;
@@ -630,18 +656,12 @@ Game.EntityMixins.JobActor = {
         this._lastJobPrioritization = 0;
     },
     act: function() {
-        if(!this._conscious) 
+        if(!this.isConscious()) 
             return;
         
         // Re-prioritize every hour
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0) {
-            for(var i = 0; i < this._jobs.length; i++) {
-                if(!this._jobPriority[this._jobs[i]]) {
-                    this._jobPriority[this._jobs[i]] = 0;
-                }
-                this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
-            }
-            this._lastJobPrioritization = this._map.getTime().getHours();
+            this.reprioritizeJobs();
         }
 
         // Get highest priority job
@@ -662,6 +682,26 @@ Game.EntityMixins.JobActor = {
         var index = this._jobs.indexOf(job)
         if(index > -1)
             this._jobs.splice(index, 1);
+    },
+    hasJob: function(job) {
+        return this._jobs.indexOf(job) > -1;
+    },
+    reprioritizeJobs: function() {
+        // Remove any jobs that the entity no longer has
+        for(var job in this._jobPriority) {
+            if(!this._jobs[job]) {
+                delete this._jobPriority[job];
+            }
+        }
+
+        for(var i = 0; i < this._jobs.length; i++) {
+            // Add new jobs to the job priority list
+            if(!this._jobPriority[this._jobs[i]]) {
+                this._jobPriority[this._jobs[i]] = 0;
+            }
+            this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
+        }
+        this._lastJobPrioritization = this._map.getTime().getHours();
     }
 };
 Game.EntityMixins.MoneyHolder = {
