@@ -4,6 +4,10 @@ Game.Jobs.getPriority = function(entity, job) {
 	return this[job].priority(entity);
 };
 
+Game.Jobs.listJobs = function() {
+	console.log(Object.keys(this));
+};
+
 Game.Jobs.survive = {
 	doJob: function(entity) {
 		// For now, just wander

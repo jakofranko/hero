@@ -630,9 +630,9 @@ Game.EntityMixins.JobActor = {
         this._lastJobPrioritization = 0;
     },
     act: function() {
-        if(!this._conscious) {
+        if(!this._conscious) 
             return;
-        }
+        
         // Re-prioritize every hour
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0) {
             for(var i = 0; i < this._jobs.length; i++) {
@@ -647,14 +647,21 @@ Game.EntityMixins.JobActor = {
         // Get highest priority job
         var highestPriority = null;
         for(var job in this._jobPriority) {
-            if(highestPriority === null) {
+            if(highestPriority === null)
                 highestPriority = job;
-            } else if(this._jobPriority[job] > this._jobPriority[highestPriority]) {
+            else if(this._jobPriority[job] > this._jobPriority[highestPriority])
                 highestPriority = job;
-            }
         }
 
         Game.Jobs[highestPriority].doJob(this);
+    },
+    addJob: function(job) {
+        this._jobs.push(job);
+    },
+    removeJob: function(job) {
+        var index = this._jobs.indexOf(job)
+        if(index > -1)
+            this._jobs.splice(index, 1);
     }
 };
 Game.EntityMixins.MoneyHolder = {
