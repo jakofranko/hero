@@ -4,6 +4,10 @@ Game.Jobs.getPriority = function(entity, job) {
 	return this[job].priority(entity);
 };
 
+Game.Jobs.listJobs = function() {
+	console.log(Object.keys(this));
+};
+
 Game.Jobs.survive = {
 	doJob: function(entity) {
 		// For now, just wander
@@ -18,7 +22,7 @@ Game.Jobs.mugger = {
 	doJob: function(entity) {
 		var target = entity.getTarget();
 		// If the target is not conscious or out of money, don't target them.
-		if(target != null && target != false && (!target.isConscious() || target.getMoney <= 0)) {
+		if(target != null && target != false && (!target.isConscious() || !target.isAlive() || target.getMoney <= 0)) {
 			entity.setTarget(null);
 			return;	
 		}
