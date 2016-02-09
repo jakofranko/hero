@@ -37,7 +37,6 @@ Game.Map = function(size, player) {
 
     // Justice System for this city
     this._justice = new Game.Justice();
-    console.log(this._justice);
 
     for (var i = 0; i < 100; i++) {
         this.addEntityAtRandomPosition(Game.EntityRepository.create('person', {

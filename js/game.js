@@ -15,6 +15,7 @@ var Game = {
 	_screenWidth: 80,
 	_screenHeight: 24,
 	_citySize: 10,
+
 	// How many in-game tiles a lot should comprise
 	_lotSize: 20,
 	_startTime: '0700',
@@ -30,6 +31,9 @@ var Game = {
 	},
 	getLog: function() {
 		return this._log;
+	},
+	getCurrentScreen: function() {
+		return this._currentScreen;
 	},
 	getScreenWidth: function() {
 	    return this._screenWidth;

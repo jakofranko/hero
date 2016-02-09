@@ -9,7 +9,7 @@ Game.Screen.startScreen = {
 	exit: function() { console.log('Exited the start screen'); },
 	render: function(display) {
 		// Render prompt to the screen
-		display.drawText(1, 1, "%c{yellow}Javascript Roguelike");
+		display.drawText(1, 1, "Justice: A Superhero Roguelike");
 		display.drawText(1, 2, "Press [Enter] to start!");
 	},
 	handleInput: function(inputType, inputData) {
@@ -131,6 +131,7 @@ Game.Screen.playScreen = {
 
         // Otherwise, handle input normally for this screen
         if (inputType === 'keydown') {
+            console.log(inputType, inputData.keyCode, ROT.VK_J);
 	        if (inputData.keyCode === ROT.VK_LEFT) {
 	            this.move(-1, 0, 0);
 	        } else if (inputData.keyCode === ROT.VK_RIGHT) {
@@ -159,6 +160,9 @@ Game.Screen.playScreen = {
                     // Show the wield screen
                     this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(), 'You have nothing to wield.');
                 }
+            } else if(inputData.keyCode === ROT.VK_J) {
+                this.setSubScreen(Game.Screen.justiceScreen);
+                return;
             } else if (inputData.keyCode === ROT.VK_X) {
                 // Show the drop screen
                 this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(), 'You have nothing to examine.');
@@ -332,6 +336,9 @@ Game.Screen.playScreen = {
             Game.sendMessage(this._player, emptyMessage);
             Game.refresh(this._player);
         }
+    },
+    getPlayer: function() {
+        return this._player;
     }
 }
 
@@ -775,8 +782,8 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
 // Define our help screen
 Game.Screen.helpScreen = {
     render: function(display) {
-        var text = 'jsrogue help';
-        var border = '-------------';
+        var text = 'Help / Command List';
+        var border = '-------------------';
         var y = 0;
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
@@ -797,6 +804,78 @@ Game.Screen.helpScreen = {
     },
     handleInput: function(inputType, inputData) {
         Game.Screen.playScreen.setSubScreen(null);
+    }
+};
+
+// View Justice meters
+Game.Screen.justiceScreen = {
+    _padding: 3,
+    _border: 1,
+    _green: ROT.Color.fromString("#00ff78"),
+    _red: ROT.Color.fromString("#ea003b"),
+    render: function(display) {
+        var text = 'Justice';
+        var justice = Game.Screen.playScreen.getPlayer().getMap().getJustice();
+        display.drawText(Game.getScreenWidth() / 2 - text.length / 2, 0, 'Justice');
+
+        var startX = 0;
+        var title = 'Justice';
+        // Draw Justice Meter
+        this._drawMeter(display, startX, 2, title, justice.getJustice() / 100);
+
+        startX += (title.length + this._padding);
+        title = 'Crime';
+        // Draw Crime Meter
+        this._drawMeter(display, startX, 2, title, justice.getCrime() / 100, true);
+
+        // Number of Criminals
+        startX += (title.length + this._padding);
+        title = 'Criminals';
+        display.drawText(startX, 2, title + ': ' + justice.getCriminals());
+    },
+    handleInput: function(inputType, inputData) {
+        if(inputType == 'keydown' && (inputData.keyCode === ROT.VK_ESCAPE || inputData.keyCode === ROT.VK_RETURN))
+            Game.Screen.playScreen.setSubScreen(null);
+        else
+            return;
+    },
+    /**
+     * @display     The same ROT.Display object passed to the this.render()
+     * @startX 
+     * @startY 
+     * @title       The text to put above the meter
+     * @percentage  Amount the gauge should be filled. Percentage should be a decimal (0.54 for 54%)
+     * @inverse     If set && true, then the more empty the greener it should be. 
+     *              Otherwise, the more full it is, the greener it should be
+     **/
+    _drawMeter: function(display, startX, startY, title, percentage, inverse) {
+        // Draw the title
+        display.drawText(startX, startY, title);
+
+        // Draw meter a little beneathe the title
+        startY += 2;
+
+        var color;
+        if(inverse && inverse === true)
+            color = ROT.Color.interpolate(this._green, this._red, percentage);
+        else
+            color = ROT.Color.interpolate(this._red, this._green, percentage);
+
+        // Draw a meter 10 units tall, and fill the meter if the segment is within the given percentage
+        var edge = "|";
+        for (var i = 10; i > 0; i--) {
+            var meter = "";
+            if(Math.floor10(percentage, -1) * 10 >= i) {
+                var meter = edge + "%c{" + ROT.Color.toHex(color) + "}#%c{}" + edge;
+            } else {
+                var meter = edge + " " + edge;
+            }
+
+            // The meter should be centered under the title (and the meter is 3 characters 'long')
+            var meterX = startX + (title.length / 2) - 2;
+            display.drawText(meterX, startY++, meter);
+        };
+
     }
 };
 
