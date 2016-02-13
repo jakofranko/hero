@@ -18,7 +18,7 @@ Game.Screen.startScreen = {
 			Game.switchScreen(Game.Screen.playScreen);
 		}
 	}
-}
+};
 
 Game.Screen.overview = {
     _city: null,
@@ -47,11 +47,11 @@ Game.Screen.overview = {
                     lot.getForeground(),
                     background
                 );
-            };
+            }
         }
     },
     handleInput: function(inputType, inputData) {}
-}
+};
 
 // Define our playing screen
 Game.Screen.playScreen = {
@@ -90,11 +90,10 @@ Game.Screen.playScreen = {
         // Render player stats and time
         var stats = '%c{white}%b{black}';
         stats += String.format(
-            'HP: %s/%s Level: %s XP: %s Money: $%s %s',
+            'HP: %s/%s XP: %s Money: $%s %s',
             this._player.getHp(),
             this._player.getMaxHp(),
-            this._player.getLevel(),
-            this._player.getExperience(),
+            this._player.getExperiencePoints(),
             this._player.getMoney(),
             this._player.getMap().getTime().clock()
         );
@@ -131,7 +130,6 @@ Game.Screen.playScreen = {
 
         // Otherwise, handle input normally for this screen
         if (inputType === 'keydown') {
-            console.log(inputType, inputData.keyCode, ROT.VK_J);
 	        if (inputData.keyCode === ROT.VK_LEFT) {
 	            this.move(-1, 0, 0);
 	        } else if (inputData.keyCode === ROT.VK_RIGHT) {
@@ -160,6 +158,11 @@ Game.Screen.playScreen = {
                     // Show the wield screen
                     this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(), 'You have nothing to wield.');
                 }
+            } else if(inputData.keyCode === ROT.VK_S) {
+                // Show the stats screen for spending xp
+                Game.Screen.gainStatScreen.setup(this._player);
+                this.setSubScreen(Game.Screen.gainStatScreen);
+                return;
             } else if(inputData.keyCode === ROT.VK_J) {
                 this.setSubScreen(Game.Screen.justiceScreen);
                 return;
@@ -295,10 +298,11 @@ Game.Screen.playScreen = {
                         y - topLeftY,
                         glyph.getChar(), 
                         foreground, 
-                        glyph.getBackground());
+                        glyph.getBackground()
+                    );
                 }
-            };
-        };
+            }
+        }
 
         // Render the entities
         var entities = this._player.getMap().getEntities();
@@ -320,7 +324,7 @@ Game.Screen.playScreen = {
                     );
                 }
             }
-        };
+        }
     },
     setGameEnded: function(gameEnded) {
         this._gameEnded = gameEnded;
@@ -340,7 +344,7 @@ Game.Screen.playScreen = {
     getPlayer: function() {
         return this._player;
     }
-}
+};
 
 // Item Listing
 Game.Screen.ItemListScreen = function(template) {
@@ -350,7 +354,7 @@ Game.Screen.ItemListScreen = function(template) {
     // By default, we use the identity function
     this._isAcceptableFunction = template['isAcceptable'] || function(x) {
         return x;
-    }
+    };
 
     // Can the user select items at all?
     this._canSelectItem = template['canSelect'];
@@ -797,6 +801,7 @@ Game.Screen.helpScreen = {
         display.drawText(0, y++, '[W] to wield items');
         display.drawText(0, y++, '[x] to examine items');
         display.drawText(0, y++, '[;] to look around you');
+        display.drawText(0, y++, '[j] to show city statistics');
         display.drawText(0, y++, '[?] to show this help screen');
         y += 3;
         text = '--- press any key to continue ---';
@@ -879,45 +884,59 @@ Game.Screen.justiceScreen = {
     }
 };
 
-// Level-up screen
+// Spend character points screen
 Game.Screen.gainStatScreen = {
     setup: function(entity) {
         // Must be called before rendering.
         this._entity = entity;
-        this._options = entity.getStatOptions();
+        this._options = entity.getPointOptions();
     },
     render: function(display) {
         var letters = 'abcdefghijklmnopqrstuvwxyz';
         display.drawText(0, 0, 'Choose a stat to increase: ');
+        display.drawText(4, 2, 'CHAR COST   VAL');
 
         // Iterate through each of our options
         for (var i = 0; i < this._options.length; i++) {
-            display.drawText(0, 2 + i, letters.substring(i, i + 1) + ' - ' + this._options[i][0]);
+            // When displaying and checking costs, strip out 'max' and 'mod' from name
+            var charName = this._options[i][0].replace(/^max(\w+)/, "$1").replace(/(\w+)mod$/, "$1");
+            var spacer1 = "".lpad(" ", 4 - charName.length + 2);
+            var spacer2 = "".lpad(" ", 3 - String(Game.Cost.Characteristics[charName]).length + 2);
+
+            display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - ' + charName + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + this._entity.getCharacteristic(charName, true, true));
         }
 
         // Render remaining stat points
-        display.drawText(0, 4 + this._options.length, "Remaining points: " + this._entity.getStatPoints());
+        display.drawText(0, 4 + this._options.length, "Remaining points: " + this._entity.getSpendablePoints());
     },
     handleInput: function(inputType, inputData) {
-        if (inputType === 'keydown') {
+        // TODO: instead of pressing letters, use direction keys to highlight characteristics to increase
+        // and spend points on the highlighted stat. Should be able to put points in and see how figured
+        // characteristics are affected, and be able to move your spendible points around (without
+        // selling back what the character has previously put points into). Up/down to hightlihg, left/right
+        // to spend and take back points, enter to accept (making the purchase permanent).
+        if(inputType === 'keydown' && inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
             // If a letter was pressed, check if it matches to a valid option.
-            if (inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
+            if(this._entity.getSpendablePoints() > 0) {
                 // Check if it maps to a valid item by subtracting 'a' from the character
                 // to know what letter of the alphabet we used.
                 var index = inputData.keyCode - ROT.VK_A;
                 if (this._options[index]) {
-                    // Call the stat increasing function
-                    this._options[index][1].call(this._entity);
+                    // When displaying and checking costs, strip out 'max' and 'mod' from name
+                    var charName = this._options[index][0].replace(/^max(\w+)/, "$1").replace(/(\w+)mod$/, "$1");
+                    // Call the stat increasing function with the name of the stat as an argument
+                    this._options[index][1].call(this._entity, this._options[index][0]);
                     // Decrease stat points
-                    this._entity.setStatPoints(this._entity.getStatPoints() - 1);
-                    // If we have no stat points left, exit the screen, else refresh
-                    if (this._entity.getStatPoints() == 0) {
-                        Game.Screen.playScreen.setSubScreen(undefined);
-                    } else {
-                        Game.refresh();
-                    }
+                    this._entity.subtractSpendablePoints(Game.Cost.Characteristics[charName]);
+
+                    Game.refresh();
                 }
+            } else {
+                Game.sendMessage(this._entity, 'You have no more points to spend.');
+                Game.refresh();
             }
+        } else if(inputType === 'keydown' && (inputData.keyCode === ROT.VK_RETURN || inputData.keyCode === ROT.VK_ESCAPE)) {
+            Game.Screen.playScreen.setSubScreen(undefined);
         }
     }
 };

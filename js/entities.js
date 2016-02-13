@@ -8,8 +8,10 @@ Game.PlayerTemplate = {
     attackValue: 10,
     sightRadius: 20,
     inventorySlots: 22,
+    basePoints: 10,
     mixins: [
         Game.EntityMixins.Characteristics,
+        Game.EntityMixins.CharacterPoints,
         Game.EntityMixins.Sight,
         Game.EntityMixins.PlayerActor,
         Game.EntityMixins.Destructible,
