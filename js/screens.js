@@ -71,6 +71,11 @@ Game.Screen.playScreen = {
 
         // Start the map's engine
         map.getEngine().start();
+
+        // The first thing that should happen is when the game starts is to
+        // assign starting points
+        Game.Screen.gainStatScreen.setup(this._player);
+        this.setSubScreen(Game.Screen.gainStatScreen);
     },
     exit: function() { console.log("Exited play screen."); },
     render: function(display) {
