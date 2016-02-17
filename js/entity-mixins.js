@@ -93,7 +93,6 @@ Game.EntityMixins.Characteristics = {
         this._ECV = Math.round(this._EGO / 3);
         this._EOCVmod = 0;
         this._EDCVmod = 0;
-
     },
     updateFiguredCharacteristics: function() {
         this._PD        = Math.round(this._STR / 5);

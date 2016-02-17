@@ -56,6 +56,9 @@ Game.Map.prototype.getWidth = function() {
 Game.Map.prototype.getHeight = function() {
     return this._height;
 };
+Game.Map.prototype.getScheduler = function() {
+    return this._scheduler;
+};
 Game.Map.prototype.getEngine = function() {
 	return this._engine;
 };

@@ -899,13 +899,13 @@ Game.Screen.gainStatScreen = {
     render: function(display) {
         var letters = 'abcdefghijklmnopqrstuvwxyz';
         display.drawText(0, 0, 'Choose a stat to increase: ');
-        display.drawText(4, 2, 'CHAR COST   VAL');
+        display.drawText(4, 2, 'CHAR  COST  VAL');
 
         // Iterate through each of our options
         for (var i = 0; i < this._options.length; i++) {
             // When displaying and checking costs, strip out 'max' and 'mod' from name
             var charName = this._options[i][0].replace(/^max(\w+)/, "$1").replace(/(\w+)mod$/, "$1");
-            var spacer1 = "".lpad(" ", 4 - charName.length + 2);
+            var spacer1 = "".lpad(" ", 4 - charName.length + 3);
             var spacer2 = "".lpad(" ", 3 - String(Game.Cost.Characteristics[charName]).length + 2);
 
             display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - ' + charName + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + this._entity.getCharacteristic(charName, true, true));
