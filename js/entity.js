@@ -41,7 +41,7 @@ Game.Entity.prototype.setPosition = function(x, y, z) {
 Game.Entity.prototype.getSpeed = function() {
     if(this.hasMixin('Characteristics')) {
         // SPD is always rounded down
-        return Math.floor(this._SPD);
+        return Math.floor(this.getSPD() + this.getSPDmod());
     } else {
         return 1;
     }
