@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "Version Plan"
+title: "Version Plan for v1"
 date:  2015-12-17 09:55am
 ---
 
-# 0.10
+# v1.0
 
 * Update win conditions to display the win screen when the Crime meter drops to 0 (thus bringing the Justice meter up to 100).
 * Normalize NPC generation (NPC generator/factory class maybe?) such that NPCs are created with random genders, with default jobs and then are assigned the mugger job
 * Create an `addJob` and `removeJob` function that will properly update game stats based on the type of job (thus when a mugger job is given to an NPC, it increments the criminal stat in the justice system, and when that job is removed, it decrements that stat)
 
-# 0.9
+# v0.9
 
 * Re-work play screen to include important player information along the side of the screen
 * Re-work NPCs to level up randomly assigning points to HERO System stats
