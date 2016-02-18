@@ -53,6 +53,25 @@ Game.Screen.overview = {
     handleInput: function(inputType, inputData) {}
 };
 
+Game.Screen.stats = {
+    enter: function(player) {
+        this._player = player;
+    },
+    exit: function() { console.log('Exited the stats screen'); },
+    render: function(display) {
+        display.clear();
+        var BODY = "BODY: " + String(this._player.getBODY());
+        var STUN = "STUN: " + String(this._player.getSTUN());
+        var HTH = "HTH: " + this._player.getHTH();
+        console.log(BODY, STUN, HTH);
+        var y = 1;
+        display.drawText(0, y++, BODY);
+        display.drawText(0, y++, STUN);
+        display.drawText(0, y++, HTH);
+    },
+    handleInput: function(inputType, inputData) {}
+};
+
 // Define our playing screen
 Game.Screen.playScreen = {
 	_player: null,
@@ -68,6 +87,9 @@ Game.Screen.playScreen = {
         // map assigned to the player (happens in map creation),
         // we can set the minimap to reflect the city overview.
         Game.setMiniMap(Game.Screen.overview, this._player);
+
+        // Display the player's stats (characteristics)
+        Game.setCharacterStats(Game.Screen.stats, this._player);
 
         // Start the map's engine
         map.getEngine().start();

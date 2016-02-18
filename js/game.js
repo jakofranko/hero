@@ -10,6 +10,7 @@ var Game = {
 	// Screens
 	_currentScreen: null,
 	_miniMap: null,
+	_characterStats: null,
 	_messages: null,
 
 	_screenWidth: 80,
@@ -35,6 +36,12 @@ var Game = {
 	getCurrentScreen: function() {
 		return this._currentScreen;
 	},
+	getMiniMap: function() {
+		return this._miniMap;
+	},
+	getCharacterStats: function() {
+		return this._characterStats;
+	},
 	getScreenWidth: function() {
 	    return this._screenWidth;
 	},
@@ -59,6 +66,7 @@ var Game = {
 	    this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight + 1});
 	    this._overview = new ROT.Display({width: this._citySize, height: this._citySize});
 	    this._log = new ROT.Display({width: 30, height: 20});
+	    this._stats = new ROT.Display({width: 10, height: 5});
 
 	   
 	    // Create a helper function for binding to an event
@@ -67,6 +75,7 @@ var Game = {
 	    window.addEventListener('resize', function() {
 	    	game.resize(game.getDisplay(), true, false, true);
 	    	game.resize(game.getOverview(), false, true);
+	    	game.resize(game.getStats(), false, true);
 	    	game.resize(game.getLog(), true, false);
 	    	game.refresh();
 	    });
@@ -93,6 +102,9 @@ var Game = {
         this._currentScreen.render(this._display);
         if(this._miniMap !== null) {
         	this._miniMap.render(this._overview);	
+        }
+        if(this._characterStats !== null) {
+        	this._characterStats.render(this._stats);	
         }
 
         this.displayMessages(player);
@@ -162,6 +174,13 @@ var Game = {
 			this._miniMap.enter(player);
 		}
 	},
+	setCharacterStats: function(screen, player) {
+		this.getStats().clear();
+		this._characterStats = screen;
+		if(!this._characterStats !== null) {
+			this._characterStats.enter(player);
+		}
+	},
 	resize: function(display, setSize, setFontSize, setScreenSize) {
 		var options = display.getOptions();
 		var parent = display.getContainer().parentElement;
@@ -194,6 +213,7 @@ window.onload = function() {
         // Add the container to our HTML page
         document.getElementById('level').appendChild(Game.getDisplay().getContainer());
         document.getElementById('overview').appendChild(Game.getOverview().getContainer());
+        document.getElementById('stats').appendChild(Game.getStats().getContainer());
         document.getElementById('log').appendChild(Game.getLog().getContainer());
         // Load the start screen
         Game.switchScreen(Game.Screen.startScreen);
@@ -201,6 +221,7 @@ window.onload = function() {
         // Resize canvas elements
 	    Game.resize(Game.getDisplay(), true, false, true);
 	    Game.resize(Game.getOverview(), false, true);
+	    Game.resize(Game.getStats(), false, true);
 	    Game.resize(Game.getLog(), true, false);
     }
 }

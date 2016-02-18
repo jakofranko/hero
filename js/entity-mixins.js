@@ -124,6 +124,7 @@ Game.EntityMixins.Characteristics = {
         return this._BODY;    
     },
     takeBODY: function(attacker, BODY) {
+        debugger;
         this._BODY -= BODY;
         if(this._BODY <= -this._maxBODY) {
             Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
@@ -230,6 +231,9 @@ Game.EntityMixins.Characteristics = {
     },
     getDCV: function() {
         return this._CV + this._DCVmod;
+    },
+    getHTH: function() {
+        return Math.floor(this._STR / 5) + "d6";
     },
     charRoll: function(chr) {
         var roll = Game.rollDice("3d6");
