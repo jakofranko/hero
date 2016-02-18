@@ -61,14 +61,30 @@ Game.EntityMixins.Characteristics = {
         this._PRE = template['PRE'] || 10;
         this._COM = template['COM'] || 10;
 
-        // Figured characteristics
+        // Figured characteristics. These will update as primary 
+        // characteristics change, but cannot be added to.
         this._PD = template['PD'] || this._STR / 5;
         this._ED = template['ED'] || this._CON / 5;
         this._SPD = template['SPD'] || 1 + (this._DEX / 10);
         this._REC = template['REC'] || (this._STR / 5) + (this._CON / 5);
         this._END = template['END'] || this._CON * 2;
+        this._maxEND = template['maxEND'] || this._END;
         this._STUN = template['STUN'] || this._BODY + (this._STR / 2) + (this._CON / 2);
         this._maxSTUN = template['maxSTUN'] || this._STUN;
+
+        // Figured characteristic modifiers. These are seperate from the values of the figured characteristics,
+        // but can be individually subtracted and added to seperately from the figured characteristics
+        this._PDmod = 0;
+        this._EDmod = 0;
+        this._SPDmod = 0;
+        this._RECmod = 0;
+        this._maxENDmod = 0;
+        this._STUNmod = 0;
+        this._maxSTUNmod = 0;
+
+        // It should be noted that BODY, STUN and END are tracked as the current values, whereas
+        // maxBODY, maxSTUN and maxEND is the upper limit that they can recover too, and 
+        // maxBODYmod, maxSTUNmod, and maxENDmod are what get incrememnted when spending XP
 
         // Combat values
         this._CV = Math.round(this._DEX / 3);
@@ -77,7 +93,23 @@ Game.EntityMixins.Characteristics = {
         this._ECV = Math.round(this._EGO / 3);
         this._EOCVmod = 0;
         this._EDCVmod = 0;
-
+    },
+    updateFiguredCharacteristics: function() {
+        this._PD        = Math.round(this._STR / 5);
+        this._ED        = Math.round(this._CON / 5);
+        this._SPD       = Math.floor(1 + (this._DEX / 10));
+        this._REC       = Math.round((this._STR / 5) + (this._CON / 5));
+        this._maxEND    = Math.round(this._CON * 2);
+        this._maxSTUN   = Math.round(this._BODY + (this._STR / 2) + (this._CON / 2));
+    },
+    getCharacteristic: function(CHAR, total, max, mod) {
+        var prefix = (max && (CHAR == 'BODY' || CHAR == 'STUN' || CHAR == 'END')) ? 'max' : '';
+        var suffix = mod ? 'mod' : '';
+        var characteristic = "_" + prefix + CHAR + suffix;
+        if(total && this[characteristic + "mod"])
+            return this[characteristic] + this[characteristic + "mod"];
+        else
+            return this[characteristic];
     },
     getSTR: function() {
         return this._STR;    
@@ -123,26 +155,61 @@ Game.EntityMixins.Characteristics = {
     getPD: function() {
         return this._PD;    
     },
+    getPDmod: function() {
+        return this._PDmod;    
+    },
     getED: function() {
         return this._ED;    
+    },
+    getEDmod: function() {
+        return this._EDmod;    
     },
     getSPD: function() {
         return this._SPD;    
     },
+    getSPDmod: function() {
+        return this._SPDmod;    
+    },
     getREC: function() {
         return this._REC;    
+    },
+    getRECmod: function() {
+        return this._RECmod;    
     },
     getEND: function() {
         return this._END;    
     },
+    getMaxEND: function() {
+        return this._maxEND;
+    },
+    getMaxENDmod: function() {
+        return this._maxENDmod;    
+    },
     getSTUN: function() {
         return this._STUN;    
+    },
+    getMaxSTUN: function() {
+        return this._maxSTUN;
+    },
+    getMaxSTUNmod: function() {
+        return this._maxSTUNmod;
     },
     takeSTUN: function(attacker, STUN) {
         this._STUN -= STUN;
         if(this._STUN <= 0) {
+            Game.sendMessage(attacker, "You knocked %s unconscious", [this.describe()]);
             this.ko();
-        };
+        }
+    },
+    increaseChar: function(CHAR) {
+        var characteristic = "_" + CHAR;
+        this[characteristic] += 1;
+        this.updateFiguredCharacteristics();
+    },
+    decreaseChar: function(CHAR) {
+        var characteristic = "_" + CHAR;
+        this[characteristic] -= 1;
+        this.updateFiguredCharacteristics();
     },
     recoverSTUN: function(STUN) {
         if(!STUN) {
@@ -154,25 +221,9 @@ Game.EntityMixins.Characteristics = {
             this._STUN += STUN;
 
         if(this._STUN > 0 && !this.isConscious()) {
-            // TODO: upon waking up, the NPC loses 'petty crime' jobs?
             this.regainConsciousness();
-            if(Math.random() > 0.5) {
-                Game.sendMessageNearby(
-                    this.getMap(),
-                    this.getX(),
-                    this.getY(),
-                    this.getZ(),
-                    "Ok ok! I'll never do it again!"
-                );
-                this.removeJob('mugger');
-                this.getMap().getJustice().removeCriminals(1);
-                this.reprioritizeJobs();
-                console.log(this.getMap().getJustice());
-            }
+            this.raiseEvent('onRegainConsciousness');
         }
-    },
-    getMaxSTUN: function() {
-        return this._maxSTUN;
     },
     getOCV: function() {
         return this._CV + this._OCVmod;
@@ -235,7 +286,7 @@ Game.EntityMixins.Characteristics = {
             this.getY(),
             this.getZ(),
             message
-        )
+        );
         // Return the margin of success or false
         var margin;
         if(result >= target.getPRE()) {
@@ -262,7 +313,61 @@ Game.EntityMixins.Characteristics = {
             this.recoverSTUN();
         }
     }
-}
+};
+Game.EntityMixins.CharacterPoints = {
+    name: 'CharacterPoints',
+    groupName: 'CharacterPoints',
+    init: function(template) {
+        // Characters will have a base pool of points, and can earn experience points,
+        // and potentially aquire disadvantages for more points. Seperately, as points
+        // are aquired they should be put in a pool of 'spendable' points that they can
+        // enhance themselves with. That way, a total point value can be ascertained
+        // from a character for awarding experience points for their defeat.
+        this._basePoints = template['basePoints'] || 0;
+        this._spendablePoints = template['basePoints'] || 0;
+
+        // Determine what they can spend XP on.
+        this._pointOptions = [];
+        if (this.hasMixin('Characteristics')) {
+            this._pointOptions.push(['STR', this.increaseChar]);
+            this._pointOptions.push(['DEX', this.increaseChar]);
+            this._pointOptions.push(['CON', this.increaseChar]);
+            this._pointOptions.push(['maxBODY', this.increaseChar]);
+            this._pointOptions.push(['INT', this.increaseChar]);
+            this._pointOptions.push(['EGO', this.increaseChar]);
+            this._pointOptions.push(['PRE', this.increaseChar]);
+            this._pointOptions.push(['COM', this.increaseChar]);
+            this._pointOptions.push(['PDmod', this.increaseChar]);
+            this._pointOptions.push(['EDmod', this.increaseChar]);
+            this._pointOptions.push(['SPDmod', this.increaseChar]);
+            this._pointOptions.push(['RECmod', this.increaseChar]);
+            this._pointOptions.push(['maxENDmod', this.increaseChar]);
+            this._pointOptions.push(['maxSTUNmod', this.increaseChar]);
+        }
+    },
+    getBasePoints: function() {
+        return this._basePoints;
+    },
+    getPointOptions: function() {
+        return this._pointOptions;
+    },
+    getSpendablePoints: function() {
+        return this._spendablePoints;
+    },
+    addSpendablePoints: function(points) {
+        this._spendablePoints += points;
+    },
+    subtractSpendablePoints: function(points) {
+        this._spendablePoints -= points;
+    },
+    getTotalPoints: function() {
+        var pointTotal = this._basePoints;
+        if(this.hasMixin('ExperienceGainer')) {
+            pointTotal += this.getExperiencePoints();
+        }
+        return pointTotal;
+    }
+};
 Game.EntityMixins.CorpseDropper = {
     name: 'CorpseDropper',
     init: function(template) {
@@ -274,11 +379,15 @@ Game.EntityMixins.CorpseDropper = {
             // Check if we should drop a corpse.
             if (Math.round(Math.random() * 100) <= this._corpseDropRate) {
                 // Create a new corpse item and drop it.
-                this._map.addItem(this.getX(), this.getY(), this.getZ(),
+                this._map.addItem(
+                    this.getX(),
+                    this.getY(),
+                    this.getZ(),
                     Game.ItemRepository.create('corpse', {
                         name: this._name + ' corpse',
                         foreground: this._foreground
-                    }));
+                    })
+                );
             }    
         }
     }
@@ -391,90 +500,25 @@ Game.EntityMixins.Equipper = {
 };
 Game.EntityMixins.ExperienceGainer = {
     name: 'ExperienceGainer',
+    groupName: 'CharacterPoints',
     init: function(template) {
-        this._level = template['level'] || 1;
-        this._experience = template['experience'] || 0;
-        this._statPointsPerLevel = template['statPointsPerLevel'] || 1;
-        this._statPoints = 0;
-        // Determine what stats can be levelled up.
-        this._statOptions = [];
-        if (this.hasMixin('Attacker')) {
-            this._statOptions.push(['Increase attack value', this.increaseAttackValue]);
-        }
-        if (this.hasMixin('Destructible')) {
-            this._statOptions.push(['Increase defense value', this.increaseDefenseValue]);   
-            this._statOptions.push(['Increase max health', this.increaseMaxHp]);
-        }
-        if (this.hasMixin('Sight')) {
-            this._statOptions.push(['Increase sight range', this.increaseSightRadius]);
-        }
-        if (this.hasMixin('Thrower')) {
-            this._statOptions.push(['Increase throwing skill', this.increaseThrowingSkill]);
-        }
+        this.experiencePoints = template['experiencePoints'] || 0;
     },
-    getLevel: function() {
-        return this._level;
+    getExperiencePoints: function() {
+        return this.experiencePoints;
     },
-    getExperience: function() {
-        return this._experience;
-    },
-    getNextLevelExperience: function() {
-        return (this._level * this._level) * 10;
-    },
-    getStatPoints: function() {
-        return this._statPoints;
-    },
-    setStatPoints: function(statPoints) {
-        this._statPoints = statPoints;
-    },
-    getStatOptions: function() {
-        return this._statOptions;
-    },
-    giveExperience: function(points) {
-        var statPointsGained = 0;
-        var levelsGained = 0;
-        // Loop until we've allocated all points.
-        while (points > 0) {
-            // Check if adding in the points will surpass the level threshold.
-            if (this._experience + points >= this.getNextLevelExperience()) {
-                // Fill our experience till the next threshold.
-                var usedPoints = this.getNextLevelExperience() - this._experience;
-                points -= usedPoints;
-                this._experience += usedPoints;
-                // Level up our entity!
-                this._level++;
-                levelsGained++;
-                this._statPoints += this._statPointsPerLevel;
-                statPointsGained += this._statPointsPerLevel;
-            } else {
-                // Simple case - just give the experience.
-                this._experience += points;
-                points = 0;
-            }
-        }
-        // Check if we gained at least one level.
-        if (levelsGained > 0) {
-            Game.sendMessage(this, "You advance to level %s.", [this._level]);
-            this.raiseEvent('onGainLevel');
-        }
+    giveExperiencePoints: function(xp) {
+        this.experiencePoints += xp;
+        Game.sendMessage(this, 'You have earned %s experience points', [xp]);
     },
     listeners: {
         onKill: function(victim) {
-            var exp = victim.getMaxHp() + victim.getDefenseValue();
-            if (victim.hasMixin('Attacker')) {
-                exp += victim.getAttackValue();
-            }
-            // Account for level differences
-            if (victim.hasMixin('ExperienceGainer')) {
-                exp -= (this.getLevel() - victim.getLevel()) * 3;
-            }
+            var xp = 0;
+            if(victim.hasMixin('CharacterPoints'))
             // Only give experience if more than 0.
-            if (exp > 0) {
-                this.giveExperience(exp);
+            if (xp > 0) {
+                this.giveExperiencePoints(xp);
             }
-        },
-        details: function() {
-            return [{key: 'level', value: this.getLevel()}];
         }
     }
 };
@@ -702,6 +746,26 @@ Game.EntityMixins.JobActor = {
             this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
         }
         this._lastJobPrioritization = this._map.getTime().getHours();
+    },
+    listeners: {
+        onRegainConsciousness: function() {
+            if(this.hasJob('mugger')) {
+                // TODO: upon waking up, the NPC loses 'petty crime' jobs?
+                if(Math.random() > 0.5) {
+                    Game.sendMessageNearby(
+                        this.getMap(),
+                        this.getX(),
+                        this.getY(),
+                        this.getZ(),
+                        "Ok ok! I'll never do it again!"
+                    );
+                    this.removeJob('mugger');
+                    this.getMap().getJustice().removeCriminals(1);
+                    this.reprioritizeJobs();
+                    console.log(this.getMap().getJustice());
+                }
+            }
+        }
     }
 };
 Game.EntityMixins.MoneyHolder = {
