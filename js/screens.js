@@ -1,16 +1,79 @@
 // Tutorial reference: http://www.codingcookies.com/2013/04/03/building-a-roguelike-in-javascript-part-2/
+// ASCII art from http://www.chris.com/ascii/index.php?art=objects/scales; altered by me.
 // TODO: Build a 'fromTemplate' function to parse files or a logo or something like that
 // TODO: Flesh out startScreen to be more of a menu, flipping between current items etc.
 Game.Screen = {};
 
 // Define start screen
 Game.Screen.startScreen = {
-	enter: function() { console.log('Entered the start screen'); },
+	enter: function() { Game.resize(Game.getDisplay(), true, false, true); },
 	exit: function() { console.log('Exited the start screen'); },
 	render: function(display) {
 		// Render prompt to the screen
-		display.drawText(1, 1, "Justice: A Superhero Roguelike");
-		display.drawText(1, 2, "Press [Enter] to start!");
+        var w = Game.getScreenWidth();
+        var h = Game.getScreenHeight();
+        var text = "%c{#585DF5}Justice%c{}: A Superhero Roguelike";
+        display.drawText((w/2) - (text.length / 2), 2, text);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to start!";
+        display.drawText((w/2) - (text.length / 2), 3, text);
+        // The widest point of the scale is 74 characters, so, use that to pad the rest
+        var widestPoint = "'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'";
+        // var padLeft = Math.round(widestPoint.length / 2);
+        var scalesASCII = [
+            ",ggg,                   gg                   ,ggg,",
+           "d8P^^8b                ,d88b,                d8^^Y8b",
+           "Y8b,__,,aadd88888bbaaa,888888,aaadd88888bbaa,,__,d8P",
+            "'88888888888888888888I888888I88888888888888888888'",
+            "/|\\`^^YY8888888PP^^^^`888888'^^^^YY8888888PP^^'/|\\",
+           "/ | \\                  `WWWW'                  / | \\",
+          "/  |  \\                 ,dMMb,                 /  |  \\",
+         "/   |   \\                I8888I                /   |   \\",
+        "/    |    \\               `Y88P'               /    |    \\",
+       "/     |     \\               `YP'               /     |     \\",
+      "/      |      \\               88               /      |      \\",
+     "/       |       \\             i88i             /       |       \\",
+    "/        |        \\            8888            /        |        \\",
+"'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'",
+  "`''Y888888888888888P'''        ,888888,        `''Y888888888888888P'''",
+                                 "I888888I",
+                                 "Y888888P",
+                                 "`Y8888P'",
+                                  "`WWWW'",
+                                   "dMMb",
+                               "_,ad8888ba,_",
+                    "__,,aaaadd888888888888888bbaaaa,,__",
+                  "d8888888888888888888888888888888888888b"
+        ];
+
+        console.log(scalesASCII);
+        for (var i = 0; i < scalesASCII.length; i++) {
+            display.drawText(3 + (widestPoint.length - scalesASCII[i].length) / 2, i + 7, "%c{#F5F058}" + scalesASCII[i]);
+        }
+
+//             ,ggg,                   gg                   ,ggg,
+//            d8P^^8b                ,d88b,                d8^^Y8b
+//            Y8b,__,,aadd88888bbaaa,888888,aaadd88888bbaa,,__,d8P
+//             '88888888888888888888I888888I88888888888888888888'
+//             /|\`^^YY8888888PP^^^^`888888'^^^^YY8888888PP^^'/|\
+//            / | \                  `WWWW'                  / | \
+//           /  |  \                 ,dMMb,                 /  |  \
+//          /   |   \                I8888I                /   |   \
+//         /    |    \               `Y88P'               /    |    \
+//        /     |     \               `YP'               /     |     \
+//       /      |      \               88               /      |      \
+//      /       |       \             i88i             /       |       \
+//     /        |        \            8888            /        |        \
+// 'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'
+//   `''Y888888888888888P'''        ,888888,        `''Y888888888888888P'''
+//                                  I888888I
+//                                  Y888888P
+//                                  `Y8888P'
+//                                   `WWWW'    Normand
+//                                    dMMb     Veilleux
+//                                _,ad8888ba,_
+//                     __,,aaaadd888888888888888bbaaaa,,__
+//                   d8888888888888888888888888888888888888b
 	},
 	handleInput: function(inputType, inputData) {
 		// When [Enter] is pressed, go to the play screen
