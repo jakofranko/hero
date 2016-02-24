@@ -124,7 +124,6 @@ Game.EntityMixins.Characteristics = {
         return this._BODY;    
     },
     takeBODY: function(attacker, BODY) {
-        debugger;
         this._BODY -= BODY;
         if(this._BODY <= -this._maxBODY) {
             Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);

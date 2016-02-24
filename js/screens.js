@@ -21,59 +21,59 @@ Game.Screen.startScreen = {
         var widestPoint = "'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'";
         // var padLeft = Math.round(widestPoint.length / 2);
         var scalesASCII = [
-            ",ggg,                   gg                   ,ggg,",
-           "d8P^^8b                ,d88b,                d8^^Y8b",
-           "Y8b,__,,aadd88888bbaaa,888888,aaadd88888bbaa,,__,d8P",
-            "'88888888888888888888I888888I88888888888888888888'",
-            "/|\\`^^YY8888888PP^^^^`888888'^^^^YY8888888PP^^'/|\\",
-           "/ | \\                  `WWWW'                  / | \\",
-          "/  |  \\                 ,dMMb,                 /  |  \\",
-         "/   |   \\                I8888I                /   |   \\",
-        "/    |    \\               `Y88P'               /    |    \\",
-       "/     |     \\               `YP'               /     |     \\",
-      "/      |      \\               88               /      |      \\",
-     "/       |       \\             i88i             /       |       \\",
-    "/        |        \\            8888            /        |        \\",
-"'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'",
-  "`''Y888888888888888P'''        ,888888,        `''Y888888888888888P'''",
-                                 "I888888I",
-                                 "Y888888P",
-                                 "`Y8888P'",
-                                  "`WWWW'",
-                                   "dMMb",
-                               "_,ad8888ba,_",
-                    "__,,aaaadd888888888888888bbaaaa,,__",
-                  "d8888888888888888888888888888888888888b"
+                        ",ggg,                   gg                   ,ggg,",
+                       "d8P^^8b                ,d88b,                d8^^Y8b",
+                       "Y8b,__,,aadd88888bbaaa,888888,aaadd88888bbaa,,__,d8P",
+                        "'88888888888888888888I888888I88888888888888888888'",
+                        "/|\\`^^YY8888888PP^^^^`888888'^^^^YY8888888PP^^'/|\\",
+                       "/ | \\                  `WWWW'                  / | \\",
+                      "/  |  \\                 ,dMMb,                 /  |  \\",
+                     "/   |   \\                I8888I                /   |   \\",
+                    "/    |    \\               `Y88P'               /    |    \\",
+                   "/     |     \\               `YP'               /     |     \\",
+                  "/      |      \\               88               /      |      \\",
+                 "/       |       \\             i88i             /       |       \\",
+                "/        |        \\            8888            /        |        \\",
+            "'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'",
+              "`''Y888888888888888P'''        ,888888,        `''Y888888888888888P'''",
+                                             "I888888I",
+                                             "Y888888P",
+                                             "`Y8888P'",
+                                              "`WWWW'",
+                                               "dMMb",
+                                           "_,ad8888ba,_",
+                                "__,,aaaadd888888888888888bbaaaa,,__",
+                              "d8888888888888888888888888888888888888b"
         ];
 
-        console.log(scalesASCII);
         for (var i = 0; i < scalesASCII.length; i++) {
             display.drawText(3 + (widestPoint.length - scalesASCII[i].length) / 2, i + 7, "%c{#F5F058}" + scalesASCII[i]);
         }
 
-//             ,ggg,                   gg                   ,ggg,
-//            d8P^^8b                ,d88b,                d8^^Y8b
-//            Y8b,__,,aadd88888bbaaa,888888,aaadd88888bbaa,,__,d8P
-//             '88888888888888888888I888888I88888888888888888888'
-//             /|\`^^YY8888888PP^^^^`888888'^^^^YY8888888PP^^'/|\
-//            / | \                  `WWWW'                  / | \
-//           /  |  \                 ,dMMb,                 /  |  \
-//          /   |   \                I8888I                /   |   \
-//         /    |    \               `Y88P'               /    |    \
-//        /     |     \               `YP'               /     |     \
-//       /      |      \               88               /      |      \
-//      /       |       \             i88i             /       |       \
-//     /        |        \            8888            /        |        \
-// 'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'
-//   `''Y888888888888888P'''        ,888888,        `''Y888888888888888P'''
-//                                  I888888I
-//                                  Y888888P
-//                                  `Y8888P'
-//                                   `WWWW'    Normand
-//                                    dMMb     Veilleux
-//                                _,ad8888ba,_
-//                     __,,aaaadd888888888888888bbaaaa,,__
-//                   d8888888888888888888888888888888888888b
+        //             ,ggg,                   gg                   ,ggg,
+        //            d8P^^8b                ,d88b,                d8^^Y8b
+        //            Y8b,__,,aadd88888bbaaa,888888,aaadd88888bbaa,,__,d8P
+        //             '88888888888888888888I888888I88888888888888888888'
+        //             /|\`^^YY8888888PP^^^^`888888'^^^^YY8888888PP^^'/|\
+        //            / | \                  `WWWW'                  / | \
+        //           /  |  \                 ,dMMb,                 /  |  \
+        //          /   |   \                I8888I                /   |   \
+        //         /    |    \               `Y88P'               /    |    \
+        //        /     |     \               `YP'               /     |     \
+        //       /      |      \               88               /      |      \
+        //      /       |       \             i88i             /       |       \
+        //     /        |        \            8888            /        |        \
+        // 'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'
+        //   `''Y888888888888888P'''        ,888888,        `''Y888888888888888P'''
+        //                                  I888888I
+        //                                  Y888888P
+        //                                  `Y8888P'
+        //                                   `WWWW'    Normand
+        //                                    dMMb     Veilleux
+        //                                _,ad8888ba,_
+        //                     __,,aaaadd888888888888888bbaaaa,,__
+        //                   d8888888888888888888888888888888888888b
+
 	},
 	handleInput: function(inputType, inputData) {
 		// When [Enter] is pressed, go to the play screen
@@ -126,11 +126,13 @@ Game.Screen.stats = {
         var BODY = "BODY: " + String(this._player.getBODY());
         var STUN = "STUN: " + String(this._player.getSTUN());
         var HTH = "HTH: " + this._player.getHTH();
+        var XP = "XP: " + this._player.getSpendablePoints();
         console.log(BODY, STUN, HTH);
         var y = 1;
         display.drawText(0, y++, BODY);
         display.drawText(0, y++, STUN);
         display.drawText(0, y++, HTH);
+        display.drawText(0, y++, XP);
     },
     handleInput: function(inputType, inputData) {}
 };
@@ -881,18 +883,16 @@ Game.Screen.helpScreen = {
         var y = 0;
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
-        display.drawText(0, y++, 'The villagers have been complaining of a terrible stench coming from the cave.');
-        display.drawText(0, y++, 'Find the source of this smell and get rid of it!');
-        y += 3;
-        display.drawText(0, y++, '[,] to pick up items');
-        display.drawText(0, y++, '[d] to drop items');
-        display.drawText(0, y++, '[e] to eat items');
-        display.drawText(0, y++, '[w] to wield items');
-        display.drawText(0, y++, '[W] to wield items');
-        display.drawText(0, y++, '[x] to examine items');
-        display.drawText(0, y++, '[;] to look around you');
-        display.drawText(0, y++, '[j] to show city statistics');
-        display.drawText(0, y++, '[?] to show this help screen');
+        
+        display.drawText(0, y++, '[%c{#585DF5},%c{}] to pick up items');
+        display.drawText(0, y++, '[%c{#585DF5}d%c{}] to drop items');
+        display.drawText(0, y++, '[%c{#585DF5}w%c{}] to wield items');
+        display.drawText(0, y++, '[%c{#585DF5}W%c{}] to wield items');
+        display.drawText(0, y++, '[%c{#585DF5}x%c{}] to examine items');
+        display.drawText(0, y++, '[%c{#585DF5};%c{}] to look around you');
+        display.drawText(0, y++, '[%c{#585DF5}j%c{}] to show city statistics');
+        display.drawText(0, y++, '[%c{#585DF5}s%c{}] to show spend experience points');
+        display.drawText(0, y++, '[%c{#585DF5}?%c{}] to show this help screen');
         y += 3;
         text = '--- press any key to continue ---';
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
@@ -993,11 +993,11 @@ Game.Screen.gainStatScreen = {
             var spacer1 = "".lpad(" ", 4 - charName.length + 3);
             var spacer2 = "".lpad(" ", 3 - String(Game.Cost.Characteristics[charName]).length + 2);
 
-            display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - ' + charName + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + this._entity.getCharacteristic(charName, true, true));
+            display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - %c{#585DF5}' + charName + '%c{}' + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + '%c{#585DF5}' + this._entity.getCharacteristic(charName, true, true));
         }
 
         // Render remaining stat points
-        display.drawText(0, 4 + this._options.length, "Remaining points: " + this._entity.getSpendablePoints());
+        display.drawText(0, 4 + this._options.length, "Remaining points: %c{#00ff78}" + this._entity.getSpendablePoints());
     },
     handleInput: function(inputType, inputData) {
         // TODO: instead of pressing letters, use direction keys to highlight characteristics to increase
@@ -1019,11 +1019,12 @@ Game.Screen.gainStatScreen = {
                     // Decrease stat points
                     this._entity.subtractSpendablePoints(Game.Cost.Characteristics[charName]);
 
-                    Game.refresh();
+                    Game.refresh(this._entity);
                 }
             } else {
                 Game.sendMessage(this._entity, 'You have no more points to spend.');
-                Game.refresh();
+                Game.refresh(this._entity);
+                this._entity.clearMessages();
             }
         } else if(inputType === 'keydown' && (inputData.keyCode === ROT.VK_RETURN || inputData.keyCode === ROT.VK_ESCAPE)) {
             Game.Screen.playScreen.setSubScreen(undefined);
