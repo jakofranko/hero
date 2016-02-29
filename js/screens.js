@@ -640,7 +640,7 @@ Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
         var keys = Object.keys(selectedItems);
         if (keys.length === 0) {
             this._player.unwield();
-            Game.sendMessage(this._player, "You are not wearing anthing.")
+            Game.sendMessage(this._player, "You are not wearing anthing.");
         } else {
             // Make sure to unequip the item first in case it is the weapon.
             var item = selectedItems[keys[0]];
@@ -687,7 +687,7 @@ Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
         if(!item || !item.hasMixin('Throwable')) {
             return false;
         } else if(item.hasMixin('Equippable') && (item.isWielded() || item.isWorn())) {
-            return false
+            return false;
         } else {
             return true;
         }
@@ -748,7 +748,7 @@ Game.Screen.TargetBasedScreen = function(template) {
                 nullTile.getRepresentation(),
                 nullTile.getDescription());
         }
-    }
+    };
 };
 Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
     this._player = player;
@@ -961,15 +961,15 @@ Game.Screen.justiceScreen = {
         for (var i = 10; i > 0; i--) {
             var meter = "";
             if(Math.floor10(percentage, -1) * 10 >= i) {
-                var meter = edge + "%c{" + ROT.Color.toHex(color) + "}#%c{}" + edge;
+                meter = edge + "%c{" + ROT.Color.toHex(color) + "}#%c{}" + edge;
             } else {
-                var meter = edge + " " + edge;
+                meter = edge + " " + edge;
             }
 
             // The meter should be centered under the title (and the meter is 3 characters 'long')
             var meterX = startX + (title.length / 2) - 2;
             display.drawText(meterX, startY++, meter);
-        };
+        }
 
     }
 };
@@ -1037,15 +1037,15 @@ Game.Screen.winScreen = {
     enter: function() {    console.log("Entered win screen."); },
     exit: function() { console.log("Exited win screen."); },
     render: function(display) {
-        // Render our prompt to the screen
-        for (var i = 0; i < 22; i++) {
-            // Generate random background colors
-            var r = Math.round(Math.random() * 255);
-            var g = Math.round(Math.random() * 255);
-            var b = Math.round(Math.random() * 255);
-            var background = ROT.Color.toRGB([r, g, b]);
-            display.drawText(2, i + 1, "%b{" + background + "}You win!");
-        }
+        var w = Game.getScreenWidth();
+        var text = "%c{#585DF5}Justice%c{} Prevails!";
+        display.drawText((w/2) - (text.length / 2), 2, text);
+
+        text = "You have successfully restored justice to this city. While crime and corruption will always be present, you can rest easy knowing that the people of this city can take care of themselves.";
+        display.drawText(1, 4, text, 80);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to keep playing";
+        display.drawText((w/2) - (text.length / 2), 8, text);
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
@@ -1059,14 +1059,16 @@ Game.Screen.loseScreen = {
     enter: function() { console.log("Entered lose screen."); },
     exit: function() { console.log("Exited lose screen."); },
     render: function(display) {
-        // Render our prompt to the screen
-        for (var i = 0; i < 22; i++) {
-            display.drawText(2, i + 1, "%b{red}You lose! :(");
-        }
+        var w = Game.getScreenWidth();
+        var text = "%c{#ea003b}You have been killed";
+        display.drawText((w/2) - 10, 2, text);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to try again";
+        display.drawText((w/2) - 13, 4, text);
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			Game.switchScreen(Game.Screen.startScreen);
+			location.reload();
 		}     
     }
 };
