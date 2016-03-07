@@ -122,13 +122,16 @@ Game.Screen.stats = {
     },
     exit: function() { console.log('Exited the stats screen'); },
     render: function(display) {
-        display.clear();
-        var BODY = "BODY: " + String(this._player.getBODY());
-        var STUN = "STUN: " + String(this._player.getSTUN());
-        var HTH = "HTH: " + this._player.getHTH();
-        var XP = "XP: " + this._player.getSpendablePoints();
-        console.log(BODY, STUN, HTH);
+        var red = Game.Palette.red;
+        var blue = Game.Palette.blue;
+        var yellow = Game.Palette.yellow;
+        var BODY = "BODY: %c{" + red + "}" + String(this._player.getBODY()) + "/" + String(this._player.getMaxBODY());
+        var STUN = "STUN: %c{" + blue + "}" + String(this._player.getSTUN()) + "/" + String(this._player.getMaxSTUN());
+        var HTH = "HTH: %c{" + '' + "}" + this._player.getHTH();
+        var XP = "XP: %c{" + yellow + "}" + this._player.getSpendablePoints();
         var y = 1;
+
+        display.clear();
         display.drawText(0, y++, BODY);
         display.drawText(0, y++, STUN);
         display.drawText(0, y++, HTH);
