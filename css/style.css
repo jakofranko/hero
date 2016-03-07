@@ -33,6 +33,7 @@ body {
 
 #overview, #log, #stats {
 	position: relative;
+	height: 100%;
 }
 
 #level canvas {
@@ -42,7 +43,7 @@ body {
 }
 
 #overview {
-	width: 50%;
+	width: 40%;
 	display: inline-block;
 	float: left;
 }
