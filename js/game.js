@@ -221,7 +221,7 @@ window.onload = function() {
         // Resize canvas elements
 	    Game.resize(Game.getDisplay(), true, false, true);
 	    Game.resize(Game.getOverview(), false, true);
-	    Game.resize(Game.getStats(), false, true);
+	    Game.resize(Game.getStats(), true, true);
 	    Game.resize(Game.getLog(), true, false);
     }
 }
