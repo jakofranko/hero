@@ -1,16 +1,79 @@
 // Tutorial reference: http://www.codingcookies.com/2013/04/03/building-a-roguelike-in-javascript-part-2/
+// ASCII art from http://www.chris.com/ascii/index.php?art=objects/scales; altered by me.
 // TODO: Build a 'fromTemplate' function to parse files or a logo or something like that
 // TODO: Flesh out startScreen to be more of a menu, flipping between current items etc.
 Game.Screen = {};
 
 // Define start screen
 Game.Screen.startScreen = {
-	enter: function() { console.log('Entered the start screen'); },
+	enter: function() { Game.resize(Game.getDisplay(), true, false, true); },
 	exit: function() { console.log('Exited the start screen'); },
 	render: function(display) {
 		// Render prompt to the screen
-		display.drawText(1, 1, "Justice: A Superhero Roguelike");
-		display.drawText(1, 2, "Press [Enter] to start!");
+        var w = Game.getScreenWidth();
+        var h = Game.getScreenHeight();
+        var text = "%c{#585DF5}Justice%c{}: A Superhero Roguelike";
+        display.drawText((w/2) - (text.length / 2), 2, text);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to start!";
+        display.drawText((w/2) - (text.length / 2), 3, text);
+        // The widest point of the scale is 74 characters, so, use that to pad the rest
+        var widestPoint = "'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'";
+        // var padLeft = Math.round(widestPoint.length / 2);
+        var scalesASCII = [
+                        ",ggg,                   gg                   ,ggg,",
+                       "d8P^^8b                ,d88b,                d8^^Y8b",
+                       "Y8b,__,,aadd88888bbaaa,888888,aaadd88888bbaa,,__,d8P",
+                        "'88888888888888888888I888888I88888888888888888888'",
+                        "/|\\`^^YY8888888PP^^^^`888888'^^^^YY8888888PP^^'/|\\",
+                       "/ | \\                  `WWWW'                  / | \\",
+                      "/  |  \\                 ,dMMb,                 /  |  \\",
+                     "/   |   \\                I8888I                /   |   \\",
+                    "/    |    \\               `Y88P'               /    |    \\",
+                   "/     |     \\               `YP'               /     |     \\",
+                  "/      |      \\               88               /      |      \\",
+                 "/       |       \\             i88i             /       |       \\",
+                "/        |        \\            8888            /        |        \\",
+            "'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'",
+              "`''Y888888888888888P'''        ,888888,        `''Y888888888888888P'''",
+                                             "I888888I",
+                                             "Y888888P",
+                                             "`Y8888P'",
+                                              "`WWWW'",
+                                               "dMMb",
+                                           "_,ad8888ba,_",
+                                "__,,aaaadd888888888888888bbaaaa,,__",
+                              "d8888888888888888888888888888888888888b"
+        ];
+
+        for (var i = 0; i < scalesASCII.length; i++) {
+            display.drawText(3 + (widestPoint.length - scalesASCII[i].length) / 2, i + 7, "%c{#F5F058}" + scalesASCII[i]);
+        }
+
+        //             ,ggg,                   gg                   ,ggg,
+        //            d8P^^8b                ,d88b,                d8^^Y8b
+        //            Y8b,__,,aadd88888bbaaa,888888,aaadd88888bbaa,,__,d8P
+        //             '88888888888888888888I888888I88888888888888888888'
+        //             /|\`^^YY8888888PP^^^^`888888'^^^^YY8888888PP^^'/|\
+        //            / | \                  `WWWW'                  / | \
+        //           /  |  \                 ,dMMb,                 /  |  \
+        //          /   |   \                I8888I                /   |   \
+        //         /    |    \               `Y88P'               /    |    \
+        //        /     |     \               `YP'               /     |     \
+        //       /      |      \               88               /      |      \
+        //      /       |       \             i88i             /       |       \
+        //     /        |        \            8888            /        |        \
+        // 'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'
+        //   `''Y888888888888888P'''        ,888888,        `''Y888888888888888P'''
+        //                                  I888888I
+        //                                  Y888888P
+        //                                  `Y8888P'
+        //                                   `WWWW'    Normand
+        //                                    dMMb     Veilleux
+        //                                _,ad8888ba,_
+        //                     __,,aaaadd888888888888888bbaaaa,,__
+        //                   d8888888888888888888888888888888888888b
+
 	},
 	handleInput: function(inputType, inputData) {
 		// When [Enter] is pressed, go to the play screen
@@ -53,6 +116,30 @@ Game.Screen.overview = {
     handleInput: function(inputType, inputData) {}
 };
 
+Game.Screen.stats = {
+    enter: function(player) {
+        this._player = player;
+    },
+    exit: function() { console.log('Exited the stats screen'); },
+    render: function(display) {
+        var red = Game.Palette.red;
+        var blue = Game.Palette.blue;
+        var yellow = Game.Palette.yellow;
+        var BODY = "BODY: %c{" + red + "}" + String(this._player.getBODY()) + "/" + String(this._player.getMaxBODY());
+        var STUN = "STUN: %c{" + blue + "}" + String(this._player.getSTUN()) + "/" + String(this._player.getMaxSTUN());
+        var HTH = "HTH: %c{" + '' + "}" + this._player.getHTH();
+        var XP = "XP: %c{" + yellow + "}" + this._player.getSpendablePoints();
+        var y = 1;
+
+        display.clear();
+        display.drawText(0, y++, BODY);
+        display.drawText(0, y++, STUN);
+        display.drawText(0, y++, HTH);
+        display.drawText(0, y++, XP);
+    },
+    handleInput: function(inputType, inputData) {}
+};
+
 // Define our playing screen
 Game.Screen.playScreen = {
 	_player: null,
@@ -68,6 +155,9 @@ Game.Screen.playScreen = {
         // map assigned to the player (happens in map creation),
         // we can set the minimap to reflect the city overview.
         Game.setMiniMap(Game.Screen.overview, this._player);
+
+        // Display the player's stats (characteristics)
+        Game.setCharacterStats(Game.Screen.stats, this._player);
 
         // Start the map's engine
         map.getEngine().start();
@@ -553,7 +643,7 @@ Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
         var keys = Object.keys(selectedItems);
         if (keys.length === 0) {
             this._player.unwield();
-            Game.sendMessage(this._player, "You are not wearing anthing.")
+            Game.sendMessage(this._player, "You are not wearing anthing.");
         } else {
             // Make sure to unequip the item first in case it is the weapon.
             var item = selectedItems[keys[0]];
@@ -600,7 +690,7 @@ Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
         if(!item || !item.hasMixin('Throwable')) {
             return false;
         } else if(item.hasMixin('Equippable') && (item.isWielded() || item.isWorn())) {
-            return false
+            return false;
         } else {
             return true;
         }
@@ -661,7 +751,7 @@ Game.Screen.TargetBasedScreen = function(template) {
                 nullTile.getRepresentation(),
                 nullTile.getDescription());
         }
-    }
+    };
 };
 Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
     this._player = player;
@@ -796,18 +886,16 @@ Game.Screen.helpScreen = {
         var y = 0;
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
-        display.drawText(0, y++, 'The villagers have been complaining of a terrible stench coming from the cave.');
-        display.drawText(0, y++, 'Find the source of this smell and get rid of it!');
-        y += 3;
-        display.drawText(0, y++, '[,] to pick up items');
-        display.drawText(0, y++, '[d] to drop items');
-        display.drawText(0, y++, '[e] to eat items');
-        display.drawText(0, y++, '[w] to wield items');
-        display.drawText(0, y++, '[W] to wield items');
-        display.drawText(0, y++, '[x] to examine items');
-        display.drawText(0, y++, '[;] to look around you');
-        display.drawText(0, y++, '[j] to show city statistics');
-        display.drawText(0, y++, '[?] to show this help screen');
+        
+        display.drawText(0, y++, '[%c{#585DF5},%c{}] to pick up items');
+        display.drawText(0, y++, '[%c{#585DF5}d%c{}] to drop items');
+        display.drawText(0, y++, '[%c{#585DF5}w%c{}] to wield items');
+        display.drawText(0, y++, '[%c{#585DF5}W%c{}] to wield items');
+        display.drawText(0, y++, '[%c{#585DF5}x%c{}] to examine items');
+        display.drawText(0, y++, '[%c{#585DF5};%c{}] to look around you');
+        display.drawText(0, y++, '[%c{#585DF5}j%c{}] to show city statistics');
+        display.drawText(0, y++, '[%c{#585DF5}s%c{}] to show spend experience points');
+        display.drawText(0, y++, '[%c{#585DF5}?%c{}] to show this help screen');
         y += 3;
         text = '--- press any key to continue ---';
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
@@ -876,15 +964,15 @@ Game.Screen.justiceScreen = {
         for (var i = 10; i > 0; i--) {
             var meter = "";
             if(Math.floor10(percentage, -1) * 10 >= i) {
-                var meter = edge + "%c{" + ROT.Color.toHex(color) + "}#%c{}" + edge;
+                meter = edge + "%c{" + ROT.Color.toHex(color) + "}#%c{}" + edge;
             } else {
-                var meter = edge + " " + edge;
+                meter = edge + " " + edge;
             }
 
             // The meter should be centered under the title (and the meter is 3 characters 'long')
             var meterX = startX + (title.length / 2) - 2;
             display.drawText(meterX, startY++, meter);
-        };
+        }
 
     }
 };
@@ -908,11 +996,11 @@ Game.Screen.gainStatScreen = {
             var spacer1 = "".lpad(" ", 4 - charName.length + 3);
             var spacer2 = "".lpad(" ", 3 - String(Game.Cost.Characteristics[charName]).length + 2);
 
-            display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - ' + charName + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + this._entity.getCharacteristic(charName, true, true));
+            display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - %c{#585DF5}' + charName + '%c{}' + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + '%c{#585DF5}' + this._entity.getCharacteristic(charName, true, true));
         }
 
         // Render remaining stat points
-        display.drawText(0, 4 + this._options.length, "Remaining points: " + this._entity.getSpendablePoints());
+        display.drawText(0, 4 + this._options.length, "Remaining points: %c{#00ff78}" + this._entity.getSpendablePoints());
     },
     handleInput: function(inputType, inputData) {
         // TODO: instead of pressing letters, use direction keys to highlight characteristics to increase
@@ -934,11 +1022,12 @@ Game.Screen.gainStatScreen = {
                     // Decrease stat points
                     this._entity.subtractSpendablePoints(Game.Cost.Characteristics[charName]);
 
-                    Game.refresh();
+                    Game.refresh(this._entity);
                 }
             } else {
                 Game.sendMessage(this._entity, 'You have no more points to spend.');
-                Game.refresh();
+                Game.refresh(this._entity);
+                this._entity.clearMessages();
             }
         } else if(inputType === 'keydown' && (inputData.keyCode === ROT.VK_RETURN || inputData.keyCode === ROT.VK_ESCAPE)) {
             Game.Screen.playScreen.setSubScreen(undefined);
@@ -951,15 +1040,15 @@ Game.Screen.winScreen = {
     enter: function() {    console.log("Entered win screen."); },
     exit: function() { console.log("Exited win screen."); },
     render: function(display) {
-        // Render our prompt to the screen
-        for (var i = 0; i < 22; i++) {
-            // Generate random background colors
-            var r = Math.round(Math.random() * 255);
-            var g = Math.round(Math.random() * 255);
-            var b = Math.round(Math.random() * 255);
-            var background = ROT.Color.toRGB([r, g, b]);
-            display.drawText(2, i + 1, "%b{" + background + "}You win!");
-        }
+        var w = Game.getScreenWidth();
+        var text = "%c{#585DF5}Justice%c{} Prevails!";
+        display.drawText((w/2) - (text.length / 2), 2, text);
+
+        text = "You have successfully restored justice to this city. While crime and corruption will always be present, you can rest easy knowing that the people of this city can take care of themselves.";
+        display.drawText(1, 4, text, 80);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to keep playing";
+        display.drawText((w/2) - (text.length / 2), 8, text);
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
@@ -973,14 +1062,16 @@ Game.Screen.loseScreen = {
     enter: function() { console.log("Entered lose screen."); },
     exit: function() { console.log("Exited lose screen."); },
     render: function(display) {
-        // Render our prompt to the screen
-        for (var i = 0; i < 22; i++) {
-            display.drawText(2, i + 1, "%b{red}You lose! :(");
-        }
+        var w = Game.getScreenWidth();
+        var text = "%c{#ea003b}You have been killed";
+        display.drawText((w/2) - 10, 2, text);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to try again";
+        display.drawText((w/2) - 13, 4, text);
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			Game.switchScreen(Game.Screen.startScreen);
+			location.reload();
 		}     
     }
 };

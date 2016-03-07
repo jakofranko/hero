@@ -21,19 +21,39 @@ body {
 	overflow: hidden;
 }
 
-#overview {
-	position: relative;
-	height: 30%;
+#top {
+	width: 100%;
+	height: 30%
 }
 
-#overview canvas, #level canvas {
+#bottom {
+	width: 100%;
+	height: 70%;
+}
+
+#overview, #log, #stats {
+	position: relative;
+	height: 100%;
+}
+
+#level canvas {
 	display: block;
 	position: relative;
 	margin: auto;
 }
 
+#overview {
+	width: 40%;
+	display: inline-block;
+	float: left;
+}
+
+#stats {
+	width: 50%;
+	display: inline-block;
+	float: left;
+}
+
 #log {
-	position: relative;
 	width: 100%;
-	height: 70%;
 }

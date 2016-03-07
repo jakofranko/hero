@@ -231,6 +231,9 @@ Game.EntityMixins.Characteristics = {
     getDCV: function() {
         return this._CV + this._DCVmod;
     },
+    getHTH: function() {
+        return Math.floor(this._STR / 5) + "d6";
+    },
     charRoll: function(chr) {
         var roll = Game.rollDice("3d6");
         var characteristic = "_" + chr;
@@ -314,8 +317,8 @@ Game.EntityMixins.Characteristics = {
         }
     }
 };
-Game.EntityMixins.CharacterPoints = {
-    name: 'CharacterPoints',
+Game.EntityMixins.BasePoints = {
+    name: 'BasePoints',
     groupName: 'CharacterPoints',
     init: function(template) {
         // Characters will have a base pool of points, and can earn experience points,
@@ -514,7 +517,7 @@ Game.EntityMixins.ExperienceGainer = {
     listeners: {
         onKill: function(victim) {
             var xp = 0;
-            if(victim.hasMixin('CharacterPoints'))
+            if(victim.hasMixin('BasePoints'))
             // Only give experience if more than 0.
             if (xp > 0) {
                 this.giveExperiencePoints(xp);
@@ -877,6 +880,23 @@ Game.EntityMixins.PlayerStatGainer = {
 Game.EntityMixins.RandomStatGainer = {
     name: 'RandomStatGainer',
     groupName: 'StatGainer',
+    init: function() {
+        if(this.hasMixin('BasePoints') && this.getSpendablePoints() > 0) {
+            var characteristics = ['STR', 'DEX', 'BODY', 'INT', 'STUN'];
+            while(this.getSpendablePoints() > 0) {
+                // The only thing keeping this from being an infinite loop
+                // is the fact that STR and STUN only cost 1 character point
+                var characteristic = characteristics.random();
+                // Make sure the characteristic is within the amount of spendable points we have
+                while(Game.Cost.Characteristics[characteristic] > this.getSpendablePoints()) {
+                    characteristic = characteristics.random();
+                }
+
+                this.increaseChar(characteristic);
+                this.subtractSpendablePoints(Game.Cost.Characteristics[characteristic]);
+            }
+        }
+    },
     listeners: {
         onGainLevel: function() {
             var statOptions = this.getStatOptions();
