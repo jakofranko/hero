@@ -123,8 +123,17 @@ Game.EntityMixins.Characteristics = {
     getBODY: function() {
         return this._BODY;    
     },
-    takeBODY: function(attacker, BODY) {
-        this._BODY -= BODY;
+    takeBODY: function(attacker, BODY, type, killing) {
+        var defense;
+        if(!type || type == 'physical') {
+            defense = this._PD;
+        } else if(type == 'energy') {
+            defense = this._ED;
+        } else {
+            defense = 0;
+        }
+
+        this._BODY -= (BODY - defense);
         if(this._BODY <= -this._maxBODY) {
             Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
             // Raise events
@@ -194,8 +203,17 @@ Game.EntityMixins.Characteristics = {
     getMaxSTUNmod: function() {
         return this._maxSTUNmod;
     },
-    takeSTUN: function(attacker, STUN) {
-        this._STUN -= STUN;
+    takeSTUN: function(attacker, STUN, type, killing) {
+        var defense;
+        if(!type || type == 'physical') {
+            defense = this._PD;
+        } else if(type == 'energy') {
+            defense = this._ED;
+        } else {
+            defense = 0;
+        }
+
+        this._STUN -= (STUN - defense);
         if(this._STUN <= 0) {
             Game.sendMessage(attacker, "You knocked %s unconscious", [this.describe()]);
             this.ko();
