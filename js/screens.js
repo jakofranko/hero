@@ -893,8 +893,9 @@ Game.Screen.helpScreen = {
         display.drawText(0, y++, '[%c{#585DF5}W%c{}] to wield items');
         display.drawText(0, y++, '[%c{#585DF5}x%c{}] to examine items');
         display.drawText(0, y++, '[%c{#585DF5};%c{}] to look around you');
+        display.drawText(0, y++, '[%c{#585DF5}.%c{}] to wait');
         display.drawText(0, y++, '[%c{#585DF5}j%c{}] to show city statistics');
-        display.drawText(0, y++, '[%c{#585DF5}s%c{}] to show spend experience points');
+        display.drawText(0, y++, '[%c{#585DF5}s%c{}] to spend experience points');
         display.drawText(0, y++, '[%c{#585DF5}?%c{}] to show this help screen');
         y += 3;
         text = '--- press any key to continue ---';
@@ -1045,14 +1046,14 @@ Game.Screen.winScreen = {
         display.drawText((w/2) - (text.length / 2), 2, text);
 
         text = "You have successfully restored justice to this city. While crime and corruption will always be present, you can rest easy knowing that the people of this city can take care of themselves.";
-        display.drawText(1, 4, text, 80);
+        display.drawText((w/2) - 40, 4, text, 80);
 
         text = "Press [%c{#585DF5}Enter%c{}] to keep playing";
         display.drawText((w/2) - (text.length / 2), 8, text);
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			Game.switchScreen(Game.Screen.playScreen);
+			Game.Screen.playScreen.setSubScreen(undefined);
 		}   
     }
 };

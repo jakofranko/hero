@@ -20,6 +20,7 @@ var Game = {
 	// How many in-game tiles a lot should comprise
 	_lotSize: 20,
 	_startTime: '0700',
+	_won: false,
 
 	getDisplay: function() {
 		return this._display;
@@ -200,6 +201,12 @@ var Game = {
 		}
 
 
+	},
+	win: function() {
+		this._won = true;
+	},
+	won: function() {
+		return this._won;
 	}
 };
 
