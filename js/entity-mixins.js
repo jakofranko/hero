@@ -133,7 +133,8 @@ Game.EntityMixins.Characteristics = {
             defense = 0;
         }
 
-        this._BODY -= (BODY - defense);
+        // Make sure we don't take any less than zero damage
+        this._BODY -= Math.max(0, (BODY - defense));
         if(this._BODY <= -this._maxBODY) {
             Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
             // Raise events
@@ -213,7 +214,8 @@ Game.EntityMixins.Characteristics = {
             defense = 0;
         }
 
-        this._STUN -= (STUN - defense);
+        // Make sure we don't take any less than zero damage
+        this._STUN -= Math.max(0, (STUN - defense));
         if(this._STUN <= 0) {
             Game.sendMessage(attacker, "You knocked %s unconscious", [this.describe()]);
             this.ko();
@@ -729,24 +731,33 @@ Game.EntityMixins.JobActor = {
             this.reprioritizeJobs();
         }
 
-        // Get highest priority job
+        // Get highest priority job, with a higher
+        // priority being a smaller int (0 is highest priority)
         var highestPriority = null;
         for(var job in this._jobPriority) {
             if(highestPriority === null)
                 highestPriority = job;
-            else if(this._jobPriority[job] > this._jobPriority[highestPriority])
+            else if(this._jobPriority[job] < this._jobPriority[highestPriority])
                 highestPriority = job;
         }
 
         Game.Jobs[highestPriority].doJob(this);
     },
+    getJobs: function() {
+        return this._jobs;
+    },
     addJob: function(job) {
         this._jobs.push(job);
+        if(Game.Jobs[job].crime)
+            this.getMap().getJustice().addCriminals(1);
     },
     removeJob: function(job) {
-        var index = this._jobs.indexOf(job)
+        var index = this._jobs.indexOf(job);
         if(index > -1)
             this._jobs.splice(index, 1);
+
+        if(Game.Jobs[job].crime)
+            this.getMap().getJustice().removeCriminals(1);
     },
     hasJob: function(job) {
         return this._jobs.indexOf(job) > -1;
@@ -781,7 +792,6 @@ Game.EntityMixins.JobActor = {
                         "Ok ok! I'll never do it again!"
                     );
                     this.removeJob('mugger');
-                    this.getMap().getJustice().removeCriminals(1);
                     this.reprioritizeJobs();
                     console.log(this.getMap().getJustice());
                 }
@@ -1064,7 +1074,7 @@ Game.EntityMixins.Targeting = {
             }
         }
     }
-}
+};
 Game.EntityMixins.Thrower = {
     name: 'Thrower',
     init: function(template) {
@@ -1130,7 +1140,7 @@ Game.EntityMixins.Thrower = {
             this.removeItem(i, amount);
         }
     }
-}
+};
 
 // For some reason, Game.extend has to be called after Game.EntityMixins.TaskActor is defined, since that's the thing it's trying to extend.
 Game.EntityMixins.GiantZombieActor = Game.extend(Game.EntityMixins.TaskActor, {

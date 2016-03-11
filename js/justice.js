@@ -27,7 +27,7 @@ Game.Justice = function() {
 	this._corruption = 0;
 
 	// Third Tier meters
-	this._criminals = 10;
+	this._criminals = 0;
 
 	// Initialize justice level based on other starting levels
 	this.updateJustice();

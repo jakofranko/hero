@@ -1,5 +1,6 @@
 var Game = {
 	_player: null,
+	_won: false,
 
 	// ROT.Displays
 	_display: null,
@@ -20,7 +21,10 @@ var Game = {
 	// How many in-game tiles a lot should comprise
 	_lotSize: 20,
 	_startTime: '0700',
-	_won: false,
+
+	// NPC Settings
+	_totalEntities: 100,
+	_totalCriminals: 25,
 
 	getDisplay: function() {
 		return this._display;
@@ -58,6 +62,12 @@ var Game = {
 	},
 	getStartTime: function() {
 		return this._startTime;
+	},
+	getTotalEntities: function() {
+		return this._totalEntities;
+	},
+	getTotalCriminals: function() {
+		return this._totalCriminals;
 	},
 	init: function() {
 		// Create player entity
