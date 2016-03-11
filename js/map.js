@@ -201,6 +201,10 @@ Game.Map.prototype._generateEntities = function() {
         var template;
         if(criminals <= Game.getTotalCriminals()) {
             template = {
+                character: {
+                    random: true,
+                    values: ['w', 'm']
+                },
                 // In order for mugging to rank higher than survive,
                 // their money / survive priority needs to be higher
                 // than 10 (which is the survive priority). I.e., >100
