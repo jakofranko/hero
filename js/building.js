@@ -379,7 +379,15 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 						startY--;
 					}
 					if(!floor[startX][startY]) {
-						debugger;
+						if(firstPass == true) {
+							debugger;
+						} else if(scanDirection == 'forwards'){
+							scanDirection = 'backwards';
+							firstPass = true;
+						} else {
+							scanDirection = 'forwards';
+							firstPass = true;
+						}
 					}
 				}
 				break;
@@ -396,7 +404,15 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 						startX--;
 					}
 					if(!floor[startX][startY]) {
-						debugger;
+						if(firstPass == true) {
+							debugger;
+						} else if(scanDirection == 'forwards'){
+							scanDirection = 'backwards';
+							firstPass = true;
+						} else {
+							scanDirection = 'forwards';
+							firstPass = true;
+						}
 					}
 				}
 				startY = 1;
@@ -414,7 +430,15 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 						startY--;
 					}
 					if(!floor[startX][startY]) {
-						debugger;
+						if(firstPass == true) {
+							debugger;
+						} else if(scanDirection == 'forwards'){
+							scanDirection = 'backwards';
+							firstPass = true;
+						} else {
+							scanDirection = 'forwards';
+							firstPass = true;
+						}
 					}
 				}
 				break;
@@ -432,7 +456,15 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 						startX--;
 					}
 					if(!floor[startX][startY]) {
-						debugger;
+						if(firstPass == true) {
+							debugger;
+						} else if(scanDirection == 'forwards'){
+							scanDirection = 'backwards';
+							firstPass = true;
+						} else {
+							scanDirection = 'forwards';
+							firstPass = true;
+						}
 					}
 				}
 				break;
