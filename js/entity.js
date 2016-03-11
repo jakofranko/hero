@@ -110,7 +110,7 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
 		return true;
 	} 
 	return false;
-}
+};
 Game.Entity.prototype.isAlive = function() {
     return this._alive;
 };
