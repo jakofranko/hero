@@ -3,19 +3,21 @@ Game.Map = function(size, player) {
     this._city = new Game.City(size);
     this._city.init();
 
+    // Justice System for this city
+    this._justice = new Game.Justice();
+
     // Used for drawing to various displays 
     this._tiles = this._city.tilesFromLots();
 
     // Cache dimensions
-    this._depth = this._tiles.length
+    this._depth = this._tiles.length;
     this._width = this._tiles[0].length;
     this._height = this._tiles[0][0].length;
 
     // Setup the field of visions
     this._fov = [];
     this.setupFov();
-    // Create a table which will hold the entities
-    this._entities = {};
+
     // Create a table which will hold the items
     this._items = {};
 
@@ -31,19 +33,13 @@ Game.Map = function(size, player) {
     this._explored = new Array(this._depth);
     this._setupExploredArray();
 
+    // Create a table which will hold the entities
+    this._entities = {};
+    this._generateEntities();
+
+    // Add the Player
     this._player = player;
-
     this.addEntityAtRandomPosition(player, 0);
-
-    // Justice System for this city
-    this._justice = new Game.Justice();
-
-    for (var i = 0; i < 100; i++) {
-        this.addEntityAtRandomPosition(Game.EntityRepository.create('person', {
-            money: ROT.RNG.getNormal(100, 50),
-            jobs: ['mugger', 'survive']
-        }), 0);
-    }
 };
 
 // Standard getters
@@ -102,6 +98,17 @@ Game.Map.prototype.addEntity = function(entity) {
 		this._scheduler.add(entity, true);
 	}
 
+    // If the entity is a criminal, update the city's justice system
+    if(entity.hasMixin('JobActor')) {
+        var jobs = entity.getJobs();
+        for (var i = 0; i < jobs.length; i++) {
+            if(Game.Jobs[jobs[i]].crime) {
+                this.getJustice().addCriminals(1);
+                break;
+            }
+        }
+    }
+
     // If the entity is the player, set the player.
     if (entity.hasMixin(Game.EntityMixins.PlayerActor)) {
         this._player = entity;
@@ -134,14 +141,14 @@ Game.Map.prototype.getEntitiesWithinRadius = function(centerX, centerY, centerZ,
 			entity.getZ() == centerZ) {
 			results.push(entity);
 		}
-	};
+	}
 	return results;
 };
 Game.Map.prototype.removeEntity = function(entity) {
 	// Find the entity in the list of entities if it is present
     var key = entity.getX() + ',' + entity.getY() + ',' + entity.getZ();
     if(this._entities[key] == entity) {
-    	delete this._entities[key]
+    	delete this._entities[key];
     }
 
     // If the entity is an actor, remove them from the scheduler
@@ -183,6 +190,34 @@ Game.Map.prototype.post12Recovery = function() {
     for(var e in this._entities) {
         if(this._entities[e].hasMixin('Characteristics'))
             this._entities[e].raiseEvent('post12Recovery');
+    }
+};
+Game.Map.prototype._generateEntities = function() {
+    var criminals = 0;
+    for (var i = 0; i < Game.getTotalEntities(); i++) {
+        // The template has to be created each time, because making it once
+        // outside the loop and then changing it changes all entities
+        // created with the template
+        var template;
+        if(criminals <= Game.getTotalCriminals()) {
+            template = {
+                // In order for mugging to rank higher than survive,
+                // their money / survive priority needs to be higher
+                // than 10 (which is the survive priority). I.e., >100
+                money: ROT.RNG.getNormal(50, 25),
+                jobs: ['mugger', 'survive']
+            };
+        } else {
+            template = {
+                money: ROT.RNG.getNormal(100, 50),
+                jobs: ['survive']
+            };
+        }
+
+        this.addEntityAtRandomPosition(Game.EntityRepository.create('person', template), 0);
+
+        if(template.jobs.indexOf('mugger') > -1)
+            criminals++;
     }
 };
 
