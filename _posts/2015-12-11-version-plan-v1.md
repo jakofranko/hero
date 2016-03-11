@@ -9,6 +9,9 @@ date:  2015-12-17 09:55am
 * Update win conditions to display the win screen when the Crime meter drops to 0 (thus bringing the Justice meter up to 100).
 * Normalize NPC generation (NPC generator/factory class maybe?) such that NPCs are created with random genders, with default jobs and then are assigned the mugger job
 * Create an `addJob` and `removeJob` function that will properly update game stats based on the type of job (thus when a mugger job is given to an NPC, it increments the criminal stat in the justice system, and when that job is removed, it decrements that stat)
+* Update mugger job so that they don't rob the same person twice.
+  * This means probably starting the memory mechanic for entities, and adding memories based on the people that they mug.
+  * This would also be a good time to implement a way to visually indicate criminals who the player character witnesses commiting crimes (turns the foreground color red?)
 
 # v0.9
 
