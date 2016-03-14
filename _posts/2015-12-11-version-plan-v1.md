@@ -12,6 +12,17 @@ date:  2015-12-17 09:55am
 * Update mugger job so that they don't rob the same person twice.
   * This means probably starting the memory mechanic for entities, and adding memories based on the people that they mug.
   * This would also be a good time to implement a way to visually indicate criminals who the player character witnesses commiting crimes (turns the foreground color red?)
+* Memory mechanic for NPCs and player (as stated above)
+  * Memories should have an optional expiration date at which point they will 'forget' that memory
+  * Memories should have a target, or 'subject' entity (if applicable)
+  * Memories should probably be organized by type:
+    * People
+    * Places
+    * Events
+* Reaction or 'state' check before performing normal jobs
+  * This is mainly to support behavior for an NPC defending itself or running away if it is attacked
+  * Could potentially be based off of a short term memory
+  * States will need to have triggers (could potentially run off of the event emitter), targets, and actions associated with them, as well as a way of turning them off or changing states.
 
 # v0.9
 
