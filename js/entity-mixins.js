@@ -799,6 +799,133 @@ Game.EntityMixins.JobActor = {
         }
     }
 };
+Game.EntityMixins.MemoryMaker = {
+    name: 'MemoryMaker',
+    init: function(template) {
+        // Each memory in a given category should have a unique key.
+        // Additionally, each memory may have sub-categories
+        this._memory = {
+            people: {
+                enemies: {},
+                victims: {}
+            },
+            places: {},
+            events: {}
+        };
+
+        // Single level (no categories) place to process memories with expirations.
+        // Type and subtypes should be added as properties for easy reference when
+        // forgetting memories that have expired (ie, they will be deleted from
+        // short-term memory as well as normal memory).
+        // Example: this._memory = {
+        //    people: {
+        //        enemies: {
+        //            'Bob Schmo': {
+        //                entity: {Entity Object},
+        //                expires: 25
+        //            }
+        //        }
+        //    }
+        //}
+        //this._shortTermMemory = {
+        //    'Bob Schmo': {
+        //             entity: {Entity Object},
+        //             expires: 25,
+        //             memoryType: 'people',
+        //             memorySubtype: 'enemies'
+        //         }
+        //     }
+        //}
+        this._shortTermMemory = {};
+    },
+    getMemory: function() {
+        return this._memory;
+    },
+    remember: function(type, subtype, memoryName, memory) {
+        // Until I can find a better way of dealing with memories
+        // in a more loose manner (ie, not caring about the content or type)
+        // I think it's better to just throw an error if the type or
+        // subtype doesn't exist so I can assume certain logic is applicable
+        if(!this._memory[type]) {
+            console.log(this);
+            throw new Error(this._name + ' has no category for \'' + type + '\' in their memory!');
+        } else if(subtype && !this._memory[type][subtype]) {
+            console.log(this);
+            throw new Error(this._name + ' has no category for \'' + subtype + '\' in their memory of \'' + type + '\' !');
+        }
+
+        // TODO: there is a possibility that an entity could get generated with a duplicate name and that could mess with an entities memory of that entity. However, since entities don't have much that differentiates them now other than their name, it probably doesn't matter/is kind of a funny 'real-life' way of entities (and maybe players?) getting confused...
+
+        // 'memory' param should be an object.
+        if(typeof memory !== 'object') {
+            console.log(memory);
+            throw new Error('Memories need to be objects, silly...');
+        }
+
+        // Each memory needs to have an 'expires' key,
+        // and an 'entity' key, both of which can be null/false.
+        if(typeof memory.expires === undefined)
+            memory.expires = false;
+        if(typeof memory.entity === undefined)
+            memory.entity = false;
+
+        if(subtype)
+            this._memory[type][subtype][memoryName] = memory;
+        else
+            this._memory[type][memoryName] = memory;
+
+        if(memory.expires !== false)
+            this.addShortTermMemory(type, subtype, memoryName, memory);
+
+        console.log(type, subtype, memoryName, memory);
+        console.log(this._memory);
+    },
+    forget: function(type, subtype, memoryName) {
+        if(subtype) {
+            if(!this._memory[type][subtype][memoryName])
+                return false;
+            else
+                delete this._memory[type][subtype][memoryName];
+        } else {
+            if(!this._memory[type][memoryName])
+                return false;
+            else
+                delete this._memory[type][memoryName];
+        }
+    },
+    recall: function(type, subtype, memoryName) {
+        if(!subtype && !memoryName)
+            return this._memory[type];
+        else if(subtype && !memoryName)
+            return this._memory[type][subtype];
+        else if(!subtype && memoryName)
+            return this._memory[type][memoryName];
+        else
+            return this._memory[type][subtype][memoryName];
+    },
+    addShortTermMemory: function(type, subtype, memoryName, memory) {
+        memory.memoryType = type;
+        memory.memorySubtype = subtype;
+        this._shortTermMemory[memoryName] = memory;
+    },
+    processMemories: function() {
+        // Loop through all short-term memories (those with expirations)
+        // and delete those that have a value of 0, and decrement the rest
+        for(var memory in this._shortTermMemory) {
+            var m = this._shortTermMemory[memory];
+            if(m.expires === 0) {
+                if(m.memorySubtype !== false)
+                    delete this._memory[m.memoryType][m.memorySubtype][memory];
+                else
+                    delete this._memory[m.memoryType][memory];
+
+                delete this._shortTermMemory[memory];
+            } else {
+                this._shortTermMemory[memory].expires--;
+            }
+        }
+    }
+};
 Game.EntityMixins.MoneyHolder = {
     name: 'MoneyHolder',
     init: function(template) {
@@ -983,6 +1110,13 @@ Game.EntityMixins.Sight = {
         this._sightRadius += value;
         Game.sendMessage(this, "You are more aware of your surroundings!");
     },
+    listeners: {
+        onCrime: function(entity) {
+            if(this.canSee(entity) && this.hasMixin('MemoryMaker')) {
+                this.remember('people', 'criminals', entity.describe(), {entity: entity, expires: 200});
+            }
+        }
+    }
 };
 Game.EntityMixins.TaskActor = {
     name: 'TaskActor',
