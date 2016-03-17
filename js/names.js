@@ -1,6 +1,7 @@
 // names.json is a file from a repo I forked here: https://github.com/dominictarr/random-name
 Game.NameGenerator = function() {
 	this.generator = new ROT.StringGenerator();
+	this._ready = false;
 
 	var that = this;
 	var r = new XMLHttpRequest();
@@ -13,9 +14,13 @@ Game.NameGenerator = function() {
 	    for (var i = 0; i < that.names.length; i++) {
 	    	that.generator.observe(that.names[i]);
 	    }
-
-	    for (var i = 0; i < 50; i++) {
-	    	console.log(that.generator.generate());
-	    }
+	    that._ready = true;
 	};
+};
+Game.NameGenerator.prototype.name = function() {
+	// Wait till names are generated
+	while(!this._ready)
+		continue;
+
+	return this.generator.generate();
 };
