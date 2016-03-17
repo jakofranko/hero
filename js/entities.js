@@ -1,4 +1,22 @@
 Game.EntityRepository = new Game.Repository('entities', Game.Entity);
+Game.EntityRepository.nameGenerator = new Game.NameGenerator();
+Game.EntityRepository.createEntity = function(name, template) {
+    if(name == 'person') {
+        if(!template.name) {
+            // Unless a name is explicitely defined, generate a first and last name
+            template.name = this.nameGenerator.name() + ' ' + this.nameGenerator.name();
+        }
+        if(!template.character) {
+            template.character = ['w', 'm'].random();
+        }
+        if(template.character == 'm' && !template.type) {
+            template.type = 'man';
+        } else if(template.character == 'w' && !template.type) {
+            template.type = 'woman';
+        }
+    }
+    return Game.EntityRepository.create.call(this, name, template);
+};
 
 Game.PlayerTemplate = {
     name: 'human (you)',
@@ -29,6 +47,7 @@ Game.PlayerTemplate = {
 
 Game.EntityRepository.define('person', {
     name: 'person',
+    description: 'person',
     character: 'm',
     foreground: 'white',
     maxHp: 10,
