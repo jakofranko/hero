@@ -1,3 +1,4 @@
+// names.json is a file from a repo I forked here: https://github.com/dominictarr/random-name
 Game.NameGenerator = function() {
 	this.generator = new ROT.StringGenerator();
 
