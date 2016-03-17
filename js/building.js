@@ -365,6 +365,7 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 	if(z == 0) {
 		var side = Game.getRandomInRange(0, 3);
 		var scanDirection = Math.round(Math.random()) ? 'forwards' : 'backwards';
+		var firstPass = false;
 		switch(side) {
 			case 0:
 				startX = 1;
@@ -379,7 +380,7 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 						startY--;
 					}
 					if(!floor[startX][startY]) {
-						if(firstPass == true) {
+						if(firstPass === true) {
 							debugger;
 						} else if(scanDirection == 'forwards'){
 							scanDirection = 'backwards';
@@ -404,7 +405,7 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 						startX--;
 					}
 					if(!floor[startX][startY]) {
-						if(firstPass == true) {
+						if(firstPass === true) {
 							debugger;
 						} else if(scanDirection == 'forwards'){
 							scanDirection = 'backwards';
@@ -430,7 +431,7 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 						startY--;
 					}
 					if(!floor[startX][startY]) {
-						if(firstPass == true) {
+						if(firstPass === true) {
 							debugger;
 						} else if(scanDirection == 'forwards'){
 							scanDirection = 'backwards';
@@ -456,7 +457,7 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 						startX--;
 					}
 					if(!floor[startX][startY]) {
-						if(firstPass == true) {
+						if(firstPass === true) {
 							debugger;
 						} else if(scanDirection == 'forwards'){
 							scanDirection = 'backwards';
