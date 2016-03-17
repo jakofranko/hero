@@ -852,7 +852,7 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
                     var entity = map.getEntityAt(x, y, z);
                     return String.format('%s - %s (%s)',
                         entity.getRepresentation(),
-                        entity.describeA(true),
+                        entity.describeA(true) + ' ('+ entity.getName() + ')',
                         entity.details());
                 }
             }
