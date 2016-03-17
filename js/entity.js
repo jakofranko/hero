@@ -2,6 +2,9 @@ Game.Entity = function(properties) {
 	properties = properties || {};
 	Game.DynamicGlyph.call(this, properties);
 	this._name = properties['name'] || '';
+    this._type = properties['type'] || '';
+    this._description = properties['description'] || '';
+    this._shortDescription = properties['shortDescription'] || '';
 	this._alive = true;
     this._conscious = true;
 	this._x = properties['x'] || 0;
@@ -61,6 +64,9 @@ Game.Entity.prototype.setMap = function(map) {
 };
 Game.Entity.prototype.getMap = function() {
     return this._map;
+};
+Game.Entity.prototype.getName = function() {
+    return this._name;
 };
 Game.Entity.prototype.tryMove = function(x, y, z, map) {
 	if(!map) {
@@ -172,4 +178,25 @@ Game.Entity.prototype.switchMap = function(newMap) {
     this._z = 0;
     // Add to the new map
     newMap.addEntity(this);
+};
+Game.Entity.prototype.describeA = function(capitalize) {
+    // Optional parameter to capitalize the a/an.
+    var prefixes = capitalize ? ['A', 'An'] : ['a', 'an'];
+    var string = this._type;
+    var firstLetter = string.charAt(0).toLowerCase();
+    // If word starts by a vowel, use an, else use a. Note that this is not perfect.
+    var prefix = 'aeiou'.indexOf(firstLetter) >= 0 ? 1 : 0;
+
+    return prefixes[prefix] + ' ' + string;
+};
+Game.Entity.prototype.describeThe = function(capitalize) {
+    var prefix = capitalize ? 'The' : 'the';
+    if(this._shortDescription) {
+        return prefix + ' ' + this._shortDescription;
+    } else {
+        return prefix + ' ' + this._type;
+    }
+};
+Game.Entity.prototype.describe = function() {
+    return this._description;
 };
