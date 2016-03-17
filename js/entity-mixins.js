@@ -807,6 +807,7 @@ Game.EntityMixins.MemoryMaker = {
         this._memory = {
             people: {
                 enemies: {},
+                criminals: {},
                 victims: {}
             },
             places: {},
@@ -1112,7 +1113,7 @@ Game.EntityMixins.Sight = {
     },
     listeners: {
         onCrime: function(entity) {
-            if(this.canSee(entity) && this.hasMixin('MemoryMaker')) {
+            if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
                 this.remember('people', 'criminals', entity.describe(), {entity: entity, expires: 200});
             }
         }

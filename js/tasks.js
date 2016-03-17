@@ -3,7 +3,7 @@ Game.Tasks = {};
 Game.Tasks.approach = function(entity) {
 	// Check to see if an entity already has a target. If not, pick a new one.
 	var target = entity.getTarget();
-	if(entity.hasMixin('Targeting') && (target == null || target == false)) {
+	if(entity.hasMixin('Targeting') && (target === null || target === false)) {
 		// Pick a random entity that they can see
 		entity.setTarget(this.findRandomEntityInSight(entity));
 	}
@@ -56,7 +56,7 @@ Game.Tasks.wander = function(entity) {
 Game.Tasks.hunt = function(entity) {
 	// Check to see if an entity already has a target. If not, pick a new one.
 	var target = entity.getTarget();
-	if(entity.hasMixin('Targeting') && (target == null || target == false)) {
+	if(entity.hasMixin('Targeting') && (target === null || target === false)) {
 		// Pick a random entity that they can see
 		entity.setTarget(this.findRandomEntityInSight(entity));
 	}
@@ -110,4 +110,4 @@ Game.Tasks.findRandomEntityInSight = function(self) {
 		return entity;
 	else
 		return false;	
-}
+};

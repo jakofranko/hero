@@ -2,6 +2,9 @@
 // that the entity performs intelligently when the value that is returned by priority is 
 // a greater integer than any of the other priorities returned by the other jobs the entity has.
 // In this case, a higher priority is actually a lower integer, with 0 being the highest priority possible.
+//
+// Another property of jobs is their 'noise-level.' This is basically the radius within which all entities
+// will have various listeners triggered, particularly the 'onCrime' listener.
 Game.Jobs = {};
 
 Game.Jobs.getPriority = function(entity, job) {
@@ -24,10 +27,11 @@ Game.Jobs.survive = {
 
 Game.Jobs.mugger = {
 	crime: true,
+	noise: 15,
 	doJob: function(entity) {
 		var target = entity.getTarget();
 		// If the target is not conscious or out of money, don't target them.
-		if(target != null && target != false && (!target.isConscious() || !target.isAlive() || target.getMoney <= 0)) {
+		if(target !== null && target !== false && (!target.isConscious() || !target.isAlive() || target.getMoney <= 0)) {
 			entity.setTarget(null);
 			return;	
 		}
@@ -43,6 +47,11 @@ Game.Jobs.mugger = {
 					this._attemptTheft(entity, target);
 				}
 			}
+
+			var witnesses = entity.getMap().getEntitiesWithinRadius(entity.getX(), entity.getY(), entity.getZ(), this.noise);
+			for (var i = 0; i < witnesses.length; i++) {
+				witnesses[i].raiseEvent('onCrime', entity);
+			}
 		}
 	},
 	_attemptTheft: function(entity, target) {
@@ -53,6 +62,15 @@ Game.Jobs.mugger = {
 				entity.steal(target, Math.round(target.getMoney() / margin));
 			} else {
 				entity.steal(target, target.getMoney());
+			}
+
+			if(target.hasMixin('MemoryMaker')) {
+				target.remember('events', false, 'mugged by ' + entity.describe(), {entity: entity, expires: 500});
+				target.remember('people', 'enemies', entity.describe(), {entity: entity});
+			}
+
+			if(entity.hasMixin('MemoryMaker')) {
+				entity.remember('people', 'victims', target.describe(), {entity: target});
 			}
 		} else {
 			entity.steal(target, target.getMoney());
