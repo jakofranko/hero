@@ -78,9 +78,6 @@ var Game = {
 	    this._overview = new ROT.Display({width: this._citySize, height: this._citySize});
 	    this._log = new ROT.Display({width: 30, height: 20});
 	    this._stats = new ROT.Display({width: 10, height: 5});
-
-	    this._nameGenerator = new Game.NameGenerator();
-
 	   
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
