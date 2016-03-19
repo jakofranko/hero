@@ -3,7 +3,7 @@ Game.Entity = function(properties) {
 	Game.DynamicGlyph.call(this, properties);
 	this._name = properties['name'] || '';
     this._type = properties['type'] || '';
-    this._description = properties['description'] || '';
+    this._description = properties['description'] || this._name;
     this._shortDescription = properties['shortDescription'] || '';
 	this._alive = true;
     this._conscious = true;
