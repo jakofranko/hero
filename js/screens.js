@@ -284,6 +284,8 @@ Game.Screen.playScreen = {
             } else if(inputData.keyCode === ROT.VK_PERIOD) {
                 // Skip turn
                 this._player.getMap().getEngine().unlock();
+                // If you don't stop it here, then it will try to perform two actions for the player
+                return;
             } else {
                 // Not a valid key
                 return;
