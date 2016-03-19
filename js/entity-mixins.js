@@ -878,7 +878,6 @@ Game.EntityMixins.MemoryMaker = {
         if(memory.expires !== false)
             this.addShortTermMemory(type, subtype, memoryName, memory);
 
-        console.log(type, subtype, memoryName, memory);
         console.log(this._memory);
     },
     forget: function(type, subtype, memoryName) {
