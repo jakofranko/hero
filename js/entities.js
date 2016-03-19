@@ -47,7 +47,6 @@ Game.PlayerTemplate = {
 
 Game.EntityRepository.define('person', {
     name: 'person',
-    description: 'person',
     character: 'm',
     foreground: 'white',
     maxHp: 10,
