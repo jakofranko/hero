@@ -365,29 +365,42 @@ Game.Screen.playScreen = {
                 if (map.isExplored(x, y, currentDepth)) {
                     // Fetch the glyph for the tile and render it to the screen
                     // at the offset position.
-                    var glyph = map.getTile(x, y, currentDepth);
-                    var foreground = glyph.getForeground();
+                    var glyph,
+                        foreground;
                     // If we are at a cell that is in the field of vision, we need
                     // to check if there are items or entities.
                     if (visibleCells[x + ',' + y]) {
-                        // Check for items first, since we want to draw entities
-                        // over items.
-                        var items = map.getItemsAt(x, y, currentDepth);
-                        // If we have items, we want to render the top most item
-                        if (items) {
-                            glyph = items[items.length - 1];
-                        }
                         // Check if we have an entity at the position
-                        if (map.getEntityAt(x, y, currentDepth)) {
+                        var entity = map.getEntityAt(x, y, currentDepth);
+                        var items = map.getItemsAt(x, y, currentDepth);
+                        if (entity) {
                             glyph = map.getEntityAt(x, y, currentDepth);
+                            var criminals = this._player.getMemory().people.criminals;
+                            // Change foreground based on character's memory
+                            if(Object.keys(criminals).length > 0) {
+                                var name = glyph.getName();
+                                if(criminals[name]) {
+                                    foreground = Game.Palette.red;
+                                } else {
+                                    foreground = glyph.getForeground();
+                                }
+                            } else {
+                                foreground = glyph.getForeground();
+                            }
+                        } else if(items) {
+                            glyph = items[items.length - 1];
+                            foreground = glyph.getForeground();
+                        } else {
+                            glyph = map.getTile(x, y, currentDepth);
+                            foreground = glyph.getForeground();
                         }
-                        // Update the foreground color in case our glyph changed
-                        foreground = glyph.getForeground();
                     } else {
+                        // Not in our FOV, so just display the terrain
+                        glyph = map.getTile(x, y, currentDepth);
                         // Since the tile was previously explored but is not 
                         // visible, we want to change the foreground color to
                         // dark gray.
-                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(foreground)));
+                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
                     }
                     
                     display.draw(
@@ -396,28 +409,6 @@ Game.Screen.playScreen = {
                         glyph.getChar(), 
                         foreground, 
                         glyph.getBackground()
-                    );
-                }
-            }
-        }
-
-        // Render the entities
-        var entities = this._player.getMap().getEntities();
-        for (var key in entities) {
-            var entity = entities[key];
-            if (visibleCells[entity.getX() + ',' + entity.getY()]) {
-                // Only render the entity if they would show up on the screen
-                if(entity.getX() < topLeftX + screenWidth && 
-                    entity.getX() >= topLeftX && 
-                    entity.getY() < topLeftY + screenHeight && 
-                    entity.getY() >= topLeftY &&
-                    entity.getZ() == this._player.getZ()) {
-                    display.draw(
-                        entity.getX() - topLeftX,
-                        entity.getY() - topLeftY,
-                        entity.getChar(),
-                        entity.getForeground(),
-                        entity.getBackground()
                     );
                 }
             }
