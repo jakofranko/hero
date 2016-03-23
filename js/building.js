@@ -362,7 +362,7 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 	// since that will be where the player will access the higher levels from (having arived from the
 	// upstairs on the lower z-level)
 	var startX, startY;
-	if(z == 0) {
+	if(z === 0) {
 		var side = Game.getRandomInRange(0, 3);
 		var scanDirection = Math.round(Math.random()) ? 'forwards' : 'backwards';
 		var firstPass = false;
@@ -478,11 +478,11 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 					startY = y;
 					break;
 				}
-			};
+			}
 			if(typeof startX !== 'undefined' && typeof startY !== 'undefined') {
 				break;
 			}
-		};
+		}
 	}
 	
 	
@@ -589,7 +589,7 @@ Game.Building.prototype._canFillRegion = function(regions, tiles, x, y) {
 		return false;
 	}
 	// Make sure the tile does not already have a region
-	if(regions[x][y] != 0) {
+	if(regions[x][y] !== 0) {
 		return false;
 	}
 	// Make sure this tile is walkable
@@ -601,9 +601,9 @@ Game.Building.prototype._getNeighborPositions = function(x, y) {
     for (var dX = -1; dX < 2; dX ++) {
         for (var dY = -1; dY < 2; dY++) {
             // Make sure it isn't the same tile or a diagonal
-            if (dX == 0 && dY == 0) {
+            if (dX === 0 && dY === 0) {
                 continue;
-            } else if(dX != 0 && dY != 0) {
+            } else if(dX !== 0 && dY !== 0) {
             	continue;
             }
             tiles.push({x: x + dX, y: y + dY});
@@ -621,8 +621,8 @@ Game.Building.prototype._consoleLogGrid = function(grid, field) {
 			} else {
 				string += String(grid[x][y]);
 			}
-		};
-		string += "\n"
-	};
+		}
+		string += "\n";
+	}
 	console.log(string);
 };
