@@ -29,7 +29,7 @@ Game.Jobs.mugger = {
 	crime: true,
 	noise: 15,
 	doJob: function(entity) {
-		if(!entity.hasMixin('Targeting')) 
+		if(!entity.hasMixin('Targeting'))
 			return;
 
 		var target = entity.getTarget();
@@ -46,7 +46,7 @@ Game.Jobs.mugger = {
 		// If the target is not conscious or out of money, don't target them.
 		if(target !== null && target !== false && (!target.isConscious() || !target.isAlive() || target.getMoney() <= 0)) {
 			target = entity.setTarget(null);
-		} 
+		}
 
 		var adjacent = Game.Tasks.approach(entity, target);
 		if(adjacent) {
