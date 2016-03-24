@@ -1,13 +1,6 @@
 Game.Tasks = {};
 
-Game.Tasks.approach = function(entity) {
-	// Check to see if an entity already has a target. If not, pick a new one.
-	var target = entity.getTarget();
-	if(entity.hasMixin('Targeting') && (target === null || target === false)) {
-		// Pick a random entity that they can see
-		entity.setTarget(this.findRandomEntityInSight(entity));
-	}
-	
+Game.Tasks.approach = function(entity, target) {
 	// If no one is around, then just wander
 	if(!target) {
 		this.wander(entity);

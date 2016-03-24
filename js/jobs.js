@@ -29,14 +29,26 @@ Game.Jobs.mugger = {
 	crime: true,
 	noise: 15,
 	doJob: function(entity) {
+		if(!entity.hasMixin('Targeting')) 
+			return;
+
 		var target = entity.getTarget();
-		// If the target is not conscious or out of money, don't target them.
-		if(target !== null && target !== false && (!target.isConscious() || !target.isAlive() || target.getMoney <= 0)) {
-			entity.setTarget(null);
-			return;	
+		if(target === false || target === null) {
+			// Pick a random entity that they can see and that they haven't already mugged
+			target = Game.Tasks.findRandomEntityInSight(entity);
+			if(target && entity.hasMixin('MemoryMaker') && entity.recall('people', 'victims', target.getName())) {
+				target = entity.setTarget(null);
+			} else {
+				entity.setTarget(target);
+			}
 		}
-		
-		var adjacent = Game.Tasks.approach(entity);
+
+		// If the target is not conscious or out of money, don't target them.
+		if(target !== null && target !== false && (!target.isConscious() || !target.isAlive() || target.getMoney() <= 0)) {
+			target = entity.setTarget(null);
+		} 
+
+		var adjacent = Game.Tasks.approach(entity, target);
 		if(adjacent) {
 			var success = entity.presenceAttack(target, 2, "Give me all your money!");
 			if(success >= 10) {
