@@ -793,7 +793,10 @@ Game.EntityMixins.JobActor = {
                     );
                     this.removeJob('mugger');
                     this.reprioritizeJobs();
-                    console.log(this.getMap().getJustice());
+                    var witnesses = this.getMap().getEntitiesWithinRadius(this.getX(), this.getY(), this.getZ(), 25);
+                    for (var i = 0; i < witnesses.length; i++) {
+                        witnesses[i].raiseEvent('onRepent', this);
+                    }
                 }
             }
         }
@@ -1115,6 +1118,11 @@ Game.EntityMixins.Sight = {
             if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
                 this.remember('people', 'criminals', entity.describe(), {entity: entity, expires: 200});
             }
+        },
+        onRepent: function(entity) {
+            if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
+                this.forget('people', 'criminals', entity.describe());
+            }
         }
     }
 };
@@ -1200,6 +1208,7 @@ Game.EntityMixins.Targeting = {
     },
     setTarget: function(target) {
         this._target = target;
+        return this._target;
     },
     listeners: {
         onKill: function(target) {
@@ -1319,7 +1328,7 @@ Game.EntityMixins.GiantZombieActor = Game.extend(Game.EntityMixins.TaskActor, {
         // Create the entity
         var slime = Game.EntityRepository.create('slime');
         slime.setX(this.getX() + xOffset);
-        slime.setY(this.getY() + yOffset)
+        slime.setY(this.getY() + yOffset);
         slime.setZ(this.getZ());
         this.getMap().addEntity(slime);
     },
