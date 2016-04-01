@@ -70,7 +70,7 @@ Game.Entity.prototype.getName = function() {
 };
 Game.Entity.prototype.tryMove = function(x, y, z, map) {
 	if(!map) {
-		var map = this.getMap();
+		map = this.getMap();
 	}
 	// Must use starting z
 	var tile = map.getTile(x, y, this.getZ());
