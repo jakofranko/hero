@@ -5,46 +5,80 @@ Game.EntityMixins.Attacker = {
     name: 'Attacker',
     groupName: 'Attacker',
     init: function(template) {
-        this._attackValue = template['attackValue'] || 1;
-    },
-    getAttackValue: function() {
-        var modifier = 0;
-        // If we can equip items, then have to take into 
-        // consideration weapon and armor
-        if (this.hasMixin(Game.EntityMixins.Equipper)) {
-            if (this.getWeapon()) {
-                modifier += this.getWeapon().getAttackValue();
-            }
-            if (this.getArmor()) {
-                modifier += this.getArmor().getAttackValue();
-            }
+        if(!this.hasMixin('Characteristics')) {
+            throw new Error('Entity needs the "Characteristics" mixin in order to use this mixin');
         }
-        return this._attackValue + modifier;
     },
-    attack: function(target) {
-        // Only remove the entity if they were attackable
-        if (target.hasMixin('Destructible')) {
-            var attack = this.getAttackValue();
-            var defense = target.getDefenseValue();
-            var max = Math.max(0, attack - defense);
-            var damage = 1 + Math.floor(Math.random() * max);
+    getHTH: function() {
+        return Math.floor(this._STR / 5) + "d6";
+    },
+    hthAttack: function(target) {
+        var hit = this._attackRoll(target);
+        if(hit) {
+            var dice = Math.floor(this._STR / 5);
+            var STUN = 0;
+            var BODY = 0;
 
-            Game.sendMessage(this, 'You strike the %s for %s damage!', [target.getName(), damage]);
-            Game.sendMessage(target, 'The %s strikes you for %s damage!', [this.getName(), damage]);
-            target.takeDamage(this, damage);
+            for(var i = 0; i < dice; i++) {
+                var dieRoll = Game.rollDice("1d6");
+
+                STUN += dieRoll;
+                if(dieRoll == 6) {
+                    BODY += 2;
+                } else if(dieRoll > 1) {
+                    BODY += 1;
+                }
+
+            }
+
+            target.takeSTUN(this, STUN);
+            target.takeBODY(this, BODY);
+            Game.sendMessage(target, "%s does %s STUN and %s BODY to you!", [this.describeThe(), STUN, BODY]);
+            Game.sendMessage(this, "You do %s STUN and %s BODY to %s!", [STUN, BODY, target.describeThe()]);
+            return true;
+        } else {
+            Game.sendMessage(target, "%s misses you!", [this.describeThe()]);
+            Game.sendMessage(this, "You miss!");
+            return false;
         }
+        target.raiseEvent('onAttack', this);
     },
-    increaseAttackValue: function(value) {
-        // If no value was passed, default to 2.
-        value = value || 2;
-        // Add to the attack value.
-        this._attackValue += value;
-        Game.sendMessage(this, "You look stronger!");
-    },
-    listeners: {
-        details: function() {
-            return [{key: 'attack', value: this.getAttackValue()}];
+    presenceAttack: function(target, additionalDice, message) {
+        if(!additionalDice)
+            additionalDice = 0;
+        var dice = Math.floor(this._PRE / 5) + additionalDice;
+        var result = Game.rollDice(dice + "d6");
+
+        if(!message)
+            message = "%s makes a presense attack!".format(this.describe());
+
+        Game.sendMessageNearby(
+            this.getMap(),
+            this.getX(),
+            this.getY(),
+            this.getZ(),
+            message
+        );
+        // Return the margin of success or false
+        var margin;
+        if(result >= target.getPRE()) {
+            margin = result - target.getPRE();
         }
+        else if(result >= target.getEGO()) {
+            margin = result - target.getEGO();
+        } else {
+            Game.sendMessage(this, "Your presence attack fails to impress %s", [target.describeThe()]);
+            Game.sendMessage(target, "%s attempted and failed to impress you with a presense attack", [this.describe()]);
+            return false;
+        }
+
+        Game.sendMessage(this, "Your presence attack succeeds in impressing %s by %s points!", [target.describeThe(), margin]);
+        Game.sendMessage(target, "%s has impressed you with a presense attack by %s points!", [this.describe(), margin]);
+        return margin;
+    },
+    _attackRoll: function(target) {
+        var roll = Game.rollDice("3d6");
+        return roll <= 11 + this.getOCV() - target.getDCV();
     }
 };
 Game.EntityMixins.Characteristics = {
@@ -256,9 +290,6 @@ Game.EntityMixins.Characteristics = {
     getDCV: function() {
         return this._CV + this._DCVmod;
     },
-    getHTH: function() {
-        return Math.floor(this._STR / 5) + "d6";
-    },
     charRoll: function(chr) {
         var roll = Game.rollDice("3d6");
         var characteristic = "_" + chr;
@@ -268,73 +299,6 @@ Game.EntityMixins.Characteristics = {
         } else {
             return false;
         }
-    },
-    hthAttack: function(target) {
-        var hit = this._attackRoll(target);
-        if(hit) {
-            var dice = Math.floor(this._STR / 5);
-            var STUN = 0;
-            var BODY = 0;
-
-            for(var i = 0; i < dice; i++) {
-                var dieRoll = Game.rollDice("1d6");
-
-                STUN += dieRoll;
-                if(dieRoll == 6) {
-                    BODY += 2;
-                } else if(dieRoll > 1) {
-                    BODY += 1;
-                }
-
-            }
-
-            target.takeSTUN(this, STUN);
-            target.takeBODY(this, BODY);
-            Game.sendMessage(target, "%s does %s STUN and %s BODY to you!", [this.describeThe(), STUN, BODY]);
-            Game.sendMessage(this, "You do %s STUN and %s BODY to %s!", [STUN, BODY, target.describeThe()]);
-            return true;
-        } else {
-            Game.sendMessage(target, "%s misses you!", [this.describeThe()]);
-            Game.sendMessage(this, "You miss!");
-            return false;
-        } 
-    },
-    presenceAttack: function(target, additionalDice, message) {
-        if(!additionalDice)
-            additionalDice = 0;
-        var dice = Math.floor(this._PRE / 5) + additionalDice;
-        var result = Game.rollDice(dice + "d6");
-
-        if(!message)
-            message = "%s makes a presense attack!".format(this.describe());
-
-        Game.sendMessageNearby(
-            this.getMap(),
-            this.getX(),
-            this.getY(),
-            this.getZ(),
-            message
-        );
-        // Return the margin of success or false
-        var margin;
-        if(result >= target.getPRE()) {
-            margin = result - target.getPRE();
-        }
-        else if(result >= target.getEGO()) {
-            margin = result - target.getEGO();
-        } else {
-            Game.sendMessage(this, "Your presence attack fails to impress %s", [target.describeThe()]);
-            Game.sendMessage(target, "%s attempted and failed to impress you with a presense attack", [this.describe()]);
-            return false;
-        }
-
-        Game.sendMessage(this, "Your presence attack succeeds in impressing %s by %s points!", [target.describeThe(), margin]);
-        Game.sendMessage(target, "%s has impressed you with a presense attack by %s points!", [this.describe(), margin]);
-        return margin;
-    },
-    _attackRoll: function(target) {
-        var roll = Game.rollDice("3d6");
-        return roll <= 11 + this.getOCV() - target.getDCV();
     },
     listeners: {
         post12Recovery: function() {
