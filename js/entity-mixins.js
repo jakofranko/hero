@@ -219,6 +219,11 @@ Game.EntityMixins.Characteristics = {
         if(this._STUN <= 0) {
             Game.sendMessage(attacker, "You knocked %s unconscious", [this.describe()]);
             this.ko();
+        } else {
+            if(this.hasMixin('Reactor')) {
+                var reaction = Math.round(Math.random()) ? 'defend' : 'runAway';
+                this.setReaction(reaction);
+            }
         }
     },
     increaseChar: function(CHAR) {
@@ -725,6 +730,11 @@ Game.EntityMixins.JobActor = {
     act: function() {
         if(!this.isConscious()) 
             return;
+
+        // If entity can react and is reacting right now,
+        // do that instead of performing job.
+        if(this.hasMixin('Reactor') && this.isReacting())
+            return this.react();
         
         // Re-prioritize every hour
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0) {
@@ -1065,6 +1075,41 @@ Game.EntityMixins.RandomStatGainer = {
                 this.setStatPoints(this.getStatPoints() - 1);
             }
         }
+    }
+};
+Game.EntityMixins.Reactor = {
+    name: 'Reactor',
+    init: function(template) {
+        this._reacting = false;
+        this._reaction = false;
+        this._reactions = {
+            defend: function() {
+                this.sendMessageNearby('Take that you ruffian!');
+            },
+            runAway: function() {
+                this.sendMessageNearby('Help! Somebody help!');
+            }
+        };
+        console.log(Object.keys(this._reactions));
+    },
+    isReacting: function() {
+        return this._reacting;
+    },
+    getReaction: function() {
+        return this._reaction;
+    },
+    setReaction: function(reaction) {
+        this._reaction = reaction;
+        if(reaction)
+            this._reacting = true;
+        else
+            this._reacting = false;
+    },
+    react: function() {
+        if(this._reaction)
+            this._reactions[this._reaction]();
+        else
+            return false;
     }
 };
 Game.EntityMixins.Sight = {
