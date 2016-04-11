@@ -71,7 +71,8 @@ Game.EntityRepository.define('person', {
         Game.EntityMixins.MoneyHolder,
         Game.EntityMixins.Sight,
         Game.EntityMixins.Targeting,
-        Game.EntityMixins.RandomStatGainer
+        Game.EntityMixins.RandomStatGainer,
+        Game.EntityMixins.Reactor
     ]
 });
 

@@ -13,6 +13,10 @@ Game.EntityMixins.Attacker = {
         return Math.floor(this._STR / 5) + "d6";
     },
     hthAttack: function(target) {
+        // No matter what, some entity took a swing at another entity,
+        // so trigger the onAttack event. onHit on the otherhand...
+        target.raiseEvent('onAttack', this);
+
         var hit = this._attackRoll(target);
         if(hit) {
             var dice = Math.floor(this._STR / 5);
@@ -41,7 +45,6 @@ Game.EntityMixins.Attacker = {
             Game.sendMessage(this, "You miss!");
             return false;
         }
-        target.raiseEvent('onAttack', this);
     },
     presenceAttack: function(target, additionalDice, message) {
         if(!additionalDice)
@@ -716,6 +719,10 @@ Game.EntityMixins.JobActor = {
         }
 
         Game.Jobs[highestPriority].doJob(this);
+
+        if(this.hasMixin('MemoryMaker')) {
+            this.processMemories();
+        }
     },
     getJobs: function() {
         return this._jobs;
@@ -852,22 +859,25 @@ Game.EntityMixins.MemoryMaker = {
         else
             this._memory[type][memoryName] = memory;
 
-        if(memory.expires !== false)
+        if(memory.expires !== false && memory.expires !== undefined)
             this.addShortTermMemory(type, subtype, memoryName, memory);
 
-        console.log(this._memory);
     },
     forget: function(type, subtype, memoryName) {
         if(subtype) {
             if(!this._memory[type][subtype][memoryName])
                 return false;
-            else
+            else {
+                this.raiseEvent('onForget', memoryName, this._memory[type][subtype][memoryName]);
                 delete this._memory[type][subtype][memoryName];
+            }
         } else {
             if(!this._memory[type][memoryName])
                 return false;
-            else
+            else {
+                this.raiseEvent('onForget', memoryName, this._memory[type][memoryName]);
                 delete this._memory[type][memoryName];
+            }
         }
     },
     recall: function(type, subtype, memoryName) {
@@ -881,6 +891,9 @@ Game.EntityMixins.MemoryMaker = {
             return this._memory[type][subtype][memoryName];
     },
     addShortTermMemory: function(type, subtype, memoryName, memory) {
+        if(!memory.expires)
+            throw new Error('Short Term memory added with no expiration...');
+
         memory.memoryType = type;
         memory.memorySubtype = subtype;
         this._shortTermMemory[memoryName] = memory;
@@ -892,14 +905,33 @@ Game.EntityMixins.MemoryMaker = {
             var m = this._shortTermMemory[memory];
             if(m.expires === 0) {
                 if(m.memorySubtype !== false)
-                    delete this._memory[m.memoryType][m.memorySubtype][memory];
+                    this.forget(m.memoryType, m.memorySubtype, memory);
                 else
-                    delete this._memory[m.memoryType][memory];
+                    this.forget(m.memoryType, false, memory);
 
                 delete this._shortTermMemory[memory];
             } else {
                 this._shortTermMemory[memory].expires--;
             }
+            console.log(Object.keys(this._shortTermMemory).length);
+        }
+    },
+    listeners: {
+        onAttack: function(attacker, expires) {
+            var enemy = {entity: attacker};
+            var event = {entity: attacker};
+            if(expires !== false && expires !== undefined) {
+                enemy.expires = expires;
+                event.expires = expires;
+            } else {
+                event.expires = 5;
+            }
+
+            this.remember('people', 'enemies', attacker.describe(), enemy);
+            this.remember('events', false, 'attacked by ' + attacker.describe(), event);
+
+            if(attacker.hasMixin('MemoryMaker')) 
+                attacker.remember('people', 'victims', this.describe(), {entity: this});
         }
     }
 };
@@ -1044,17 +1076,17 @@ Game.EntityMixins.RandomStatGainer = {
 Game.EntityMixins.Reactor = {
     name: 'Reactor',
     init: function(template) {
+        var self = this;
         this._reacting = false;
         this._reaction = false;
         this._reactions = {
             defend: function() {
-                this.sendMessageNearby('Take that you ruffian!');
+                Game.sendMessageNearby(self.getMap(), self.getX(), self.getY(), self.getZ(), 'Take that you ruffian!');
             },
             runAway: function() {
-                this.sendMessageNearby('Help! Somebody help!');
+                Game.sendMessageNearby(self.getMap(), self.getX(), self.getY(), self.getZ(), 'Help! Somebody help!');
             }
         };
-        console.log(Object.keys(this._reactions));
     },
     isReacting: function() {
         return this._reacting;
@@ -1074,6 +1106,31 @@ Game.EntityMixins.Reactor = {
             this._reactions[this._reaction]();
         else
             return false;
+
+        // Make sure to process memories so that these poor entities
+        // can forget (one day) that they have been attacked.
+        if(this.hasMixin('MemoryMaker')) {
+            this.processMemories();
+        }
+    },
+    listeners: {
+        onAttack: function(attacker) {
+            // Only switch it up if not already reacting
+            if(!this._reacting) {
+                var reaction = Math.round(Math.random()) ? 'defend' : 'runAway';
+                this.setReaction(reaction);
+
+                if(this.hasMixin('Targeting'))
+                    this.setTarget(attacker);    
+            }
+        },
+        onForget: function(memoryName, memory) {
+            if(this._reacting) {
+                if((memoryName.search(/mugged by/) !== -1 || memoryName.search(/attacked by/) !== -1) && memory.entity == this.getTarget())
+                    this.setReaction(false);
+                
+            }
+        }
     }
 };
 Game.EntityMixins.Sight = {
