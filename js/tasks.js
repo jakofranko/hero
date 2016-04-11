@@ -91,6 +91,14 @@ Game.Tasks.hunt = function(entity) {
 	}
 };
 
+Game.Tasks.retreat = function(self, target) {
+	var pos = {
+		x: self.getX(),
+		y: self.getY(),
+		z: self.getZ()
+	};
+}
+
 Game.Tasks.findRandomEntityInSight = function(self) {
 	var entities = self.getMap().getEntitiesWithinRadius(self.getX(), self.getY(), self.getZ(), self.getSightRadius());
 	var randomized = entities.randomize();
