@@ -27,7 +27,7 @@ Game.Justice = function() {
 	this._corruption = 0;
 
 	// Third Tier meters
-	this._criminals = 10;
+	this._criminals = 0;
 
 	// Initialize justice level based on other starting levels
 	this.updateJustice();
@@ -41,6 +41,13 @@ Game.Justice.prototype.updateJustice = function() {
 
 	// Justice is a function of the second tier meters (crime and corruption)
 	this._justice = 100 - this._crime - this._corruption;
+
+	// If Justice == 100, you win!
+	if(this._justice >= 100 && !Game.won())
+	{
+		Game.Screen.playScreen.setSubScreen(Game.Screen.winScreen);
+		Game.win();
+	}
 };
 
 // Second Tier methods

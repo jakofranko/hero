@@ -1,4 +1,22 @@
 Game.EntityRepository = new Game.Repository('entities', Game.Entity);
+Game.EntityRepository.nameGenerator = new Game.NameGenerator();
+Game.EntityRepository.createEntity = function(name, template) {
+    if(name == 'person') {
+        if(!template.name) {
+            // Unless a name is explicitely defined, generate a first and last name
+            template.name = this.nameGenerator.name() + ' ' + this.nameGenerator.name();
+        }
+        if(!template.character) {
+            template.character = ['w', 'm'].random();
+        }
+        if(template.character == 'm' && !template.type) {
+            template.type = 'man';
+        } else if(template.character == 'w' && !template.type) {
+            template.type = 'woman';
+        }
+    }
+    return Game.EntityRepository.create.call(this, name, template);
+};
 
 Game.PlayerTemplate = {
     name: 'human (you)',
@@ -18,6 +36,7 @@ Game.PlayerTemplate = {
         Game.EntityMixins.Equipper,
         Game.EntityMixins.Attacker,
         Game.EntityMixins.InventoryHolder,
+        Game.EntityMixins.MemoryMaker,
         Game.EntityMixins.MoneyHolder,
         Game.EntityMixins.MessageRecipient,
         Game.EntityMixins.PlayerStatGainer,
@@ -48,10 +67,12 @@ Game.EntityRepository.define('person', {
         Game.EntityMixins.Destructible,
         Game.EntityMixins.ExperienceGainer,
         Game.EntityMixins.JobActor,
+        Game.EntityMixins.MemoryMaker,
         Game.EntityMixins.MoneyHolder,
         Game.EntityMixins.Sight,
         Game.EntityMixins.Targeting,
-        Game.EntityMixins.RandomStatGainer
+        Game.EntityMixins.RandomStatGainer,
+        Game.EntityMixins.Reactor
     ]
 });
 

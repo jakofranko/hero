@@ -284,6 +284,8 @@ Game.Screen.playScreen = {
             } else if(inputData.keyCode === ROT.VK_PERIOD) {
                 // Skip turn
                 this._player.getMap().getEngine().unlock();
+                // If you don't stop it here, then it will try to perform two actions for the player
+                return;
             } else {
                 // Not a valid key
                 return;
@@ -363,29 +365,42 @@ Game.Screen.playScreen = {
                 if (map.isExplored(x, y, currentDepth)) {
                     // Fetch the glyph for the tile and render it to the screen
                     // at the offset position.
-                    var glyph = map.getTile(x, y, currentDepth);
-                    var foreground = glyph.getForeground();
+                    var glyph,
+                        foreground;
                     // If we are at a cell that is in the field of vision, we need
                     // to check if there are items or entities.
                     if (visibleCells[x + ',' + y]) {
-                        // Check for items first, since we want to draw entities
-                        // over items.
-                        var items = map.getItemsAt(x, y, currentDepth);
-                        // If we have items, we want to render the top most item
-                        if (items) {
-                            glyph = items[items.length - 1];
-                        }
                         // Check if we have an entity at the position
-                        if (map.getEntityAt(x, y, currentDepth)) {
+                        var entity = map.getEntityAt(x, y, currentDepth);
+                        var items = map.getItemsAt(x, y, currentDepth);
+                        if (entity) {
                             glyph = map.getEntityAt(x, y, currentDepth);
+                            var criminals = this._player.getMemory().people.criminals;
+                            // Change foreground based on character's memory
+                            if(Object.keys(criminals).length > 0) {
+                                var name = glyph.getName();
+                                if(criminals[name]) {
+                                    foreground = Game.Palette.red;
+                                } else {
+                                    foreground = glyph.getForeground();
+                                }
+                            } else {
+                                foreground = glyph.getForeground();
+                            }
+                        } else if(items) {
+                            glyph = items[items.length - 1];
+                            foreground = glyph.getForeground();
+                        } else {
+                            glyph = map.getTile(x, y, currentDepth);
+                            foreground = glyph.getForeground();
                         }
-                        // Update the foreground color in case our glyph changed
-                        foreground = glyph.getForeground();
                     } else {
+                        // Not in our FOV, so just display the terrain
+                        glyph = map.getTile(x, y, currentDepth);
                         // Since the tile was previously explored but is not 
                         // visible, we want to change the foreground color to
                         // dark gray.
-                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(foreground)));
+                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
                     }
                     
                     display.draw(
@@ -394,28 +409,6 @@ Game.Screen.playScreen = {
                         glyph.getChar(), 
                         foreground, 
                         glyph.getBackground()
-                    );
-                }
-            }
-        }
-
-        // Render the entities
-        var entities = this._player.getMap().getEntities();
-        for (var key in entities) {
-            var entity = entities[key];
-            if (visibleCells[entity.getX() + ',' + entity.getY()]) {
-                // Only render the entity if they would show up on the screen
-                if(entity.getX() < topLeftX + screenWidth && 
-                    entity.getX() >= topLeftX && 
-                    entity.getY() < topLeftY + screenHeight && 
-                    entity.getY() >= topLeftY &&
-                    entity.getZ() == this._player.getZ()) {
-                    display.draw(
-                        entity.getX() - topLeftX,
-                        entity.getY() - topLeftY,
-                        entity.getChar(),
-                        entity.getForeground(),
-                        entity.getBackground()
                     );
                 }
             }
@@ -852,7 +845,7 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
                     var entity = map.getEntityAt(x, y, z);
                     return String.format('%s - %s (%s)',
                         entity.getRepresentation(),
-                        entity.describeA(true),
+                        entity.describeA(true) + ' ('+ entity.getName() + ')',
                         entity.details());
                 }
             }
@@ -893,8 +886,9 @@ Game.Screen.helpScreen = {
         display.drawText(0, y++, '[%c{#585DF5}W%c{}] to wield items');
         display.drawText(0, y++, '[%c{#585DF5}x%c{}] to examine items');
         display.drawText(0, y++, '[%c{#585DF5};%c{}] to look around you');
+        display.drawText(0, y++, '[%c{#585DF5}.%c{}] to wait');
         display.drawText(0, y++, '[%c{#585DF5}j%c{}] to show city statistics');
-        display.drawText(0, y++, '[%c{#585DF5}s%c{}] to show spend experience points');
+        display.drawText(0, y++, '[%c{#585DF5}s%c{}] to spend experience points');
         display.drawText(0, y++, '[%c{#585DF5}?%c{}] to show this help screen');
         y += 3;
         text = '--- press any key to continue ---';
@@ -1045,14 +1039,14 @@ Game.Screen.winScreen = {
         display.drawText((w/2) - (text.length / 2), 2, text);
 
         text = "You have successfully restored justice to this city. While crime and corruption will always be present, you can rest easy knowing that the people of this city can take care of themselves.";
-        display.drawText(1, 4, text, 80);
+        display.drawText((w/2) - 40, 4, text, 80);
 
         text = "Press [%c{#585DF5}Enter%c{}] to keep playing";
         display.drawText((w/2) - (text.length / 2), 8, text);
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			Game.switchScreen(Game.Screen.playScreen);
+			Game.Screen.playScreen.setSubScreen(undefined);
 		}   
     }
 };

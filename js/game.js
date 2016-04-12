@@ -1,5 +1,6 @@
 var Game = {
 	_player: null,
+	_won: false,
 
 	// ROT.Displays
 	_display: null,
@@ -20,6 +21,10 @@ var Game = {
 	// How many in-game tiles a lot should comprise
 	_lotSize: 20,
 	_startTime: '0700',
+
+	// NPC Settings
+	_totalEntities: 100,
+	_totalCriminals: 25,
 
 	getDisplay: function() {
 		return this._display;
@@ -58,6 +63,12 @@ var Game = {
 	getStartTime: function() {
 		return this._startTime;
 	},
+	getTotalEntities: function() {
+		return this._totalEntities;
+	},
+	getTotalCriminals: function() {
+		return this._totalCriminals;
+	},
 	init: function() {
 		// Create player entity
 		this._player = new Game.Entity(Game.PlayerTemplate);
@@ -67,7 +78,6 @@ var Game = {
 	    this._overview = new ROT.Display({width: this._citySize, height: this._citySize});
 	    this._log = new ROT.Display({width: 30, height: 20});
 	    this._stats = new ROT.Display({width: 10, height: 5});
-
 	   
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
@@ -200,6 +210,12 @@ var Game = {
 		}
 
 
+	},
+	win: function() {
+		this._won = true;
+	},
+	won: function() {
+		return this._won;
 	}
 };
 

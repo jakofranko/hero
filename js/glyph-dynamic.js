@@ -45,7 +45,7 @@ Game.DynamicGlyph = function(properties) {
             mixins[i].init.call(this, properties);
         }
     }
-}
+};
 // Make dynamic glyphs inherit all the functionality from glyphs
 Game.DynamicGlyph.extend(Game.Glyph);
 
@@ -104,7 +104,7 @@ Game.DynamicGlyph.prototype.raiseEvent = function(event) {
         return;
     }
     // Extract any arguments passed, removing the event name
-    var args = Array.prototype.slice.call(arguments, 1)
+    var args = Array.prototype.slice.call(arguments, 1);
     // Invoke each listener, with this entity as the context and the arguments
     var results = [];
     for (var i = 0; i < this._listeners[event].length; i++) {
