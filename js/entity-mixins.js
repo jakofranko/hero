@@ -778,6 +778,9 @@ Game.EntityMixins.JobActor = {
                     for (var i = 0; i < witnesses.length; i++) {
                         witnesses[i].raiseEvent('onRepent', this);
                     }
+
+                    if(this.hasMixin('Reactor'))
+                        this.setReaction(false);
                 }
             }
         }
@@ -1082,9 +1085,11 @@ Game.EntityMixins.Reactor = {
         this._reactions = {
             defend: function() {
                 Game.sendMessageNearby(self.getMap(), self.getX(), self.getY(), self.getZ(), 'Take that you ruffian!');
+                Game.Tasks.hunt(self);
             },
             runAway: function() {
                 Game.sendMessageNearby(self.getMap(), self.getX(), self.getY(), self.getZ(), 'Help! Somebody help!');
+                Game.Tasks.retreat(self, self.getTarget());
             }
         };
     },

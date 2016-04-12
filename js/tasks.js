@@ -63,7 +63,7 @@ Game.Tasks.hunt = function(entity) {
 	    var offsets = Math.abs(target.getX() - entity.getX()) + Math.abs(target.getY() - entity.getY());
 	    if (offsets === 1) {
 	        if (entity.hasMixin('Attacker')) {
-	            entity.attack(target);
+	            entity.hthAttack(target);
 	            return;
 	        }
 	    }
@@ -92,12 +92,36 @@ Game.Tasks.hunt = function(entity) {
 };
 
 Game.Tasks.retreat = function(self, target) {
-	var pos = {
+	var selfPos = {
 		x: self.getX(),
 		y: self.getY(),
 		z: self.getZ()
 	};
-}
+	var targetPos = {
+		x: target.getX(),
+		y: target.getY(),
+		z: target.getZ()
+	};
+
+	// Determine if the target is to the left or right of self
+	var x = 0;
+	if(selfPos.x - targetPos.x > 0)
+		x = 1; // target is to the left, so we want to go right
+	else if(selfPos.x - targetPos.x < 0)
+		x = -1; // target is to the right, so we want to go left
+
+	// Determine if the target is to the north or south of self
+	var y = 0;
+	if(selfPos.y - targetPos.y > 0)
+		y = 1; // target is above, so we want to go south
+	else if(selfPos.y - targetPos.y < 0)
+		y = -1; // target is below, so we want to go up
+
+	if(x === 0 && y === 0)
+		throw new Error('Two entities are on top of each other...how did that happen???');
+
+	self.tryMove(selfPos.x + x, selfPos.y + y, selfPos.z);
+};
 
 Game.Tasks.findRandomEntityInSight = function(self) {
 	var entities = self.getMap().getEntitiesWithinRadius(self.getX(), self.getY(), self.getZ(), self.getSightRadius());
