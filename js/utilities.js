@@ -22,9 +22,9 @@ Game.rollDice = function(XdX) {
     var total = 0;
     for (var i = 0; i < num; i++) {
         total += Math.floor(Math.random() * sides) + 1;
-    };
+    }
     return total;
-}
+};
 
 /**
 * Decimal adjustment of a number. Copy/pasted from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
