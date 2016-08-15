@@ -25,6 +25,7 @@ Game.House = function(options) {
 	}
 
 	this.graph = this.generate('foyer');
+	return this;
 };
 Game.House.prototype.rooms = [
 	'foyer',		// 0
@@ -37,6 +38,14 @@ Game.House.prototype.rooms = [
 	'bedroom',		// 7
 	'closet',		// 8
 ];
+
+Game.House.prototype.possibleDirections = {
+	// Depending on which way a house is facing, it may only branch in any 3 given directions
+	n: ['s', 'e', 'w'],
+	s: ['n', 'e', 'w'],
+	e: ['n', 's', 'w'],
+	w: ['n', 's', 'e']
+};
 
 // Closets and offices are terminal nodes; no rooms will spawn a foyer, as that is the origin
 Game.House.prototype.grammar = {
@@ -53,7 +62,35 @@ Game.House.prototype.grammar = {
 
 Game.House.prototype.Room = function(name) {
 	this.room = name;
+	this.x = null;
+	this.y = null;
+	this.width = 5;			// TODO: randomize based on room type
+	this.height = 5;		// TODO: randomize based on room type
 	this.children = [];
+};
+Game.House.prototype.Room.prototype.setX = function(x) {
+	this.x = x;
+};
+Game.House.prototype.Room.prototype.getX = function() {
+	return this.x;
+};
+Game.House.prototype.Room.prototype.getY = function(y) {
+	this.y = y;
+};
+Game.House.prototype.Room.prototype.setY = function(y) {
+	return this.y;
+};
+Game.House.prototype.Room.prototype.getWidth = function(width) {
+	this.width = width;
+};
+Game.House.prototype.Room.prototype.setWidth = function(width) {
+	return this.width;
+};
+Game.House.prototype.Room.prototype.getHeight = function(height) {
+	this.height = height;
+};
+Game.House.prototype.Room.prototype.setHeight = function(height) {
+	return this.height;
 };
 Game.House.prototype.Room.prototype.addChild = function(child) {
 	if(child !== false)
@@ -62,7 +99,6 @@ Game.House.prototype.Room.prototype.addChild = function(child) {
 
 // Recusively generate the graph, starting with the 'foyer'
 Game.House.prototype.generate = function(name) {
-	debugger;
 	// Create a new room
 	var room = new this.Room(name);
 
@@ -89,10 +125,121 @@ Game.House.prototype.generate = function(name) {
 	}
 };
 
+
+// Because a room could be tacked on to the north, x,y coordinate 0,0 is going to change. Rooms to the south and east of their ancestor are not a problem; just stick the 'cursor' at a brand new x or y coordinate. But if it's to the north or west, the whole thing needs to be shifted down or to the right, and then the new room added to the new 0,y or x,0 coordinates.
+Game.House.prototype.render = function(direction) { // The direction specifies when way we branch from the root initially
+	// The array of tiles to be returned
+	var house = [];
+
+	// This will be an array of rooms to do next.
+	var queue = [this.graph];
+
+	// Process the queue until it's empty. Processing a room will consist of the following:
+	// 1. Draw the room starting at the designated x,y coordinates that each room will have. If it does not have x and y properties, then it is the starting room (foyer).
+	// 2. Loop through the room's children. For each child, pick a direction that the room will be added on to, and then place a door somewhere along that wall
+	// 3. Then, based on the current child's width and height, assign the x,y start location to the child such that when starting at x,y and then rendering the room tiles, it will connect to the door placed in the previous step. It is important that each room is no larger than it's parent. Additionally, if the room is being placed north or west, the y and x columns/rows will need to be shifted accordingly in this step so that the x,y value assigned to the child are valid.
+	// 4. Add the child (with assigned x and y values) to the queue
+	while(queue.length > 0) {
+		debugger;
+		var room = queue.pop();
+		var possibleDirections = this.possibleDirections[direction].randomize(); // For directions that have already been taken for child rooms
+		var x, y;
+
+		// Render room tiles
+		var roomTiles = this._renderRoom(room);
+
+		// Add room tiles to our house tiles
+		if(room.x && room.y) {
+			x = room.x;
+			y = room.y;
+		} else {
+			x = 0;
+			y = 0;
+		}
+		for(var i = 0; i < roomTiles.length; i++, x++) {
+			if(!house[x])
+				house[x] = new Array(roomTiles[i].length);
+
+			// Since we iterate over the height of the room (y) everytime,
+			// we need to reset y back to it's starting value (roomY)
+			for(var j = 0, roomY = y; j < roomTiles[i].length; j++, roomY++) {
+				house[x][roomY] = roomTiles[i][j];
+			}
+		}
+		Game._consoleLogGrid(house, '_char');
+
+		// Process the room's children if it has any
+		if(room.children.length > 0) {
+			var child = room.children[i];
+			// Pick direction to branch from
+			for (var i = 0; i < room.children.length; i++) {
+				var dir = possibleDirections.pop();
+
+				// Add a door to the room tiles
+				switch(dir) {
+					// Shift whole house 'south' by using Array.prototype.unshift()
+					case 'n':
+						// Loop through every column
+						for (var x = 0; x < house.length; x++) {
+							// unshift() a patch of grass to every row based on room height
+							for (var y = 0; y < child.height; y++) {
+								house[x].unshift(Game.TileRepository.create('grass'));
+							}
+						}
+						break;
+					// Shift whole house 'east' by using Array.prototype.unshift()
+					case 'w':
+						// unshift() a column of grass to every column based on room width
+						for (var x = 0; x < child.width; x++) {
+							house.unshift(new Array(house[0].length));
+							for (var y = 0; y < house[0].length; y++) {
+								house[x][y] = Game.TileRepository.create('grass');
+							}
+						}
+						break;
+					case 'e':
+					case 's':
+					default:
+						break;
+				}
+			}
+		}
+		Game._consoleLogGrid(house, '_char');
+	}
+	return house;
+};
+
+Game.House.prototype._renderRoom = function(room, direction) {
+	var w = room.width;
+	var h = room.height;
+	var horizontalWall = Game.TileRepository.create('indoor wall-horizontal');
+	var verticalWall = Game.TileRepository.create('indoor wall-vertical');
+	var floor = Game.TileRepository.create('floor');
+	var tiles = new Array(w); // Initialize the x-length
+	
+	for (var x = 0; x < w; x++) {
+		// Initialize the y-length if it doesn't exist yet.
+		if(!tiles[x])
+				tiles[x] = new Array(h);
+
+		for (var y = 0; y < h; y++) {
+			if(y === 0 || y === h - 1)
+				tiles[x][y] = horizontalWall;
+			else if(x === 0 || x === w - 1)
+				tiles[x][y] = verticalWall;
+			else
+				tiles[x][y] = floor;
+		}
+	}
+
+	
+	return tiles;
+};
+
 Game.House.prototype._getRandomChild = function(room, returnWord) {
 	// Get a new array from the possible room children based on what rooms
 	// aren't at their max
-	var selection = []
+	var selection = [];
 	this.grammar[room].forEach(function(val, index) {
 		var roomName = this.rooms[val];
 		if(!this.options[roomName] || this.roomNum[roomName] < this.options[roomName])

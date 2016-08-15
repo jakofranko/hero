@@ -26,6 +26,21 @@ Game.rollDice = function(XdX) {
     return total;
 };
 
+Game._consoleLogGrid = function(grid, field) {
+    var string = "";
+    for (var y = 0; y < grid[0].length; y++) {
+        for (var x= 0; x < grid.length; x++) {
+            if(field) {
+                string += String(grid[x][y][field]);
+            } else {
+                string += String(grid[x][y]);
+            }
+        }
+        string += "\n";
+    }
+    console.log(string);
+};
+
 /**
 * Decimal adjustment of a number. Copy/pasted from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
 *
