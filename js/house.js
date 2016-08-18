@@ -41,10 +41,10 @@ Game.House.prototype.rooms = [
 
 Game.House.prototype.possibleDirections = {
 	// Depending on which way a house is facing, it may only branch in any 3 given directions
-	n: ['s', 'e', 'w'],
-	s: ['n', 'e', 'w'],
-	e: ['n', 's', 'w'],
-	w: ['n', 's', 'e']
+	'n': ['s', 'e', 'w'],
+	's': ['n', 'e', 'w'],
+	'e': ['n', 's', 'w'],
+	'w': ['n', 's', 'e']
 };
 
 // Closets and offices are terminal nodes; no rooms will spawn a foyer, as that is the origin
