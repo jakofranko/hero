@@ -149,7 +149,7 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		var roomTiles = this._renderRoom(room);
 
 		// Add room tiles to our house tiles
-		if(room.x && room.y) {
+		if((room.x || room.x === 0) && (room.y || room.y === 0)) {
 			x = room.x;
 			y = room.y;
 		} else {
@@ -166,42 +166,82 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 				house[x][roomY] = roomTiles[i][j];
 			}
 		}
+
+		// Fill in missing spaces with grass
+		house = this._grassFill(house);
 		Game._consoleLogGrid(house, '_char');
 
 		// Process the room's children if it has any
 		if(room.children.length > 0) {
-			var child = room.children[i];
 			// Pick direction to branch from
 			for (var i = 0; i < room.children.length; i++) {
+				var child = room.children[i];
 				var dir = possibleDirections.pop();
 
-				// Add a door to the room tiles
+				// Add a door to the room tiles, and set x,y start for child
 				switch(dir) {
 					// Shift whole house 'south' by using Array.prototype.unshift()
 					case 'n':
-						// Loop through every column
-						for (var x = 0; x < house.length; x++) {
-							// unshift() a patch of grass to every row based on room height
-							for (var y = 0; y < child.height; y++) {
-								house[x].unshift(Game.TileRepository.create('grass'));
-							}
+						// Set x,y
+						child.x = room.x || 0;
+						child.y = room.y - child.height;
+
+						if(child.y < 0) {
+							// Loop through every column
+							for (var x = 0; x < house.length; x++) {
+								// unshift() a patch of grass to every row based on room height
+								for (var y = 0; y < child.height; y++) {
+									house[x].unshift(Game.TileRepository.create('grass'));
+									// Adjust room and children y positions by child height
+									if(x === 0) { // Ensures we do this once, instead of for every row
+										room.y++;
+										for(var roomChild = 0; roomChild < room.children.length; roomChild++)
+											room.children[roomChild].y++; // This increments the 'child' var too
+										
+									}
+								}
+							}	
 						}
+						
 						break;
 					// Shift whole house 'east' by using Array.prototype.unshift()
 					case 'w':
-						// unshift() a column of grass to every column based on room width
-						for (var x = 0; x < child.width; x++) {
-							house.unshift(new Array(house[0].length));
-							for (var y = 0; y < house[0].length; y++) {
-								house[x][y] = Game.TileRepository.create('grass');
+						// Set x,y
+						child.x = room.x - child.width;
+						child.y = room.y || 0;
+
+						if(child.x < 0) {
+							// unshift() a column of grass to every column based on room width
+							for (var x = 0; x < child.width; x++) {
+								house.unshift(new Array(house[0].length));
+								for (var y = 0; y < house[0].length; y++) {
+									// Always use index of 0 since we're adding the array to the beginning
+									house[0][y] = Game.TileRepository.create('grass');
+								}
+								// Adjust room and children y positions by child width
+								room.x++;
+								for(var roomChild = 0; roomChild < room.children.length; roomChild++)
+									room.children[roomChild].x++; // This increments the 'child' var too
 							}
 						}
 						break;
 					case 'e':
+						// Set x,y
+						child.x = room.x + room.width;
+						child.y = room.y || 0;
+						break;
 					case 's':
+						// Set x,y
+						child.x = room.x || 0;
+						child.y = room.y + room.height;
+						break;
 					default:
+						throw new Error("There are no more possible directions. This should not be possible...heh heh.");
 						break;
 				}
+
+				// Add the child room to the queue
+				queue.push(child);
 			}
 		}
 		Game._consoleLogGrid(house, '_char');
@@ -258,4 +298,19 @@ Game.House.prototype._getRandomChild = function(room, returnWord) {
 		return this.rooms[child];
 	else
 		return child;
+};
+
+// Based on the length of the first grid array, fill in the rest of the grid with grass tiles.
+// Note: this will not work if the first element is shorter than other elements in the array
+Game.House.prototype._grassFill = function(grid) {
+	for (var x = 0; x < grid.length; x++) {
+		if(!grid[x])
+			grid[x] = new Array(grid[0].length);
+
+		for (var y = 0; y < grid[0].length; y++) {
+			if(!grid[x][y])
+				grid[x][y] = Game.TileRepository.create('grass');
+		}
+	}
+	return grid;
 };
