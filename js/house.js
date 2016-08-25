@@ -173,7 +173,9 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			// Since we iterate over the height of the room (y) everytime,
 			// we need to reset y back to it's starting value (roomY)
 			for(var j = 0, roomY = y; j < roomTiles[i].length; j++, roomY++) {
-				house[x][roomY] = roomTiles[i][j];
+				// Don't overwrite an existing room tile
+				if(!house[x][roomY] || house[x][roomY].describe() == 'grass')
+					house[x][roomY] = roomTiles[i][j];
 			}
 		}
 
@@ -282,7 +284,6 @@ Game.House.prototype._renderRoom = function(room, direction) {
 		}
 	}
 
-	
 	return tiles;
 };
 
