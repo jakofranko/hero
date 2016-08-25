@@ -151,7 +151,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 	// 3. Then, based on the current child's width and height, assign the x,y start location to the child such that when starting at x,y and then rendering the room tiles, it will connect to the door placed in the previous step. It is important that each room is no larger than it's parent. Additionally, if the room is being placed north or west, the y and x columns/rows will need to be shifted accordingly in this step so that the x,y value assigned to the child are valid.
 	// 4. Add the child (with assigned x and y values) to the queue
 	while(queue.length > 0) {
-		debugger;
 		var room = queue.pop();
 		var possibleDirections = this.possibleDirections[direction].randomize(); // For directions that have already been taken for child rooms
 		var x, y;
