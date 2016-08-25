@@ -179,9 +179,11 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			}
 		}
 
+		this._testZeroIndex(house);
 		// Fill in missing spaces with grass
 		house = this._grassFill(house);
 		Game._consoleLogGrid(house, '_char');
+		this._testZeroIndex(house);
 
 		// Process the room's children if it has any
 		if(room.children.length > 0) {
@@ -314,14 +316,29 @@ Game.House.prototype._getRandomChild = function(room, returnWord) {
 // Based on the length of the first grid array, fill in the rest of the grid with grass tiles.
 // Note: this will not work if the first element is shorter than other elements in the array
 Game.House.prototype._grassFill = function(grid) {
-	for (var x = 0; x < grid.length; x++) {
+	// If there are varying heights, find the highest column
+	var height = grid.reduce(function(prev, curr) {
+		if(typeof prev === 'object') prev = prev.length;
+		if(typeof curr === 'object') curr = curr.length;
+		return Math.max(prev, curr);
+	}, 0);
+	for (var x = 0; x < grid.length; x++) { // grid.length == width
 		if(!grid[x])
 			grid[x] = new Array(grid[0].length);
 
-		for (var y = 0; y < grid[0].length; y++) {
+		for (var y = 0; y < height; y++) {
 			if(!grid[x][y])
 				grid[x][y] = Game.TileRepository.create('grass');
 		}
 	}
 	return grid;
+};
+
+// For testing
+Game.House.prototype._testZeroIndex = function(grid) {
+	for (var x = 0; x < grid.length; x++) {
+		if(!grid[x][0])
+			throw new Error("Some how this array didn't start with 0...");
+	}
+	return true;
 };
