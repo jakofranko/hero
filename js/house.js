@@ -38,7 +38,6 @@ Game.House.prototype.rooms = [
 	'bedroom',		// 7
 	'closet',		// 8
 ];
-
 Game.House.prototype.possibleDirections = {
 	// Depending on which way a house is facing, it may only branch in any 3 given directions
 	'n': ['s', 'e', 'w'],
@@ -64,9 +63,21 @@ Game.House.prototype.Room = function(name) {
 	this.room = name;
 	this.x = null;
 	this.y = null;
-	this.width = 5;			// TODO: randomize based on room type
-	this.height = 5;		// TODO: randomize based on room type
+	this.width = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
+	this.height = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.children = [];
+};
+// 'roomName': [min, max]
+Game.House.prototype.Room.prototype.roomSizes = {
+	'foyer': [3, 4],
+	'dining room': [6, 7],
+	'living room': [6, 8],
+	'kitchen': [5, 7],
+	'office': [5, 6],
+	'hall': [3, 5],
+	'bathroom': [5, 6],
+	'bedroom': [5, 8],
+	'closet': [3, 3],
 };
 Game.House.prototype.Room.prototype.setX = function(x) {
 	this.x = x;
