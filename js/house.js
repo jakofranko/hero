@@ -25,6 +25,8 @@ Game.House = function(options) {
 	}
 
 	this.graph = this.generate('foyer');
+	this.leftovers = [];
+	// this.tiles = this.render(['n', 'e', 's', 'w'].random());
 	return this;
 };
 Game.House.prototype.rooms = [
@@ -65,6 +67,7 @@ Game.House.prototype.Room = function(name) {
 	this.y = null;
 	this.width = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.height = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
+	this.spawnDirection = null;
 	this.children = [];
 };
 // 'roomName': [min, max]
@@ -102,6 +105,12 @@ Game.House.prototype.Room.prototype.getHeight = function(height) {
 };
 Game.House.prototype.Room.prototype.setHeight = function(height) {
 	return this.height;
+};
+Game.House.prototype.Room.prototype.setSpawnDirection = function(dir) {
+	this.spawnDirection = dir;
+};
+Game.House.prototype.Room.prototype.getSpawnDirection = function(dir) {
+	return this.spawnDirection;
 };
 Game.House.prototype.Room.prototype.addChild = function(child) {
 	if(child !== false)
@@ -166,6 +175,32 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			x = 0;
 			y = 0;
 		}
+
+		// Check to see if a room exists already. If it does, skip this room.
+		// Depending on the room spawn direction, shave off one side in order
+		// to skip the shared wall.
+		var existingRoom = false;
+		switch(room.getSpawnDirection()) {
+			case 'n':
+				existingRoom = this._roomCheck(x, y, room.width, room.height - 1, house);
+				break;
+			case 'e':
+				existingRoom = this._roomCheck(x + 1, y, room.width, room.height, house);
+				break;
+			case 's':
+				existingRoom = this._roomCheck(x, y + 1, room.width, room.height, house);
+				break;
+			case 'w':
+				existingRoom = this._roomCheck(x, y, room.width - 1, room.height, house);
+				break;
+			default:
+				break;
+		}
+		if(existingRoom) {
+			continue;
+		}
+
+		// No room was found, so render on!
 		for(var i = 0; i < roomTiles.length; i++, x++) {
 			if(!house[x])
 				house[x] = new Array(roomTiles[i].length);
@@ -179,11 +214,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			}
 		}
 
-		this._testZeroIndex(house);
 		// Fill in missing spaces with grass
 		house = this._grassFill(house);
 		Game._consoleLogGrid(house, '_char');
-		this._testZeroIndex(house);
+		this._testZeroIndex(house, [room, house]);
 
 		// Process the room's children if it has any
 		if(room.children.length > 0) {
@@ -191,14 +225,18 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			for (var i = 0; i < room.children.length; i++) {
 				var child = room.children[i];
 				var dir = possibleDirections.pop();
+				child.setSpawnDirection(dir);
 
-				// Add a door to the room tiles, and set x,y start for child
+				// Now that a child and the direction it will spawn have been chosen, do three things:
+				// 1) Shift the house tiles if necessary
+				// 2) Set the room and child x,y coordinates
+				// 3) Determine a place on the wall the rooms will share, and add a door
 				switch(dir) {
 					// Shift whole house 'south' by using Array.prototype.unshift()
 					case 'n':
 						// Set x,y
 						child.x = room.x || 0;
-						child.y = room.y - child.height;
+						child.y = room.y - child.height + 1; // plus one so the rooms will share a wall
 
 						if(child.y < 0) {
 							// Loop through every column
@@ -221,7 +259,7 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 					// Shift whole house 'east' by using Array.prototype.unshift()
 					case 'w':
 						// Set x,y
-						child.x = room.x - child.width;
+						child.x = room.x - child.width + 1; // plus one so the rooms will share a wall
 						child.y = room.y || 0;
 
 						if(child.x < 0) {
@@ -241,13 +279,13 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 						break;
 					case 'e':
 						// Set x,y
-						child.x = room.x + room.width;
+						child.x = room.x + room.width - 1; // minus one so the rooms will share a wall
 						child.y = room.y || 0;
 						break;
 					case 's':
 						// Set x,y
 						child.x = room.x || 0;
-						child.y = room.y + room.height;
+						child.y = room.y + room.height - 1; // minus one so the rooms will share a wall
 						break;
 					default:
 						throw new Error("There are no more possible directions. This should not be possible...heh heh.");
@@ -335,10 +373,34 @@ Game.House.prototype._grassFill = function(grid) {
 };
 
 // For testing
-Game.House.prototype._testZeroIndex = function(grid) {
+Game.House.prototype._testZeroIndex = function(grid, info) {
 	for (var x = 0; x < grid.length; x++) {
-		if(!grid[x][0])
+		if(!grid[x]) {
+			console.log(info);
+			throw new Error("What the...?");
+		} else if(!grid[x][0]) {
+			console.log(info);
 			throw new Error("Some how this array didn't start with 0...");
+		}
 	}
 	return true;
+};
+
+// Given x, y, width, and height
+// (meaning, that the given grid contains only empty space or grass)
+Game.House.prototype._roomCheck = function(startX, startY, width, height, tiles) {
+	var roomFound = false;
+	debugger;
+	for (var x = 0; x < width; x++, startX++) {
+		for (var y = 0; y < height; y++, startY++) {
+			if(!tiles[startX])
+				continue;
+			if(tiles[startX][startY] && tiles[startX][startY].describe() != 'grass') {
+				roomFound = true;
+				break;
+			}
+		}
+		if(roomFound) break;
+	}
+	return roomFound;
 };
