@@ -86,3 +86,14 @@ if (!Math.ceil10) {
       return decimalAdjust('ceil', value, exp);
     };
 }
+
+
+function listXY(startX, startY, width, height) {
+    var list = [];
+    for (var x = 0; x < width; x++, startX++) {
+        for(y = 0; y < height; y++, startY++) {
+            list.push(startX + "," + startY);
+        }
+    }
+    return list;
+}
