@@ -1,5 +1,5 @@
 // Constructor for Game.BuildingRepository. This will contain information on size, number of stories, and map (or perhaps 'blueprint') information for drawing the building. Buildings created from templates will ultimately be stored in their lots, and will ultimately be drawn as part of the buildTiles function of lots.
-// This will be the constructor class for all buildings, including skyscrapers, houses etc. So, the logic for building out the 'blueprint' of the building will be found in each building's template
+// This will be the constructor class for all buildings, including skyscrapers, garages, fast-food places etc. So, the logic for building out the 'blueprint' of the building will be found in each building's template
 // Width and height should not be larger than the 'lot-size' for the game map
 // All features will have a blueprint object, which is a collection of z-levels and their respective maps
 // Again, this is heavily inspired by Shamus Young's post here: http://www.shamusyoung.com/twentysidedtale/?p=2983
