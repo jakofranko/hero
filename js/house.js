@@ -68,8 +68,9 @@ Game.House.prototype.grammar = {
 
 Game.House.prototype.Room = function(name) {
 	this.room = name;
-	this.x = null;
-	this.y = null;
+	this.x = 0;
+	this.y = 0;
+	this.z = 0;
 	this.width = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.height = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.spawnDirection = null;
@@ -87,35 +88,47 @@ Game.House.prototype.Room.prototype.roomSizes = {
 	'bedroom': [5, 8],
 	'closet': [3, 3],
 };
-Game.House.prototype.Room.prototype.setX = function(x) {
-	this.x = x;
-};
 Game.House.prototype.Room.prototype.getX = function() {
 	return this.x;
 };
-Game.House.prototype.Room.prototype.getY = function(y) {
-	this.y = y;
+Game.House.prototype.Room.prototype.setX = function(x) {
+	this.x = x;
 };
-Game.House.prototype.Room.prototype.setY = function(y) {
+Game.House.prototype.Room.prototype.getY = function(y) {
 	return this.y;
 };
-Game.House.prototype.Room.prototype.getWidth = function(width) {
-	this.width = width;
+Game.House.prototype.Room.prototype.setY = function(y) {
+	this.y = y;
 };
-Game.House.prototype.Room.prototype.setWidth = function(width) {
+Game.House.prototype.Room.prototype.getZ = function(z) {
+	return this.z;
+};
+Game.House.prototype.Room.prototype.setZ = function(z) {
+	this.z = z;
+	// All children should have this same z level
+	if(this.children.length > 0) {
+		for (var i = 0; i < this.children.length; i++) {
+			this.children[i].setZ(z);
+		}
+	}
+};
+Game.House.prototype.Room.prototype.getWidth = function(width) {
 	return this.width;
 };
-Game.House.prototype.Room.prototype.getHeight = function(height) {
-	this.height = height;
+Game.House.prototype.Room.prototype.setWidth = function(width) {
+	this.width = width;
 };
-Game.House.prototype.Room.prototype.setHeight = function(height) {
+Game.House.prototype.Room.prototype.getHeight = function(height) {
 	return this.height;
 };
-Game.House.prototype.Room.prototype.setSpawnDirection = function(dir) {
-	this.spawnDirection = dir;
+Game.House.prototype.Room.prototype.setHeight = function(height) {
+	this.height = height;
 };
 Game.House.prototype.Room.prototype.getSpawnDirection = function(dir) {
 	return this.spawnDirection;
+};
+Game.House.prototype.Room.prototype.setSpawnDirection = function(dir) {
+	this.spawnDirection = dir;
 };
 Game.House.prototype.Room.prototype.addChild = function(child) {
 	if(child !== false)
@@ -167,19 +180,15 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 	while(queue.length > 0) {
 		var room = queue.pop();
 		var possibleDirections = this.possibleDirections[direction].randomize(); // For directions that have already been taken for child rooms
-		var x, y;
+		var x, y, z, stairs;
 
 		// Render room tiles
 		var roomTiles = this._renderRoom(room);
 
 		// Add room tiles to our house tiles
-		if((room.x || room.x === 0) && (room.y || room.y === 0)) {
-			x = room.x;
-			y = room.y;
-		} else {
-			x = 0;
-			y = 0;
-		}
+		x = room.getX();
+		y = room.getY();
+		z = room.getZ();
 
 		// Check to see if a room exists already. If it does, skip this room.
 		// Depending on the room spawn direction, shave off one side in order
