@@ -88,12 +88,12 @@ if (!Math.ceil10) {
 }
 
 
-function listXY(startX, startY, width, height) {
+Game.listXY = function(startX, startY, width, height) {
     var list = [];
     for (var x = 0; x < width; x++, startX++) {
-        for(y = 0; y < height; y++, startY++) {
-            list.push(startX + "," + startY);
+        for(y = 0, initialY = startY; y < height; y++, initialY++) {
+            list.push(startX + "," + initialY);
         }
     }
     return list;
-}
+};
