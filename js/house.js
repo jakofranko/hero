@@ -240,21 +240,27 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			default:
 				break;
 		}
-		if(existingRoom) {
+		if(typeof existingRoom == "object") {
+			stairs = {
+				x: existingRoom.x,
+				y: existingRoom.y
+			};
+			
+		} else if(existingRoom === true) {
 			continue;
 		}
 
 		// No room was found, so render on!
-		for(var i = 0; i < roomTiles.length; i++, x++) {
-			if(!house[x])
-				house[x] = new Array(roomTiles[i].length);
+		for(var i = 0, roomX = x; i < roomTiles.length; i++, roomX++) {
+			if(!house[roomX])
+				house[roomX] = new Array(roomTiles[i].length);
 
 			// Since we iterate over the height of the room (y) everytime,
 			// we need to reset y back to it's starting value (roomY)
 			for(var j = 0, roomY = y; j < roomTiles[i].length; j++, roomY++) {
 				// Don't overwrite an existing room tile
-				if(!house[x][roomY] || house[x][roomY].describe() == 'grass')
-					house[x][roomY] = roomTiles[i][j];
+				if(!house[roomX][roomY] || house[roomX][roomY].describe() == 'grass')
+					house[roomX][roomY] = roomTiles[i][j];
 			}
 		}
 
@@ -279,17 +285,17 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 					// Shift whole house 'south' by using Array.prototype.unshift()
 					case 'n':
 						// Set x,y
-						child.x = room.x || 0;
-						child.y = room.y - child.height + 1; // plus one so the rooms will share a wall
+						child.setX(x);
+						child.setY(y - child.getHeight() + 1); // plus one so the rooms will share a wall
 
-						if(child.y < 0) {
+						if(child.getY() < 0) {
 							// Loop through every column
-							for (var x = 0; x < house.length; x++) {
+							for (var houseX = 0; houseX < house.length; houseX++) {
 								// unshift() a patch of grass to every row based on room height
-								for (var y = 0; y < child.height; y++) {
-									house[x].unshift(Game.TileRepository.create('grass'));
+								for (var houseY = 0; houseY < child.height; houseY++) {
+									house[houseX].unshift(Game.TileRepository.create('grass'));
 									// Adjust room and children y positions by child height
-									if(x === 0) { // Ensures we do this once, instead of for every row
+									if(houseX === 0) { // Ensures we do this once, instead of for every row
 										room.y++;
 										for(var roomChild = 0; roomChild < room.children.length; roomChild++)
 											room.children[roomChild].y++; // This increments the 'child' var too
@@ -458,21 +464,30 @@ Game.House.prototype._testZeroIndex = function(grid, info) {
 	return true;
 };
 
-// Given x, y, width, and height
+// Given x, y, width, and height, attempt to return coordinates of floor tile for stairs.
+// Otherwise, return true if room is found, false if no room is found.
 // (meaning, that the given grid contains only empty space or grass)
 Game.House.prototype._roomCheck = function(startX, startY, width, height, tiles) {
 	var roomFound = false;
-	debugger;
+	var floorFound = false;
 	for (var x = 0; x < width; x++, startX++) {
 		for (var y = 0; y < height; y++, startY++) {
 			if(!tiles[startX])
 				continue;
-			if(tiles[startX][startY] && tiles[startX][startY].describe() != 'grass') {
+
+			if(tiles[startX][startY] && tiles[startX][startY].describe() != 'grass')
 				roomFound = true;
+
+			if(roomFound && !floorFound && tiles[startX][startY] && tiles[startX][startY].describe() == 'floor') {
+				floorFound = {
+					x: startX,
+					y: startY
+				};
 				break;
 			}
 		}
-		if(roomFound) break;
+		if(roomFound && floorFound) break;
 	}
-	return roomFound;
+
+	return (roomFound && floorFound) ? floorFound : roomFound;
 };
