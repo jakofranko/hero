@@ -18,7 +18,9 @@ Game.House = function(options) {
 			"office": 1,
 			"hall": 3 // If halls aren't limited, they will just spawn an infinite number of halls and closets
 		},
-		maxStories: 2
+		maxStories: 2,
+		maxWidth: 100,	// TODO: based off of lot size / number of houses per lot
+		maxHeight: 100	// TODO: based off of lot size / number of houses per lot
 	};
 
 	// Set initial number of rooms, to be incremented as they are added
