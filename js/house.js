@@ -173,10 +173,12 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 	var queue = [this.graph];
 
 	// Process the queue until it's empty. Processing a room will consist of the following:
-	// 1. Draw the room starting at the designated x,y coordinates that each room will have. If it does not have x and y properties, then it is the starting room (foyer).
-	// 2. Loop through the room's children. For each child, pick a direction that the room will be added on to, and then place a door somewhere along that wall
-	// 3. Then, based on the current child's width and height, assign the x,y start location to the child such that when starting at x,y and then rendering the room tiles, it will connect to the door placed in the previous step. It is important that each room is no larger than it's parent. Additionally, if the room is being placed north or west, the y and x columns/rows will need to be shifted accordingly in this step so that the x,y value assigned to the child are valid.
-	// 4. Add the child (with assigned x and y values) to the queue
+	// 1. Draw the room starting at the designated x, y, and z
+	// 2. Loop through the room's children. For each child, pick a direction that the room will be added on to, and then detect whether a room already exists in that direction. If a room exists and adding a story would not exceed the maximum story limit of a house, add an up stairs and a down stairs in the current room and give the child room the same x,y coordinates of the parent room, set all of the child rooms chidren nodes to the new z level, and then add the child to the queue. If a room exists but you cannot add a story, skip the child.
+	// 3. If a room does not exist in the projected space, then assign the x,y start location to the child based on the current child's width and height, such that when starting at x,y and then rendering the room tiles, it will connect to the door placed in step 5 as well as share a wall with the parent node.
+	// 4. If the x or y values of the new room are negative, shift the x and y values of the child and the parent until they are no longer negative while simultaneously adding spaces onto the house in the appropriate direction.
+	// 5. After the new x and y values of the child and parent are known (and if they are on the same z level), it is possible to know what x and y coordinates they will share. This should be the shared wall. After getting a list of the coordinates they will share, eliminate the extreme x or y coordinates to avoid placing a door in a corner, and then randomly pick a coordinate for a door and replace the wall tile with a door tile.
+	// 6. Add the child (with assigned x, y, and z values) to the queue of rooms to render
 	while(queue.length > 0) {
 		var room = queue.pop();
 		var possibleDirections = this.possibleDirections[direction].randomize(); // For directions that have already been taken for child rooms
@@ -190,7 +192,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		y = room.getY();
 		z = room.getZ();
 
-		// Check to see if a room exists already. If it does, skip this room.
+
+		// Check to see if a room exists already. If it does, _roomCheck will try
+		// to return the coordinates of a floor tile so that stairs can be placed
+		// and the room spawned on the z level above. Otherwise, skip this room.
 		// Depending on the room spawn direction, shave off one side in order
 		// to skip the shared wall.
 		var existingRoom = false;
