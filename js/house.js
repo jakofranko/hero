@@ -186,6 +186,31 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 
 		// Render room tiles
 		var roomTiles = this._renderRoom(room);
+		// If it's the foyer, place the front door
+		if(room.room == 'foyer') {
+			var doorX, doorY;
+			switch(direction) {
+				case 'n': // Rooms will be spawning south, so put the door at the north
+					doorX = Game.getRandomInRange(room.getX() + 1, room.getWidth() - 2);
+					doorY = room.getY();
+					break;
+				case 'e': // Rooms will be spawning west, so put door at the east
+					doorX = room.getWidth() - 1;
+					doorY = Game.getRandomInRange(room.getY() + 1, room.getHeight() - 2);
+					break;
+				case 's':
+					doorX = Game.getRandomInRange(room.getX() + 1, room.getWidth() - 2);
+					doorY = room.getHeight() - 1;
+					break;
+				case 'w':
+					doorX = room.getX();
+					doorY = Game.getRandomInRange(room.getY() + 1, room.getHeight() - 2);
+					break;
+				default:
+					break;
+			}
+			roomTiles[doorX][doorY] = Game.TileRepository.create('door');
+		}
 
 		// Add room tiles to our house tiles
 		x = room.getX();
@@ -310,6 +335,34 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 						throw new Error("There are no more possible directions. This should not be possible...heh heh.");
 						break;
 				}
+
+				// Determine where to place the door
+				var roomXY = Game.listXY(room.getX(), room.getY(), room.getWidth(), room.getHeight());
+				var childXY = Game.listXY(child.getX(), child.getY(), child.getWidth(), child.getHeight());
+				var commonXY = [];
+				for (var i = 0; i < roomXY.length; i++)
+					if(childXY.indexOf(roomXY[i]) > -1)
+						commonXY.push(roomXY[i]);
+				
+				// Make sure door isn't placed in a corner by eliminating the least and greatest x or y coordinates, depending on spawn direction
+				// if(dir == 'n' || dir == 's') {
+				// 	var lowestX = commonXY.reduce(function(prev, curr) {
+				// 		return Math.min(prev, curr.split(",")[0]);
+				// 	}, commonXY[0].split(",")[0]);
+				// 	var highestX = commonXY.reduce(function(prev, curr) {
+				// 		return Math.max(prev, curr.split(",")[0]);
+				// 	}, commonXY[0].split(",")[0]);
+				// } else {
+				// 	var lowestY = commonXY.reduce(function(prev, curr) {
+				// 		return Math.min(prev, curr.split(",")[1]);
+				// 	}, commonXY[0].split(",")[1]);
+				// 	var highestY = commonXY.reduce(function(prev, curr) {
+				// 		return Math.max(prev, curr.split(",")[1]);
+				// 	}, commonXY[0].split(",")[1]);
+				// }
+
+				var doorXY = commonXY.random().split(",");
+				house[doorXY[0]][doorXY[1]] = Game.TileRepository.create("door");
 
 				// Add the child room to the queue
 				queue.push(child);
