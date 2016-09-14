@@ -6,6 +6,10 @@
 //
 // Additionally, when building a house, a set of options can be passed in to define a certain number of rooms, otherwise the house can just kind of spawn with an upper limit to the size. The output of generating the house plan will be a 'graph' of nodes and connections which can then be used by another function to actually produce the tiles that will go on a city lot.
 
+// TODO: maxWidth and maxHeight should be based off of a fraction of the lot size. Perhaps this should be defined at a house template level
+// TODO: house tiles need to have z levels
+// TODO: enforce the maxWidth and maxHeight limits when generating the house. This should probably be enforced when assigning x,y coordinates to children, since at that point we can easily predict if adding the child in the direction will go over the limit. If it will, we should instead try to stack the room on the next story
+// TODO: prevent doors from spawning at corners
 Game.House = function(options) {
 	this.options = options || {
 		maxRooms: {
@@ -464,6 +468,7 @@ Game.House.prototype._testZeroIndex = function(grid, info) {
 	return true;
 };
 
+// NOTE: THIS IS DESIGNED TO ONLY COVER X AN Y, SO PASS IN THE APPROPRIATE Z LEVEL WHEN CALLING THIS FUNCTION
 // Given x, y, width, and height, attempt to return coordinates of floor tile for stairs.
 // Otherwise, return true if room is found, false if no room is found.
 // (meaning, that the given grid contains only empty space or grass)
