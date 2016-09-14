@@ -230,47 +230,54 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		var existingRoom = false;
 		switch(room.getSpawnDirection()) {
 			case 'n':
-				existingRoom = this._roomCheck(x, y, room.width, room.height - 1, house);
+				existingRoom = this._roomCheck(x, y, room.width, room.height - 1, house[z]);
 				break;
 			case 'e':
-				existingRoom = this._roomCheck(x + 1, y, room.width, room.height, house);
+				existingRoom = this._roomCheck(x + 1, y, room.width, room.height, house[z]);
 				break;
 			case 's':
-				existingRoom = this._roomCheck(x, y + 1, room.width, room.height, house);
+				existingRoom = this._roomCheck(x, y + 1, room.width, room.height, house[z]);
 				break;
 			case 'w':
-				existingRoom = this._roomCheck(x, y, room.width - 1, room.height, house);
+				existingRoom = this._roomCheck(x, y, room.width - 1, room.height, house[z]);
 				break;
 			default:
 				break;
 		}
 		if(typeof existingRoom == "object") {
+			debugger;
 			stairs = {
 				x: existingRoom.x,
-				y: existingRoom.y
+				y: existingRoom.y,
+				z: z
 			};
-			
 		} else if(existingRoom === true) {
 			continue;
 		}
 
 		// No room was found, so render on!
+		if(!house[z]) {
+			if(z === 0)
+				house[z] = new Array(roomTiles.length);
+			else
+				house[z] = new Array(house[z - 1].length); // Make the new z level the same length as the level beneathe it
+		}
 		for(var i = 0, roomX = x; i < roomTiles.length; i++, roomX++) {
-			if(!house[roomX])
-				house[roomX] = new Array(roomTiles[i].length);
+			if(!house[z][roomX])
+				house[z][roomX] = new Array(roomTiles[i].length);
 
 			// Since we iterate over the height of the room (y) everytime,
 			// we need to reset y back to it's starting value (roomY)
 			for(var j = 0, roomY = y; j < roomTiles[i].length; j++, roomY++) {
 				// Don't overwrite an existing room tile
-				if(!house[roomX][roomY] || house[roomX][roomY].describe() == 'grass')
-					house[roomX][roomY] = roomTiles[i][j];
+				if(!house[z][roomX][roomY] || house[z][roomX][roomY].describe() == 'grass')
+					house[z][roomX][roomY] = roomTiles[i][j];
 			}
 		}
 
 		// Fill in missing spaces with grass
-		house = this._grassFill(house);
-		Game._consoleLogGrid(house, '_char');
+		house = this._spaceFill(house);
+		Game._consoleLogGrid(house[z], '_char');
 		this._testZeroIndex(house, [room, house]);
 
 		// Process the room's children if it has any
@@ -294,10 +301,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 
 						if(child.getY() < 0) {
 							// Loop through every column
-							for (var houseX = 0; houseX < house.length; houseX++) {
+							for (var houseX = 0; houseX < house[z].length; houseX++) {
 								// unshift() a patch of grass to every row based on room height
 								for (var houseY = 0; houseY < child.height; houseY++) {
-									house[houseX].unshift(Game.TileRepository.create('grass'));
+									house[z][houseX].unshift(Game.TileRepository.create('grass'));
 									// Adjust room and children y positions by child height
 									if(houseX === 0) { // Ensures we do this once, instead of for every row
 										room.y++;
@@ -319,10 +326,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 						if(child.x < 0) {
 							// unshift() a column of grass to every column based on room width
 							for (var x = 0; x < child.width; x++) {
-								house.unshift(new Array(house[0].length));
-								for (var y = 0; y < house[0].length; y++) {
+								house[z].unshift(new Array(house[z][0].length));
+								for (var y = 0; y < house[z][0].length; y++) {
 									// Always use index of 0 since we're adding the array to the beginning
-									house[0][y] = Game.TileRepository.create('grass');
+									house[z][0][y] = Game.TileRepository.create('grass');
 								}
 								// Adjust room and children y positions by child width
 								room.x++;
@@ -372,13 +379,13 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 				// }
 
 				var doorXY = commonXY.random().split(",");
-				house[doorXY[0]][doorXY[1]] = Game.TileRepository.create("door");
+				house[z][doorXY[0]][doorXY[1]] = Game.TileRepository.create("door");
 
 				// Add the child room to the queue
 				queue.push(child);
 			}
 		}
-		Game._consoleLogGrid(house, '_char');
+		Game._consoleLogGrid(house[z], '_char');
 	}
 	return house;
 };
@@ -433,22 +440,24 @@ Game.House.prototype._getRandomChild = function(room, returnWord) {
 		return child;
 };
 
-// Based on the length of the first grid array, fill in the rest of the grid with grass tiles.
+// For every z-level, based on the length of the first grid array, fill in the rest of the grid with grass tiles.
 // Note: this will not work if the first element is shorter than other elements in the array
-Game.House.prototype._grassFill = function(grid) {
-	// If there are varying heights, find the highest column
-	var height = grid.reduce(function(prev, curr) {
-		if(typeof prev === 'object') prev = prev.length;
-		if(typeof curr === 'object') curr = curr.length;
-		return Math.max(prev, curr);
-	}, 0);
-	for (var x = 0; x < grid.length; x++) { // grid.length == width
-		if(!grid[x])
-			grid[x] = new Array(grid[0].length);
+Game.House.prototype._spaceFill = function(grid) {
+	for (var z = 0; z < grid.length; z++) {
+		// If there are varying heights, find the highest column
+		var height = grid[z].reduce(function(prev, curr) {
+			if(typeof prev === 'object') prev = prev.length;
+			if(typeof curr === 'object') curr = curr.length;
+			return Math.max(prev, curr);
+		}, 0);
+		for (var x = 0; x < grid[z].length; x++) { // grid[z].length == width
+			if(!grid[z][x])
+				grid[z][x] = new Array(grid[z][0].length);
 
-		for (var y = 0; y < height; y++) {
-			if(!grid[x][y])
-				grid[x][y] = Game.TileRepository.create('grass');
+			for (var y = 0; y < height; y++) {
+				if(!grid[z][x][y])
+					grid[z][x][y] = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+			}
 		}
 	}
 	return grid;
@@ -456,13 +465,15 @@ Game.House.prototype._grassFill = function(grid) {
 
 // For testing
 Game.House.prototype._testZeroIndex = function(grid, info) {
-	for (var x = 0; x < grid.length; x++) {
-		if(!grid[x]) {
-			console.log(info);
-			throw new Error("What the...?");
-		} else if(!grid[x][0]) {
-			console.log(info);
-			throw new Error("Some how this array didn't start with 0...");
+	for (var z = 0; z < grid.length; z++) {
+		for (var x = 0; x < grid[z].length; x++) {
+			if(!grid[z][x]) {
+				console.log(info);
+				throw new Error("What the...?");
+			} else if(!grid[z][x][0]) {
+				console.log(info);
+				throw new Error("Some how this array didn't start with 0...");
+			}
 		}
 	}
 	return true;
