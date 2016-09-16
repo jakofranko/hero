@@ -7,8 +7,8 @@
 // Additionally, when building a house, a set of options can be passed in to define a certain number of rooms, otherwise the house can just kind of spawn with an upper limit to the size. The output of generating the house plan will be a 'graph' of nodes and connections which can then be used by another function to actually produce the tiles that will go on a city lot.
 
 // TODO: maxWidth and maxHeight should be based off of a fraction of the lot size. Perhaps this should be defined at a house template level
-// TODO: enforce the maxWidth and maxHeight limits when generating the house. This should probably be enforced when assigning x,y coordinates to children, since at that point we can easily predict if adding the child in the direction will go over the limit. If it will, we should instead try to stack the room on the next story
 // TODO: prevent doors from spawning at corners
+// TODO: If there is no more room to add a room's children on the current z-level, the code will try to place all the children directly above the room, resulting in only one being able to be placed (since the other's would not pass the _roomCheck being placed in the same x, y coordinates). Fix this somehow?
 Game.House = function(options) {
 	this.maxRooms = options['maxRooms'] || {
 		// Max number of rooms
