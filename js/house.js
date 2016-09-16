@@ -565,3 +565,23 @@ Game.House.prototype._roomCheck = function(startX, startY, width, height, tiles)
 
 	return (roomFound && floorFound) ? floorFound : roomFound;
 };
+
+Game.House.prototype._getRandomFloor = function(roomX, roomY, width, height, tiles) {
+	var floorTiles = [];
+	for (var x = 0; x < width; x++, roomX++) {
+		if(!tiles[roomX])
+			continue;
+		for (var y = 0, tilesY = roomY; y < height; y++, tilesY++) {
+			if(tiles[roomX][tilesY] && tiles[roomX][tilesY].describe() == 'floor') {
+				floorTiles.push(roomX + "," + tilesY);
+			}
+		}
+	}
+
+	if(floorTiles.length > 0) {
+		var randomFloor = floorTiles.random().split(",");
+		return { x: randomFloor[0], y: randomFloor[1] };
+	} else {
+		return false;
+	}
+};
