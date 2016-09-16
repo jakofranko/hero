@@ -269,7 +269,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 
 		// Fill in missing spaces with grass
 		house = this._spaceFill(house);
-		Game._consoleLogGrid(house[z], '_char');
 		this._testZeroIndex(house, [room, house]);
 
 		// Process the room's children if it has any
@@ -414,6 +413,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 				}
 			}
 		}
+		Game._consoleLogGrid(house[z], '_char');
+	}
+
+	for (var z = 0; z < house.length; z++) {
 		Game._consoleLogGrid(house[z], '_char');
 	}
 	return house;
