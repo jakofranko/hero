@@ -183,7 +183,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 	while(queue.length > 0) {
 		var room = queue.pop();
 		var possibleDirections = this.possibleDirections[direction].randomize(); // For directions that have already been taken for child rooms
-		var x, y, z, stairs;
+		var x, y, z;
+		var upStairs = false;
+		var downStairs = false;
+		var existingRoom = false;
 
 		// Render room tiles
 		var roomTiles = this._renderRoom(room);
@@ -224,7 +227,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		// and the room spawned on the z level above. Otherwise, skip this room.
 		// Depending on the room spawn direction, shave off one side in order
 		// to skip the shared wall.
-		var existingRoom = false;
 		switch(room.getSpawnDirection()) {
 			case 'n':
 				existingRoom = this._roomCheck(x, y, room.width, room.height - 1, house[z]);
@@ -241,13 +243,25 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			default:
 				break;
 		}
-		if(typeof existingRoom == "object") {
+		if(typeof existingRoom == "object" && z + 1 <= this.maxStories) {
 			debugger;
-			stairs = {
+			// A valid floor tile was placed, so set the coordinates for the placement of up and down stairs
+			upStairs = {
 				x: existingRoom.x,
 				y: existingRoom.y,
 				z: z
 			};
+			downStairs = {
+				x: existingRoom.x,
+				y: existingRoom.y,
+				z: z + 1
+			};
+
+			// Move the room's z level (and all it's children) up one
+			room.setZ(z + 1);
+
+			// And set z to the room's new z level
+			z = room.getZ();			
 		} else if(existingRoom === true) {
 			continue;
 		}
