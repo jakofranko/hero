@@ -189,33 +189,8 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		var existingRoom = false;
 
 		// Render room tiles
-		var roomTiles = this._renderRoom(room);
-		// If it's the foyer, place the front door
-		if(room.room == 'foyer') {
-			var doorX, doorY;
-			switch(direction) {
-				case 'n': // Rooms will be spawning south, so put the door at the north
-					doorX = Game.getRandomInRange(room.getX() + 1, room.getWidth() - 2);
-					doorY = room.getY();
-					break;
-				case 'e': // Rooms will be spawning west, so put door at the east
-					doorX = room.getWidth() - 1;
-					doorY = Game.getRandomInRange(room.getY() + 1, room.getHeight() - 2);
-					break;
-				case 's':
-					doorX = Game.getRandomInRange(room.getX() + 1, room.getWidth() - 2);
-					doorY = room.getHeight() - 1;
-					break;
-				case 'w':
-					doorX = room.getX();
-					doorY = Game.getRandomInRange(room.getY() + 1, room.getHeight() - 2);
-					break;
-				default:
-					break;
-			}
-			roomTiles[doorX][doorY] = Game.TileRepository.create('door');
-		}
-
+		var roomTiles = this._renderRoom(room, direction);
+		
 		// Add room tiles to our house tiles
 		x = room.getX();
 		y = room.getY();
@@ -422,6 +397,32 @@ Game.House.prototype._renderRoom = function(room, direction) {
 			else
 				tiles[x][y] = floor;
 		}
+	}
+
+	// If it's the foyer, place the front door
+	if(room.room == 'foyer') {
+		var doorX, doorY;
+		switch(direction) {
+			case 'n': // Rooms will be spawning south, so put the door at the north
+				doorX = Game.getRandomInRange(room.getX() + 1, room.getWidth() - 2);
+				doorY = room.getY();
+				break;
+			case 'e': // Rooms will be spawning west, so put door at the east
+				doorX = room.getWidth() - 1;
+				doorY = Game.getRandomInRange(room.getY() + 1, room.getHeight() - 2);
+				break;
+			case 's':
+				doorX = Game.getRandomInRange(room.getX() + 1, room.getWidth() - 2);
+				doorY = room.getHeight() - 1;
+				break;
+			case 'w':
+				doorX = room.getX();
+				doorY = Game.getRandomInRange(room.getY() + 1, room.getHeight() - 2);
+				break;
+			default:
+				break;
+		}
+		tiles[doorX][doorY] = Game.TileRepository.create('door');
 	}
 
 	return tiles;
