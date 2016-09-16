@@ -464,7 +464,7 @@ Game.House.prototype._spaceFill = function(grid) {
 		}, 0);
 		for (var x = 0; x < grid[z].length; x++) { // grid[z].length == width
 			if(!grid[z][x])
-				grid[z][x] = new Array(grid[z][0].length);
+				grid[z][x] = new Array(height);
 
 			for (var y = 0; y < height; y++) {
 				if(!grid[z][x][y])
