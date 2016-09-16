@@ -10,21 +10,19 @@
 // TODO: enforce the maxWidth and maxHeight limits when generating the house. This should probably be enforced when assigning x,y coordinates to children, since at that point we can easily predict if adding the child in the direction will go over the limit. If it will, we should instead try to stack the room on the next story
 // TODO: prevent doors from spawning at corners
 Game.House = function(options) {
-	this.options = options || {
-		maxRooms: {
-			// Max number of rooms
-			"kitchen": 1,
-			"dining room": 1,
-			"living room": 1,
-			"bedroom": 3,
-			"bathroom": 2,
-			"office": 1,
-			"hall": 3 // If halls aren't limited, they will just spawn an infinite number of halls and closets
-		},
-		maxStories: 2,
-		maxWidth: 100,	// TODO: based off of lot size / number of houses per lot
-		maxHeight: 100	// TODO: based off of lot size / number of houses per lot
+	this.maxRooms = options['maxRooms'] || {
+		// Max number of rooms
+		"kitchen": 1,
+		"dining room": 1,
+		"living room": 1,
+		"bedroom": 3,
+		"bathroom": 2,
+		"office": 1,
+		"hall": 3 // If halls aren't limited, they will just spawn an infinite number of halls and closets
 	};
+	this.maxStories = options['maxStories'] || 2;
+	this.maxWidth = options['maxWidth'] || 10;	// TODO: based off of lot size / number of houses per lot
+	this.maxHeight = options['maxHeight'] || 10;	// TODO: based off of lot size / number of houses per lot
 
 	// Set initial number of rooms, to be incremented as they are added
 	this.roomNum = [];
@@ -154,7 +152,7 @@ Game.House.prototype.generate = function(name) {
 			var randomChild = this._getRandomChild(name, true);
 
 			// If the random child is under, or does not have a limit, add it
-			if(randomChild && (!this.options.maxRooms[randomChild] || this.roomNum[randomChild] < this.options.maxRooms[randomChild])) {
+			if(randomChild && (!this.maxRooms[randomChild] || this.roomNum[randomChild] < this.maxRooms[randomChild])) {
 				// this should be incremented first so that deeper in 
 				// the recursion the current numbers of rooms are reflected
 				this.roomNum[randomChild]++; 
@@ -421,7 +419,7 @@ Game.House.prototype._getRandomChild = function(room, returnWord) {
 	var selection = [];
 	this.grammar[room].forEach(function(val, index) {
 		var roomName = this.rooms[val];
-		if(!this.options.maxRooms[roomName] || this.roomNum[roomName] < this.options.maxRooms[roomName])
+		if(!this.maxRooms[roomName] || this.roomNum[roomName] < this.maxRooms[roomName])
 			selection.push(val);
 	}, this);
 
