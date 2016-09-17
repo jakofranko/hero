@@ -18,8 +18,11 @@ Game.Lot = function(properties) {
 		// Build each building
 		this._buildings = [];
 		for(var spec in this._buildingSpecs) {
-			for(i = 0; i < this._buildingSpecs[spec].amount; i++) {
-				this._buildings.push(Game.BuildingRepository.create(this._buildingSpecs[spec].type));
+			var amount = this._buildingSpecs[spec].amount;
+			var type = this._buildingSpecs[spec].type;
+			var constructor = this._buildingSpecs[spec].constructor;
+			for(i = 0; i < amount; i++) {
+				this._buildings.push(Game[constructor].create(type));
 			}
 		}
 	}
