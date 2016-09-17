@@ -18,7 +18,8 @@ Game.LotRepository.define('building', {
 	buildingSpecs: [
 		{
 			type: 'office building',
-			amount: 1
+			amount: 1,
+			constructor: 'BuildingRepository'
 		}
 	],
 	buildTiles: function() {
