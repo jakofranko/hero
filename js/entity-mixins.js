@@ -916,7 +916,6 @@ Game.EntityMixins.MemoryMaker = {
             } else {
                 this._shortTermMemory[memory].expires--;
             }
-            console.log(Object.keys(this._shortTermMemory).length);
         }
     },
     listeners: {
