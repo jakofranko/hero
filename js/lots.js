@@ -19,7 +19,7 @@ Game.LotRepository.define('building', {
 		{
 			type: 'office building',
 			amount: 1,
-			constructor: 'BuildingRepository'
+			repo: 'BuildingRepository'
 		}
 	],
 	buildTiles: function() {
@@ -164,7 +164,20 @@ Game.LotRepository.define('houses', {
 	downtown: 0,
 	midtown: 0,
 	uptown: 0.3,
-	suburbs: 1
+	suburbs: 1,
+	buildingSpecs: [
+		{
+			type: 'medium house',
+			amount: 4,
+			repo: 'HouseRepository'
+		}
+	],
+	buildTiles: function() {
+		debugger;
+		var tiles = this.fillLot('grass');
+		var buildings = this.getBuildings();
+		return tiles;
+	}
 });
 Game.LotRepository.define('empty', {
 	name: 'empty',

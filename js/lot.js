@@ -20,14 +20,14 @@ Game.Lot = function(properties) {
 		for(var spec in this._buildingSpecs) {
 			var amount = this._buildingSpecs[spec].amount;
 			var type = this._buildingSpecs[spec].type;
-			var constructor = this._buildingSpecs[spec].constructor;
+			var repo = this._buildingSpecs[spec].repo;
 			for(i = 0; i < amount; i++) {
-				this._buildings.push(Game[constructor].create(type));
+				this._buildings.push(Game[repo].create(type));
 			}
 		}
 	}
 
-	this.getTiles;
+	this.getTiles = null;
 	if(typeof properties['buildTiles'] === 'function') {
 		this.getTiles = properties['buildTiles'];	
 	} else {
@@ -103,8 +103,8 @@ Game.Lot.prototype.fillLot = function(tile, extraProperties) {
 				// Otherwise create a new tile every time
 				result[x][y] = Game.TileRepository.create(tile, extraProperties);
 			}
-		};
-	};
+		}
+	}
 
 	// Only 1 z-level so return as the only element of an array
 	return [result];
