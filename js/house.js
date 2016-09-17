@@ -20,7 +20,7 @@ Game.House = function(options) {
 		"office": 1,
 		"hall": 3 // If halls aren't limited, they will just spawn an infinite number of halls and closets
 	};
-	this.maxStories = options['maxStories'] || 2;
+	this.maxStories = options['maxStories'] || 1;
 	this.maxWidth = options['maxWidth'] || 10;	// TODO: based off of lot size / number of houses per lot
 	this.maxHeight = options['maxHeight'] || 10;	// TODO: based off of lot size / number of houses per lot
 
