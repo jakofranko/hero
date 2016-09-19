@@ -76,15 +76,15 @@ Game.LotRepository.define('building', {
 					}
 
 					if(i !== false && j !== false) {
-						if(b[z][i] == undefined)
+						if(b[z][i] === undefined)
 							debugger;
 						tiles[z][x][y] = b[z][i][j];
 					} else if(z > 0) {
 						tiles[z][x][y] = air;
 					}
-				};
-			};
-		};
+				}
+			}
+		}
 
 		return tiles;
 	}
@@ -173,9 +173,34 @@ Game.LotRepository.define('houses', {
 		}
 	],
 	buildTiles: function() {
-		debugger;
 		var tiles = this.fillLot('grass');
 		var buildings = this.getBuildings();
+		var w, h, i;
+
+		// This is the number of buildings we can fit on each row and column
+		w = h = Math.sqrt(buildings.length);
+		i = 0;
+		for (var lotX = 0; lotX < w; lotX++) {
+			for (var lotY = 0; lotY < h; lotY++) {
+				var startX = lotX * (Game.getLotSize() / w);
+				var startY = lotY * (Game.getLotSize() / h);
+				var houseTiles = buildings[i].getTiles();
+				for (var z = 0; z < houseTiles.length; z++) {
+					if(!tiles[z])
+						tiles[z] = new Array(this.getWidth());
+
+					for(x = 0, tilesX = startX; x < houseTiles[z].length; x++, tilesX++) {
+						if(!tiles[z][tilesX])
+							tiles[z][tilesX] = new Array(this.getHeight());
+						for (var y = 0, tilesY = startY; y < houseTiles[z][x].length; y++, tilesY++) {
+							tiles[z][tilesX][tilesY] = houseTiles[z][x][y];
+						}
+					}
+				}
+				i++;
+			}	
+		}
+		console.log(tiles);
 		return tiles;
 	}
 });

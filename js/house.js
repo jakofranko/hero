@@ -31,9 +31,12 @@ Game.House = function(options) {
 	}
 
 	this.graph = this.generate('foyer');
-	this.leftovers = [];
-	// this.tiles = this.render(['n', 'e', 's', 'w'].random());
+	this.tiles = this.render(['n', 'e', 's', 'w'].random());
+
 	return this;
+};
+Game.House.prototype.getTiles = function() {
+	return this.tiles;
 };
 Game.House.prototype.rooms = [
 	'foyer',		// 0
@@ -219,7 +222,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 				break;
 		}
 		if(typeof existingRoom == "object" && z + 1 <= this.maxStories) {
-			debugger;
 			// A valid floor tile was placed, so set the coordinates for the placement of up and down stairs
 			upStairs = {
 				x: existingRoom.x,
@@ -416,9 +418,11 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		Game._consoleLogGrid(house[z], '_char');
 	}
 
-	for (var z = 0; z < house.length; z++) {
-		Game._consoleLogGrid(house[z], '_char');
-	}
+	// One last time, fill out any missing tiles with air or grass
+	house = this._spaceFill(house);
+	// for (var z = 0; z < house.length; z++) {
+	// 	Game._consoleLogGrid(house[z], '_char');
+	// }
 	return house;
 };
 
