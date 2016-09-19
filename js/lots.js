@@ -200,6 +200,7 @@ Game.LotRepository.define('houses', {
 				i++;
 			}	
 		}
+		tiles = Game.spaceFill(tiles);
 		console.log(tiles);
 		return tiles;
 	}

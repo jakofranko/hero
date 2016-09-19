@@ -97,3 +97,26 @@ Game.listXY = function(startX, startY, width, height) {
     }
     return list;
 };
+
+// Takes a 3-dimensional array and fills in non-existant
+// places in the arrays and fills them with air or grass tiles
+Game.spaceFill = function(grid) {
+    for (var z = 0; z < grid.length; z++) {
+        // If there are varying heights, find the highest column
+        var height = grid[z].reduce(function(prev, curr) {
+            if(typeof prev === 'object') prev = prev.length;
+            if(typeof curr === 'object') curr = curr.length;
+            return Math.max(prev, curr);
+        }, 0);
+        for (var x = 0; x < grid[z].length; x++) { // grid[z].length == width
+            if(!grid[z][x])
+                grid[z][x] = new Array(height);
+
+            for (var y = 0; y < height; y++) {
+                if(!grid[z][x][y])
+                    grid[z][x][y] = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+            }
+        }
+    }
+    return grid;
+};

@@ -167,13 +167,15 @@ Game.City.prototype.tilesFromLots = function() {
 						map[z][offsetX] = new Array(this._height * Game.getLotSize());
 					}
 
+					if(!tiles[z][x])
+						debugger;
 					for (var y = 0; y < tiles[z][x].length; y++) {
 						var offsetY = y + (cityY * Game.getLotSize());
 						map[z][offsetX][offsetY] = tiles[z][x][y];
-					};
-				};
-			};
-		};
+					}
+				}
+			}
+		}
 	}
 
 	// Some z-levels will not have a fully populated grid, since not all lots
