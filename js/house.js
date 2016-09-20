@@ -78,6 +78,8 @@ Game.House.prototype.Room = function(name) {
 	this.width = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.height = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.spawnDirection = null;
+	this.upStair = null;
+	this.downStair = null;
 	this.children = [];
 };
 // 'roomName': [min, max]
@@ -134,6 +136,18 @@ Game.House.prototype.Room.prototype.getSpawnDirection = function(dir) {
 Game.House.prototype.Room.prototype.setSpawnDirection = function(dir) {
 	this.spawnDirection = dir;
 };
+Game.House.prototype.Room.prototype.getUpStair = function() {
+	return this.upStair;
+};
+Game.House.prototype.Room.prototype.setUpStair = function(upStair) {
+	this.upStair = upStair;
+};
+Game.House.prototype.Room.prototype.getDownStair = function() {
+	return this.downStair;
+};
+Game.House.prototype.Room.prototype.setDownStair = function(downStair) {
+	this.downStair = downStair;
+};
 Game.House.prototype.Room.prototype.addChild = function(child) {
 	if(child !== false)
 		this.children.push(child);
@@ -187,8 +201,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		var room = queue.pop();
 		var possibleDirections = this.possibleDirections[direction].randomize(); // For directions that have already been taken for child rooms
 		var x, y, z;
-		var upStairs = false;
-		var downStairs = false;
 		var existingRoom = false;
 
 		// Render room tiles
@@ -223,16 +235,16 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		}
 		if(typeof existingRoom == "object" && z + 1 <= this.maxStories) {
 			// A valid floor tile was placed, so set the coordinates for the placement of up and down stairs
-			upStairs = {
+			room.setUpStair({
 				x: existingRoom.x,
 				y: existingRoom.y,
 				z: z
-			};
-			downStairs = {
+			});
+			room.setDownStair({
 				x: existingRoom.x,
 				y: existingRoom.y,
 				z: z + 1
-			};
+			});
 
 			// Move the room's z level (and all it's children) up one
 			room.setZ(z + 1);
@@ -264,7 +276,9 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		}
 
 		// If stairs can be placed, place them
-		if(upStairs !== false && downStairs !== false) {
+		var upStairs = room.getUpStair();
+		var downStairs = room.getDownStair();
+		if(upStairs !== null && downStairs !== null) {
 			house[upStairs.z][upStairs.x][upStairs.y] = Game.TileRepository.create('stairsUp');
 			house[downStairs.z][downStairs.x][downStairs.y] = Game.TileRepository.create('stairsDown');
 		}
@@ -303,13 +317,20 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 							house[z + 1][randomFloor.x] = new Array(child.getHeight());
 						}
 
-						house[z][randomFloor.x][randomFloor.y] = Game.TileRepository.create('stairsUp');
-						house[z + 1][randomFloor.x][randomFloor.y] = Game.TileRepository.create('stairsDown');
-
 						// Set the child's x, y, and z levels...
 						child.setX(x);
 						child.setY(y);
 						child.setZ(z + 1);
+						child.setUpStair({
+							x: randomFloor.x,
+							y: randomFloor.y,
+							z: z
+						});
+						child.setDownStair({
+							x: randomFloor.x,
+							y: randomFloor.y,
+							z: z + 1
+						});
 
 						// And push it into the queue.
 						queue.push(child);
