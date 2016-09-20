@@ -271,7 +271,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 
 		// Fill in missing spaces with grass
 		house = this._spaceFill(house);
-		this._testZeroIndex(house, [room, house]);
 
 		// Process the room's children if it has any
 		if(room.children.length > 0) {
@@ -415,7 +414,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 				}
 			}
 		}
-		Game._consoleLogGrid(house[z], '_char');
 	}
 
 	// One last time, fill out any missing tiles with air or grass
@@ -423,6 +421,7 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 	// for (var z = 0; z < house.length; z++) {
 	// 	Game._consoleLogGrid(house[z], '_char');
 	// }
+	// this._testZeroIndex(house, [room, house]);
 	return house;
 };
 
