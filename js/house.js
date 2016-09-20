@@ -258,7 +258,7 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			// we need to reset y back to it's starting value (roomY)
 			for(var j = 0, roomY = y; j < roomTiles[i].length; j++, roomY++) {
 				// Don't overwrite an existing room tile
-				if(!house[z][roomX][roomY] || house[z][roomX][roomY].describe() == 'grass')
+				if(!house[z][roomX][roomY] || house[z][roomX][roomY].describe() == 'grass' || house[z][roomX][roomY].describe() == 'air')
 					house[z][roomX][roomY] = roomTiles[i][j];
 			}
 		}
@@ -548,18 +548,18 @@ Game.House.prototype._testZeroIndex = function(grid, info) {
 Game.House.prototype._roomCheck = function(startX, startY, width, height, tiles) {
 	var roomFound = false;
 	var floorFound = false;
-	for (var x = 0; x < width; x++, startX++) {
-		for (var y = 0; y < height; y++, startY++) {
-			if(!tiles[startX])
+	for (var x = 0, tilesX = startX; x < width; x++, tilesX++) {
+		for (var y = 0, tilesY = startY; y < height; y++, tilesY++) {
+			if(!tiles[tilesX])
 				continue;
 
-			if(tiles[startX][startY] && tiles[startX][startY].describe() != 'grass')
+			if(tiles[tilesX][tilesY] && tiles[tilesX][tilesY].describe() != 'grass' && tiles[tilesX][tilesY].describe() != 'air')
 				roomFound = true;
 
-			if(roomFound && !floorFound && tiles[startX][startY] && tiles[startX][startY].describe() == 'floor') {
+			if(roomFound && !floorFound && tiles[tilesX][tilesY] && tiles[tilesX][tilesY].describe() == 'floor') {
 				floorFound = {
-					x: startX,
-					y: startY
+					x: tilesX,
+					y: tilesY
 				};
 				break;
 			}
