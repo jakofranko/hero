@@ -100,11 +100,25 @@ Game.House.prototype.Room.prototype.getX = function() {
 Game.House.prototype.Room.prototype.setX = function(x) {
 	this.x = x;
 };
+Game.House.prototype.Room.prototype.adjustX = function(amount) {
+	this.x += amount;
+	if(this.upStair !== null)
+		this.upStair.x += amount;
+	if(this.downStair !== null)
+		this.downStair.x += amount;
+};
 Game.House.prototype.Room.prototype.getY = function(y) {
 	return this.y;
 };
 Game.House.prototype.Room.prototype.setY = function(y) {
 	this.y = y;
+};
+Game.House.prototype.Room.prototype.adjustY = function(amount) {
+	this.y += amount;
+	if(this.upStair !== null)
+		this.upStair.y += amount;
+	if(this.downStair !== null)
+		this.downStair.y += amount;
 };
 Game.House.prototype.Room.prototype.getZ = function(z) {
 	return this.z;
@@ -245,7 +259,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 				y: existingRoom.y,
 				z: z + 1
 			});
-
 			// Move the room's z level (and all it's children) up one
 			room.setZ(z + 1);
 
@@ -279,13 +292,21 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		var upStairs = room.getUpStair();
 		var downStairs = room.getDownStair();
 		if(upStairs !== null && downStairs !== null) {
+			if(
+				!house[upStairs.z][upStairs.x] ||
+				!house[downStairs.z][downStairs.x] ||
+				!house[upStairs.z][upStairs.x][upStairs.y] ||
+				!house[downStairs.z][downStairs.x][downStairs.y]
+			) {
+				debugger;
+			}
 			house[upStairs.z][upStairs.x][upStairs.y] = Game.TileRepository.create('stairsUp');
 			house[downStairs.z][downStairs.x][downStairs.y] = Game.TileRepository.create('stairsDown');
 		}
 
 		// Fill in missing spaces with grass
 		house = this._spaceFill(house);
-
+		
 		// Process the room's children if it has any
 		if(room.children.length > 0) {
 			// Pick direction to branch from
@@ -331,7 +352,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 							y: randomFloor.y,
 							z: z + 1
 						});
-
 						// And push it into the queue.
 						queue.push(child);
 					} else {
@@ -355,9 +375,9 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 										house[z][houseX].unshift(tile);
 										// Adjust room and children y positions by child height
 										if(houseX === 0) { // Ensures we do this once, instead of for every row
-											room.y++;
+											room.adjustY(1);
 											for(var roomChild = 0; roomChild < room.children.length; roomChild++)
-												room.children[roomChild].y++; // This increments the 'child' var too
+												room.children[roomChild].adjustY(1); // This increments the 'child' var too
 											
 										}
 									}
@@ -380,10 +400,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 										// Always use index of 0 since we're adding the array to the beginning
 										house[z][0][y] = tile;
 									}
-									// Adjust room and children y positions by child width
-									room.x++;
-									for(var roomChild = 0; roomChild < room.children.length; roomChild++)
-										room.children[roomChild].x++; // This increments the 'child' var too
+									// Adjust room and children x positions by child width
+									room.adjustX(1);
+									for(var roomChild = 0; roomChild < room.children.length; roomChild++) 
+										room.children[roomChild].adjustX(1); // This increments the 'child' var too
 								}
 							}
 							break;
@@ -601,7 +621,11 @@ Game.House.prototype._getRandomFloor = function(roomX, roomY, width, height, til
 		if(!tiles[roomX])
 			continue;
 		for (var y = 0, tilesY = roomY; y < height; y++, tilesY++) {
-			if(tiles[roomX][tilesY] && tiles[roomX][tilesY].describe() == 'floor') {
+			if(
+				tiles[roomX][tilesY] &&
+				tiles[roomX][tilesY].describe() == 'floor' &&
+				x !== 0 && y !== 0 && x != width - 1 && y != height - 1 // Make sure that the floor tile isn't on the edge of what will be the room tiles (which would put it in a wall)
+			) {
 				floorTiles.push(roomX + "," + tilesY);
 			}
 		}
