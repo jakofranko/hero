@@ -349,9 +349,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 							if(child.getY() < 0) {
 								// Loop through every column
 								for (var houseX = 0; houseX < house[z].length; houseX++) {
-									// unshift() a patch of grass to every row based on room height
+									// unshift() a patch of grass/air to every row based on room height
 									for (var houseY = 0; houseY < child.height; houseY++) {
-										house[z][houseX].unshift(Game.TileRepository.create('grass'));
+										var tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+										house[z][houseX].unshift(tile);
 										// Adjust room and children y positions by child height
 										if(houseX === 0) { // Ensures we do this once, instead of for every row
 											room.y++;
@@ -371,12 +372,13 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 							child.y = room.y || 0;
 
 							if(child.x < 0) {
-								// unshift() a column of grass to every column based on room width
+								// unshift() a column of grass/air to every column based on room width
 								for (var x = 0; x < child.width; x++) {
 									house[z].unshift(new Array(house[z][0].length));
 									for (var y = 0; y < house[z][0].length; y++) {
+										var tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
 										// Always use index of 0 since we're adding the array to the beginning
-										house[z][0][y] = Game.TileRepository.create('grass');
+										house[z][0][y] = tile;
 									}
 									// Adjust room and children y positions by child width
 									room.x++;
@@ -440,6 +442,7 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 	// One last time, fill out any missing tiles with air or grass
 	house = this._spaceFill(house);
 	// for (var z = 0; z < house.length; z++) {
+	// 	console.log(z);
 	// 	Game._consoleLogGrid(house[z], '_char');
 	// }
 	// this._testZeroIndex(house, [room, house]);
@@ -537,8 +540,10 @@ Game.House.prototype._spaceFill = function(grid) {
 				grid[z][x] = new Array(height);
 
 			for (var y = 0; y < height; y++) {
-				if(!grid[z][x][y])
-					grid[z][x][y] = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+				if(!grid[z][x][y]) {
+					var tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+					grid[z][x][y] = tile;
+				}
 			}
 		}
 	}

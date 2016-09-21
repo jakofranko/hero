@@ -176,7 +176,7 @@ Game.LotRepository.define('houses', {
 		var tiles = this.fillLot('grass');
 		var buildings = this.getBuildings();
 		var w, h, i;
-
+		
 		// This is the number of buildings we can fit on each row and column
 		w = h = Math.sqrt(buildings.length);
 		i = 0;
@@ -201,7 +201,8 @@ Game.LotRepository.define('houses', {
 			}	
 		}
 		tiles = Game.spaceFill(tiles);
-		console.log(tiles);
+
+		// console.log(tiles);
 		return tiles;
 	}
 });
