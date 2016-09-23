@@ -8,6 +8,7 @@
 
 // TODO: maxWidth and maxHeight should be based off of a fraction of the lot size. Perhaps this should be defined at a house template level
 // TODO: prevent doors from spawning at corners
+// TODO: Re-work the way stairs are created, since there is no way to account for z-level shifting when spawning new rooms on additional z-levels.
 // TODO: If there is no more room to add a room's children on the current z-level, the code will try to place all the children directly above the room, resulting in only one being able to be placed (since the other's would not pass the _roomCheck being placed in the same x, y coordinates). Fix this somehow?
 Game.House = function(options) {
 	this.maxRooms = options['maxRooms'] || {
@@ -78,8 +79,6 @@ Game.House.prototype.Room = function(name) {
 	this.width = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.height = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.spawnDirection = null;
-	this.upStair = null;
-	this.downStair = null;
 	this.children = [];
 };
 // 'roomName': [min, max]
@@ -102,10 +101,6 @@ Game.House.prototype.Room.prototype.setX = function(x) {
 };
 Game.House.prototype.Room.prototype.adjustX = function(amount) {
 	this.x += amount;
-	if(this.upStair !== null)
-		this.upStair.x += amount;
-	if(this.downStair !== null)
-		this.downStair.x += amount;
 };
 Game.House.prototype.Room.prototype.getY = function(y) {
 	return this.y;
@@ -115,10 +110,6 @@ Game.House.prototype.Room.prototype.setY = function(y) {
 };
 Game.House.prototype.Room.prototype.adjustY = function(amount) {
 	this.y += amount;
-	if(this.upStair !== null)
-		this.upStair.y += amount;
-	if(this.downStair !== null)
-		this.downStair.y += amount;
 };
 Game.House.prototype.Room.prototype.getZ = function(z) {
 	return this.z;
@@ -149,18 +140,6 @@ Game.House.prototype.Room.prototype.getSpawnDirection = function(dir) {
 };
 Game.House.prototype.Room.prototype.setSpawnDirection = function(dir) {
 	this.spawnDirection = dir;
-};
-Game.House.prototype.Room.prototype.getUpStair = function() {
-	return this.upStair;
-};
-Game.House.prototype.Room.prototype.setUpStair = function(upStair) {
-	this.upStair = upStair;
-};
-Game.House.prototype.Room.prototype.getDownStair = function() {
-	return this.downStair;
-};
-Game.House.prototype.Room.prototype.setDownStair = function(downStair) {
-	this.downStair = downStair;
 };
 Game.House.prototype.Room.prototype.addChild = function(child) {
 	if(child !== false)
@@ -247,24 +226,7 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			default:
 				break;
 		}
-		if(typeof existingRoom == "object" && z + 1 <= this.maxStories) {
-			// A valid floor tile was placed, so set the coordinates for the placement of up and down stairs
-			room.setUpStair({
-				x: existingRoom.x,
-				y: existingRoom.y,
-				z: z
-			});
-			room.setDownStair({
-				x: existingRoom.x,
-				y: existingRoom.y,
-				z: z + 1
-			});
-			// Move the room's z level (and all it's children) up one
-			room.setZ(z + 1);
-
-			// And set z to the room's new z level
-			z = room.getZ();			
-		} else if(existingRoom === true) {
+		if(existingRoom === true) {
 			continue;
 		}
 
@@ -286,22 +248,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 				if(!house[z][roomX][roomY] || house[z][roomX][roomY].describe() == 'grass' || house[z][roomX][roomY].describe() == 'air')
 					house[z][roomX][roomY] = roomTiles[i][j];
 			}
-		}
-
-		// If stairs can be placed, place them
-		var upStairs = room.getUpStair();
-		var downStairs = room.getDownStair();
-		if(upStairs !== null && downStairs !== null) {
-			if(
-				!house[upStairs.z][upStairs.x] ||
-				!house[downStairs.z][downStairs.x] ||
-				!house[upStairs.z][upStairs.x][upStairs.y] ||
-				!house[downStairs.z][downStairs.x][downStairs.y]
-			) {
-				debugger;
-			}
-			house[upStairs.z][upStairs.x][upStairs.y] = Game.TileRepository.create('stairsUp');
-			house[downStairs.z][downStairs.x][downStairs.y] = Game.TileRepository.create('stairsDown');
 		}
 
 		// Fill in missing spaces with grass
@@ -326,38 +272,14 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 					child.getHeight() + house[z][0].length > this.maxHeight
 				);
 				if(exceedsMax && z + 1 <= this.maxStories) {
-					var randomFloor = this._getRandomFloor(x, y, child.getWidth(), child.getHeight(), house[z]);
-					if(randomFloor !== false) {
-						// Valid floor was found, so place stairs...
-						if(!house[z + 1]) {
-							// Make the new z level the same length as this level
-							house[z + 1] = new Array(house[z].length);
-						}
-						// If the x array doesn't exist, create in as high as the child
-						if(!house[z + 1][randomFloor.x]) {
-							house[z + 1][randomFloor.x] = new Array(child.getHeight());
-						}
-
-						// Set the child's x, y, and z levels...
-						child.setX(x);
-						child.setY(y);
-						child.setZ(z + 1);
-						child.setUpStair({
-							x: randomFloor.x,
-							y: randomFloor.y,
-							z: z
-						});
-						child.setDownStair({
-							x: randomFloor.x,
-							y: randomFloor.y,
-							z: z + 1
-						});
-						// And push it into the queue.
-						queue.push(child);
-					} else {
-						// A valid floor tile was not found, so this room cannot be added; continue.
-						continue;
-					}
+					// Set the child's x, y, and z levels...
+					child.setX(x);
+					child.setY(y);
+					child.setZ(z + 1);
+					
+					// And push it into the queue.
+					queue.push(child);
+					
 				} else if(!exceedsMax) {
 					switch(dir) {
 						// Shift whole house 'south' by using Array.prototype.unshift()
@@ -393,12 +315,12 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 
 							if(child.x < 0) {
 								// unshift() a column of grass/air to every column based on room width
-								for (var x = 0; x < child.width; x++) {
+								for (var houseX = 0; houseX < child.width; houseX++) {
 									house[z].unshift(new Array(house[z][0].length));
-									for (var y = 0; y < house[z][0].length; y++) {
+									for (var houseY = 0; houseY < house[z][0].length; houseY++) {
 										var tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
 										// Always use index of 0 since we're adding the array to the beginning
-										house[z][0][y] = tile;
+										house[z][0][houseY] = tile;
 									}
 									// Adjust room and children x positions by child width
 									room.adjustX(1);
@@ -461,6 +383,31 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 
 	// One last time, fill out any missing tiles with air or grass
 	house = this._spaceFill(house);
+
+	// If the house is more than one z level, place stairs where there is a valid floor tile on both z levels
+	for (var z = 0; z < house.length; z++) {
+		if(!house[z + 1])
+			break;
+
+		var floorTiles = this._getFloorTiles(house[z]);
+		var randomFloor = false;
+		for(var i = 0; i < floorTiles.length; i++) {
+			var f = floorTiles[i].split(",");
+			if(!house[z + 1][f[0]][f[1]])
+				continue;
+			if(house[z + 1][f[0]][f[1]].describe() == 'floor') {
+				randomFloor = {
+					x: f[0],
+					y: f[1]
+				};
+				break;
+			}
+		}
+		if(randomFloor !== false) {
+			house[z][randomFloor.x][randomFloor.y] = Game.TileRepository.create('stairsUp');
+			house[z + 1][randomFloor.x][randomFloor.y] = Game.TileRepository.create('stairsDown');
+		}
+	}
 	// for (var z = 0; z < house.length; z++) {
 	// 	console.log(z);
 	// 	Game._consoleLogGrid(house[z], '_char');
@@ -592,49 +539,37 @@ Game.House.prototype._testZeroIndex = function(grid, info) {
 // (meaning, that the given grid contains only empty space or grass)
 Game.House.prototype._roomCheck = function(startX, startY, width, height, tiles) {
 	var roomFound = false;
-	var floorFound = false;
+	// z level doesn't exist yet, so obvs, no room
+	if(!tiles)
+		return roomFound;
 	for (var x = 0, tilesX = startX; x < width; x++, tilesX++) {
 		for (var y = 0, tilesY = startY; y < height; y++, tilesY++) {
 			if(!tiles[tilesX])
 				continue;
 
-			if(tiles[tilesX][tilesY] && tiles[tilesX][tilesY].describe() != 'grass' && tiles[tilesX][tilesY].describe() != 'air')
-				roomFound = true;
-
-			if(roomFound && !floorFound && tiles[tilesX][tilesY] && tiles[tilesX][tilesY].describe() == 'floor') {
-				floorFound = {
-					x: tilesX,
-					y: tilesY
-				};
-				break;
+			if(tiles[tilesX][tilesY] && tiles[tilesX][tilesY].describe() != 'grass' && tiles[tilesX][tilesY].describe() != 'air') {
+					roomFound = true;
+					break;
 			}
 		}
-		if(roomFound && floorFound) break;
+		if(roomFound)
+			break;
 	}
 
-	return (roomFound && floorFound) ? floorFound : roomFound;
+	return roomFound;
 };
 
-Game.House.prototype._getRandomFloor = function(roomX, roomY, width, height, tiles) {
+Game.House.prototype._getFloorTiles = function(tiles) {
 	var floorTiles = [];
-	for (var x = 0; x < width; x++, roomX++) {
-		if(!tiles[roomX])
+	for (var x = 0; x < tiles.length; x++) {
+		if(!tiles[x])
 			continue;
-		for (var y = 0, tilesY = roomY; y < height; y++, tilesY++) {
-			if(
-				tiles[roomX][tilesY] &&
-				tiles[roomX][tilesY].describe() == 'floor' &&
-				x !== 0 && y !== 0 && x != width - 1 && y != height - 1 // Make sure that the floor tile isn't on the edge of what will be the room tiles (which would put it in a wall)
-			) {
-				floorTiles.push(roomX + "," + tilesY);
-			}
+		for (var y = 0; y < tiles[x].length; y++) {
+			if(tiles[x][y] && tiles[x][y].describe() == 'floor')
+				floorTiles.push(x + "," + y);
 		}
+
 	}
 
-	if(floorTiles.length > 0) {
-		var randomFloor = floorTiles.random().split(",");
-		return { x: randomFloor[0], y: randomFloor[1] };
-	} else {
-		return false;
-	}
+	return floorTiles;
 };
