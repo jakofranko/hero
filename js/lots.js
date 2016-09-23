@@ -23,6 +23,7 @@ Game.LotRepository.define('building', {
 		}
 	],
 	buildTiles: function() {
+		// TODO: Smarter way of pickin the direction houses face
 		// Add terrain
 		var tiles = this.fillLot('floor');
 		var air = Game.TileRepository.create('air');
