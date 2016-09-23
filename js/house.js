@@ -6,9 +6,6 @@
 //
 // Additionally, when building a house, a set of options can be passed in to define a certain number of rooms, otherwise the house can just kind of spawn with an upper limit to the size. The output of generating the house plan will be a 'graph' of nodes and connections which can then be used by another function to actually produce the tiles that will go on a city lot.
 
-// TODO: maxWidth and maxHeight should be based off of a fraction of the lot size. Perhaps this should be defined at a house template level
-// TODO: prevent doors from spawning at corners
-// TODO: Re-work the way stairs are created, since there is no way to account for z-level shifting when spawning new rooms on additional z-levels.
 // TODO: If there is no more room to add a room's children on the current z-level, the code will try to place all the children directly above the room, resulting in only one being able to be placed (since the other's would not pass the _roomCheck being placed in the same x, y coordinates). Fix this somehow?
 Game.House = function(options) {
 	this.maxRooms = options['maxRooms'] || {
@@ -352,21 +349,32 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 							commonXY.push(roomXY[i]);
 					
 					// Make sure door isn't placed in a corner by eliminating the least and greatest x or y coordinates, depending on spawn direction
-					// if(dir == 'n' || dir == 's') {
-					// 	var lowestX = commonXY.reduce(function(prev, curr) {
-					// 		return Math.min(prev, curr.split(",")[0]);
-					// 	}, commonXY[0].split(",")[0]);
-					// 	var highestX = commonXY.reduce(function(prev, curr) {
-					// 		return Math.max(prev, curr.split(",")[0]);
-					// 	}, commonXY[0].split(",")[0]);
-					// } else {
-					// 	var lowestY = commonXY.reduce(function(prev, curr) {
-					// 		return Math.min(prev, curr.split(",")[1]);
-					// 	}, commonXY[0].split(",")[1]);
-					// 	var highestY = commonXY.reduce(function(prev, curr) {
-					// 		return Math.max(prev, curr.split(",")[1]);
-					// 	}, commonXY[0].split(",")[1]);
-					// }
+					if(dir == 'n' || dir == 's') {
+						var lowestX = commonXY.reduce(function(prev, curr) {
+							return Math.min(prev, curr.split(",")[0]);
+						}, commonXY[0].split(",")[0]);
+						var highestX = commonXY.reduce(function(prev, curr) {
+							return Math.max(prev, curr.split(",")[0]);
+						}, commonXY[0].split(",")[0]);
+
+						// Remove the extreme x tiles from the list
+						for (var i = 0; i < commonXY.length; i++) {
+							if(commonXY[i].split(",")[0] == lowestX || commonXY[i].split(",")[0] == highestX)
+								commonXY.splice(i, 1);
+						}
+					} else {
+						var lowestY = commonXY.reduce(function(prev, curr) {
+							return Math.min(prev, curr.split(",")[1]);
+						}, commonXY[0].split(",")[1]);
+						var highestY = commonXY.reduce(function(prev, curr) {
+							return Math.max(prev, curr.split(",")[1]);
+						}, commonXY[0].split(",")[1]);
+						// Remove the extreme y tiles from the list
+						for (var i = 0; i < commonXY.length; i++) {
+							if(commonXY[i].split(",")[1] == lowestY || commonXY[i].split(",")[1] == highestY)
+								commonXY.splice(i, 1);
+						}
+					}
 
 					var doorXY = commonXY.random().split(",");
 					house[z][doorXY[0]][doorXY[1]] = Game.TileRepository.create("door");
