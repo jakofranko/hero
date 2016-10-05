@@ -15,7 +15,7 @@ Game.City = function(size) {
 	// Instantiate the lots and tiles array
 	for (var x = 0; x < this._width; x++) {
 		this._lots[x] = new Array(size);
-	};
+	}
 
 	// Determine neighborhood sizes based on city size
 	// since dividing by 10, then the multipliers should add up to 5 (leave room for suburbs!)
@@ -135,7 +135,7 @@ Game.City.prototype.neighborhood = function(x, y) {
 	} else {
 		return 'suburbs';
 	}
-}
+};
 Game.City.prototype.tilesFromLots = function() {
 	// The map variable should be a 3-dimensional array,
 	// stitched together from the 3-dimensional array of tiles
@@ -190,9 +190,9 @@ Game.City.prototype.tilesFromLots = function() {
 				if(!map[z][x][y]) {
 					map[z][x][y] = air;
 				}
-			};
-		};
-	};
+			}
+		}
+	}
 
 	return map;
 };
