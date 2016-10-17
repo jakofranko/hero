@@ -179,7 +179,6 @@ Game.Building = function(properties) {
 			// always be a path between the first region and the last region.
 			// If anybody can explain to me why this works, I'd love to know...
 			for(var region in this._roomRegions[z].tree) {
-				debugger;
 				var regionDoorPlaced = false;
 				// For determining the greatest difference
 				var regionDiffs = [];
