@@ -21,6 +21,9 @@ Game.Building = function(properties) {
 		// this.name = Game.Building.randomName();
 	}
 
+	// Map of item locations
+	this._items = properties['items'] || {};
+
 	this._roomSize = properties['roomSize'] || false; // Squared; so room size 3 will be a 3x3 room.
 
 	// Initialize blueprint and room regions arrays
@@ -697,6 +700,33 @@ Game.Building.prototype._getNeighborPositions = function(x, y) {
         }
     }
     return tiles.randomize();
+};
+
+Game.Building.prototype.getItemsAt = function(x, y, z) {
+    return this._items[x + ',' + y + ',' + z];
+};
+
+Game.Building.prototype.setItemsAt = function(x, y, z, items) {
+    // If our items array is empty, then delete the key from the table.
+    var key = x + ',' + y + ',' + z;
+    if (items.length === 0) {
+        if (this._items[key]) {
+            delete this._items[key];
+        }
+    } else {
+        // Simply update the items at that key
+        this._items[key] = items;
+    }
+};
+
+Game.Building.prototype.addItem = function(x, y, z, item) {
+    // If we already have items at that position, simply append the item to the list of items.
+    var key = x + ',' + y + ',' + z;
+    if (this._items[key]) {
+        this._items[key].push(item);
+    } else {
+        this._items[key] = [item];
+    }
 };
 
 Game.Building.prototype._consoleLogGrid = function(grid, field) {
