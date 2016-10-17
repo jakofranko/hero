@@ -3,5 +3,6 @@ Game.Palette = {
 	green: "#00ff78",
 	blue: "#585DF5",
 	lightBlue: "#B8DBFF",
-	yellow: "#F5F058"
+	yellow: "#F5F058",
+	brown: "#935800"
 };
