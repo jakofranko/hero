@@ -168,7 +168,6 @@ Game.Building = function(properties) {
 			}
 
 			door.setOuterWall(false);
-			this._consoleLogGrid(this._roomRegions[z].regions);
 
 			// For keeping track of already placed doors
 			var placedDoors = [];
@@ -181,6 +180,7 @@ Game.Building = function(properties) {
 			// If anybody can explain to me why this works, I'd love to know...
 			for(var region in this._roomRegions[z].tree) {
 				debugger;
+				var regionDoorPlaced = false;
 				// For determining the greatest difference
 				var regionDiffs = [];
 
@@ -211,6 +211,7 @@ Game.Building = function(properties) {
 					if(placedDoors.indexOf(doorPosKey) === -1) {
 						placedDoors.push(doorPosKey);
 						this._blueprint[z][pos.x][pos.y] = door;
+						regionDoorPlaced = true;
 						break;
 					} else {
 						var diffIndex = regionDiffs.indexOf(biggestDiff);
@@ -221,7 +222,7 @@ Game.Building = function(properties) {
 				// In very rare circumstances, a region will only have one connecting region.
 				// I think this only happens in artifical cicumstances where there is a region
 				// isolated within a region (a room within a room). This happens when I place
-				// stairwells after using to slice method to place rooms. If this
+				// stairwells after using the slice method to place rooms. If this
 				// 'room within a room' has a high region number, then a door will be placed
 				// to connect to it when processing the lower numbered region that surrounds it,
 				// and then when it comes time to place a door for the high numbered inner region
@@ -265,31 +266,24 @@ Game.Building = function(properties) {
 				// If it only has a single neigboring region (again, this should not be possible
 				// when using only the slice method), then add a door between the neigboring region
 				// and one of it's neiboring regions. This SHOULD un-isolate the region.
-
+				if(regionDoorPlaced === false) {
+					var connectingRegions = Object.keys(this._roomRegions[z].tree[region]);
+					if(connectingRegions.length === 1) {
+						var parentRegion = this._roomRegions[z].tree[connectingRegions[0]];
+						for(var parentRegionConnection in parentRegion) {
+							var parentConnectorPos = parentRegion[parentRegionConnection];
+							var key = parentConnectorPos.x + "," + parentConnectorPos.y;
+							if(placedDoors.indexOf(key) === -1) {
+								placedDoors.push(key);
+								this._blueprint[z][parentConnectorPos.x][parentConnectorPos.y] = door;
+								regionDoorPlaced = true;
+								break;
+							}
+						}
+					}
+				}
 			}
 		}
-
-		// Debug stuff....
-		// var max = diffs.reduce(function(last, current) {
-		// 	return Math.max(last, current);
-		// });
-		// var sum = diffs.reduce(function(last, current) {
-		// 	return Math.abs(last) + Math.abs(current);
-		// });
-		// var diffCount = {};
-		// for (var i = 0; i < diffs.length; i++) {
-		// 	var diff = Math.abs(diffs[i]);
-		// 	if(!diffCount[diff]) {
-		// 		diffCount[diff] = 1;
-		// 	} else {
-		// 		diffCount[diff]++;
-		// 	}
-		// };
-		// console.log("Number of Rooms: ", this._roomNumber);
-		// console.log("Largest Diff: ", max);
-		// console.log("Average Diff: ", Math.round((sum / diffs.length) * 100) / 100);
-		// console.log("Diffs by Frequency: ", diffCount);
-		// console.log("---------------------");
 	};
 
 	this.build = properties['build'] || function() {
