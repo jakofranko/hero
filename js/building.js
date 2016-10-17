@@ -1,5 +1,6 @@
 // Constructor for Game.BuildingRepository. This will contain information on size, number of stories, and map (or perhaps 'blueprint') information for drawing the building. Buildings created from templates will ultimately be stored in their lots, and will ultimately be drawn as part of the buildTiles function of lots.
-// This will be the constructor class for all buildings, including skyscrapers, garages, fast-food places etc. So, the logic for building out the 'blueprint' of the building will be found in each building's template
+// This will be the constructor class for all buildings, including skyscrapers, garages, fast-food places etc. So, the logic for building out the 'blueprint' of the building will be found in each building's template.
+// By default, Game.Building will generate a sort of generic office building.
 // Width and height should not be larger than the 'lot-size' for the game map
 // All features will have a blueprint object, which is a collection of z-levels and their respective maps
 // Again, this is heavily inspired by Shamus Young's post here: http://www.shamusyoung.com/twentysidedtale/?p=2983
@@ -164,18 +165,104 @@ Game.Building = function(properties) {
 			}
 
 			door.setOuterWall(false);
+			this._consoleLogGrid(this._roomRegions[z].regions);
+
+			// For keeping track of already placed doors
+			var placedDoors = [];
+
+			// Because of the way room regions are placed sequentially,
+			// it works out that you take the difference between the current
+			// region and each of it's connecting regions, and place a door
+			// between the regions with the largest difference, there will (almost)
+			// always be a path between the first region and the last region.
+			// If anybody can explain to me why this works, I'd love to know...
 			for(var region in this._roomRegions[z].tree) {
+				debugger;
+				// For determining the greatest difference
+				var regionDiffs = [];
+
+				// For keeping track of the relationship between the difference and the connection
+				var regionDiffsMap = {};
+
 				for(var connection in this._roomRegions[z].tree[region]) {
-					var pos = this._roomRegions[z].tree[region][connection];
-					// Because of the way room regions are placed sequentially,
-					// it works out that if regions within a certain range of 
-					// each other are linked, it is unnecessary (in fact, cool)
-					// to place door to link to all their connecting rooms.
-					diffs.push(region - connection);
-					if(Math.abs(region - connection) < Math.max(2, this._roomNumber - 2)) {
-						this._blueprint[z][pos.x][pos.y] = door;	
+					// Because there will almost always be a connection that is larger than the
+					// current region (the very last region being the exception), it is better
+					// to take the difference between the connecting region and the current
+					// region than vice versa.
+					// Note: the variable 'connection' here actually refers to neigboring regions
+					regionDiffs.push(connection - region);
+					regionDiffsMap[connection - region] = connection;
+				}
+
+				// Sometimes the algorithm will find that the best place for a door
+				// for two regions, after analyzing each of their respective
+				// surrounding regions, is on the same wall. To prevent this, keep
+				// track of all the region diffs, and if a door has already been placed
+				// at a region connector, then place take that region out of the difference
+				// calculation.
+				while(regionDiffs.length) {
+					var biggestDiff = Math.max.apply(null, regionDiffs);
+					var connectingRegion = regionDiffsMap[biggestDiff];
+					var pos = this._roomRegions[z].tree[region][connectingRegion];
+					var doorPosKey = pos.x + "," + pos.y;
+					if(placedDoors.indexOf(doorPosKey) === -1) {
+						placedDoors.push(doorPosKey);
+						this._blueprint[z][pos.x][pos.y] = door;
+						break;
+					} else {
+						var diffIndex = regionDiffs.indexOf(biggestDiff);
+						regionDiffs.splice(diffIndex, 1);
 					}
 				}
+
+				// In very rare circumstances, a region will only have one connecting region.
+				// I think this only happens in artifical cicumstances where there is a region
+				// isolated within a region (a room within a room). This happens when I place
+				// stairwells after using to slice method to place rooms. If this
+				// 'room within a room' has a high region number, then a door will be placed
+				// to connect to it when processing the lower numbered region that surrounds it,
+				// and then when it comes time to place a door for the high numbered inner region
+				// there is already a door, so the algorithm does nothing. For instance, consider this scenario:
+
+				// #####################
+				// #7777#6666#555555555#
+				// #7777#6666#555555555#
+				// #7777+6666#555555555#
+				// #7777#6666#555555555#
+				// #7777#6666#555555555#
+				// #7777#6666#555555555#
+				// #7777#6666#555555555#
+				// ####+#6666#555555555#
+				// #1111#6666#555555555#
+				// #1111#6666#555555555#
+				// #1111#6666+555555555#
+				// #########+###########
+				// #2222#3333#444444444#
+				// #2222#3333#444444444#
+				// #2222#3333#444444444#
+				// #2222+3333#444444444#
+				// #2222#3333#4444444#+#
+				// #2222#3333#4444444#8#
+				// #2222#3333#4444444#8#
+				// #####################
+
+				// Note in the lower right corner, a stairwell has been placed and randomly given
+				// the region number '8.' # = wall, + = door, numbers = regions.
+				//
+				// The algorithm places doors between the following regions:
+				// 1-7, 2-3, 3-6, 4-8, 5-6, 6-7, and region 7 does nothing because
+				// doors have already been placed when processing regions 1 and 6,
+				// and region 8 does nothing because a door has already been placed
+				// when processing region 4, and it is connected to nothing else. The result is that
+				// region 4 is isolated from the other regions since when processing region 4,
+				// a door was placed to region 8, and region 8 is connected to only region 4,
+				// so it could not do anything. My solution will be to detect whether or not a door
+				// has been placed for a given region. If it was not after going through the normal
+				// process, then detect whether or not it only has a single neigboring region.
+				// If it only has a single neigboring region (again, this should not be possible
+				// when using only the slice method), then add a door between the neigboring region
+				// and one of it's neiboring regions. This SHOULD un-isolate the region.
+
 			}
 		}
 
