@@ -135,6 +135,7 @@ Game.Building = function(properties) {
 		// place doors intelligently so that by some path from the stairs all rooms are accessible
 		// (this is achieved by having the stairwell be region 1 on higher floors during region generation)
 		for(var z = 0; z < this._stories; z++) {
+			this._consoleLogGrid(this._roomRegions[z].regions);
 			if(z === 0) {
 				// As this will be going on the outside wall, designate it as such
 				door.setOuterWall(true);
@@ -179,7 +180,6 @@ Game.Building = function(properties) {
 			// always be a path between the first region and the last region.
 			// If anybody can explain to me why this works, I'd love to know...
 			for(var region in this._roomRegions[z].tree) {
-				var regionDoorPlaced = false;
 				// For determining the greatest difference
 				var regionDiffs = [];
 
@@ -259,25 +259,21 @@ Game.Building = function(properties) {
 				// when processing region 4, and it is connected to nothing else. The result is that
 				// region 4 is isolated from the other regions since when processing region 4,
 				// a door was placed to region 8, and region 8 is connected to only region 4,
-				// so it could not do anything. My solution will be to detect whether or not a door
-				// has been placed for a given region. If it was not after going through the normal
-				// process, then detect whether or not it only has a single neigboring region.
+				// so it could not do anything. My solution will be to detect whether 
+				// the current region has only a single neigboring region.
 				// If it only has a single neigboring region (again, this should not be possible
 				// when using only the slice method), then add a door between the neigboring region
 				// and one of it's neiboring regions. This SHOULD un-isolate the region.
-				if(regionDoorPlaced === false) {
-					var connectingRegions = Object.keys(this._roomRegions[z].tree[region]);
-					if(connectingRegions.length === 1) {
-						var parentRegion = this._roomRegions[z].tree[connectingRegions[0]];
-						for(var parentRegionConnection in parentRegion) {
-							var parentConnectorPos = parentRegion[parentRegionConnection];
-							var key = parentConnectorPos.x + "," + parentConnectorPos.y;
-							if(placedDoors.indexOf(key) === -1) {
-								placedDoors.push(key);
-								this._blueprint[z][parentConnectorPos.x][parentConnectorPos.y] = door;
-								regionDoorPlaced = true;
-								break;
-							}
+				var connectingRegions = Object.keys(this._roomRegions[z].tree[region]);
+				if(connectingRegions.length === 1) {
+					var parentRegion = this._roomRegions[z].tree[connectingRegions[0]];
+					for(var parentRegionConnection in parentRegion) {
+						var parentConnectorPos = parentRegion[parentRegionConnection];
+						var key = parentConnectorPos.x + "," + parentConnectorPos.y;
+						if(placedDoors.indexOf(key) === -1) {
+							placedDoors.push(key);
+							this._blueprint[z][parentConnectorPos.x][parentConnectorPos.y] = door;
+							break;
 						}
 					}
 				}
@@ -578,6 +574,10 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 	return regions;
 };
 Game.Building.prototype._fillRegions = function(regions, floor, region, x, y) {
+	debugger;
+	// In order to keep region numbers from incrementing in a semi-random, snakelike fashion and instead
+	// to increment sequentially, such that region 1's neigbors are filled, then region 2's, then 3's etc
+	// it is neccessary to group the starting locations by the region that spawned them.
 	var startLocations = [{x: x, y: y}];
 
 	// The regionTree is an object of the regions of a floor. Each region has an object of connections,
@@ -589,7 +589,7 @@ Game.Building.prototype._fillRegions = function(regions, floor, region, x, y) {
 		var start = startLocations.pop();
 
 		// If a region has not already been placed, update the region of the start tile and
-		// begin filling. After fill for this room is done, increment the region number.
+		// begin filling. After the fill for this room is done, increment the region number.
 		// Otherwise, keep going through the starting locations without incrementing.
 		if(this._canFillRegion(regions, floor, start.x, start.y)) {
 			// If the region is new, add it to the regionTree
@@ -642,6 +642,7 @@ Game.Building.prototype._fillRegions = function(regions, floor, region, x, y) {
 				            }
 				        }
 		            }
+		            this._consoleLogGrid(regions);
 		        }
 			}
 			region++;
