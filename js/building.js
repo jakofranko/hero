@@ -135,7 +135,6 @@ Game.Building = function(properties) {
 		// place doors intelligently so that by some path from the stairs all rooms are accessible
 		// (this is achieved by having the stairwell be region 1 on higher floors during region generation)
 		for(var z = 0; z < this._stories; z++) {
-			this._consoleLogGrid(this._roomRegions[z].regions);
 			if(z === 0) {
 				// As this will be going on the outside wall, designate it as such
 				door.setOuterWall(true);
@@ -574,10 +573,6 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 	return regions;
 };
 Game.Building.prototype._fillRegions = function(regions, floor, region, x, y) {
-	debugger;
-	// In order to keep region numbers from incrementing in a semi-random, snakelike fashion and instead
-	// to increment sequentially, such that region 1's neigbors are filled, then region 2's, then 3's etc
-	// it is neccessary to group the starting locations by the region that spawned them.
 	var startLocations = [{x: x, y: y}];
 
 	// The regionTree is an object of the regions of a floor. Each region has an object of connections,
@@ -586,7 +581,12 @@ Game.Building.prototype._fillRegions = function(regions, floor, region, x, y) {
 		1: {}
 	};
 	while(startLocations.length > 0) {
-		var start = startLocations.pop();
+		// Important to shift and not pop!! Shifting means that we get to the start locations
+		// in the order that they are added to the array, which means the regions are filled
+		// sequentially, instead of the snake-like fill that will result from taking the most
+		// recent addition. Popping and pushing throughout the rest of the algorithm is
+		// fine I think.
+		var start = startLocations.shift();
 
 		// If a region has not already been placed, update the region of the start tile and
 		// begin filling. After the fill for this room is done, increment the region number.
@@ -642,7 +642,6 @@ Game.Building.prototype._fillRegions = function(regions, floor, region, x, y) {
 				            }
 				        }
 		            }
-		            this._consoleLogGrid(regions);
 		        }
 			}
 			region++;
