@@ -127,6 +127,11 @@ Game.Building = function(properties) {
 		}
 	};
 
+	// The method for placing doors will be to use an algorithm to try to place doors
+	// in an interesting way according to a mathematical relationship between regions 
+	// and their neigbors. Then, a second pass will be made traversing the roomRegion
+	// tree to make sure that region 1 has a connection by some path to every other 
+	// region on the floor.
 	this._placeDoors = properties['placeDoors'] || function() {
 		var door = Game.TileRepository.create('door');
 		var diffs = [];
@@ -276,6 +281,33 @@ Game.Building = function(properties) {
 						}
 					}
 				}
+			}
+
+			// Now that we've used the algorithm to try to place doors intelligently, traverse the
+			// roomRegions tree to make sure that region 1 has some path to all the other regions
+			// by comparing the regions that region 1 connects to with the doors that have already
+			// been placed
+			var regionTree = this._roomRegions[z].tree;
+			var isolatedRegions = this._getIsolatedRegions(regionTree, placedDoors);
+			while(isolatedRegions.length) {
+				// Take the first region off the list, and add a door too it, then update the isolatedRegions list
+				// to see if the added connections has un-isolated any of the regions.
+				var isolatedDoorPlaced = false;
+				for (var i = 0; i < isolatedRegions.length; i++) {
+					for(var isolatedConnection in regionTree[isolatedRegions[i]]) {
+						var isolatedPos = regionTree[isolatedRegions[i]][isolatedConnection];
+						var isolatedKey = isolatedPos.x + "," + isolatedPos.y;
+						if(placedDoors.indexOf(isolatedKey) === -1) {
+							isolatedDoorPlaced = true;
+							placedDoors.push(isolatedKey);
+							this._blueprint[z][isolatedPos.x][isolatedPos.y] = door;
+							break;
+						}
+					}
+					if(isolatedDoorPlaced)
+						break;
+				}
+				isolatedRegions = this._getIsolatedRegions(regionTree, placedDoors);
 			}
 		}
 	};
@@ -720,6 +752,34 @@ Game.Building.prototype.addItem = function(x, y, z, item) {
     } else {
         this._items[key] = [item];
     }
+};
+
+Game.Building.prototype._getIsolatedRegions = function(regionTree, placedDoors) {
+	debugger;
+	var allRegions = Object.keys(regionTree);
+	var region1Connections = [];
+	var scanRegions = [1]; // start with region 1...
+	while(scanRegions.length) {
+		var currentRegion = scanRegions.pop();
+		var currentRegionConnections = regionTree[currentRegion];
+		for(var currentRegionConnection in currentRegionConnections) {
+			var wallPos = currentRegionConnections[currentRegionConnection];
+			var wallPosKey = wallPos.x + "," + wallPos.y;
+			// Check if the door has been placed and if it has, make sure that this isn't already a connection for region 1
+			if(placedDoors.indexOf(wallPosKey) > -1 && region1Connections.indexOf(currentRegionConnection) === -1) {
+				scanRegions.push(currentRegionConnection);
+				region1Connections.push(currentRegionConnection);
+			}
+		}
+	}
+
+	// See if any regions cannot be pathed to from region 1
+	return allRegions.filter(function(currReg) {
+		if(this.indexOf(currReg) === -1)
+			return true;
+		else
+			return false;
+	}, region1Connections);
 };
 
 Game.Building.prototype._consoleLogGrid = function(grid, field) {
