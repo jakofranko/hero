@@ -60,6 +60,9 @@ Game.Jobs.mugger = {
 				}
 			}
 
+			if(!entity || !entity.getX) 
+				debugger;
+
 			var witnesses = entity.getMap().getEntitiesWithinRadius(entity.getX(), entity.getY(), entity.getZ(), this.noise);
 			for (var i = 0; i < witnesses.length; i++) {
 				witnesses[i].raiseEvent('onCrime', entity);

@@ -297,6 +297,7 @@ Game.Building = function(properties) {
 					for(var isolatedConnection in regionTree[isolatedRegions[i]]) {
 						var isolatedPos = regionTree[isolatedRegions[i]][isolatedConnection];
 						var isolatedKey = isolatedPos.x + "," + isolatedPos.y;
+						// TODO: Skip placing additional doors into region 1
 						if(placedDoors.indexOf(isolatedKey) === -1) {
 							isolatedDoorPlaced = true;
 							placedDoors.push(isolatedKey);
@@ -755,7 +756,6 @@ Game.Building.prototype.addItem = function(x, y, z, item) {
 };
 
 Game.Building.prototype._getIsolatedRegions = function(regionTree, placedDoors) {
-	debugger;
 	var allRegions = Object.keys(regionTree);
 	var region1Connections = [];
 	var scanRegions = [1]; // start with region 1...
