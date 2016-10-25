@@ -313,6 +313,88 @@ Game.Building = function(properties) {
 		}
 	};
 
+	this._placeItems = properties['placeItems'] || function() {
+		// Loop through each z-level, placing items appropraitely
+		for (var z = 0; z < this._stories; z++) {
+			var randomOffsetX = [-1, 1, 0].random();
+			var randomOffsetY = randomOffsetX === 0 ? [-1, 1].random() : 0; // no diagnals
+			// Keep track of x,y coordinate values of rooms on each floor.
+			// This structure of this object will be like so:
+			// rooms[roomNumber] = { width: int, height: int, floorKeys: []}
+			var rooms = {};
+			var regions = this._roomRegions[z].regions;
+			for (var x = 0; x < this._width; x++) {
+				for (var y = 0; y < this._height; y++) {
+					var roomNumber = regions[x][y];
+					if(roomNumber !== 0 && !rooms[roomNumber]) {
+						rooms[roomNumber] = {
+							topX: null,
+							topY: null,
+							width: 0,
+							height: 0,
+							floorKeys: []
+						};
+					}
+					var description = this._blueprint[z][x][y].describe();
+					if(roomNumber !== 0) {
+						var key = x + "," + y;
+						rooms[roomNumber].floorKeys.push(key);
+					}
+				}
+			}
+
+			// Iterate through the rooms in order to calculate width and height
+			for(var room in rooms) {
+				var topX = this._getMinXFromKeys(rooms[room].floorKeys);
+				var topY = this._getMinYFromKeys(rooms[room].floorKeys);
+				var width = this._getWidthFromKeys(rooms[room].floorKeys);
+				var height = this._getHeightFromKeys(rooms[room].floorKeys);
+				rooms[room].topX = topX;
+				rooms[room].topY = topY;
+				rooms[room].width = width;
+				rooms[room].height = height;
+				if(width >= 3 && height >= 3) {
+					for(var roomX = topX, i = 0; i < width; i++, roomX++) {
+						var edgeOffsetX = 0;
+						var offsetX = roomX;
+						if(i === 0) {
+							edgeOffsetX = [0, 1].random();
+							offsetX = roomX + edgeOffsetX;
+						} else if(i === width - 1) {
+							edgeOffsetX = [0, -1].random();
+							offsetX = roomX + edgeOffsetX;
+						} else {
+							offsetX = roomX + randomOffsetX;
+						}
+
+						for(var roomY = topY, j = 0; j < height; j++, roomY++) {
+							// Place desks and chairs every other tile
+							if(i % 2 === 0 && j % 2 === 0) {
+								var desk = Game.ItemRepository.create('desk');
+								this.addItem(z, roomX, roomY, desk);
+
+								// Place chair intelligently
+								var edgeOffsetY = 0;
+								var offsetY = roomY;
+								if(j === 0 && edgeOffsetX === 0)
+									offsetY = roomY + 1;
+								else if(j === height - 1 && edgeOffsetX === 0)
+									offsetY = roomY - 1;
+								else if(edgeOffsetX === 0)
+									offsetY = roomY + [1, -1].random();
+
+								if(rooms[room].floorKeys.indexOf(offsetX + "," + offsetY) > -1) {
+									var chair = Game.ItemRepository.create('chair');
+									this.addItem(z, offsetX, offsetY, chair);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	};
+
 	this.build = properties['build'] || function() {
 		// Create the initial 3D array, consisting of the outer 
 		// wall (including windows), doors, and optional stairways
@@ -327,7 +409,7 @@ Game.Building = function(properties) {
 
 		this._generateRoomRegions();
 		this._placeDoors();
-		//this._placeItems();
+		this._placeItems();
 	};
 };
 Game.Building.prototype.getWidth = function() {
@@ -780,6 +862,62 @@ Game.Building.prototype._getIsolatedRegions = function(regionTree, placedDoors) 
 		else
 			return false;
 	}, region1Connections);
+};
+
+Game.Building.prototype._getMinXFromKeys = function(keys) {
+	var listX = [];
+	// Put all the x values in the list of keys into a single array
+	for (var i = 0; i < keys.length; i++) {
+		listX.push(keys[i].split(",")[0]);
+	}
+
+	var minX = Math.min.apply(null, listX);
+	return minX;
+};
+
+Game.Building.prototype._getMaxXFromKeys = function(keys) {
+	var listX = [];
+	// Put all the x values in the list of keys into a single array
+	for (var i = 0; i < keys.length; i++) {
+		listX.push(keys[i].split(",")[0]);
+	}
+
+	var minX = Math.max.apply(null, listX);
+	return minX;
+};
+
+Game.Building.prototype._getMinYFromKeys = function(keys) {
+	var listY = [];
+	// Put all the x values in the list of keys into a single array
+	for (var i = 0; i < keys.length; i++) {
+		listY.push(keys[i].split(",")[1]);
+	}
+
+	var minY = Math.min.apply(null, listY);
+	return minY;
+};
+
+Game.Building.prototype._getMaxYFromKeys = function(keys) {
+	var listY = [];
+	// Put all the x values in the list of keys into a single array
+	for (var i = 0; i < keys.length; i++) {
+		listY.push(keys[i].split(",")[1]);
+	}
+
+	var minY = Math.max.apply(null, listY);
+	return minY;
+};
+
+Game.Building.prototype._getWidthFromKeys = function(keys) {
+	var minX = this._getMinXFromKeys(keys);
+	var maxX = this._getMaxXFromKeys(keys);
+	return maxX - minX;
+};
+
+Game.Building.prototype._getHeightFromKeys = function(keys) {
+	var minY = this._getMinYFromKeys(keys);
+	var maxY = this._getMaxYFromKeys(keys);
+	return maxY - minY;
 };
 
 Game.Building.prototype._consoleLogGrid = function(grid, field) {
