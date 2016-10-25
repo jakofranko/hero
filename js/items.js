@@ -14,8 +14,20 @@ Game.ItemRepository.define('chair', {
 
 Game.ItemRepository.define('desk', {
     name: 'desk',
-    character: '#',
+    character: 'π',
     foreground: Game.Palette.brown,
+});
+
+Game.ItemRepository.define('floor lamp', {
+    name: 'floor lamp',
+    character: '∫',
+    foreground: 'white',
+});
+
+Game.ItemRepository.define('potted plant', {
+    name: 'potted plant',
+    character: '*',
+    foreground: '#B3C67F',
 });
 
 Game.ItemRepository.define('corpse', {
