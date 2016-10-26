@@ -34,7 +34,9 @@ Game.Lot = function(properties) {
 		this.getTiles = function() {
 			return this.fillLot('floor');
 		};
-	} 
+	}
+
+	this._items = properties['items'] || {};
 };
 // Make items inherit all the functionality from glyphs
 Game.Lot.extend(Game.DynamicGlyph);
@@ -108,4 +110,31 @@ Game.Lot.prototype.fillLot = function(tile, extraProperties) {
 
 	// Only 1 z-level so return as the only element of an array
 	return [result];
+};
+
+Game.Lot.prototype.getItemsAt = function(x, y, z) {
+    return this._items[x + ',' + y + ',' + z];
+};
+
+Game.Lot.prototype.setItemsAt = function(x, y, z, items) {
+    // If our items array is empty, then delete the key from the table.
+    var key = x + ',' + y + ',' + z;
+    if (items.length === 0) {
+        if (this._items[key]) {
+            delete this._items[key];
+        }
+    } else {
+        // Simply update the items at that key
+        this._items[key] = items;
+    }
+};
+
+Game.Lot.prototype.addItem = function(x, y, z, item) {
+    // If we already have items at that position, simply append the item to the list of items.
+    var key = x + ',' + y + ',' + z;
+    if (this._items[key]) {
+        this._items[key].push(item);
+    } else {
+        this._items[key] = [item];
+    }
 };

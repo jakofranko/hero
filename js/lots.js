@@ -80,6 +80,11 @@ Game.LotRepository.define('building', {
 						if(b[z][i] === undefined)
 							debugger;
 						tiles[z][x][y] = b[z][i][j];
+
+						// Add building items to lot items
+						var items = building.getItemsAt(i, j, z);
+						if(items && items.length)
+							this.setItemsAt(x, y, z, items);
 					} else if(z > 0) {
 						tiles[z][x][y] = air;
 					}
