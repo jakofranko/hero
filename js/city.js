@@ -27,6 +27,8 @@ Game.City = function(size) {
 
 	// How many roads in the city.
 	this._roadFrequency = 0.4;
+
+	this._items = {};
 };
 // Getters and setters
 Game.City.prototype.getWidth = function() {
@@ -172,6 +174,12 @@ Game.City.prototype.tilesFromLots = function() {
 					for (var y = 0; y < tiles[z][x].length; y++) {
 						var offsetY = y + (cityY * Game.getLotSize());
 						map[z][offsetX][offsetY] = tiles[z][x][y];
+
+						// Add items from lot to map
+						var items = this._lots[cityX][cityY].getItemsAt(x, y, z);
+						console.log(items);
+						if(items && items.length)
+							this.setItemsAt(offsetX, offsetY, z, items);
 					}
 				}
 			}
@@ -183,16 +191,46 @@ Game.City.prototype.tilesFromLots = function() {
 	var air = Game.TileRepository.create('air');
 	for (var z = 0; z < map.length; z++) {
 		for (var x = 0; x < map[z].length; x++) {
-			if(!map[z][x]) {
+			if(!map[z][x])
 				map[z][x] = new Array(this._height * Game.getLotSize());
-			}
+
 			for (var y = 0; y < map[z][x].length; y++) {
-				if(!map[z][x][y]) {
+				if(!map[z][x][y])
 					map[z][x][y] = air;
-				}
 			}
 		}
 	}
 
 	return map;
+};
+
+Game.City.prototype.getItems = function() {
+	return this._items;
+};
+
+Game.City.prototype.getItemsAt = function(x, y, z) {
+    return this._items[x + ',' + y + ',' + z];
+};
+
+Game.City.prototype.setItemsAt = function(x, y, z, items) {
+    // If our items array is empty, then delete the key from the table.
+    var key = x + ',' + y + ',' + z;
+    if (items.length === 0) {
+        if (this._items[key]) {
+            delete this._items[key];
+        }
+    } else {
+        // Simply update the items at that key
+        this._items[key] = items;
+    }
+};
+
+Game.City.prototype.addItem = function(x, y, z, item) {
+    // If we already have items at that position, simply append the item to the list of items.
+    var key = x + ',' + y + ',' + z;
+    if (this._items[key]) {
+        this._items[key].push(item);
+    } else {
+        this._items[key] = [item];
+    }
 };
