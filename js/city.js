@@ -176,7 +176,6 @@ Game.City.prototype.tilesFromLots = function() {
 
 						// Add items from lot to map
 						var items = this._lots[cityX][cityY].getItemsAt(x, y, z);
-						console.log(items);
 						if(items && items.length)
 							this.setItemsAt(offsetX, offsetY, z, items);
 					}
