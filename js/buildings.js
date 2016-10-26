@@ -4,5 +4,5 @@ Game.BuildingRepository.define('office building', {
 	width: Game.getLotSize() / 2,
 	height: Game.getLotSize() / 2,
 	stories: 4,
-	roomNumber: 10
+	roomNumber: 6
 });
