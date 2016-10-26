@@ -51,7 +51,7 @@ Game.City.prototype.init = function() {
 			// don't let them be right next to each other,
 			// dont' let them be within 2 units of each other,
 			// and don't put a road at 0,0
-			if((x == 0 || y == 0) && key != "0,0" && Math.random() < this._roadFrequency) {
+			if((x === 0 || y === 0) && key != "0,0" && Math.random() < this._roadFrequency) {
 				var lastX = x - 1;
 				var lastY = y - 1;
 				var lastRow = lastX + "," + y;
@@ -60,7 +60,7 @@ Game.City.prototype.init = function() {
 				// Don't put roads within two units of eachother
 				if(lastRow != lastKey && lastColumn != lastKey) {
 					lastKey = key;
-					var orientation = (x == 0) ? 'horizontal' : 'vertical';
+					var orientation = (x === 0) ? 'horizontal' : 'vertical';
 					this._lots[x][y] = Game.LotRepository.create('road', {
 						orientation: orientation
 					});
@@ -75,7 +75,7 @@ Game.City.prototype.init = function() {
 	for(var x = 0; x < this._width; x++) {
 		for(var y = 0; y < this._height; y++) {
 			if(this._lots[x][y] && this._lots[x][y].getName() == 'road') {
-				if(y == 0) {
+				if(y === 0) {
 					// We are on the first row, so draw the roads directly down
 					var thisColumn = x;
 					for(var i = 1; i < this._height; i++) {
@@ -88,7 +88,7 @@ Game.City.prototype.init = function() {
 							});	
 						}
 					}
-				} else if(x == 0) {
+				} else if(x === 0) {
 					// Otherwise, we are on the first column, so draw the road directly over
 					var thisRow = y;
 					for(var j = 1; j < this._width; j++) {
