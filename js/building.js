@@ -371,7 +371,7 @@ Game.Building = function(properties) {
 							// Place desks and chairs every other tile
 							if(i % 2 === 0 && j % 2 === 0) {
 								var desk = Game.ItemRepository.create('desk');
-								this.addItem(z, roomX, roomY, desk);
+								this.addItem(roomX, roomY, z, desk);
 
 								// Place chair intelligently
 								var edgeOffsetY = 0;
@@ -385,7 +385,7 @@ Game.Building = function(properties) {
 
 								if(rooms[room].floorKeys.indexOf(offsetX + "," + offsetY) > -1) {
 									var chair = Game.ItemRepository.create('chair');
-									this.addItem(z, offsetX, offsetY, chair);
+									this.addItem(offsetX, offsetY, z, chair);
 								}
 							}
 						}
@@ -808,6 +808,10 @@ Game.Building.prototype._getNeighborPositions = function(x, y) {
         }
     }
     return tiles.randomize();
+};
+
+Game.Building.prototype.getItems = function() {
+	return this._items;
 };
 
 Game.Building.prototype.getItemsAt = function(x, y, z) {
