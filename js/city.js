@@ -157,20 +157,19 @@ Game.City.prototype.tilesFromLots = function() {
 			// tiles[z][x].length == lot height
 			for (var z = 0; z < tiles.length; z++) {
 				// Instantiate a new z-level if it doesn't exist already
-				if(!map[z]) {
+				if(!map[z])
 					map[z] = new Array(this._width * Game.getLotSize());
-				}
 
 				for (var x = 0; x < tiles[z].length; x++) {
 					var offsetX = x + (cityX * Game.getLotSize());
 
 					// Instantiate a new map column if it doesn't exist already
-					if(!map[z][offsetX]) {
+					if(!map[z][offsetX])
 						map[z][offsetX] = new Array(this._height * Game.getLotSize());
-					}
 
 					if(!tiles[z][x])
 						debugger;
+
 					for (var y = 0; y < tiles[z][x].length; y++) {
 						var offsetY = y + (cityY * Game.getLotSize());
 						map[z][offsetX][offsetY] = tiles[z][x][y];
