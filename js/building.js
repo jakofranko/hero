@@ -373,15 +373,17 @@ Game.Building = function(properties) {
 								var desk = Game.ItemRepository.create('desk');
 								this.addItem(roomX, roomY, z, desk);
 
-								// Place chair intelligently
+								// Place chair intelligently, no diagnals
 								var edgeOffsetY = 0;
 								var offsetY = roomY;
-								if(j === 0 && edgeOffsetX === 0)
-									offsetY = roomY + 1;
-								else if(j === height - 1 && edgeOffsetX === 0)
-									offsetY = roomY - 1;
-								else if(edgeOffsetX === 0)
-									offsetY = roomY + [1, -1].random();
+								if(offsetX == roomX) {
+									if(j === 0)
+										offsetY++;
+									else if(j === height - 1)
+										offsetY--;
+									else
+										offsetY = roomY + [1, -1].random();
+								}
 
 								if(rooms[room].floorKeys.indexOf(offsetX + "," + offsetY) > -1) {
 									var chair = Game.ItemRepository.create('chair');
