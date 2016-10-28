@@ -368,6 +368,11 @@ Game.Building = function(properties) {
 						}
 
 						for(var roomY = topY, j = 0; j < height; j++, roomY++) {
+							// If for some reason we end up in a section of the building that does
+							// not belong to the room, skip ahead
+							if(rooms[room].floorKeys.indexOf(roomX + "," + roomY) === -1)
+								continue;
+
 							// Place desks and chairs every other tile
 							if(i % 2 === 0 && j % 2 === 0) {
 								var desk = Game.ItemRepository.create('desk');
@@ -385,7 +390,10 @@ Game.Building = function(properties) {
 										offsetY = roomY + [1, -1].random();
 								}
 
-								if(rooms[room].floorKeys.indexOf(offsetX + "," + offsetY) > -1) {
+								if(
+									rooms[room].floorKeys.indexOf(offsetX + "," + offsetY) > -1 &&
+									this._blueprint[z][offsetX][offsetY].describe() == 'floor'
+								) {
 									var chair = Game.ItemRepository.create('chair');
 									this.addItem(offsetX, offsetY, z, chair);
 								}
