@@ -30,6 +30,18 @@ Game.ItemRepository.define('potted plant', {
     foreground: '#B3C67F',
 });
 
+Game.ItemRepository.define('refridgerator', {
+    name: 'refridgerator',
+    character: '[',
+    foreground: 'silver',
+});
+
+Game.ItemRepository.define('oven', {
+    name: 'oven',
+    character: '{',
+    foreground: 'silver',
+});
+
 Game.ItemRepository.define('corpse', {
     name: 'corpse',
     character: '%',
