@@ -8,6 +8,7 @@
 // 				like 'grass' or 'table' such that calling templateKey[key].repository.create(templateKey[key].name) 
 //				would generate the appropriate thing
 // TODO: Add support for adding multiple objects to a single place on the template via a template key
+// TODO: Add functions to turn a template by 90 degrees, and by 180 degrees (and maybe by 270 degrees)
 Game.Template = function(name, properties) {
 	if(this._validateTemplateKey(properties['templateKey'])) {
 		this._name = name;
