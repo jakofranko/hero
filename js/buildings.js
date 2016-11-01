@@ -34,3 +34,10 @@ Game.BuildingRepository.define('office building', {
 	stories: 4,
 	roomNumber: 6
 });
+
+Game.BuildingRepository.define('apartment', {
+	exactProperties: true,
+	width: Game.getLotSize() - 4, // 2 tile sidewalks
+	height: Game.getLotSize() - 4,
+	stories: 3,
+});
