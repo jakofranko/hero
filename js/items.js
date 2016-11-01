@@ -6,10 +6,22 @@ Game.ItemRepository.define('bed', {
     foreground: Game.Palette.lightBlue,
 });
 
+Game.ItemRepository.define('desk', {
+    name: 'desk',
+    character: '#',
+    foreground: Game.Palette.brown,
+});
+
 Game.ItemRepository.define('chair', {
     name: 'chair',
     character: 'h',
     foreground: Game.Palette.brown,
+});
+
+Game.ItemRepository.define('couch', {
+    name: 'couch',
+    character: 'C',
+    foreground: Game.Palette.teal,
 });
 
 Game.ItemRepository.define('desk', {
@@ -21,7 +33,7 @@ Game.ItemRepository.define('desk', {
 Game.ItemRepository.define('floor lamp', {
     name: 'floor lamp',
     character: '∫',
-    foreground: 'white',
+    foreground: Game.Palette.white,
 });
 
 Game.ItemRepository.define('potted plant', {
@@ -33,17 +45,47 @@ Game.ItemRepository.define('potted plant', {
 Game.ItemRepository.define('refridgerator', {
     name: 'refridgerator',
     character: '[',
-    foreground: 'silver',
+    foreground: Game.Palette.silver,
+});
+
+Game.ItemRepository.define('television', {
+    name: 'television',
+    character: ']',
+    foreground: Game.Palette.lightBlue,
 });
 
 Game.ItemRepository.define('oven', {
     name: 'oven',
     character: '{',
-    foreground: 'silver',
+    foreground: Game.Palette.silver,
+});
+
+Game.ItemRepository.define('end table', {
+    name: 'end table',
+    character: 'n',
+    foreground: Game.Palette.brown,
+});
+
+Game.ItemRepository.define('toilet', {
+    name: 'toilet',
+    character: '&',
+    foreground: Game.Palette.white,
+});
+
+Game.ItemRepository.define('bathtub', {
+    name: 'bathtub',
+    character: 'O',
+    foreground: Game.Palette.silver,
+});
+
+Game.ItemRepository.define('sink', {
+    name: 'sink',
+    character: 'o',
+    foreground: Game.Palette.silver,
 });
 
 Game.ItemRepository.define('corpse', {
     name: 'corpse',
     character: '%',
-    foreground: 'white',
+    foreground: Game.Palette.white,
 });
