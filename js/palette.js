@@ -4,5 +4,8 @@ Game.Palette = {
 	blue: "#585DF5",
 	lightBlue: "#B8DBFF",
 	yellow: "#F5F058",
-	brown: "#935800"
+	brown: "#935800",
+	silver: "silver",
+	white: "white",
+	teal: "teal"
 };
