@@ -24,9 +24,9 @@ Game.ItemRepository.define('couch', {
     foreground: Game.Palette.teal,
 });
 
-Game.ItemRepository.define('desk', {
-    name: 'desk',
-    character: 'π',
+Game.ItemRepository.define('table', {
+    name: 'table',
+    character: '#',
     foreground: Game.Palette.brown,
 });
 

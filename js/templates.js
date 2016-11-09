@@ -1,6 +1,7 @@
 Game.TemplateRepository = new Game.Repository('templates', Game.Template);
 
 Game.TemplateRepository.define('studio apartment', {
+	name: 'studio apartment',
 	template: [
 		'&O|t#l',
 		'o +  c',
@@ -60,6 +61,7 @@ Game.TemplateRepository.define('studio apartment', {
 });
 
 Game.TemplateRepository.define('one-bedroom apartment', {
+	name: 'one-bedroom apartment',
 	template: [
 		'&O|dt#l',
 		' o|c   ',
@@ -130,6 +132,7 @@ Game.TemplateRepository.define('one-bedroom apartment', {
 });
 
 Game.TemplateRepository.define('two-bedroom apartment', {
+	name: 'two-bedroom apartment',
 	template: [
 		'&O| t#ld',
 		'o +    c',

@@ -1,3 +1,21 @@
+if (!String.prototype.splice) {
+    /**
+     * {JSDoc}
+     *
+     * The splice() method changes the content of a string by removing a range of
+     * characters and/or adding new characters.
+     *
+     * @this {String}
+     * @param {number} start Index at which to start changing the string.
+     * @param {number} delCount An integer indicating the number of old chars to remove.
+     * @param {string} newSubStr The String that is spliced in.
+     * @return {string} A new string with the spliced substring.
+     */
+    String.prototype.splice = function(start, delCount, newSubStr) {
+        return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount));
+    };
+}
+
 Game.extend = function(src, dest) {
     // Create a copy of the source.
     var result = {};
@@ -29,12 +47,13 @@ Game.rollDice = function(XdX) {
 Game._consoleLogGrid = function(grid, field) {
     var string = "";
     for (var y = 0; y < grid[0].length; y++) {
-        for (var x= 0; x < grid.length; x++) {
-            if(field) {
+        for (var x = 0; x < grid.length; x++) {
+            if(!grid[x] || !grid[x][y])
+                string += " ";
+            else if(field)
                 string += String(grid[x][y][field]);
-            } else {
+            else
                 string += String(grid[x][y]);
-            }
         }
         string += "\n";
     }
