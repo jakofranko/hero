@@ -113,6 +113,10 @@ Game.TemplateRepository.define('one-bedroom apartment', {
 			repository: 'ItemRepository',
 			name: 'chair'
 		},
+		'C': {
+			repository: 'ItemRepository',
+			name: 'couch'
+		},
 		'V': {
 			repository: 'ItemRepository',
 			name: 'television'

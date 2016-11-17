@@ -156,13 +156,68 @@ Game.LotRepository.define('road', {
 		return [tiles];
 	}
 });
-Game.LotRepository.define('appartments', {
-	name: 'appartments',
+Game.LotRepository.define('apartments', {
+	name: 'apartments',
 	character: 'A',
 	downtown: 1,
 	midtown: 1,
 	uptown: 1,
-	suburbs: 0.6
+	suburbs: 0.6,
+	buildingSpecs: [
+		{
+			type: 'apartment',
+			amount: 1,
+			repo: 'BuildingRepository'
+		}
+	],
+	buildTiles: function() {
+		var tiles = this.fillLot('grass');
+		var centerX = this.getMidWidth();
+		var centerY = this.getMidHeight();
+
+		var apartment = this.getBuildings()[0];
+		apartment.build();
+		var a = apartment.getBlueprint();
+		var apartmentMidWidth = apartment.getMidWidth();
+		var apartmentMidHeight = apartment.getMidHeight();
+
+		var cornerX = centerX - apartmentMidWidth;
+		var cornerY = centerY - apartmentMidHeight;
+		if(cornerX < 0 || cornerY < 0) {
+			return tiles;
+		}
+
+		for (var z = 0; z < apartment.getStories(); z++) {
+			if(!tiles[z])
+				tiles[z] = new Array(this.getWidth());
+
+			for (var x = 0; x < a[z].length; x++) {
+				if(!tiles[z][x + cornerX])
+					tiles[z][x + cornerX] = new Array(this.getHeight());
+
+				for (var y = 0; y < a[z][x].length; y++) {
+					tiles[z][x + cornerX][y + cornerY] = a[z][x][y];
+
+					var items = apartment.getItemsAt(x, y, z);
+					if(items && items.length)
+						this.setItemsAt(x + cornerX, y + cornerY, z, items);
+				}
+			}
+
+			// Fill any undefined grid spots with grass or air
+			for (var lotX = 0; lotX < tiles[z].length; lotX++) {
+				if(!tiles[z][lotX])
+					tiles[z][lotX] = new Array(this.getWidth());
+				for (var lotY = 0; lotY < tiles[z][x].length; lotY++) {
+					if(!tiles[z][lotX][lotY]) {
+						var tile = (z === 0) ? 'grass' : 'air';
+						tiles[z][lotX][lotY] = Game.TileRepository.create(tile);
+					}
+				}
+			}
+		}
+		return tiles;
+	}
 });
 Game.LotRepository.define('houses', {
 	name: 'houses',
