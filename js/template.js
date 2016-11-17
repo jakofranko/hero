@@ -40,9 +40,7 @@ Game.Template.prototype.getProcessedTemplate = function() {
 			var char = this._template[y][x];
 			if(this._key[char]) {
 				var key = x + "," + y;
-				var repo = this._key[char].repository;
-				var name = this._key[char].name;
-				map[key] = Game[repo].create(name);
+				map[key] = this._key[char];
 			}
 		}
 	}
@@ -134,9 +132,7 @@ Game.Template.prototype.getProcessedTemplateFlipHorizontal = function() {
 			var char = this._template[y][i];
 			if(this._key[char]) {
 				var key = x + "," + y;
-				var repo = this._key[char].repository;
-				var name = this._key[char].name;
-				map[key] = Game[repo].create(name);
+				map[key] = this._key[char];
 			}
 		}
 	}
@@ -149,14 +145,12 @@ Game.Template.prototype.getProcessedTemplateFlipHorizontal = function() {
 // have the same x position, but a reversed y position.
 Game.Template.prototype.getProcessedTemplateFlipVertical = function() {
 	var map = {};
-	for(var y = 0, i = this._template[y].length - 1; y < this._template.length; y++, i--) {
+	for(var y = 0, i = this._template.length - 1; y < this._template.length; y++, i--) {
 		for (var x = 0; x < this._template[y].length; x++) {
 			var char = this._template[i][x];
 			if(this._key[char]) {
 				var key = x + "," + y;
-				var repo = this._key[char].repository;
-				var name = this._key[char].name;
-				map[key] = Game[repo].create(name);
+				map[key] = this._key[char];
 			}
 		}
 	}
@@ -198,6 +192,8 @@ Game.Template.prototype._validateTemplate = function(template) {
 Game.Template.prototype._consoleLogMap = function(map) {
 	var grid = new Array(this.getWidth());
 	for(var key in map) {
+		var name = map[key].name;
+		var repo = map[key].repository;
 		var splitKey = key.split(",");
 		var x = splitKey[0];
 		var y = splitKey[1];
@@ -205,7 +201,7 @@ Game.Template.prototype._consoleLogMap = function(map) {
 		if(!grid[x])
 			grid[x] = new Array(this.getHeight());
 
-		grid[x][y] = map[key];
+		grid[x][y] = Game[repo].create(name);
 	}
 	Game._consoleLogGrid(grid, '_char');
 };

@@ -7,5 +7,6 @@ Game.Palette = {
 	brown: "#935800",
 	silver: "silver",
 	white: "white",
-	teal: "teal"
+	teal: "teal",
+	metalGrey: "#a4a6aa"
 };
