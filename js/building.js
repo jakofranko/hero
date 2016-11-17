@@ -104,7 +104,7 @@ Game.Building = function(properties) {
 						tile = horizontalWall;
 					} else if(x === 0 || x == sWidth - 1) {
 						tile = verticalWall;
-					} else if(!stairsPlaced && z < this.getNumberOfStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].describe() !== 'stairsDown') {
+					} else if(!stairsPlaced && z < this.getStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].describe() !== 'stairsDown') {
 						tile = stairsUp;
 						stairsPlaced = true;
 					}
@@ -434,7 +434,7 @@ Game.Building.prototype.getMidWidth = function() {
 Game.Building.prototype.getMidHeight = function() {
 	return Math.round(this._height / 2);
 };
-Game.Building.prototype.getNumberOfStories = function() {
+Game.Building.prototype.getStories = function() {
 	return this._stories;
 };
 Game.Building.prototype.getBlueprint = function() {

@@ -47,7 +47,7 @@ Game.LotRepository.define('building', {
 		}
 
 		// debugger;
-		for (var z = 0; z < building.getNumberOfStories(); z++) {
+		for (var z = 0; z < building.getStories(); z++) {
 			if(!tiles[z]) {
 				tiles[z] = new Array(this.getWidth());
 			}
