@@ -44,7 +44,6 @@ Game.Template.prototype.getProcessedTemplate = function() {
 			}
 		}
 	}
-	this._consoleLogMap(map);
 	return map;
 };
 
@@ -117,8 +116,7 @@ Game.Template.prototype.rotateTemplate = function(template) {
 			}
 		}
 	}
-	
-	Game._consoleLogGrid(newTemplate);
+
 	return newTemplate;
 };
 
@@ -136,7 +134,7 @@ Game.Template.prototype.getProcessedTemplateFlipHorizontal = function() {
 			}
 		}
 	}
-	this._consoleLogMap(map);
+
 	return map;
 };
 
@@ -154,7 +152,7 @@ Game.Template.prototype.getProcessedTemplateFlipVertical = function() {
 			}
 		}
 	}
-	this._consoleLogMap(map);
+
 	return map;
 };
 

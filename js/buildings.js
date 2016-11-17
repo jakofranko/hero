@@ -211,7 +211,6 @@ Game.BuildingRepository.define('apartment', {
 					this._blueprint[z][offsetX][offsetY] = Game.TileRepository.create('stairsUp');
 				}
 			}
-			Game._consoleLogGrid(this._blueprint[z], '_char');
 		}
 	},
 	build: function() {
