@@ -155,5 +155,67 @@ Game.BuildingRepository.define('apartment', {
 			}
 			this._blueprint[z] = story;
 		}
+	},
+	placeStairs: function() {
+		var midX = Math.round(this.getWidth() / 2);
+		var midY = Math.round(this.getHeight() / 2);
+		var dir = [1, 2, 3, 4].random();
+		var x, y, offsetX, offsetY;
+		switch(dir) {
+			case 1: // North
+				x = midX;
+				y = 1;
+				offsetX = x - 1;
+				offsetY = y;
+				break;
+			case 2: // East
+				x = this._blueprint[0].length - 2;
+				y = midY;
+				offsetX = x;
+				offsetY = y - 1;
+				break;
+			case 3: // South
+				x = midX;
+				y = this._blueprint[0][0].length - 2;
+				offsetX = x - 1;
+				offsetY = y;
+				break;
+			case 4: // West
+				x = 1;
+				y = midY;
+				offsetX = x;
+				offsetY = y - 1;
+				break;
+			default:
+				throw new Error("Huh?");
+				break;
+		}
+		for (var z = 0; z < this._stories; z++) {
+			// If it's the bottom floor, only place up stairs
+			// If it's the top floor, only place down stairs depending on the number of sotires
+			// otherwise, alternate up and down stairs
+			if(z === 0) {
+				this._blueprint[z][x][y] = Game.TileRepository.create('stairsUp');
+			} else if(z === this._stories - 1) {
+				if(z % 2 === 0) {
+					this._blueprint[z][offsetX][offsetY] = Game.TileRepository.create('stairsDown');
+				} else {
+					this._blueprint[z][x][y] = Game.TileRepository.create('stairsDown');
+				}
+			} else {
+				if(z % 2 === 0) {
+					this._blueprint[z][x][y] = Game.TileRepository.create('stairsUp');
+					this._blueprint[z][offsetX][offsetY] = Game.TileRepository.create('stairsDown');
+				} else {
+					this._blueprint[z][x][y] = Game.TileRepository.create('stairsDown');
+					this._blueprint[z][offsetX][offsetY] = Game.TileRepository.create('stairsUp');
+				}
+			}
+			Game._consoleLogGrid(this._blueprint[z], '_char');
+		}
+	},
+	build: function() {
+		this._createBlueprint();
+		this._placeStairs();
 	}
 });
