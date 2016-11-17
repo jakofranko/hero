@@ -16,6 +16,17 @@ if (!String.prototype.splice) {
     };
 }
 
+// Since Ondras isn't updating ROT.js much these days, I need the unbroken version of this function
+Array.prototype.randomize = function() {
+    var result = [];
+    var clone = this.slice();
+    while (clone.length) {
+        var index = clone.indexOf(clone.random());
+        result.push(clone.splice(index, 1)[0]);
+    }
+    return result;
+};
+
 Game.extend = function(src, dest) {
     // Create a copy of the source.
     var result = {};
