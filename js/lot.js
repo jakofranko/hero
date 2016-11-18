@@ -138,3 +138,53 @@ Game.Lot.prototype.addItem = function(x, y, z, item) {
         this._items[key] = [item];
     }
 };
+
+Game.Lot.prototype.placeCenteredBuilding = function(lotTiles, building) {
+	var centerX = this.getMidWidth();
+	var centerY = this.getMidHeight();
+
+	building.build();
+	var buildingMidWidth = building.getMidWidth();
+	var buildingMidHeight = building.getMidHeight();
+	var b = building.getBlueprint();
+
+	// Place the building in the center of the lot
+	// Find upper corner...
+	var cornerX = centerX - buildingMidWidth;
+	var cornerY = centerY - buildingMidHeight;
+	if(cornerX < 0 || cornerY < 0) {
+		return lotTiles;
+	}
+
+	for (var z = 0; z < building.getStories(); z++) {
+		if(!lotTiles[z])
+			lotTiles[z] = new Array(this.getWidth());
+
+		for (var x = 0; x < b[z].length; x++) {
+			if(!lotTiles[z][x + cornerX])
+				lotTiles[z][x + cornerX] = new Array(this.getHeight());
+
+			for (var y = 0; y < b[z][x].length; y++) {
+				lotTiles[z][x + cornerX][y + cornerY] = b[z][x][y];
+
+				var items = building.getItemsAt(x, y, z);
+				if(items && items.length)
+					this.setItemsAt(x + cornerX, y + cornerY, z, items);
+			}
+		}
+
+		// Fill any undefined grid spots with grass or air
+		for (var lotX = 0; lotX < lotTiles[z].length; lotX++) {
+			if(!lotTiles[z][lotX])
+				lotTiles[z][lotX] = new Array(this.getHeight());
+			for (var lotY = 0; lotY < lotTiles[z][lotX].length; lotY++) {
+				if(!lotTiles[z][lotX][lotY]) {
+					var tile = (z === 0) ? 'grass' : 'air';
+					lotTiles[z][lotX][lotY] = Game.TileRepository.create(tile);
+				}
+			}
+		}
+	}
+
+	return lotTiles;
+};
