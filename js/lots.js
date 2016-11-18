@@ -218,7 +218,7 @@ Game.LotRepository.define('apartments', {
 			// Fill any undefined grid spots with grass or air
 			for (var lotX = 0; lotX < tiles[z].length; lotX++) {
 				if(!tiles[z][lotX])
-					tiles[z][lotX] = new Array(this.getWidth());
+					tiles[z][lotX] = new Array(this.getHeight());
 				for (var lotY = 0; lotY < tiles[z][x].length; lotY++) {
 					if(!tiles[z][lotX][lotY]) {
 						var tile = (z === 0) ? 'grass' : 'air';
