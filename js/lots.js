@@ -6,7 +6,18 @@ Game.LotRepository.define('skyscraper', {
 	downtown: 1,
 	midtown: 0.5,
 	uptown: 0.1,
-	suburbs: 0
+	suburbs: 0,
+	buildingSpecs: [
+		{
+			type: 'skyscraper',
+			amount: 1,
+			repo: 'BuildingRepository'
+		}
+	],
+	buildTiles: function() {
+		var initialTiles = this.fillLot('grass');
+		return this.placeCenteredBuilding(initialTiles, this.getBuildings()[0]);
+	}
 });
 Game.LotRepository.define('building', {
 	name: 'building',

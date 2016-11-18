@@ -36,6 +36,14 @@ Game.BuildingRepository.define('office building', {
 	roomNumber: 6
 });
 
+Game.BuildingRepository.define('skyscraper', {
+	name: 'Skyscraper',
+	width: Game.getLotSize() - 2,
+	height: Game.getLotSize() - 2,
+	stories: 12,
+	roomNumber: 10
+});
+
 Game.BuildingRepository.define('apartment', {
 	name: 'Apartment Complex',
 	exactProperties: true,
