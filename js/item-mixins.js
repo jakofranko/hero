@@ -92,11 +92,14 @@ Game.ItemMixins.Heavy = {
         this._strMin = template['strMin'];
     },
     canPickUp: function(entity) {
+        // TODO: Just because a character can pick up a heavy item, doesn't mean they can
+        // hold a lot of a heavy item. Sum all heavy items' STR min in inventory and return
+        // false if TOTAL exceeds STR
         // If an entity doesn't have str, just return true
         if(!entity.hasMixin('Characteristics'))
             return true;
 
-        var can = (entity.getSTR >= this._strMin);
+        var can = (entity.getSTR() >= this._strMin);
         if(!can) {
             Game.sendMessage(entity, "%s is too heavy to pickup", [this.describeThe()]);
             return false;
