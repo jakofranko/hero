@@ -86,6 +86,25 @@ Game.ItemMixins.Equippable = {
         }
     }
 };
+Game.ItemMixins.Heavy = {
+    name: "Heavy",
+    init: function(template) {
+        this._strMin = template['strMin'];
+    },
+    canPickUp: function(entity) {
+        // If an entity doesn't have str, just return true
+        if(!entity.hasMixin('Characteristics'))
+            return true;
+
+        var can = (entity.getSTR >= this._strMin);
+        if(!can) {
+            Game.sendMessage(entity, "%s is too heavy to pickup", [this.describeThe()]);
+            return false;
+        } else {
+            return true;
+        }
+    }
+};
 Game.ItemMixins.Stackable = {
     name: 'Stackable',
     init: function(template) {

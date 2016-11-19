@@ -4,12 +4,16 @@ Game.ItemRepository.define('bed', {
     name: 'bed',
     character: '#',
     foreground: Game.Palette.lightBlue,
+    strMin: 20,
+    mixins: [Game.ItemMixins.Heavy]
 });
 
 Game.ItemRepository.define('desk', {
     name: 'desk',
     character: '#',
     foreground: Game.Palette.brown,
+    strMin: 15,
+    mixins: [Game.ItemMixins.Heavy]
 });
 
 Game.ItemRepository.define('chair', {
@@ -22,12 +26,16 @@ Game.ItemRepository.define('couch', {
     name: 'couch',
     character: 'C',
     foreground: Game.Palette.teal,
+    strMin: 18,
+    mixins: [Game.ItemMixins.Heavy]
 });
 
 Game.ItemRepository.define('table', {
     name: 'table',
     character: '#',
     foreground: Game.Palette.brown,
+    strMin: 12,
+    mixins: [Game.ItemMixins.Heavy]
 });
 
 Game.ItemRepository.define('floor lamp', {
@@ -46,18 +54,24 @@ Game.ItemRepository.define('refridgerator', {
     name: 'refridgerator',
     character: '[',
     foreground: Game.Palette.silver,
+    strMin: 20,
+    mixins: [Game.ItemMixins.Heavy]
 });
 
 Game.ItemRepository.define('television', {
     name: 'television',
     character: ']',
     foreground: Game.Palette.lightBlue,
+    strMin: 12,
+    mixins: [Game.ItemMixins.Heavy]
 });
 
 Game.ItemRepository.define('oven', {
     name: 'oven',
     character: '{',
     foreground: Game.Palette.silver,
+    strMin: 20,
+    mixins: [Game.ItemMixins.Heavy]
 });
 
 Game.ItemRepository.define('end table', {
