@@ -607,7 +607,6 @@ Game.EntityMixins.InventoryHolder = {
         return this._items[i];
     },
     addItem: function(item) {
-        debugger;
         var stack = this.canStackItem(item);
         var index = this.canAddItem(item);
         if(stack !== false)
