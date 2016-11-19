@@ -19,12 +19,12 @@ Game.DynamicGlyph = function(properties) {
      'groupName',
      'listeners'
     ];
-    for (var i = 0; i < mixins.length; i++) {
+    for(var i = 0; i < mixins.length; i++) {
         // Copy over all properties from each mixin as long
         // as it's not the name or the init property. We
         // also make sure not to override a property that
         // already exists on the entity.
-        for (var key in mixins[i]) {
+        for(var key in mixins[i]) {
             if(this.hasOwnProperty(key)) {
                 console.log(this);
                 throw new Error("Mixin '" + mixins[i].name + "' is attempting to add duplicate property '" + key + "'");
@@ -35,11 +35,11 @@ Game.DynamicGlyph = function(properties) {
         // Add the name of this mixin to our attached mixins
         this._attachedMixins[mixins[i].name] = true;
         // If a group name is present, add it
-        if (mixins[i].groupName) {
+        if(mixins[i].groupName) {
             this._attachedMixinGroups[mixins[i].groupName] = true;
         }
         // Add all of our listeners
-        if (mixins[i].listeners) {
+        if(mixins[i].listeners) {
             for (var listener in mixins[i].listeners) {
                 // If we don't already have a listener for this event in our listeners array, add it.
                 if (!this._listeners[listener]) {
@@ -50,7 +50,7 @@ Game.DynamicGlyph = function(properties) {
             }
         }
         // Finally call the init function if there is one
-        if (mixins[i].init) {
+        if(mixins[i].init) {
             mixins[i].init.call(this, properties);
         }
     }
