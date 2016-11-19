@@ -275,8 +275,6 @@ Game.Screen.playScreen = {
                     var item = items[0];
                     if (this._player.pickupItems([0])) {
                         Game.sendMessage(this._player, "You pick up %s.", [item.describeA()]);
-                    } else {
-                        Game.sendMessage(this._player, "Your inventory is full! Nothing was picked up.");
                     }
                 } else {
                     this.showItemsSubScreen(Game.Screen.pickupScreen, items, 'There is nothing here to pick up.');
