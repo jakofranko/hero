@@ -86,6 +86,9 @@ Game.ItemMixins.Equippable = {
         }
     }
 };
+Game.ItemMixinx.Fixture = {
+    name: "Fixture"
+};
 Game.ItemMixins.Heavy = {
     name: "Heavy",
     init: function(template) {

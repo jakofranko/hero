@@ -633,6 +633,11 @@ Game.EntityMixins.InventoryHolder = {
         }
     },
     canAddItem: function(item) {
+        if(item.hasMixin("Fixture")) {
+            Game.sendMessage(this, "%s is fixed to the ground and cannot be picked up", [item.describeThe()]);
+            return false;
+        }
+
         // Return false if the item is too heavy
         if(item.hasMixin('Heavy') && !item.canPickUp(this))
             return false;
