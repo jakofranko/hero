@@ -17,7 +17,7 @@
   ],
   "private": true,
   "dependencies": {
-    "rot.js": "~0.5.0",
+    "rot.js": "0.5 - 0.7",
     "underscore": "^1.8.3"
   }
 }
