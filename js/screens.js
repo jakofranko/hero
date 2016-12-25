@@ -268,6 +268,9 @@ Game.Screen.playScreen = {
             } else if(inputData.keyCode === ROT.VK_T) {
                 this.showItemsSubScreen(Game.Screen.throwScreen, this._player.getItems(), 'You have nothing to throw.');
                 return;
+            } else if(inputData.keyCode === ROT.VK_SPACE) {
+                // Action menu. Get actions...
+                // var actions = 
             } else if (inputData.keyCode === ROT.VK_COMMA) {
                 var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
                 // If there is only one item, directly pick it up

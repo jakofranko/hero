@@ -32,5 +32,27 @@ Game.Geometry = {
         var horizontalDistance = startX - endX;
         var verticalDistance = startY - endY;
         return Math.sqrt(Math.pow(horizontalDistance, 2) + Math.pow(verticalDistance, 2));
+    },
+    getCircle: function(centerX, centerY, radius) {
+        var angle = 0,
+            increment = 0.1,
+            points = [],
+            repeatTries = 0,
+            x, y;
+
+        while(angle <= 360) {
+            debugger;
+            x = Math.round(centerX + radius * Math.cos(angle));
+            y = Math.round(centerY + radius * Math.sin(angle));
+
+            var key = x + "," + y;
+            if(points.indexOf(key) < 0)
+                points.push(key);
+            else
+                repeatTries++;
+
+            angle += increment;
+        }
+        return points;
     }
 };
