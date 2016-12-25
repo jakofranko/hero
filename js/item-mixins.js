@@ -86,7 +86,7 @@ Game.ItemMixins.Equippable = {
         }
     }
 };
-Game.ItemMixinx.Fixture = {
+Game.ItemMixins.Fixture = {
     name: "Fixture"
 };
 Game.ItemMixins.Heavy = {

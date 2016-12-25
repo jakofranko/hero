@@ -84,18 +84,21 @@ Game.ItemRepository.define('toilet', {
     name: 'toilet',
     character: '&',
     foreground: Game.Palette.white,
+    mixins: [Game.ItemMixins.Fixture]
 });
 
 Game.ItemRepository.define('bathtub', {
     name: 'bathtub',
     character: 'O',
     foreground: Game.Palette.silver,
+    mixins: [Game.ItemMixins.Fixture]
 });
 
 Game.ItemRepository.define('sink', {
     name: 'sink',
     character: 'o',
     foreground: Game.Palette.silver,
+    mixins: [Game.ItemMixins.Fixture]
 });
 
 Game.ItemRepository.define('corpse', {
