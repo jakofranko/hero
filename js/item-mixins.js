@@ -164,3 +164,55 @@ Game.ItemMixins.Throwable = {
         }
     }
 };
+
+// Adding an item to a container removes it from the entity.
+// Removing an item from a container adds it to the entity.
+Game.ItemMixins.Container = {
+    name: 'Container',
+    init: function(template) {
+        this._items = [];
+    },
+    getItems: function() {
+        return this._items;
+    },
+    getItem: function(i) {
+        return this._items[i];
+    },
+    addItem: function(entity, index, amount) {
+        debugger;
+        if(!entity.hasMixin('InventoryHolder') || !entity.hasMixin('Container')) {
+            return false;
+        }
+        this._items.push(entity.getItem(index));
+        entity.removeItem(index, amount);
+
+        if(entity.hasMixin('MessageRecipient'))
+            Game.sendMessage(entity, "You place %s into %s", [item.describeThe(), this.describeThe()]);
+
+    },
+    removeItem: function(entity, index, amount) {
+        debugger;
+        if(!entity.hasMixin('InventoryHolder') || !entity.hasMixin('Container')) {
+            return false;
+        }
+        entity.addItem(this.getItem(index));
+        this._items[i] = null;
+
+        if(entity.hasMixin('MessageRecipient'))
+            Game.sendMessage(entity, "You remove %s from %s", [item.describeThe(), this.describeThe()]);
+    },
+    listeners: {
+        'action': function(actionTaker) {
+            debugger;
+            var actions = {};
+            var actionName = "Open %s".format(this.describeThe());
+
+            // array of functions to execute. For each sub-array,
+            // first item is the action function, additional items are the args
+            actions[actionName] = [
+                [Game.Screen.containerScreen.setup, entity, entity.getItems(), this, this.getIems()],
+                [Game.Screen.playScreen.setSubScreen, Game.Screen.containerScreen]
+            ];
+        }
+    }
+};

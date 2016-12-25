@@ -693,6 +693,25 @@ Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
         return;
     }
 });
+Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
+    caption: 'Container',
+    canSelect: true,
+    canSelectMultipleItems: true,
+    ok: function(selectedItems, altSelectedItems) {
+        debugger;
+        for(var itemKey in selectedItems) {
+            if(this._altEntity.hasMixin('Container')) {
+                this._altEntity.addItem(this._player, itemKey);
+            }
+        }
+
+        for(var altItemKey in altSelectedItems) {
+            if(this._player.hasMixin('InventoryHolder')) {
+                this._altEntity.removeItem(this._player, altItemKey)
+            }
+        }
+    }
+});
 
 // Targetting Screen
 Game.Screen.TargetBasedScreen = function(template) {
