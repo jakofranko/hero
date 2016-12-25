@@ -433,7 +433,14 @@ Game.Screen.playScreen = {
 };
 
 // Item Listing
+// TODO: refactor this to support arrow key selection
 Game.Screen.ItemListScreen = function(template) {
+    // This is dependant on the number of letters we use as indices in the render function
+    this._maxItems = 52;
+
+    this._items = null;
+    this._altItems = null;
+
     // Set up based on the template
     this._caption = template['caption'];
     this._okFunction = template['ok'];
@@ -451,8 +458,12 @@ Game.Screen.ItemListScreen = function(template) {
     // Whether a 'no item' option should appear.
     this._hasNoItemOption = template['hasNoItemOption'];
 };
-Game.Screen.ItemListScreen.prototype.setup = function(player, items) {
+Game.Screen.ItemListScreen.prototype.setup = function(player, items, altEntity, altItems) {
+    if(items > this._maxItems || altItems > this._maxItems || items + altItems > this._maxItems)
+        throw new Error("The item number max has been reached. Throw some rotten fruit at the developer and tell him that he needs to come up with a better solution for indexing items!");
+
     this._player = player;
+    this._altEntity = altEntity;
     // Should be called before switching to the screen.
     var count = 0;
     // Iterate over each item, keeping only the aceptable ones and counting the number of acceptable items.
@@ -467,18 +478,48 @@ Game.Screen.ItemListScreen.prototype.setup = function(player, items) {
         }
     });
 
+    if(altItems) {
+        this._altItems = altItems.map(function(item) {
+            // Transform the item into null if it's not acceptable
+            if (that._isAcceptableFunction(item)) {
+                count++;
+                return item;
+            } else {
+                return null;
+            }
+        });
+    }
+
     // Clean set of selected indices
     this._selectedIndices = {};
+    this._altSelectedIndices = {};
     return count;
 };
 Game.Screen.ItemListScreen.prototype.render = function(display) {
     var letters = 'abcdefghijklmnopqrstuvwxyz';
+    letters += letters.toUpperCase();
+
+    // Set column width based on the presence of altItems
+    var screenWidth = Game.getScreenWidth();
+    var midPoint = Math.round(screenWidth / 2);
+    var colWidth, separatorHeight;
+
     // Render the no item row if enabled
-    if (this._hasNoItemOption) {
+    if (this._hasNoItemOption)
         display.drawText(0, 1, '0 - no item');
-    }   
+
     // Render the caption in the top row
     display.drawText(0, 0, this._caption);
+
+    if(this._altItems && this._altItems.length > 0) {
+        colWidth = midPoint - 1;
+
+        // Also set the height of the separator
+        separatorHeight = Math.max(this._items.length, this._altItems.length);
+    } else {
+        colWidth = screenWidth;
+    }
+
     var row = 0;
     for(var i = 0; i < this._items.length; i++) {
         // If we have an item, we want to render it
@@ -493,8 +534,38 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
             var stack = this._items[i].hasMixin('Stackable') ? ' (' + this._items[i].amount() + ')' : '';
 
             // Render at the correct row and add 2
-            display.drawText(0, 2 + row, letter + ' ' + selectionState + ' ' + this._items[i].describe() + stack);
+            display.drawText(
+                0,
+                2 + row,
+                letter + ' ' + selectionState + ' ' + this._items[i].describe() + stack,
+                colWidth
+            );
             row++;
+        }
+    }
+
+    if(this._altItems && this._altItems > 0) {
+        var altRow = 0;
+        for (var j = 0; j < separatorHeight; j++) {
+            display.draw(midPoint, j, '|');
+        }
+
+        // Continue to get the next letter by continuing to increment i
+        for (var k = 0; k < this._altItems.length; k++, i++) {
+            var altLetter = letters.substring(i, i + 1); // Note: using i, not k
+            var altSelectionState = (
+                this._canSelectItem &&
+                this._canSelectMultipleItems &&
+                this._altSelectedIndices[k]
+                ) ? '+' : '-';
+            var altStack = this._items[k].hasMixin('Stackable') ? ' (' + this._items[k].amount() + ')' : '';
+            display.drawText(
+                midPoint + 1,
+                2 + altRow,
+                altLetter + ' ' + altSelectionState + ' ' + this._altItems[k].describe() + altStack,
+                colWidth
+            );
+            altRow++;
         }
     }
 };
@@ -505,11 +576,17 @@ Game.Screen.ItemListScreen.prototype.executeOkFunction = function() {
         selectedItems[key] = this._items[key];
     }
 
+    // And the altSelected items.
+    var altSelectedItems = {};
+    for (var altkey in this._altSelectedIndices) {
+        altSelectedItems[altKey] = this._altItems[altKey];
+    }
+
     // Switch back to play screen
     Game.Screen.playScreen.setSubScreen(undefined);
 
     // Call the OK function and end the player's turn if it returns true
-    if(this._okFunction(selectedItems)) {
+    if(this._okFunction(selectedItems, altSelectedItems)) {
         this._player.getMap().getEngine().unlock();
     }
 };
@@ -517,25 +594,46 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
     if(inputType === 'keydown') {
         // If the user hit escape, hit enter and can't select an item, or hit
         // enter without any items selected, simply cancel out
-        if (inputData.keyCode === ROT.VK_ESCAPE || (inputData.keyCode === ROT.VK_RETURN && (!this._canSelectItem || Object.keys(this._selectedIndices).length === 0))) {
+        if(inputData.keyCode === ROT.VK_ESCAPE ||
+            (inputData.keyCode === ROT.VK_RETURN &&
+                (!this._canSelectItem || Object.keys(this._selectedIndices).length === 0))) {
             Game.Screen.playScreen.setSubScreen(undefined);
+
         // Handle pressing return when items are selected
-        } else if (inputData.keyCode === ROT.VK_RETURN) {
+        } else if(inputData.keyCode === ROT.VK_RETURN) {
             this.executeOkFunction();
+
         // Handle pressing zero when 'no item' selection is enabled
-        } else if (this._canSelectItem && this._hasNoItemOption && inputData.keyCode === ROT.VK_0) {
+        } else if(this._canSelectItem &&
+                  this._hasNoItemOption &&
+                  inputData.keyCode === ROT.VK_0) {
+
             this._selectedIndices = {};
             this.executeOkFunction();
+
         // Handle pressing a letter if we can select
-        } else if (this._canSelectItem && inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
+        // TODO: Might need to eventually support using numbers
+        } else if(this._canSelectItem &&
+                  inputData.keyCode >= ROT.VK_A &&
+                  inputData.keyCode <= ROT.VK_Z) {
+
             // Check if it maps to a valid item by subtracting 'a' from the character
-            // to know what letter of the alphabet we used.
-            var index = inputData.keyCode - ROT.VK_A;
-            if (this._items[index]) {
+            // to know what letter of the alphabet we used. If the shift key is pressed,
+            // then add 26 to the index since our letters string is organized lowercaseUPPERCASE
+            var shift = inputData.shiftKey ? 26 : 0;
+            var index = inputData.keyCode - ROT.VK_A + shift;
+
+            // This works because of the way letters are added to each item. 
+            // After all the items are rendered, we begin to render altItems
+            // (if they exist), and continue to use the next letter in the sequence.
+            // Thus, the index needs to be 'reset' like this when we begin checking
+            // altItems.
+            var altIndex = index - this._items.length;
+            if(this._items[index]) {
                 // If multiple selection is allowed, toggle the selection status, else
                 // select the item and exit the screen
-                if (this._canSelectMultipleItems) {
-                    if (this._selectedIndices[index]) {
+                if(this._canSelectMultipleItems) {
+                    if(this._selectedIndices[index]) {
                         delete this._selectedIndices[index];
                     } else {
                         this._selectedIndices[index] = true;
@@ -544,6 +642,19 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
                     Game.refresh();
                 } else {
                     this._selectedIndices[index] = true;
+                    this.executeOkFunction();
+                }
+            } else if(this._altItems !== null && this._altItems[altIndex]) {
+                if(this._canSelectMultipleItems) {
+                    if(this._altSelectedIndices[index]) {
+                        delete this._altSelectedIndices[index];
+                    } else {
+                        this._altSelectedIndices[index] = true;
+                    }
+                    // Redraw screen
+                    Game.refresh();
+                } else {
+                    this._altSelectedIndices[index] = true;
                     this.executeOkFunction();
                 }
             }
