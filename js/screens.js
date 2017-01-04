@@ -271,6 +271,8 @@ Game.Screen.playScreen = {
             } else if(inputData.keyCode === ROT.VK_SPACE) {
                 // Action menu. Get actions...
                 // var actions = 
+                Game.Screen.actionMenu.setup(this._player);
+                this.setSubScreen(Game.Screen.actionMenu);
             } else if (inputData.keyCode === ROT.VK_COMMA) {
                 var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
                 // If there is only one item, directly pick it up
@@ -920,19 +922,18 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
 Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputData) {
     // Move the cursor
     if (inputType == 'keydown') {
-        if (inputData.keyCode === ROT.VK_LEFT) {
+        if (inputData.keyCode === ROT.VK_LEFT)
             this.moveCursor(-1, 0);
-        } else if (inputData.keyCode === ROT.VK_RIGHT) {
+        else if (inputData.keyCode === ROT.VK_RIGHT)
             this.moveCursor(1, 0);
-        } else if (inputData.keyCode === ROT.VK_UP) {
+        else if (inputData.keyCode === ROT.VK_UP)
             this.moveCursor(0, -1);
-        } else if (inputData.keyCode === ROT.VK_DOWN) {
+        else if (inputData.keyCode === ROT.VK_DOWN)
             this.moveCursor(0, 1);
-        } else if (inputData.keyCode === ROT.VK_ESCAPE) {
+        else if (inputData.keyCode === ROT.VK_ESCAPE)
             Game.Screen.playScreen.setSubScreen(undefined);
-        } else if (inputData.keyCode === ROT.VK_RETURN) {
+        else if (inputData.keyCode === ROT.VK_RETURN)
             this.executeOkFunction();
-        }
     }
     Game.refresh();
 };
@@ -999,6 +1000,114 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
         return true;
     }
 });
+
+// Menu screens
+Game.Screen.MenuScreen = function(template) {
+    template = template || {};
+
+    this._player = null;
+
+    // Display settings
+    this._caption = template['caption'] || 'Menu';
+    this._outerPadding = template['outerPadding'] || 4;
+    this._innerPadding = template['innerPadding'] || 2;
+    this._width = template['width'] || Game.getScreenWidth() - this._outerPadding;
+    this._height = template['height'] || Game.getScreenHeight() - this._outerPadding;
+    this._textWidth = this._width - this._innerPadding;
+    this._verticalChar = template['verticalChar'] || '|';
+    this._horizontalChar = template['horizontalChar'] || '-';
+    this._cornerChar = template['cornerChar'] || '+';
+    this._highlightColor = template['highlightColor'] || Game.Palette.blue;
+
+    // Menu item settings
+    this._currentIndex = template['currentIndex'] || 0;
+    this._menuItems = template['menuItems'] || [];
+    this._menuActions = template['menuActions'] || [];
+    this._buildMenuItems = template['buildMenuItems'] || function() {
+        // The the value of each menu item should be an array of arrays, where the first value of each sub array is a function reference, and the second value is an array of parameters, such that the menu action can be called via menuAction[i][0].apply(this, menuAction[i][1]). This data structure allows for as many function calls with as many arguments to be called sequentially by a single menu action.
+        var exampleMenuItem = {
+            'Example 1': [[console.log, ['This is an example', ', and another.']], [console.log, ['And another!']]],
+            'Example 2': [[console.log, ['This is another example', ', and another.']], [console.log, ['And another!!']]]
+        };
+        for(var item in exampleMenuItem) {
+            this._menuItems.push(item);
+            this._menuActions.push(exampleMenuItem[item]);
+        }
+    };
+    this._okFunction = template['ok'] || function() {
+        var menuActions = this._menuActions[this._currentIndex];
+        for (var i = 0; i < menuActions.length; i++) {
+            menuActions[i][0].apply(this, menuActions[i][1]);
+        }
+        return true;
+    };
+};
+Game.Screen.MenuScreen.prototype.setup = function(player, builderArgs) {
+    this._player = player;
+    this._buildMenuItems.apply(this, builderArgs);
+};
+Game.Screen.MenuScreen.prototype.render = function(display) {
+    var startX = this._outerPadding,
+        startY = this._outerPadding;
+
+    // Draw menu box
+    for (var row = 0; row < this._height; row++) {
+        if(row === 0 || row === this._height - 1) {
+            display.drawText(
+                startX,
+                startY + row,
+                this._cornerChar.rpad(this._horizontalChar, this._width - 2) + this._cornerChar,
+                this._width
+            );
+        } else {
+            display.drawText(
+                startX,
+                startY + row,
+                this._verticalChar.rpad(" ", this._width - 2) + this._verticalChar,
+                this._width
+            );
+        }
+    }
+
+    // Draw menu items
+    for (var item = 0; item < this._menuItems.length; item++) {
+        var highlight;
+        if(item === this._currentIndex)
+            highlight = '%b{' + this._highlightColor + '}';
+        else
+            highlight = '%b{}';
+
+        display.drawText(
+            startX + this._innerPadding,
+            startY + this._innerPadding + item,
+            highlight + this._menuItems[item]
+        );
+    }
+};
+Game.Screen.MenuScreen.prototype.handleInput = function(inputType, inputData) {
+    // Move the cursor
+    if(inputType == 'keydown') {
+        if(inputData.keyCode === ROT.VK_UP && this._currentIndex > 0)
+            this._currentIndex--;
+        else if(inputData.keyCode === ROT.VK_DOWN && this._currentIndex < this._menuItems.length - 1)
+            this._currentIndex++;
+        else if(inputData.keyCode === ROT.VK_ESCAPE)
+            Game.Screen.playScreen.setSubScreen(undefined);
+        else if(inputData.keyCode === ROT.VK_RETURN)
+            this.executeOkFunction();
+    }
+    Game.refresh();
+};
+Game.Screen.MenuScreen.prototype.executeOkFunction = function() {
+    // Switch back to the play screen.
+    Game.Screen.playScreen.setSubScreen(undefined);
+    // Call the OK function and end the player's turn if it return true.
+    if (this._okFunction && this._okFunction()) {
+        this._player.getMap().getEngine().unlock();
+    }
+};
+
+Game.Screen.actionMenu = new Game.Screen.MenuScreen();
 
 // Define our help screen
 Game.Screen.helpScreen = {
