@@ -1044,6 +1044,7 @@ Game.Screen.MenuScreen = function(template) {
 };
 Game.Screen.MenuScreen.prototype.setup = function(player, builderArgs) {
     this._player = player;
+    this._menuItems = []; // clear out old menu items;
     this._buildMenuItems.apply(this, builderArgs);
 };
 Game.Screen.MenuScreen.prototype.render = function(display) {
