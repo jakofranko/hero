@@ -10,10 +10,15 @@ layout: page
   * PCG for houses, skyscrapers, apartment complexes
   * Furniture. These will be implemented as items with some new mixins:
   	* "Pick-up-able" (some furniture should not be picked up (or perhaps only))
-  	* "Openable" for things like chests. Also for tiles, for things like doors
+  	* "Container" mixin for things like chests.
   * Bug fixes for how buildings are being generated with some rooms not having doors.
   * Lot sizes should probably be bigger, which means that roads and sidewalks should be generated more intelligently
 * v0.3 - NPC improvements
+  * Bug Fixes and improvements
+    * Better captioning for menus (namely the action menu for putting things in containers)
+    * Performance Audit improvements
+      * Pathfinding efficiency improvements
+    * Items in houses
   * Pathfinding between z-levels and through doors
   * Path finding from work to home and vice-versa
   * Schedule-based jobs (between 9-5, I should be working, between 10-7 I should be sleeping etc)
