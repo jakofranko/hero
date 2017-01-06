@@ -549,7 +549,7 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
         }
     }
 
-    if(this._altItems && this._altItems > 0) {
+    if(this._altItems && this._altItems.length > 0) {
         var altRow = 0;
         for (var j = 0; j < separatorHeight; j++) {
             display.draw(midPoint, j, '|');
@@ -557,20 +557,22 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
 
         // Continue to get the next letter by continuing to increment i
         for (var k = 0; k < this._altItems.length; k++, i++) {
-            var altLetter = letters.substring(i, i + 1); // Note: using i, not k
-            var altSelectionState = (
-                this._canSelectItem &&
-                this._canSelectMultipleItems &&
-                this._altSelectedIndices[k]
+            if(this._altItems[k]) {
+                var altLetter = letters.substring(i, i + 1); // Note: using i, not k
+                var altSelectionState = (
+                    this._canSelectItem &&
+                    this._canSelectMultipleItems &&
+                    this._altSelectedIndices[k]
                 ) ? '+' : '-';
-            var altStack = this._items[k].hasMixin('Stackable') ? ' (' + this._items[k].amount() + ')' : '';
-            display.drawText(
-                midPoint + 1,
-                2 + altRow,
-                altLetter + ' ' + altSelectionState + ' ' + this._altItems[k].describe() + altStack,
-                colWidth
-            );
-            altRow++;
+                var altStack = this._altItems[k].hasMixin('Stackable') ? ' (' + this._altItems[k].amount() + ')' : '';
+                display.drawText(
+                    midPoint + 1,
+                    2 + altRow,
+                    altLetter + ' ' + altSelectionState + ' ' + this._altItems[k].describe() + altStack,
+                    colWidth
+                );
+                altRow++;
+            }  
         }
     }
 };
@@ -583,7 +585,7 @@ Game.Screen.ItemListScreen.prototype.executeOkFunction = function() {
 
     // And the altSelected items.
     var altSelectedItems = {};
-    for (var altkey in this._altSelectedIndices) {
+    for (var altKey in this._altSelectedIndices) {
         altSelectedItems[altKey] = this._altItems[altKey];
     }
 
@@ -601,7 +603,8 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
         // enter without any items selected, simply cancel out
         if(inputData.keyCode === ROT.VK_ESCAPE ||
             (inputData.keyCode === ROT.VK_RETURN &&
-                (!this._canSelectItem || Object.keys(this._selectedIndices).length === 0))) {
+                (!this._canSelectItem || 
+                    (Object.keys(this._selectedIndices).length === 0 && Object.keys(this._altSelectedIndices).length === 0)))) {
             Game.Screen.playScreen.setSubScreen(undefined);
 
         // Handle pressing return when items are selected
@@ -651,15 +654,15 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
                 }
             } else if(this._altItems !== null && this._altItems[altIndex]) {
                 if(this._canSelectMultipleItems) {
-                    if(this._altSelectedIndices[index]) {
-                        delete this._altSelectedIndices[index];
+                    if(this._altSelectedIndices[altIndex]) {
+                        delete this._altSelectedIndices[altIndex];
                     } else {
-                        this._altSelectedIndices[index] = true;
+                        this._altSelectedIndices[altIndex] = true;
                     }
                     // Redraw screen
                     Game.refresh();
                 } else {
-                    this._altSelectedIndices[index] = true;
+                    this._altSelectedIndices[altIndex] = true;
                     this.executeOkFunction();
                 }
             }
@@ -1037,20 +1040,34 @@ Game.Screen.MenuScreen = function(template) {
     this._okFunction = template['ok'] || function() {
         var menuActions = this._menuActions[this._currentIndex];
         for (var i = 0; i < menuActions.length; i++) {
-            menuActions[i][0].apply(this, menuActions[i][1]);
+            if(menuActions[i].length !== 2 && menuActions[i].length !== 3)
+                throw new Error('Incorrectly formatted action type:', menuActions[i]);
+            var actionFunc = menuActions[i][0],
+                actionArgs = menuActions[i][1],
+                actionContext = (menuActions[i].length === 3) ? menuActions[i][2] : actionFunc;
+
+            actionFunc.apply(actionContext, actionArgs);
         }
         return true;
     };
 };
 Game.Screen.MenuScreen.prototype.setup = function(player, builderArgs) {
     this._player = player;
+    this._currentIndex = 0; // reset current index to 0
     this._menuItems = []; // clear out old menu items;
+    this._menuActions = []; // clear out old menu items;
     this._buildMenuItems.apply(this, builderArgs);
 };
 Game.Screen.MenuScreen.prototype.render = function(display) {
     var startX = this._outerPadding,
         startY = this._outerPadding;
 
+    // Draw caption
+    display.drawText(
+        Math.round(this._width / 2) - Math.round(this._caption.length / 2),
+        startY - 1,
+        '%c{' + Game.Palette.blue + '}' + this._caption + '%c{}'
+    );
     // Draw menu box
     for (var row = 0; row < this._height; row++) {
         if(row === 0 || row === this._height - 1) {

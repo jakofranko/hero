@@ -180,10 +180,11 @@ Game.ItemMixins.Container = {
     },
     addItem: function(entity, index, amount) {
         debugger;
-        if(!entity.hasMixin('InventoryHolder') || !entity.hasMixin('Container')) {
+        if(!entity.hasMixin('InventoryHolder') && !entity.hasMixin('Container')) {
             return false;
         }
-        this._items.push(entity.getItem(index));
+        var item = entity.getItem(index);
+        this._items.push(item);
         entity.removeItem(index, amount);
 
         if(entity.hasMixin('MessageRecipient'))
@@ -192,27 +193,30 @@ Game.ItemMixins.Container = {
     },
     removeItem: function(entity, index, amount) {
         debugger;
-        if(!entity.hasMixin('InventoryHolder') || !entity.hasMixin('Container')) {
+        if(!entity.hasMixin('InventoryHolder') && !entity.hasMixin('Container')) {
             return false;
         }
-        entity.addItem(this.getItem(index));
-        this._items[i] = null;
+        var item = this.getItem(index);
+        entity.addItem(item);
+        this._items.splice(index, 1);
 
         if(entity.hasMixin('MessageRecipient'))
             Game.sendMessage(entity, "You remove %s from %s", [item.describeThe(), this.describeThe()]);
     },
     listeners: {
         'action': function(actionTaker) {
-            debugger;
             var actions = {};
             var actionName = "Open %s".format(this.describeThe());
 
             // array of functions to execute. For each sub-array,
-            // first item is the action function, additional items are the args
+            // first value is the action function,
+            // second value are the args,
+            // third (optional) value is the 'this' context to use
             actions[actionName] = [
-                [Game.Screen.containerScreen.setup, entity, entity.getItems(), this, this.getIems()],
-                [Game.Screen.playScreen.setSubScreen, Game.Screen.containerScreen]
+                [Game.Screen.containerScreen.setup, [actionTaker, actionTaker.getItems(), this, this.getItems()], Game.Screen.containerScreen],
+                [Game.Screen.playScreen.setSubScreen, [Game.Screen.containerScreen], Game.Screen.playScreen]
             ];
+            return actions;
         }
     }
 };
