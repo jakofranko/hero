@@ -57,7 +57,7 @@ Game.Repository.prototype.createIf = function(criteria) {
     var names = [];
     for (var name in this._templates) {
         names.push(name);
-    };
+    }
     var randomized = names.randomize();
 
     // Loop through a randomized array of templates...
@@ -69,7 +69,7 @@ Game.Repository.prototype.createIf = function(criteria) {
         // that's name matches the criteria string
         if(temp[criteria]) {
             // Get any additional arguments passed to this function
-            var args = Array.prototype.slice.call(arguments, 1)
+            var args = Array.prototype.slice.call(arguments, 1);
 
             // Execute the criteria function
             var create = temp[criteria].apply(temp, args);

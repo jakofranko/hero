@@ -26,6 +26,27 @@ Game.Geometry = {
 
         return points;
     },
+    getCircle: function(centerX, centerY, radius) {
+        var angle = 0,
+            increment = 10 / radius, // should have an inverse relationship to radius
+            points = [],
+            repeatTries = 0,
+            x, y;
+
+        while(angle <= 360) {
+            x = Math.round(centerX + radius * Math.cos(angle));
+            y = Math.round(centerY + radius * Math.sin(angle));
+
+            var key = x + "," + y;
+            if(points.indexOf(key) < 0)
+                points.push(key);
+            else
+                repeatTries++;
+
+            angle += increment;
+        }
+        return points;
+    },
     distance: function(startX, startY, endX, endY) {
         // Math.pow(a, 2) + Math.pow(b, 2) = Math.pow(c, 2)
         // c = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2))

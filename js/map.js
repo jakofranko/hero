@@ -18,8 +18,8 @@ Game.Map = function(size, player) {
     this._fov = [];
     this.setupFov();
 
-    // Create a table which will hold the items
-    this._items = {};
+    // This will only work if this._city.tilesFromLots() has been called first
+    this._items = this._city.getItems();
 
     // Create the engine and scheduler
     this._scheduler = new ROT.Scheduler.Speed();

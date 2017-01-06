@@ -607,28 +607,16 @@ Game.EntityMixins.InventoryHolder = {
         return this._items[i];
     },
     addItem: function(item) {
-        // Try to find a slot, returning true only if we could add the item.
+        var stack = this.canStackItem(item);
+        var index = this.canAddItem(item);
+        if(stack !== false)
+            this._items[stack].addToStack();
+        else if(index !== false)
+            this._items[index] = item;
+        else
+            return false;
 
-        // Check to see if we can stack the item unless we find an open slot first
-        if(item.hasMixin('Stackable')) {
-            for (var i = 0; i < this._items.length; i++) {
-                if (!this._items[i]) {
-                    this._items[i] = item;
-                    return true;
-                } else if(this._items[i].describe() == item.describe()) {
-                    this._items[i].addToStack();
-                    return true;
-                }
-            }
-        } else {
-            for (var i = 0; i < this._items.length; i++) {
-                if (!this._items[i]) {
-                    this._items[i] = item;
-                    return true;
-                }
-            }
-        }        
-        return false;
+        return true;
     },
     removeItem: function(i, amount) {
         // If we can equip items, then make sure we unequip the item we are removing.
@@ -644,16 +632,36 @@ Game.EntityMixins.InventoryHolder = {
             this._items[i] = null;    
         }
     },
-    canAddItem: function() {
-        // Check if we have an empty slot.
-        for (var i = 0; i < this._items.length; i++) {
+    canAddItem: function(item) {
+        if(item.hasMixin("Fixture")) {
+            Game.sendMessage(this, "%s is fixed to the ground and cannot be picked up", [item.describeThe()]);
+            return false;
+        }
+
+        // Return false if the item is too heavy
+        if(item.hasMixin('Heavy') && !item.canPickUp(this))
+            return false;
+
+        // Otherwise, return the empty slot if it exists
+        for(var i = 0; i < this._items.length; i++) {
             if (!this._items[i]) {
-                return true;
+                return i;
+            }
+        }
+        Game.sendMessage(this, "Your inventory is full! Not all items were picked up.");
+        return false;
+    },
+    canStackItem: function(item) {
+        if(item.hasMixin('Stackable')) {
+            for(var i = 0; i < this._items.length; i++) {
+                if(this._items[i].describe() == item.describe()) {
+                    return i;
+                }
             }
         }
         return false;
     },
-    pickupItems: function(indices) {
+    pickupItems: function(indices) { // This is invoked from screens.js Game.Screen.pickupScreen
         // Allows the user to pick up items from the map, where indices is
         // the indices for the array returned by map.getItemsAt
         var mapItems = this._map.getItemsAt(this.getX(), this.getY(), this.getZ());
@@ -916,7 +924,6 @@ Game.EntityMixins.MemoryMaker = {
             } else {
                 this._shortTermMemory[memory].expires--;
             }
-            console.log(Object.keys(this._shortTermMemory).length);
         }
     },
     listeners: {

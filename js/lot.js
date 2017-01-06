@@ -18,20 +18,25 @@ Game.Lot = function(properties) {
 		// Build each building
 		this._buildings = [];
 		for(var spec in this._buildingSpecs) {
-			for(i = 0; i < this._buildingSpecs[spec].amount; i++) {
-				this._buildings.push(Game.BuildingRepository.create(this._buildingSpecs[spec].type));
+			var amount = this._buildingSpecs[spec].amount;
+			var type = this._buildingSpecs[spec].type;
+			var repo = this._buildingSpecs[spec].repo;
+			for(i = 0; i < amount; i++) {
+				this._buildings.push(Game[repo].create(type));
 			}
 		}
 	}
 
-	this.getTiles;
+	this.getTiles = null;
 	if(typeof properties['buildTiles'] === 'function') {
 		this.getTiles = properties['buildTiles'];	
 	} else {
 		this.getTiles = function() {
 			return this.fillLot('floor');
 		};
-	} 
+	}
+
+	this._items = properties['items'] || {};
 };
 // Make items inherit all the functionality from glyphs
 Game.Lot.extend(Game.DynamicGlyph);
@@ -100,9 +105,86 @@ Game.Lot.prototype.fillLot = function(tile, extraProperties) {
 				// Otherwise create a new tile every time
 				result[x][y] = Game.TileRepository.create(tile, extraProperties);
 			}
-		};
-	};
+		}
+	}
 
 	// Only 1 z-level so return as the only element of an array
 	return [result];
+};
+
+Game.Lot.prototype.getItemsAt = function(x, y, z) {
+    return this._items[x + ',' + y + ',' + z];
+};
+
+Game.Lot.prototype.setItemsAt = function(x, y, z, items) {
+    // If our items array is empty, then delete the key from the table.
+    var key = x + ',' + y + ',' + z;
+    if (items.length === 0) {
+        if (this._items[key]) {
+            delete this._items[key];
+        }
+    } else {
+        // Simply update the items at that key
+        this._items[key] = items;
+    }
+};
+
+Game.Lot.prototype.addItem = function(x, y, z, item) {
+    // If we already have items at that position, simply append the item to the list of items.
+    var key = x + ',' + y + ',' + z;
+    if (this._items[key]) {
+        this._items[key].push(item);
+    } else {
+        this._items[key] = [item];
+    }
+};
+
+Game.Lot.prototype.placeCenteredBuilding = function(lotTiles, building) {
+	var centerX = this.getMidWidth();
+	var centerY = this.getMidHeight();
+
+	building.build();
+	var buildingMidWidth = building.getMidWidth();
+	var buildingMidHeight = building.getMidHeight();
+	var b = building.getBlueprint();
+
+	// Place the building in the center of the lot
+	// Find upper corner...
+	var cornerX = centerX - buildingMidWidth;
+	var cornerY = centerY - buildingMidHeight;
+	if(cornerX < 0 || cornerY < 0) {
+		return lotTiles;
+	}
+
+	for (var z = 0; z < building.getStories(); z++) {
+		if(!lotTiles[z])
+			lotTiles[z] = new Array(this.getWidth());
+
+		for (var x = 0; x < b[z].length; x++) {
+			if(!lotTiles[z][x + cornerX])
+				lotTiles[z][x + cornerX] = new Array(this.getHeight());
+
+			for (var y = 0; y < b[z][x].length; y++) {
+				lotTiles[z][x + cornerX][y + cornerY] = b[z][x][y];
+
+				var items = building.getItemsAt(x, y, z);
+				if(items && items.length)
+					this.setItemsAt(x + cornerX, y + cornerY, z, items);
+			}
+		}
+
+		// Fill any undefined grid spots with grass or air
+		for (var lotX = 0; lotX < lotTiles[z].length; lotX++) {
+			if(!lotTiles[z][lotX])
+				lotTiles[z][lotX] = new Array(this.getHeight());
+			for (var lotY = 0; lotY < lotTiles[z][lotX].length; lotY++) {
+				if(!lotTiles[z][lotX][lotY]) {
+					var tile = (z === 0) ? 'grass' : 'air';
+					lotTiles[z][lotX][lotY] = Game.TileRepository.create(tile);
+				}
+			}
+		}
+	}
+
+	return lotTiles;
 };

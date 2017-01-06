@@ -12,6 +12,9 @@ Game.Glyph = function(properties) {
 Game.Glyph.prototype.getChar = function(){ 
     return this._char; 
 };
+Game.Glyph.prototype.setChar = function(char) {
+    this._char = char;
+};
 Game.Glyph.prototype.getBackground = function(){
     return this._background;
 };

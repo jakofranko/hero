@@ -1,3 +1,32 @@
+if (!String.prototype.splice) {
+    /**
+     * {JSDoc}
+     *
+     * The splice() method changes the content of a string by removing a range of
+     * characters and/or adding new characters.
+     *
+     * @this {String}
+     * @param {number} start Index at which to start changing the string.
+     * @param {number} delCount An integer indicating the number of old chars to remove.
+     * @param {string} newSubStr The String that is spliced in.
+     * @return {string} A new string with the spliced substring.
+     */
+    String.prototype.splice = function(start, delCount, newSubStr) {
+        return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount));
+    };
+}
+
+// Since Ondras isn't updating ROT.js much these days, I need the unbroken version of this function
+Array.prototype.randomize = function() {
+    var result = [];
+    var clone = this.slice();
+    while (clone.length) {
+        var index = clone.indexOf(clone.random());
+        result.push(clone.splice(index, 1)[0]);
+    }
+    return result;
+};
+
 Game.extend = function(src, dest) {
     // Create a copy of the source.
     var result = {};
@@ -22,9 +51,25 @@ Game.rollDice = function(XdX) {
     var total = 0;
     for (var i = 0; i < num; i++) {
         total += Math.floor(Math.random() * sides) + 1;
-    };
+    }
     return total;
-}
+};
+
+Game._consoleLogGrid = function(grid, field) {
+    var string = "";
+    for (var y = 0; y < grid[0].length; y++) {
+        for (var x = 0; x < grid.length; x++) {
+            if(!grid[x] || !grid[x][y])
+                string += " ";
+            else if(field)
+                string += String(grid[x][y][field]);
+            else
+                string += String(grid[x][y]);
+        }
+        string += "\n";
+    }
+    console.log(string);
+};
 
 /**
 * Decimal adjustment of a number. Copy/pasted from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
@@ -71,3 +116,37 @@ if (!Math.ceil10) {
       return decimalAdjust('ceil', value, exp);
     };
 }
+
+
+Game.listXY = function(startX, startY, width, height) {
+    var list = [];
+    for (var x = 0; x < width; x++, startX++) {
+        for(y = 0, initialY = startY; y < height; y++, initialY++) {
+            list.push(startX + "," + initialY);
+        }
+    }
+    return list;
+};
+
+// Takes a 3-dimensional array and fills in non-existant
+// places in the arrays and fills them with air or grass tiles
+Game.spaceFill = function(grid) {
+    for (var z = 0; z < grid.length; z++) {
+        // If there are varying heights, find the highest column
+        var height = grid[z].reduce(function(prev, curr) {
+            if(typeof prev === 'object') prev = prev.length;
+            if(typeof curr === 'object') curr = curr.length;
+            return Math.max(prev, curr);
+        }, 0);
+        for (var x = 0; x < grid[z].length; x++) { // grid[z].length == width
+            if(!grid[z][x])
+                grid[z][x] = new Array(height);
+
+            for (var y = 0; y < height; y++) {
+                if(!grid[z][x][y])
+                    grid[z][x][y] = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+            }
+        }
+    }
+    return grid;
+};

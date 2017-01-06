@@ -86,6 +86,35 @@ Game.ItemMixins.Equippable = {
         }
     }
 };
+Game.ItemMixins.Fixture = {
+    name: "Fixture"
+};
+Game.ItemMixins.Heavy = {
+    name: "Heavy",
+    init: function(template) {
+        this._strMin = template['strMin'];
+    },
+    canPickUp: function(entity) {
+        // If an entity doesn't have str, just return true
+        if(!entity.hasMixin('Characteristics'))
+            return true;
+        var items = entity.getItems();
+        var totalStrMin = this._strMin;
+        for (var i = 0; i < items.length; i++) {
+            if(items[i] && items[i].hasMixin('Heavy')) {
+                totalStrMin += items[i]._strMin;
+            }
+        }
+
+        var can = (entity.getSTR() >= totalStrMin);
+        if(!can) {
+            Game.sendMessage(entity, "%s is too heavy to pickup", [this.describeThe()]);
+            return false;
+        } else {
+            return true;
+        }
+    }
+};
 Game.ItemMixins.Stackable = {
     name: 'Stackable',
     init: function(template) {
@@ -132,6 +161,62 @@ Game.ItemMixins.Throwable = {
                 results.push({key: 'attack', value: this.getAttackValue()});
             }
             return results;
+        }
+    }
+};
+
+// Adding an item to a container removes it from the entity.
+// Removing an item from a container adds it to the entity.
+Game.ItemMixins.Container = {
+    name: 'Container',
+    init: function(template) {
+        this._items = [];
+    },
+    getItems: function() {
+        return this._items;
+    },
+    getItem: function(i) {
+        return this._items[i];
+    },
+    addItem: function(entity, index, amount) {
+        debugger;
+        if(!entity.hasMixin('InventoryHolder') && !entity.hasMixin('Container')) {
+            return false;
+        }
+        var item = entity.getItem(index);
+        this._items.push(item);
+        entity.removeItem(index, amount);
+
+        if(entity.hasMixin('MessageRecipient'))
+            Game.sendMessage(entity, "You place %s into %s", [item.describeThe(), this.describeThe()]);
+
+    },
+    removeItem: function(entity, index, amount) {
+        debugger;
+        if(!entity.hasMixin('InventoryHolder') && !entity.hasMixin('Container')) {
+            return false;
+        }
+        var item = this.getItem(index);
+        entity.addItem(item);
+        this._items.splice(index, 1);
+
+        if(entity.hasMixin('MessageRecipient'))
+            Game.sendMessage(entity, "You remove %s from %s", [item.describeThe(), this.describeThe()]);
+    },
+    listeners: {
+        'action': function(actionTaker) {
+            var actions = {};
+            var actionName = "Open %s".format(this.describeThe());
+
+            // array of functions to execute. For each sub-array,
+            // first value is the action function,
+            // second value are the args,
+            // third (optional) value is the 'this' context to use
+            actions[actionName] = [
+                [Game.Screen.containerScreen.setup, [actionTaker, actionTaker.getItems(), this, this.getItems()], Game.Screen.containerScreen],
+                [Game.Screen.playScreen.setSubScreen, [Game.Screen.containerScreen], Game.Screen.playScreen]
+            ];
+            return actions;
         }
     }
 };

@@ -1,5 +1,6 @@
 // Constructor for Game.BuildingRepository. This will contain information on size, number of stories, and map (or perhaps 'blueprint') information for drawing the building. Buildings created from templates will ultimately be stored in their lots, and will ultimately be drawn as part of the buildTiles function of lots.
-// This will be the constructor class for all buildings, including skyscrapers, houses etc. So, the logic for building out the 'blueprint' of the building will be found in each building's template
+// This will be the constructor class for all buildings, including skyscrapers, garages, fast-food places etc. So, the logic for building out the 'blueprint' of the building will be found in each building's template.
+// By default, Game.Building will generate a sort of generic office building.
 // Width and height should not be larger than the 'lot-size' for the game map
 // All features will have a blueprint object, which is a collection of z-levels and their respective maps
 // Again, this is heavily inspired by Shamus Young's post here: http://www.shamusyoung.com/twentysidedtale/?p=2983
@@ -19,6 +20,9 @@ Game.Building = function(properties) {
 		this._roomNumber = Math.max(0, Math.round(ROT.RNG.getNormal(properties['roomNumber'], 3))) || false;
 		// this.name = Game.Building.randomName();
 	}
+
+	// Map of item locations
+	this._items = properties['items'] || {};
 
 	this._roomSize = properties['roomSize'] || false; // Squared; so room size 3 will be a 3x3 room.
 
@@ -100,7 +104,7 @@ Game.Building = function(properties) {
 						tile = horizontalWall;
 					} else if(x === 0 || x == sWidth - 1) {
 						tile = verticalWall;
-					} else if(!stairsPlaced && z < this.getNumberOfStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].describe() !== 'stairsDown') {
+					} else if(!stairsPlaced && z < this.getStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].describe() !== 'stairsDown') {
 						tile = stairsUp;
 						stairsPlaced = true;
 					}
@@ -123,6 +127,11 @@ Game.Building = function(properties) {
 		}
 	};
 
+	// The method for placing doors will be to use an algorithm to try to place doors
+	// in an interesting way according to a mathematical relationship between regions 
+	// and their neigbors. Then, a second pass will be made traversing the roomRegion
+	// tree to make sure that region 1 has a connection by some path to every other 
+	// region on the floor.
 	this._placeDoors = properties['placeDoors'] || function() {
 		var door = Game.TileRepository.create('door');
 		var diffs = [];
@@ -164,42 +173,236 @@ Game.Building = function(properties) {
 			}
 
 			door.setOuterWall(false);
+
+			// For keeping track of already placed doors
+			var placedDoors = [];
+
+			// Because of the way room regions are placed sequentially,
+			// it works out that you take the difference between the current
+			// region and each of it's connecting regions, and place a door
+			// between the regions with the largest difference, there will (almost)
+			// always be a path between the first region and the last region.
+			// If anybody can explain to me why this works, I'd love to know...
 			for(var region in this._roomRegions[z].tree) {
+				// For determining the greatest difference
+				var regionDiffs = [];
+
+				// For keeping track of the relationship between the difference and the connection
+				var regionDiffsMap = {};
+
 				for(var connection in this._roomRegions[z].tree[region]) {
-					var pos = this._roomRegions[z].tree[region][connection];
-					// Because of the way room regions are placed sequentially,
-					// it works out that if regions within a certain range of 
-					// each other are linked, it is unnecessary (in fact, cool)
-					// to place door to link to all their connecting rooms.
-					diffs.push(region - connection);
-					if(Math.abs(region - connection) < Math.max(2, this._roomNumber - 2)) {
-						this._blueprint[z][pos.x][pos.y] = door;	
+					// Because there will almost always be a connection that is larger than the
+					// current region (the very last region being the exception), it is better
+					// to take the difference between the connecting region and the current
+					// region than vice versa.
+					// Note: the variable 'connection' here actually refers to neigboring regions
+					regionDiffs.push(connection - region);
+					regionDiffsMap[connection - region] = connection;
+				}
+
+				// Sometimes the algorithm will find that the best place for a door
+				// for two regions, after analyzing each of their respective
+				// surrounding regions, is on the same wall. To prevent this, keep
+				// track of all the region diffs, and if a door has already been placed
+				// at a region connector, then place take that region out of the difference
+				// calculation.
+				while(regionDiffs.length) {
+					var biggestDiff = Math.max.apply(null, regionDiffs);
+					var connectingRegion = regionDiffsMap[biggestDiff];
+					var pos = this._roomRegions[z].tree[region][connectingRegion];
+					var doorPosKey = pos.x + "," + pos.y;
+					if(placedDoors.indexOf(doorPosKey) === -1) {
+						placedDoors.push(doorPosKey);
+						this._blueprint[z][pos.x][pos.y] = door;
+						regionDoorPlaced = true;
+						break;
+					} else {
+						var diffIndex = regionDiffs.indexOf(biggestDiff);
+						regionDiffs.splice(diffIndex, 1);
+					}
+				}
+
+				// In very rare circumstances, a region will only have one connecting region.
+				// I think this only happens in artifical cicumstances where there is a region
+				// isolated within a region (a room within a room). This happens when I place
+				// stairwells after using the slice method to place rooms. If this
+				// 'room within a room' has a high region number, then a door will be placed
+				// to connect to it when processing the lower numbered region that surrounds it,
+				// and then when it comes time to place a door for the high numbered inner region
+				// there is already a door, so the algorithm does nothing. For instance, consider this scenario:
+
+				// #####################
+				// #7777#6666#555555555#
+				// #7777#6666#555555555#
+				// #7777+6666#555555555#
+				// #7777#6666#555555555#
+				// #7777#6666#555555555#
+				// #7777#6666#555555555#
+				// #7777#6666#555555555#
+				// ####+#6666#555555555#
+				// #1111#6666#555555555#
+				// #1111#6666#555555555#
+				// #1111#6666+555555555#
+				// #########+###########
+				// #2222#3333#444444444#
+				// #2222#3333#444444444#
+				// #2222#3333#444444444#
+				// #2222+3333#444444444#
+				// #2222#3333#4444444#+#
+				// #2222#3333#4444444#8#
+				// #2222#3333#4444444#8#
+				// #####################
+
+				// Note in the lower right corner, a stairwell has been placed and randomly given
+				// the region number '8.' # = wall, + = door, numbers = regions.
+				//
+				// The algorithm places doors between the following regions:
+				// 1-7, 2-3, 3-6, 4-8, 5-6, 6-7, and region 7 does nothing because
+				// doors have already been placed when processing regions 1 and 6,
+				// and region 8 does nothing because a door has already been placed
+				// when processing region 4, and it is connected to nothing else. The result is that
+				// region 4 is isolated from the other regions since when processing region 4,
+				// a door was placed to region 8, and region 8 is connected to only region 4,
+				// so it could not do anything. My solution will be to detect whether 
+				// the current region has only a single neigboring region.
+				// If it only has a single neigboring region (again, this should not be possible
+				// when using only the slice method), then add a door between the neigboring region
+				// and one of it's neiboring regions. This SHOULD un-isolate the region.
+				var connectingRegions = Object.keys(this._roomRegions[z].tree[region]);
+				if(connectingRegions.length === 1) {
+					var parentRegion = this._roomRegions[z].tree[connectingRegions[0]];
+					for(var parentRegionConnection in parentRegion) {
+						var parentConnectorPos = parentRegion[parentRegionConnection];
+						var key = parentConnectorPos.x + "," + parentConnectorPos.y;
+						if(placedDoors.indexOf(key) === -1) {
+							placedDoors.push(key);
+							this._blueprint[z][parentConnectorPos.x][parentConnectorPos.y] = door;
+							break;
+						}
+					}
+				}
+			}
+
+			// Now that we've used the algorithm to try to place doors intelligently, traverse the
+			// roomRegions tree to make sure that region 1 has some path to all the other regions
+			// by comparing the regions that region 1 connects to with the doors that have already
+			// been placed
+			var regionTree = this._roomRegions[z].tree;
+			var isolatedRegions = this._getIsolatedRegions(regionTree, placedDoors);
+			while(isolatedRegions.length) {
+				// Take the first region off the list, and add a door too it, then update the isolatedRegions list
+				// to see if the added connections has un-isolated any of the regions.
+				var isolatedDoorPlaced = false;
+				for (var i = 0; i < isolatedRegions.length; i++) {
+					for(var isolatedConnection in regionTree[isolatedRegions[i]]) {
+						var isolatedPos = regionTree[isolatedRegions[i]][isolatedConnection];
+						var isolatedKey = isolatedPos.x + "," + isolatedPos.y;
+						// TODO: Skip placing additional doors into region 1
+						if(placedDoors.indexOf(isolatedKey) === -1) {
+							isolatedDoorPlaced = true;
+							placedDoors.push(isolatedKey);
+							this._blueprint[z][isolatedPos.x][isolatedPos.y] = door;
+							break;
+						}
+					}
+					if(isolatedDoorPlaced)
+						break;
+				}
+				isolatedRegions = this._getIsolatedRegions(regionTree, placedDoors);
+			}
+		}
+	};
+
+	this._placeItems = properties['placeItems'] || function() {
+		// Loop through each z-level, placing items appropraitely
+		for (var z = 0; z < this._stories; z++) {
+			var randomOffsetX = [-1, 1, 0].random();
+			var randomOffsetY = randomOffsetX === 0 ? [-1, 1].random() : 0; // no diagnals
+			// Keep track of x,y coordinate values of rooms on each floor.
+			// This structure of this object will be like so:
+			// rooms[roomNumber] = { width: int, height: int, floorKeys: []}
+			var rooms = {};
+			var regions = this._roomRegions[z].regions;
+			for (var x = 0; x < this._width; x++) {
+				for (var y = 0; y < this._height; y++) {
+					var roomNumber = regions[x][y];
+					if(roomNumber !== 0 && !rooms[roomNumber]) {
+						rooms[roomNumber] = {
+							topX: null,
+							topY: null,
+							width: 0,
+							height: 0,
+							floorKeys: []
+						};
+					}
+					var description = this._blueprint[z][x][y].describe();
+					if(roomNumber !== 0) {
+						var key = x + "," + y;
+						rooms[roomNumber].floorKeys.push(key);
+					}
+				}
+			}
+
+			// Iterate through the rooms in order to calculate width and height
+			for(var room in rooms) {
+				var topX = this._getMinXFromKeys(rooms[room].floorKeys);
+				var topY = this._getMinYFromKeys(rooms[room].floorKeys);
+				var width = this._getWidthFromKeys(rooms[room].floorKeys);
+				var height = this._getHeightFromKeys(rooms[room].floorKeys);
+				rooms[room].topX = topX;
+				rooms[room].topY = topY;
+				rooms[room].width = width;
+				rooms[room].height = height;
+				if(width >= 3 && height >= 3) {
+					for(var roomX = topX, i = 0; i < width; i++, roomX++) {
+						var edgeOffsetX = 0;
+						var offsetX = roomX;
+						if(i === 0) {
+							edgeOffsetX = [0, 1].random();
+							offsetX = roomX + edgeOffsetX;
+						} else if(i === width - 1) {
+							edgeOffsetX = [0, -1].random();
+							offsetX = roomX + edgeOffsetX;
+						} else {
+							offsetX = roomX + randomOffsetX;
+						}
+
+						for(var roomY = topY, j = 0; j < height; j++, roomY++) {
+							// If for some reason we end up in a section of the building that does
+							// not belong to the room, skip ahead
+							if(rooms[room].floorKeys.indexOf(roomX + "," + roomY) === -1)
+								continue;
+
+							// Place desks and chairs every other tile
+							if(i % 2 === 0 && j % 2 === 0) {
+								var desk = Game.ItemRepository.create('desk');
+								this.addItem(roomX, roomY, z, desk);
+
+								// Place chair intelligently, no diagnals
+								var edgeOffsetY = 0;
+								var offsetY = roomY;
+								if(offsetX == roomX) {
+									if(j === 0)
+										offsetY++;
+									else if(j === height - 1)
+										offsetY--;
+									else
+										offsetY = roomY + [1, -1].random();
+								}
+
+								if(
+									rooms[room].floorKeys.indexOf(offsetX + "," + offsetY) > -1 &&
+									this._blueprint[z][offsetX][offsetY].describe() == 'floor'
+								) {
+									var chair = Game.ItemRepository.create('chair');
+									this.addItem(offsetX, offsetY, z, chair);
+								}
+							}
+						}
 					}
 				}
 			}
 		}
-
-		// Debug stuff....
-		// var max = diffs.reduce(function(last, current) {
-		// 	return Math.max(last, current);
-		// });
-		// var sum = diffs.reduce(function(last, current) {
-		// 	return Math.abs(last) + Math.abs(current);
-		// });
-		// var diffCount = {};
-		// for (var i = 0; i < diffs.length; i++) {
-		// 	var diff = Math.abs(diffs[i]);
-		// 	if(!diffCount[diff]) {
-		// 		diffCount[diff] = 1;
-		// 	} else {
-		// 		diffCount[diff]++;
-		// 	}
-		// };
-		// console.log("Number of Rooms: ", this._roomNumber);
-		// console.log("Largest Diff: ", max);
-		// console.log("Average Diff: ", Math.round((sum / diffs.length) * 100) / 100);
-		// console.log("Diffs by Frequency: ", diffCount);
-		// console.log("---------------------");
 	};
 
 	this.build = properties['build'] || function() {
@@ -216,7 +419,7 @@ Game.Building = function(properties) {
 
 		this._generateRoomRegions();
 		this._placeDoors();
-		//this._placeItems();
+		this._placeItems();
 	};
 };
 Game.Building.prototype.getWidth = function() {
@@ -231,7 +434,7 @@ Game.Building.prototype.getMidWidth = function() {
 Game.Building.prototype.getMidHeight = function() {
 	return Math.round(this._height / 2);
 };
-Game.Building.prototype.getNumberOfStories = function() {
+Game.Building.prototype.getStories = function() {
 	return this._stories;
 };
 Game.Building.prototype.getBlueprint = function() {
@@ -503,10 +706,15 @@ Game.Building.prototype._fillRegions = function(regions, floor, region, x, y) {
 		1: {}
 	};
 	while(startLocations.length > 0) {
-		var start = startLocations.pop();
+		// Important to shift and not pop!! Shifting means that we get to the start locations
+		// in the order that they are added to the array, which means the regions are filled
+		// sequentially, instead of the snake-like fill that will result from taking the most
+		// recent addition. Popping and pushing throughout the rest of the algorithm is
+		// fine I think.
+		var start = startLocations.shift();
 
 		// If a region has not already been placed, update the region of the start tile and
-		// begin filling. After fill for this room is done, increment the region number.
+		// begin filling. After the fill for this room is done, increment the region number.
 		// Otherwise, keep going through the starting locations without incrementing.
 		if(this._canFillRegion(regions, floor, start.x, start.y)) {
 			// If the region is new, add it to the regionTree
@@ -610,6 +818,120 @@ Game.Building.prototype._getNeighborPositions = function(x, y) {
         }
     }
     return tiles.randomize();
+};
+
+Game.Building.prototype.getItems = function() {
+	return this._items;
+};
+
+Game.Building.prototype.getItemsAt = function(x, y, z) {
+    return this._items[x + ',' + y + ',' + z];
+};
+
+Game.Building.prototype.setItemsAt = function(x, y, z, items) {
+    // If our items array is empty, then delete the key from the table.
+    var key = x + ',' + y + ',' + z;
+    if (items.length === 0) {
+        if (this._items[key]) {
+            delete this._items[key];
+        }
+    } else {
+        // Simply update the items at that key
+        this._items[key] = items;
+    }
+};
+
+Game.Building.prototype.addItem = function(x, y, z, item) {
+    // If we already have items at that position, simply append the item to the list of items.
+    var key = x + ',' + y + ',' + z;
+    if (this._items[key]) {
+        this._items[key].push(item);
+    } else {
+        this._items[key] = [item];
+    }
+};
+
+Game.Building.prototype._getIsolatedRegions = function(regionTree, placedDoors) {
+	var allRegions = Object.keys(regionTree);
+	var region1Connections = [];
+	var scanRegions = [1]; // start with region 1...
+	while(scanRegions.length) {
+		var currentRegion = scanRegions.pop();
+		var currentRegionConnections = regionTree[currentRegion];
+		for(var currentRegionConnection in currentRegionConnections) {
+			var wallPos = currentRegionConnections[currentRegionConnection];
+			var wallPosKey = wallPos.x + "," + wallPos.y;
+			// Check if the door has been placed and if it has, make sure that this isn't already a connection for region 1
+			if(placedDoors.indexOf(wallPosKey) > -1 && region1Connections.indexOf(currentRegionConnection) === -1) {
+				scanRegions.push(currentRegionConnection);
+				region1Connections.push(currentRegionConnection);
+			}
+		}
+	}
+
+	// See if any regions cannot be pathed to from region 1
+	return allRegions.filter(function(currReg) {
+		if(this.indexOf(currReg) === -1)
+			return true;
+		else
+			return false;
+	}, region1Connections);
+};
+
+Game.Building.prototype._getMinXFromKeys = function(keys) {
+	var listX = [];
+	// Put all the x values in the list of keys into a single array
+	for (var i = 0; i < keys.length; i++) {
+		listX.push(keys[i].split(",")[0]);
+	}
+
+	var minX = Math.min.apply(null, listX);
+	return minX;
+};
+
+Game.Building.prototype._getMaxXFromKeys = function(keys) {
+	var listX = [];
+	// Put all the x values in the list of keys into a single array
+	for (var i = 0; i < keys.length; i++) {
+		listX.push(keys[i].split(",")[0]);
+	}
+
+	var minX = Math.max.apply(null, listX);
+	return minX;
+};
+
+Game.Building.prototype._getMinYFromKeys = function(keys) {
+	var listY = [];
+	// Put all the x values in the list of keys into a single array
+	for (var i = 0; i < keys.length; i++) {
+		listY.push(keys[i].split(",")[1]);
+	}
+
+	var minY = Math.min.apply(null, listY);
+	return minY;
+};
+
+Game.Building.prototype._getMaxYFromKeys = function(keys) {
+	var listY = [];
+	// Put all the x values in the list of keys into a single array
+	for (var i = 0; i < keys.length; i++) {
+		listY.push(keys[i].split(",")[1]);
+	}
+
+	var minY = Math.max.apply(null, listY);
+	return minY;
+};
+
+Game.Building.prototype._getWidthFromKeys = function(keys) {
+	var minX = this._getMinXFromKeys(keys);
+	var maxX = this._getMaxXFromKeys(keys);
+	return maxX - minX;
+};
+
+Game.Building.prototype._getHeightFromKeys = function(keys) {
+	var minY = this._getMinYFromKeys(keys);
+	var maxY = this._getMaxYFromKeys(keys);
+	return maxY - minY;
 };
 
 Game.Building.prototype._consoleLogGrid = function(grid, field) {

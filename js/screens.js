@@ -268,6 +268,11 @@ Game.Screen.playScreen = {
             } else if(inputData.keyCode === ROT.VK_T) {
                 this.showItemsSubScreen(Game.Screen.throwScreen, this._player.getItems(), 'You have nothing to throw.');
                 return;
+            } else if(inputData.keyCode === ROT.VK_SPACE) {
+                // Action menu. Get actions...
+                // var actions = 
+                Game.Screen.actionMenu.setup(this._player);
+                this.setSubScreen(Game.Screen.actionMenu);
             } else if (inputData.keyCode === ROT.VK_COMMA) {
                 var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
                 // If there is only one item, directly pick it up
@@ -275,8 +280,6 @@ Game.Screen.playScreen = {
                     var item = items[0];
                     if (this._player.pickupItems([0])) {
                         Game.sendMessage(this._player, "You pick up %s.", [item.describeA()]);
-                    } else {
-                        Game.sendMessage(this._player, "Your inventory is full! Nothing was picked up.");
                     }
                 } else {
                     this.showItemsSubScreen(Game.Screen.pickupScreen, items, 'There is nothing here to pick up.');
@@ -435,7 +438,14 @@ Game.Screen.playScreen = {
 };
 
 // Item Listing
+// TODO: refactor this to support arrow key selection
 Game.Screen.ItemListScreen = function(template) {
+    // This is dependant on the number of letters we use as indices in the render function
+    this._maxItems = 52;
+
+    this._items = null;
+    this._altItems = null;
+
     // Set up based on the template
     this._caption = template['caption'];
     this._okFunction = template['ok'];
@@ -453,8 +463,12 @@ Game.Screen.ItemListScreen = function(template) {
     // Whether a 'no item' option should appear.
     this._hasNoItemOption = template['hasNoItemOption'];
 };
-Game.Screen.ItemListScreen.prototype.setup = function(player, items) {
+Game.Screen.ItemListScreen.prototype.setup = function(player, items, altEntity, altItems) {
+    if(items > this._maxItems || altItems > this._maxItems || items + altItems > this._maxItems)
+        throw new Error("The item number max has been reached. Throw some rotten fruit at the developer and tell him that he needs to come up with a better solution for indexing items!");
+
     this._player = player;
+    this._altEntity = altEntity;
     // Should be called before switching to the screen.
     var count = 0;
     // Iterate over each item, keeping only the aceptable ones and counting the number of acceptable items.
@@ -469,18 +483,48 @@ Game.Screen.ItemListScreen.prototype.setup = function(player, items) {
         }
     });
 
+    if(altItems) {
+        this._altItems = altItems.map(function(item) {
+            // Transform the item into null if it's not acceptable
+            if (that._isAcceptableFunction(item)) {
+                count++;
+                return item;
+            } else {
+                return null;
+            }
+        });
+    }
+
     // Clean set of selected indices
     this._selectedIndices = {};
+    this._altSelectedIndices = {};
     return count;
 };
 Game.Screen.ItemListScreen.prototype.render = function(display) {
     var letters = 'abcdefghijklmnopqrstuvwxyz';
+    letters += letters.toUpperCase();
+
+    // Set column width based on the presence of altItems
+    var screenWidth = Game.getScreenWidth();
+    var midPoint = Math.round(screenWidth / 2);
+    var colWidth, separatorHeight;
+
     // Render the no item row if enabled
-    if (this._hasNoItemOption) {
+    if (this._hasNoItemOption)
         display.drawText(0, 1, '0 - no item');
-    }   
+
     // Render the caption in the top row
     display.drawText(0, 0, this._caption);
+
+    if(this._altItems && this._altItems.length > 0) {
+        colWidth = midPoint - 1;
+
+        // Also set the height of the separator
+        separatorHeight = Math.max(this._items.length, this._altItems.length);
+    } else {
+        colWidth = screenWidth;
+    }
+
     var row = 0;
     for(var i = 0; i < this._items.length; i++) {
         // If we have an item, we want to render it
@@ -495,8 +539,40 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
             var stack = this._items[i].hasMixin('Stackable') ? ' (' + this._items[i].amount() + ')' : '';
 
             // Render at the correct row and add 2
-            display.drawText(0, 2 + row, letter + ' ' + selectionState + ' ' + this._items[i].describe() + stack);
+            display.drawText(
+                0,
+                2 + row,
+                letter + ' ' + selectionState + ' ' + this._items[i].describe() + stack,
+                colWidth
+            );
             row++;
+        }
+    }
+
+    if(this._altItems && this._altItems.length > 0) {
+        var altRow = 0;
+        for (var j = 0; j < separatorHeight; j++) {
+            display.draw(midPoint, j, '|');
+        }
+
+        // Continue to get the next letter by continuing to increment i
+        for (var k = 0; k < this._altItems.length; k++, i++) {
+            if(this._altItems[k]) {
+                var altLetter = letters.substring(i, i + 1); // Note: using i, not k
+                var altSelectionState = (
+                    this._canSelectItem &&
+                    this._canSelectMultipleItems &&
+                    this._altSelectedIndices[k]
+                ) ? '+' : '-';
+                var altStack = this._altItems[k].hasMixin('Stackable') ? ' (' + this._altItems[k].amount() + ')' : '';
+                display.drawText(
+                    midPoint + 1,
+                    2 + altRow,
+                    altLetter + ' ' + altSelectionState + ' ' + this._altItems[k].describe() + altStack,
+                    colWidth
+                );
+                altRow++;
+            }  
         }
     }
 };
@@ -507,11 +583,17 @@ Game.Screen.ItemListScreen.prototype.executeOkFunction = function() {
         selectedItems[key] = this._items[key];
     }
 
+    // And the altSelected items.
+    var altSelectedItems = {};
+    for (var altKey in this._altSelectedIndices) {
+        altSelectedItems[altKey] = this._altItems[altKey];
+    }
+
     // Switch back to play screen
     Game.Screen.playScreen.setSubScreen(undefined);
 
     // Call the OK function and end the player's turn if it returns true
-    if(this._okFunction(selectedItems)) {
+    if(this._okFunction(selectedItems, altSelectedItems)) {
         this._player.getMap().getEngine().unlock();
     }
 };
@@ -519,25 +601,47 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
     if(inputType === 'keydown') {
         // If the user hit escape, hit enter and can't select an item, or hit
         // enter without any items selected, simply cancel out
-        if (inputData.keyCode === ROT.VK_ESCAPE || (inputData.keyCode === ROT.VK_RETURN && (!this._canSelectItem || Object.keys(this._selectedIndices).length === 0))) {
+        if(inputData.keyCode === ROT.VK_ESCAPE ||
+            (inputData.keyCode === ROT.VK_RETURN &&
+                (!this._canSelectItem || 
+                    (Object.keys(this._selectedIndices).length === 0 && Object.keys(this._altSelectedIndices).length === 0)))) {
             Game.Screen.playScreen.setSubScreen(undefined);
+
         // Handle pressing return when items are selected
-        } else if (inputData.keyCode === ROT.VK_RETURN) {
+        } else if(inputData.keyCode === ROT.VK_RETURN) {
             this.executeOkFunction();
+
         // Handle pressing zero when 'no item' selection is enabled
-        } else if (this._canSelectItem && this._hasNoItemOption && inputData.keyCode === ROT.VK_0) {
+        } else if(this._canSelectItem &&
+                  this._hasNoItemOption &&
+                  inputData.keyCode === ROT.VK_0) {
+
             this._selectedIndices = {};
             this.executeOkFunction();
+
         // Handle pressing a letter if we can select
-        } else if (this._canSelectItem && inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
+        // TODO: Might need to eventually support using numbers
+        } else if(this._canSelectItem &&
+                  inputData.keyCode >= ROT.VK_A &&
+                  inputData.keyCode <= ROT.VK_Z) {
+
             // Check if it maps to a valid item by subtracting 'a' from the character
-            // to know what letter of the alphabet we used.
-            var index = inputData.keyCode - ROT.VK_A;
-            if (this._items[index]) {
+            // to know what letter of the alphabet we used. If the shift key is pressed,
+            // then add 26 to the index since our letters string is organized lowercaseUPPERCASE
+            var shift = inputData.shiftKey ? 26 : 0;
+            var index = inputData.keyCode - ROT.VK_A + shift;
+
+            // This works because of the way letters are added to each item. 
+            // After all the items are rendered, we begin to render altItems
+            // (if they exist), and continue to use the next letter in the sequence.
+            // Thus, the index needs to be 'reset' like this when we begin checking
+            // altItems.
+            var altIndex = index - this._items.length;
+            if(this._items[index]) {
                 // If multiple selection is allowed, toggle the selection status, else
                 // select the item and exit the screen
-                if (this._canSelectMultipleItems) {
-                    if (this._selectedIndices[index]) {
+                if(this._canSelectMultipleItems) {
+                    if(this._selectedIndices[index]) {
                         delete this._selectedIndices[index];
                     } else {
                         this._selectedIndices[index] = true;
@@ -546,6 +650,19 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
                     Game.refresh();
                 } else {
                     this._selectedIndices[index] = true;
+                    this.executeOkFunction();
+                }
+            } else if(this._altItems !== null && this._altItems[altIndex]) {
+                if(this._canSelectMultipleItems) {
+                    if(this._altSelectedIndices[altIndex]) {
+                        delete this._altSelectedIndices[altIndex];
+                    } else {
+                        this._altSelectedIndices[altIndex] = true;
+                    }
+                    // Redraw screen
+                    Game.refresh();
+                } else {
+                    this._altSelectedIndices[altIndex] = true;
                     this.executeOkFunction();
                 }
             }
@@ -563,10 +680,8 @@ Game.Screen.pickupScreen = new Game.Screen.ItemListScreen({
     canSelect: true,
     canSelectMultipleItems: true,
     ok: function(selectedItems) {
-        // Try to pick up all items, messaging the player if they couldn't all be picked up.
-        if (!this._player.pickupItems(Object.keys(selectedItems))) {
-            Game.sendMessage(this._player, "Your inventory is full! Not all items were picked up.");
-        }
+        // Try to pick up all items (messages handled by the pickupItems function)
+        this._player.pickupItems(Object.keys(selectedItems));
         return true;
     }
 });
@@ -697,6 +812,25 @@ Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
         return;
     }
 });
+Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
+    caption: 'Container',
+    canSelect: true,
+    canSelectMultipleItems: true,
+    ok: function(selectedItems, altSelectedItems) {
+        debugger;
+        for(var itemKey in selectedItems) {
+            if(this._altEntity.hasMixin('Container')) {
+                this._altEntity.addItem(this._player, itemKey);
+            }
+        }
+
+        for(var altItemKey in altSelectedItems) {
+            if(this._player.hasMixin('InventoryHolder')) {
+                this._altEntity.removeItem(this._player, altItemKey)
+            }
+        }
+    }
+});
 
 // Targetting Screen
 Game.Screen.TargetBasedScreen = function(template) {
@@ -791,19 +925,18 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
 Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputData) {
     // Move the cursor
     if (inputType == 'keydown') {
-        if (inputData.keyCode === ROT.VK_LEFT) {
+        if (inputData.keyCode === ROT.VK_LEFT)
             this.moveCursor(-1, 0);
-        } else if (inputData.keyCode === ROT.VK_RIGHT) {
+        else if (inputData.keyCode === ROT.VK_RIGHT)
             this.moveCursor(1, 0);
-        } else if (inputData.keyCode === ROT.VK_UP) {
+        else if (inputData.keyCode === ROT.VK_UP)
             this.moveCursor(0, -1);
-        } else if (inputData.keyCode === ROT.VK_DOWN) {
+        else if (inputData.keyCode === ROT.VK_DOWN)
             this.moveCursor(0, 1);
-        } else if (inputData.keyCode === ROT.VK_ESCAPE) {
+        else if (inputData.keyCode === ROT.VK_ESCAPE)
             Game.Screen.playScreen.setSubScreen(undefined);
-        } else if (inputData.keyCode === ROT.VK_RETURN) {
+        else if (inputData.keyCode === ROT.VK_RETURN)
             this.executeOkFunction();
-        }
     }
     Game.refresh();
 };
@@ -868,6 +1001,170 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
     okFunction: function(x, y) {
         this._player.throwItem(this._player.getThrowing(), x, y);
         return true;
+    }
+});
+
+// Menu screens
+Game.Screen.MenuScreen = function(template) {
+    template = template || {};
+
+    this._player = null;
+
+    // Display settings
+    this._caption = template['caption'] || 'Menu';
+    this._outerPadding = template['outerPadding'] || 4;
+    this._innerPadding = template['innerPadding'] || 2;
+    this._width = template['width'] || Game.getScreenWidth() - this._outerPadding;
+    this._height = template['height'] || Game.getScreenHeight() - this._outerPadding;
+    this._textWidth = this._width - this._innerPadding;
+    this._verticalChar = template['verticalChar'] || '|';
+    this._horizontalChar = template['horizontalChar'] || '-';
+    this._cornerChar = template['cornerChar'] || '+';
+    this._highlightColor = template['highlightColor'] || Game.Palette.blue;
+
+    // Menu item settings
+    this._currentIndex = template['currentIndex'] || 0;
+    this._menuItems = template['menuItems'] || [];
+    this._menuActions = template['menuActions'] || [];
+    this._buildMenuItems = template['buildMenuItems'] || function() {
+        // The the value of each menu item should be an array of arrays, where the first value of each sub array is a function reference, and the second value is an array of parameters, such that the menu action can be called via menuAction[i][0].apply(this, menuAction[i][1]). This data structure allows for as many function calls with as many arguments to be called sequentially by a single menu action.
+        var exampleMenuItem = {
+            'Example 1': [[console.log, ['This is an example', ', and another.']], [console.log, ['And another!']]],
+            'Example 2': [[console.log, ['This is another example', ', and another.']], [console.log, ['And another!!']]]
+        };
+        for(var item in exampleMenuItem) {
+            this._menuItems.push(item);
+            this._menuActions.push(exampleMenuItem[item]);
+        }
+    };
+    this._okFunction = template['ok'] || function() {
+        var menuActions = this._menuActions[this._currentIndex];
+        for (var i = 0; i < menuActions.length; i++) {
+            if(menuActions[i].length !== 2 && menuActions[i].length !== 3)
+                throw new Error('Incorrectly formatted action type:', menuActions[i]);
+            var actionFunc = menuActions[i][0],
+                actionArgs = menuActions[i][1],
+                actionContext = (menuActions[i].length === 3) ? menuActions[i][2] : actionFunc;
+
+            actionFunc.apply(actionContext, actionArgs);
+        }
+        return true;
+    };
+};
+Game.Screen.MenuScreen.prototype.setup = function(player, builderArgs) {
+    this._player = player;
+    this._currentIndex = 0; // reset current index to 0
+    this._menuItems = []; // clear out old menu items;
+    this._menuActions = []; // clear out old menu items;
+    this._buildMenuItems.apply(this, builderArgs);
+};
+Game.Screen.MenuScreen.prototype.render = function(display) {
+    var startX = this._outerPadding,
+        startY = this._outerPadding;
+
+    // Draw caption
+    display.drawText(
+        Math.round(this._width / 2) - Math.round(this._caption.length / 2),
+        startY - 1,
+        '%c{' + Game.Palette.blue + '}' + this._caption + '%c{}'
+    );
+    // Draw menu box
+    for (var row = 0; row < this._height; row++) {
+        if(row === 0 || row === this._height - 1) {
+            display.drawText(
+                startX,
+                startY + row,
+                this._cornerChar.rpad(this._horizontalChar, this._width - 2) + this._cornerChar,
+                this._width
+            );
+        } else {
+            display.drawText(
+                startX,
+                startY + row,
+                this._verticalChar.rpad(" ", this._width - 2) + this._verticalChar,
+                this._width
+            );
+        }
+    }
+
+    // Draw menu items
+    for (var item = 0; item < this._menuItems.length; item++) {
+        var highlight;
+        if(item === this._currentIndex)
+            highlight = '%b{' + this._highlightColor + '}';
+        else
+            highlight = '%b{}';
+
+        display.drawText(
+            startX + this._innerPadding,
+            startY + this._innerPadding + item,
+            highlight + this._menuItems[item]
+        );
+    }
+};
+Game.Screen.MenuScreen.prototype.handleInput = function(inputType, inputData) {
+    // Move the cursor
+    if(inputType == 'keydown') {
+        if(inputData.keyCode === ROT.VK_UP && this._currentIndex > 0)
+            this._currentIndex--;
+        else if(inputData.keyCode === ROT.VK_DOWN && this._currentIndex < this._menuItems.length - 1)
+            this._currentIndex++;
+        else if(inputData.keyCode === ROT.VK_ESCAPE)
+            Game.Screen.playScreen.setSubScreen(undefined);
+        else if(inputData.keyCode === ROT.VK_RETURN)
+            this.executeOkFunction();
+    }
+    Game.refresh();
+};
+Game.Screen.MenuScreen.prototype.executeOkFunction = function() {
+    // Switch back to the play screen.
+    Game.Screen.playScreen.setSubScreen(undefined);
+    // Call the OK function and end the player's turn if it return true.
+    if (this._okFunction && this._okFunction()) {
+        this._player.getMap().getEngine().unlock();
+    }
+};
+
+Game.Screen.actionMenu = new Game.Screen.MenuScreen({
+    buildMenuItems: function() {
+        var adjacentCoords = Game.Geometry.getCircle(this._player.getX(), this._player.getY(), 1),
+            map = this._player.getMap(),
+            z = this._player.getZ(),
+            actions = [];
+
+        // Populate a list of actions with which to build the menu
+        for(var i = 0; i < adjacentCoords.length; i++) {
+            var coords = adjacentCoords[i].split(","),
+                x = coords[0],
+                y = coords[1];
+
+            var entity = map.getEntityAt(x, y, z),
+                items = map.getItemsAt(x, y, z);
+
+            if(entity) {
+                var entityActions = entity.raiseEvent('action', this._player);
+                if(entityActions) actions.push(entityActions);
+            }
+            if(items) {
+                for(var j = 0; j < items.length; j++) {
+                    var itemActions = items[j].raiseEvent('action', this._player);
+                    if(itemActions) actions.push(itemActions);
+                }
+            }
+        }
+
+        // Iterate through the actions, building out the _menuItems and _menuActions arrays
+        for(var k = 0; k < actions.length; k++) {
+            var glyphActions = actions[k]; // An array of action objects
+            for (var l = 0; l < glyphActions.length; l++) {
+                // An object of action name/functions pairs returned by each relevant item-mixin listener
+                var mixinActions = glyphActions[l];
+                for(var actionName in mixinActions) {
+                    this._menuItems.push(actionName);
+                    this._menuActions.push(mixinActions[actionName]);
+                }
+            }
+        }
     }
 });
 

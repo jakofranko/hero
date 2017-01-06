@@ -19,7 +19,7 @@ var Game = {
 	_citySize: 10,
 
 	// How many in-game tiles a lot should comprise
-	_lotSize: 20,
+	_lotSize: 40,
 	_startTime: '0700',
 
 	// NPC Settings

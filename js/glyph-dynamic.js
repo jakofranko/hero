@@ -13,35 +13,44 @@ Game.DynamicGlyph = function(properties) {
     this._listeners = {};
     // Setup the object's mixins
     var mixins = properties['mixins'] || [];
-    for (var i = 0; i < mixins.length; i++) {
+    var ignoreKeys = [
+     'init',
+     'name',
+     'groupName',
+     'listeners'
+    ];
+    for(var i = 0; i < mixins.length; i++) {
         // Copy over all properties from each mixin as long
         // as it's not the name or the init property. We
         // also make sure not to override a property that
         // already exists on the entity.
-        for (var key in mixins[i]) {
-            if (key != 'init' && key != 'name' && !this.hasOwnProperty(key)) {
-                this[key] = mixins[i][key];
+        for(var key in mixins[i]) {
+            if(this.hasOwnProperty(key)) {
+                console.log(this);
+                throw new Error("Mixin '" + mixins[i].name + "' is attempting to add duplicate property '" + key + "'");
             }
+            if(ignoreKeys.indexOf(key) === -1)
+                this[key] = mixins[i][key];
         }
         // Add the name of this mixin to our attached mixins
         this._attachedMixins[mixins[i].name] = true;
         // If a group name is present, add it
-        if (mixins[i].groupName) {
+        if(mixins[i].groupName) {
             this._attachedMixinGroups[mixins[i].groupName] = true;
         }
         // Add all of our listeners
-        if (mixins[i].listeners) {
-            for (var key in mixins[i].listeners) {
-                // If we don't already have a key for this event in our listeners array, add it.
-                if (!this._listeners[key]) {
-                    this._listeners[key] = [];
+        if(mixins[i].listeners) {
+            for (var listener in mixins[i].listeners) {
+                // If we don't already have a listener for this event in our listeners array, add it.
+                if (!this._listeners[listener]) {
+                    this._listeners[listener] = [];
                 }
                 // Add the listener.
-                this._listeners[key].push(mixins[i].listeners[key]);
+                this._listeners[listener].push(mixins[i].listeners[listener]);
             }
         }
         // Finally call the init function if there is one
-        if (mixins[i].init) {
+        if(mixins[i].init) {
             mixins[i].init.call(this, properties);
         }
     }

@@ -135,3 +135,11 @@ Game.TileRepository.define('glass door', {
     blocksLight: false,
     description: "A glass door"
 });
+Game.TileRepository.define('guard rail', {
+    name: 'guard rail',
+    character: '#',
+    foreground: Game.Palette.metalGrey,
+    walkable: false,
+    blocksLight: false,
+    description: 'A metal guard rail'
+});

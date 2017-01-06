@@ -1,122 +1,109 @@
 Game.ItemRepository = new Game.Repository('items', Game.Item);
 
-Game.ItemRepository.define('rock', {
-    name: 'rock',
+Game.ItemRepository.define('bed', {
+    name: 'bed',
+    character: '#',
+    foreground: Game.Palette.lightBlue,
+    strMin: 20,
+    mixins: [Game.ItemMixins.Heavy]
+});
+
+Game.ItemRepository.define('desk', {
+    name: 'desk',
+    character: '#',
+    foreground: Game.Palette.brown,
+    strMin: 15,
+    mixins: [Game.ItemMixins.Heavy, Game.ItemMixins.Container]
+});
+
+Game.ItemRepository.define('chair', {
+    name: 'chair',
+    character: 'h',
+    foreground: Game.Palette.brown,
+});
+
+Game.ItemRepository.define('couch', {
+    name: 'couch',
+    character: 'C',
+    foreground: Game.Palette.teal,
+    strMin: 18,
+    mixins: [Game.ItemMixins.Heavy]
+});
+
+Game.ItemRepository.define('table', {
+    name: 'table',
+    character: '#',
+    foreground: Game.Palette.brown,
+    strMin: 12,
+    mixins: [Game.ItemMixins.Heavy]
+});
+
+Game.ItemRepository.define('floor lamp', {
+    name: 'floor lamp',
+    character: '∫',
+    foreground: Game.Palette.white,
+});
+
+Game.ItemRepository.define('potted plant', {
+    name: 'potted plant',
     character: '*',
-    foreground: 'white',
-    attackValue: 2,
-    throwable: true,
-    stackable: true,
-    mixins: [Game.ItemMixins.Throwable, Game.ItemMixins.Stackable]
+    foreground: '#B3C67F',
 });
 
-Game.ItemRepository.define('apple', {
-    name: 'apple',
-    character: '%',
-    foreground: 'red',
-    foodValue: 50,
-    stackable: true,
-    mixins: [Game.ItemMixins.Edible, Game.ItemMixins.Stackable]
+Game.ItemRepository.define('refridgerator', {
+    name: 'refridgerator',
+    character: '[',
+    foreground: Game.Palette.silver,
+    strMin: 20,
+    mixins: [Game.ItemMixins.Heavy, Game.ItemMixins.Container]
 });
 
-Game.ItemRepository.define('melon', {
-    name: 'melon',
-    character: '%',
-    foreground: 'lightgreen',
-    foodValue: 35,
-    consumptions: 4,
-    mixins: [Game.ItemMixins.Edible]
+Game.ItemRepository.define('television', {
+    name: 'television',
+    character: ']',
+    foreground: Game.Palette.lightBlue,
+    strMin: 12,
+    mixins: [Game.ItemMixins.Heavy]
+});
+
+Game.ItemRepository.define('oven', {
+    name: 'oven',
+    character: '{',
+    foreground: Game.Palette.silver,
+    strMin: 20,
+    mixins: [Game.ItemMixins.Heavy, Game.ItemMixins.Container]
+});
+
+Game.ItemRepository.define('end table', {
+    name: 'end table',
+    character: 'n',
+    foreground: Game.Palette.brown,
+    mixins: [Game.ItemMixins.Container]
+});
+
+Game.ItemRepository.define('toilet', {
+    name: 'toilet',
+    character: '&',
+    foreground: Game.Palette.white,
+    mixins: [Game.ItemMixins.Fixture]
+});
+
+Game.ItemRepository.define('bathtub', {
+    name: 'bathtub',
+    character: 'O',
+    foreground: Game.Palette.silver,
+    mixins: [Game.ItemMixins.Fixture]
+});
+
+Game.ItemRepository.define('sink', {
+    name: 'sink',
+    character: 'o',
+    foreground: Game.Palette.silver,
+    mixins: [Game.ItemMixins.Fixture]
 });
 
 Game.ItemRepository.define('corpse', {
     name: 'corpse',
     character: '%',
-    foodValue: 75,
-    consumptions: 1,
-    mixins: [Game.ItemMixins.Edible]
-}, {
-    disableRandomCreation: true
-});
-
-// Weapons
-Game.ItemRepository.define('dagger', {
-    name: 'dagger',
-    character: ')',
-    foreground: 'gray',
-    attackValue: 5,
-    wieldable: true,
-    throwable: true,
-    mixins: [Game.ItemMixins.Equippable, Game.ItemMixins.Throwable]
-}, {
-    disableRandomCreation: true
-});
-
-Game.ItemRepository.define('sword', {
-    name: 'sword',
-    character: ')',
-    foreground: 'white',
-    attackValue: 10,
-    wieldable: true,
-    mixins: [Game.ItemMixins.Equippable]
-}, {
-    disableRandomCreation: true
-});
-
-Game.ItemRepository.define('staff', {
-    name: 'staff',
-    character: ')',
-    foreground: 'yellow',
-    attackValue: 5,
-    defenseValue: 3,
-    wieldable: true,
-    mixins: [Game.ItemMixins.Equippable]
-}, {
-    disableRandomCreation: true
-});
-
-// Wearables
-Game.ItemRepository.define('tunic', {
-    name: 'tunic',
-    character: '[',
-    foreground: 'green',
-    defenseValue: 2,
-    wearable: true,
-    mixins: [Game.ItemMixins.Equippable]
-}, {
-    disableRandomCreation: true
-});
-
-Game.ItemRepository.define('chainmail', {
-    name: 'chainmail',
-    character: '[',
-    foreground: 'white',
-    defenseValue: 4,
-    wearable: true,
-    mixins: [Game.ItemMixins.Equippable]
-}, {
-    disableRandomCreation: true
-});
-
-Game.ItemRepository.define('platemail', {
-    name: 'platemail',
-    character: '[',
-    foreground: 'aliceblue',
-    defenseValue: 6,
-    wearable: true,
-    mixins: [Game.ItemMixins.Equippable]
-}, {
-    disableRandomCreation: true
-});
-
-Game.ItemRepository.define('pumpkin', {
-    name: 'pumpkin',
-    character: '%',
-    foreground: 'orange',
-    foodValue: 50,
-    attackValue: 2,
-    defenseValue: 2,
-    wearable: true,
-    wieldable: true,
-    throwable: true,
-    mixins: [Game.ItemMixins.Edible, Game.ItemMixins.Equippable, Game.ItemMixins.Throwable]
+    foreground: Game.Palette.white,
 });
