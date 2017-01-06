@@ -13,7 +13,7 @@ Game.ItemRepository.define('desk', {
     character: '#',
     foreground: Game.Palette.brown,
     strMin: 15,
-    mixins: [Game.ItemMixins.Heavy]
+    mixins: [Game.ItemMixins.Heavy, Game.ItemMixins.Container]
 });
 
 Game.ItemRepository.define('chair', {
@@ -55,7 +55,7 @@ Game.ItemRepository.define('refridgerator', {
     character: '[',
     foreground: Game.Palette.silver,
     strMin: 20,
-    mixins: [Game.ItemMixins.Heavy]
+    mixins: [Game.ItemMixins.Heavy, Game.ItemMixins.Container]
 });
 
 Game.ItemRepository.define('television', {
@@ -71,13 +71,14 @@ Game.ItemRepository.define('oven', {
     character: '{',
     foreground: Game.Palette.silver,
     strMin: 20,
-    mixins: [Game.ItemMixins.Heavy]
+    mixins: [Game.ItemMixins.Heavy, Game.ItemMixins.Container]
 });
 
 Game.ItemRepository.define('end table', {
     name: 'end table',
     character: 'n',
     foreground: Game.Palette.brown,
+    mixins: [Game.ItemMixins.Container]
 });
 
 Game.ItemRepository.define('toilet', {
