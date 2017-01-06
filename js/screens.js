@@ -1125,7 +1125,48 @@ Game.Screen.MenuScreen.prototype.executeOkFunction = function() {
     }
 };
 
-Game.Screen.actionMenu = new Game.Screen.MenuScreen();
+Game.Screen.actionMenu = new Game.Screen.MenuScreen({
+    buildMenuItems: function() {
+        var adjacentCoords = Game.Geometry.getCircle(this._player.getX(), this._player.getY(), 1),
+            map = this._player.getMap(),
+            z = this._player.getZ(),
+            actions = [];
+
+        // Populate a list of actions with which to build the menu
+        for(var i = 0; i < adjacentCoords.length; i++) {
+            var coords = adjacentCoords[i].split(","),
+                x = coords[0],
+                y = coords[1];
+
+            var entity = map.getEntityAt(x, y, z),
+                items = map.getItemsAt(x, y, z);
+
+            if(entity) {
+                var entityActions = entity.raiseEvent('action', this._player);
+                if(entityActions) actions.push(entityActions);
+            }
+            if(items) {
+                for(var j = 0; j < items.length; j++) {
+                    var itemActions = items[j].raiseEvent('action', this._player);
+                    if(itemActions) actions.push(itemActions);
+                }
+            }
+        }
+
+        // Iterate through the actions, building out the _menuItems and _menuActions arrays
+        for(var k = 0; k < actions.length; k++) {
+            var glyphActions = actions[k]; // An array of action objects
+            for (var l = 0; l < glyphActions.length; l++) {
+                // An object of action name/functions pairs returned by each relevant item-mixin listener
+                var mixinActions = glyphActions[l];
+                for(var actionName in mixinActions) {
+                    this._menuItems.push(actionName);
+                    this._menuActions.push(mixinActions[actionName]);
+                }
+            }
+        }
+    }
+});
 
 // Define our help screen
 Game.Screen.helpScreen = {
