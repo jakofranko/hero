@@ -269,8 +269,6 @@ Game.Screen.playScreen = {
                 this.showItemsSubScreen(Game.Screen.throwScreen, this._player.getItems(), 'You have nothing to throw.');
                 return;
             } else if(inputData.keyCode === ROT.VK_SPACE) {
-                // Action menu. Get actions...
-                // var actions = 
                 Game.Screen.actionMenu.setup(this._player);
                 this.setSubScreen(Game.Screen.actionMenu);
             } else if (inputData.keyCode === ROT.VK_COMMA) {
