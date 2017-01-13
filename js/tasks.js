@@ -4,11 +4,14 @@ Game.Tasks.approach = function(entity, target) {
 	// If no one is around, then just wander
 	if(!target) {
 		this.wander(entity);
+	} else if(entity.getPath().length > 0) {
+		var step = entity.getNextStep();
+		entity.tryMove(step[0], step[1], entity.getZ());
 	} else {
 		// If we are adjacent to the target, then we have successfully approached it.
 	    // TODO: if I'm not mistaken, this enforces a topology 4 and doesn't account for diagnally adjacent
-	    var offsets = Math.abs(target.getX() - entity.getX()) + Math.abs(target.getY() - entity.getY());
-	    if (offsets === 1) {
+	    var distance = Math.abs(target.getX() - entity.getX()) + Math.abs(target.getY() - entity.getY());
+	    if (distance === 1) {
             return true;
 	    }
 
@@ -23,15 +26,21 @@ Game.Tasks.approach = function(entity, target) {
 	        }
 	        return source.getMap().getTile(x, y, z).isWalkable();
 	    }, {topology: 4});
-	    // Once we've gotten the path, we want to move to the second cell that is
-	    // passed in the callback (the first is the entity's starting point)
+	    // Once we've gotten the path, we want to store a number of steps equal
+	    // to half the distance between the entity and the target, skipping the 
+	    // first coordinate because that is the entity's starting location
 	    var count = 0;
+	    var entityPath = [];
 	    path.compute(source.getX(), source.getY(), function(x, y) {
-	        if (count == 1) {
-	            source.tryMove(x, y, z);
-	        }
+	        if(count > 0 && count <= distance / 2)
+	            entityPath.push([x, y]);
 	        count++;
 	    });
+
+	    // Update the entity's path and make the first step
+	    entity.setPath(entityPath);
+	    var step = entity.getNextStep();
+	    entity.tryMove(step[0], step[1], z);
 	}
 };
 
@@ -102,6 +111,10 @@ Game.Tasks.retreat = function(self, target) {
 		y: target.getY(),
 		z: target.getZ()
 	};
+
+	// Entity needs to forget their current path
+	if(self.getPath().length > 0)
+		self.setPath([]);
 
 	// Determine if the target is to the left or right of self
 	var x = 0;

@@ -701,6 +701,7 @@ Game.EntityMixins.JobActor = {
         this._jobs = template['jobs'] || ['survive'];
         this._jobPriority = template['jobPriority'] || {};
         this._lastJobPrioritization = 0;
+        this._path = [];
     },
     act: function() {
         if(!this.isConscious()) 
@@ -767,6 +768,15 @@ Game.EntityMixins.JobActor = {
             this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
         }
         this._lastJobPrioritization = this._map.getTime().getHours();
+    },
+    getPath: function() {
+        return this._path;
+    },
+    getNextStep: function() {
+        return this._path.shift();
+    },
+    setPath: function(path) {
+        this._path = path;
     },
     listeners: {
         onRegainConsciousness: function() {
