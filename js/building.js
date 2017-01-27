@@ -34,6 +34,7 @@ Game.Building = function(properties) {
 	// Initialize blueprint and room regions arrays
 	this._blueprint = new Array(this._stories);
 	this._roomRegions = new Array(this._stories);
+	this._rooms = [];
 
 	this._createBlueprint = properties['createBlueprint'] || function() {
 		var floor = Game.TileRepository.create('floor');

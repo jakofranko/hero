@@ -252,7 +252,54 @@ Game.Map.prototype.getTile = function(x, y, z) {
         return this._tiles[z][x][y] || Game.TileRepository.create('null');
     }
 };
+Game.Map.prototype.getTileList = function(type) {
+    debugger;
+    var tileList = [];
+    for(var z = 0; z < this._depth; z++) {
+        if(!tileList[z])
+            tileList[z] = [];
+        for(var x = 0; x < this._width; x++)
+            for(var y = 0; y < this._height; y++)
+                if(this._tiles[z][x][y].describe() === type)
+                    tileList[z].push(x + ',' + y);
+    }
 
+    return tileList;
+};
+Game.Map.prototype.findNearestDownStair = function(x, y, z) {
+    debugger;
+    var nearestIndex = null,
+        nearestDistance = null;
+    for (var i = 0; i < this._downStairs[z].length; i++) {
+        var split = this._downStairs[z][i].split(","),
+            currentX = split[0],
+            currentY = split[1],
+            distance = Game.Geometry.distance(x, y, currentX, currentY);
+
+        if(nearestDistance === null || distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestIndex = i;
+        }
+    }
+    return this._downStairs[z][nearestIndex];
+};
+Game.Map.prototype.findNearestUpStair = function(x, y, z) {
+    debugger;
+    var nearestIndex = null,
+        nearestDistance = null;
+    for (var i = 0; i < this._upStairs[z].length; i++) {
+        var split = this._upStairs[z][i].split(","),
+            currentX = split[0],
+            currentY = split[1],
+            distance = Game.Geometry.distance(x, y, currentX, currentY);
+
+        if(nearestDistance === null || distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestIndex = i;
+        }
+    }
+    return this._upStairs[z][nearestIndex];
+};
 // FOV
 Game.Map.prototype.setupFov = function() {
     // Keep this in 'map' variable so that we don't lose it.
