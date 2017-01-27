@@ -23,8 +23,8 @@ var Game = {
 	_startTime: '0700',
 
 	// NPC Settings
-	_totalEntities: 100,
-	_totalCriminals: 25,
+	_totalEntities: 500,
+	_totalCriminals: 100,
 
 	getDisplay: function() {
 		return this._display;

@@ -45,6 +45,12 @@ Game.LotRepository.define('building', {
 
 		var building = this.getBuildings()[0];
 		building.build();
+
+		// Add building's job locaitons to lot job locations
+		debugger;
+		this.setCompanies(building.getCompanies());
+
+		// Set up dimensions and fetch the blueprint
 		var buildingMidWidth = building.getMidWidth();
 		var buildingMidHeight = building.getMidHeight();
 		var b = building.getBlueprint();

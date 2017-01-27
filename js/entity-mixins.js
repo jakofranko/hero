@@ -698,9 +698,11 @@ Game.EntityMixins.JobActor = {
     name: 'JobActor',
     groupName: 'Actor',
     init: function(template) {
+        this._jobTitle = template['jobTitle'] || null;
         this._jobs = template['jobs'] || ['survive'];
         this._jobPriority = template['jobPriority'] || {};
         this._lastJobPrioritization = 0;
+        this._jobLocation = template['jobLocation'] || null;
         this._path = [];
     },
     act: function() {
@@ -769,6 +771,12 @@ Game.EntityMixins.JobActor = {
         }
         this._lastJobPrioritization = this._map.getTime().getHours();
     },
+    getJobTitle: function() {
+        return this._jobTitle;
+    },
+    setJobTitle: function(title) {
+        this._jobTitle = title;
+    },
     getPath: function() {
         return this._path;
     },
@@ -777,6 +785,16 @@ Game.EntityMixins.JobActor = {
     },
     setPath: function(path) {
         this._path = path;
+    },
+    getJobLocation: function() {
+        return this._jobLocation;
+    },
+    setJobLocation: function(jobLocation) {
+        this._jobLocation = jobLocation;
+    },
+    isAtJobLocation: function() {
+        var currentLocation = this.getX() + "," + this.getY() + "," + this.getZ();
+        return currentLocation === this._jobLocation;
     },
     listeners: {
         onRegainConsciousness: function() {

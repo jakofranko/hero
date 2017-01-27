@@ -37,6 +37,9 @@ Game.Lot = function(properties) {
 	}
 
 	this._items = properties['items'] || {};
+
+	this._jobLocations = properties['jobLocations'] || [];
+	this._companies = properties['companies'] || [];
 };
 // Make items inherit all the functionality from glyphs
 Game.Lot.extend(Game.DynamicGlyph);
@@ -62,7 +65,22 @@ Game.Lot.prototype.getWidth = function() {
 Game.Lot.prototype.getHeight = function() {
 	return this._height;
 };
-
+Game.Lot.prototype.getJobLocations = function() {
+	return this._jobLocations;
+};
+Game.Lot.prototype.setJobLocations = function(jobLocations) {
+	this._jobLocations = jobLocations;
+};
+Game.Lot.prototype.addJobLocation = function(location) {
+	if(this._jobLocations.indexOf(location) < 0)
+		this._jobLocations.push(location);
+};
+Game.Lot.prototype.getCompanies = function() {
+	return this._companies;
+};
+Game.Lot.prototype.setCompanies = function(companie) {
+	this._companies = companies;
+};
 // Used during city generation to determine whether or not
 // a lot will be placed based on the frequency those lots
 // appear in a given neigborhood.
@@ -144,6 +162,10 @@ Game.Lot.prototype.placeCenteredBuilding = function(lotTiles, building) {
 	var centerY = this.getMidHeight();
 
 	building.build();
+	// Add building's job locaitons to lot job locations
+	debugger;
+	this.setCompanies(building.getCompanies());
+
 	var buildingMidWidth = building.getMidWidth();
 	var buildingMidHeight = building.getMidHeight();
 	var b = building.getBlueprint();

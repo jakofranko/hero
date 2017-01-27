@@ -14,6 +14,10 @@ Game.Map = function(size, player) {
     this._width = this._tiles[0].length;
     this._height = this._tiles[0][0].length;
 
+    // Cache certain tile types for path-finding
+    this._downStairs = this.getTileList('stairsDown');
+    this._upStairs = this.getTileList('stairsUp');
+
     // Setup the field of visions
     this._fov = [];
     this.setupFov();
@@ -192,6 +196,8 @@ Game.Map.prototype.post12Recovery = function() {
             this._entities[e].raiseEvent('post12Recovery');
     }
 };
+
+// TODO: Give entities jobs at companies upon creation
 Game.Map.prototype._generateEntities = function() {
     var criminals = 0;
     for (var i = 0; i < Game.getTotalEntities(); i++) {

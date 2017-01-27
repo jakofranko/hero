@@ -21,6 +21,11 @@ Game.Building = function(properties) {
 		// this.name = Game.Building.randomName();
 	}
 
+	// Company generator and jobLocation storage
+	this._companyGenerator = new Game.CompanyGenerator();
+	this._companies = [];
+	this._jobLocations = [];
+
 	// Map of item locations
 	this._items = properties['items'] || {};
 
@@ -396,11 +401,31 @@ Game.Building = function(properties) {
 								) {
 									var chair = Game.ItemRepository.create('chair');
 									this.addItem(offsetX, offsetY, z, chair);
+
+									// Add this to a list of job locations
+									this.addJobLocation(offsetX + ',' + offsetY + ',' + z);
 								}
 							}
 						}
 					}
 				}
+			}
+			this._rooms[z] = rooms;
+		}
+	};
+
+	this._placeJobs = properties['placeJobs'] || function() {
+		debugger;
+		var company = this._companyGenerator.generate('corp');
+		this._companies.push(company);
+
+		while(this._jobLocations.length) {
+			if(company.getAvailablePositions() > 0)
+				company.addJobLocation(this._jobLocations.shift());
+			else {
+				company = this._companyGenerator.generate('corp');
+				this._companies.push(company);
+				company.addJobLocation(this._jobLocations.shift());
 			}
 		}
 	};
@@ -410,16 +435,16 @@ Game.Building = function(properties) {
 		// wall (including windows), doors, and optional stairways
 		this._createBlueprint();
 		
-		if(this._stories > 1) {
+		if(this._stories > 1)
 			this._placeStairs();
-		}
-		if(this._roomNumber !== false) {
+
+		if(this._roomNumber !== false)
 			this._placeRooms();
-		}
 
 		this._generateRoomRegions();
 		this._placeDoors();
 		this._placeItems();
+		this._placeJobs();
 	};
 };
 Game.Building.prototype.getWidth = function() {
@@ -443,7 +468,16 @@ Game.Building.prototype.getBlueprint = function() {
 Game.Building.prototype.getName = function() {
 	return this._name;
 };
-
+Game.Building.prototype.getJobLocations = function() {
+	return this._jobLocations;
+};
+Game.Building.prototype.addJobLocation = function(location) {
+	if(this._jobLocations.indexOf(location) < 0)
+		this._jobLocations.push(location);
+};
+Game.Building.prototype.getCompanies = function() {
+	return this._companies;
+};
 Game.Building.prototype._sliceMethod = function(floor) {
 	// This assumes that the perimeter tiles are outerWalls, 
 	// and that rooms should be placed within the perimeter.
