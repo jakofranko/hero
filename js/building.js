@@ -421,7 +421,7 @@ Game.Building = function(properties) {
 		this._companies.push(company);
 
 		while(this._jobLocations.length) {
-			if(company.getAvailablePositions() > 0)
+			if(company.getJobLocations().length <= company.getAvailablePositions())
 				company.addJobLocation(this._jobLocations.shift());
 			else {
 				company = this._companyGenerator.generate('corp');

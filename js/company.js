@@ -193,6 +193,9 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 		addJobLocation: function(location) {
 			if(this.jobLocations.indexOf(location) < 0)
 				this.jobLocations.push(location);
+		},
+		getJobLocations: function() {
+			return this.jobLocations;
 		}
 	};
 	if(type === 'corp' && this.getTotalJobs() >= 10) {
