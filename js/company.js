@@ -1,7 +1,7 @@
 // TODO: Have this create different types of companies based on the size and other demographics of the city
 // TODO: Add special generator for News companies (like stores and corps)
 Game.CompanyGenerator = function() {
-	this._totalJobs = Game.getTotalEntities();
+	this._totalJobs = Game.getAvailableJobs();
 	this._usedCorpNames = [];
 	this._usedStoreNames = [];
 	this._corpNames = [
@@ -28,7 +28,8 @@ Game.CompanyGenerator = function() {
 		'Solutions',
 		'Security',
 		'Defense',
-		'Designs'
+		'Designs',
+		'Consolidated'
 	];
 	this._corpTypes = [
 		'Inc.',
@@ -91,8 +92,13 @@ Game.CompanyGenerator = function() {
 Game.CompanyGenerator.prototype.getTotalJobs = function(amount) {
 	return this._totalJobs;
 };
+Game.CompanyGenerator.prototype.addTotalJobs = function(amount) {
+	this._totalJobs += amount;
+	Game.addAvailableJobs(amount);
+};
 Game.CompanyGenerator.prototype.decreaseTotalJobs = function(amount) {
 	this._totalJobs -= amount;
+	Game.decreaseAvailableJobs(amount);
 };
 Game.CompanyGenerator.prototype.addUsedCorpName = function(corpName) {
 	this._usedCorpNames.push(corpName);
@@ -106,7 +112,7 @@ Game.CompanyGenerator.prototype.addUsedStoreName = function(corpName) {
 Game.CompanyGenerator.prototype.getUsedStoreNames = function() {
 	return this._usedStoreNames;
 };
-Game.CompanyGenerator.prototype._generateCorpName = function() {
+Game.CompanyGenerator.prototype._generateStoreName = function() {
 	var prefixChance = Math.round(Math.random()),
 		storeName = this._storeNames.random(),
 		storePrefix = prefixChance ? this._storePrefixes.random() : '';
@@ -117,7 +123,7 @@ Game.CompanyGenerator.prototype._generateCorpName = function() {
 
 	return finalName;
 };
-Game.CompanyGenerator.prototype._generateStoreName = function() {
+Game.CompanyGenerator.prototype._generateCorpName = function() {
 	var industryChance = Math.round(Math.random()),
 		typeChance = Math.round(Math.random()),
 		corpName = this._corpNames.random(),
@@ -154,12 +160,12 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 				entity.setJobTitle(this.titles.random());
 
 				// Add to the employee roster
-				employees.push(entity);
+				this.employees.push(entity);
 				this.occupiedPositions++;
 			}
 		},
 		removeEmployee: function(i) {
-			var entity = employees[i],
+			var entity = this.employees[i],
 				jobLocation = entity.getJobLocation();
 
 			this.jobLocations.push(jobLocation);
@@ -188,7 +194,7 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 			return false;
 		},
 		getAvailablePositions: function() {
-			return positions - occupiedPositions;
+			return this.positions - this.occupiedPositions;
 		},
 		addJobLocation: function(location) {
 			if(this.jobLocations.indexOf(location) < 0)
@@ -211,8 +217,10 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 			corpTries++;
 		} while(usedCorpNames.indexOf(corpName) >= 0 && corpTries < 100);
 
-		if(corpTries <= 100) 
+		if(corpTries >= 100) {
+			debugger;
 			return false;
+		}
 		else {
 			this.addUsedCorpName(corpName);
 
@@ -234,7 +242,7 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 			storeTries++;
 		} while(usedStoreNames.indexOf(storeName) >= 0 && storeTries < 100);
 
-		if(storeTries <= 100) 
+		if(storeTries >= 100) 
 			return false;
 		else {
 			this.addUsedStoreName(storeName);
@@ -244,5 +252,8 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 			company.titles = this._storeTitles;
 			return company;
 		}
+	} else {
+		console.log("Out of job positions");
+		return false;
 	}
 };

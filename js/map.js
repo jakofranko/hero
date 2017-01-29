@@ -199,7 +199,9 @@ Game.Map.prototype.post12Recovery = function() {
 
 // TODO: Give entities jobs at companies upon creation
 Game.Map.prototype._generateEntities = function() {
-    var criminals = 0;
+    var criminals = 0,
+        companies = this._city.getCompanies(),
+        currentCompany = 0;
     for (var i = 0; i < Game.getTotalEntities(); i++) {
         // The template has to be created each time, because making it once
         // outside the loop and then changing it changes all entities
@@ -220,7 +222,15 @@ Game.Map.prototype._generateEntities = function() {
             };
         }
 
-        this.addEntityAtRandomPosition(Game.EntityRepository.createEntity('person', template), 0);
+        var entity = Game.EntityRepository.createEntity('person', template);
+
+        // Give the entity a job
+        if(companies[currentCompany].getAvailablePositions() <= 0)
+            currentCompany++;
+
+        companies[currentCompany].addEmployee(entity);
+
+        this.addEntityAtRandomPosition(entity, 0);
 
         if(template.jobs.indexOf('mugger') > -1)
             criminals++;

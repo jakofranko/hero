@@ -40,7 +40,10 @@ Game.Tasks.approach = function(entity, target) {
 	    // Update the entity's path and make the first step
 	    entity.setPath(entityPath);
 	    var step = entity.getNextStep();
-	    entity.tryMove(step[0], step[1], step[2]);
+
+	    // TODO: This might cause some entities to freeze...
+	    if(step && step.length)
+	    	entity.tryMove(step[0], step[1], step[2]);
 	}
 };
 

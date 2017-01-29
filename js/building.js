@@ -416,17 +416,17 @@ Game.Building = function(properties) {
 	};
 
 	this._placeJobs = properties['placeJobs'] || function() {
-		debugger;
 		var company = this._companyGenerator.generate('corp');
 		this._companies.push(company);
 
-		while(this._jobLocations.length) {
-			if(company.getJobLocations().length <= company.getAvailablePositions())
+		while(this._jobLocations.length && company) {
+			if(company.getJobLocations().length < company.getAvailablePositions())
 				company.addJobLocation(this._jobLocations.shift());
 			else {
+				// If jobs have been filled or there is an error, company will return false
 				company = this._companyGenerator.generate('corp');
-				this._companies.push(company);
-				company.addJobLocation(this._jobLocations.shift());
+				if(company)
+					this._companies.push(company);
 			}
 		}
 	};

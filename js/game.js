@@ -25,6 +25,7 @@ var Game = {
 	// NPC Settings
 	_totalEntities: 500,
 	_totalCriminals: 100,
+	_availableJobs: 500 - 100,
 
 	getDisplay: function() {
 		return this._display;
@@ -68,6 +69,21 @@ var Game = {
 	},
 	getTotalCriminals: function() {
 		return this._totalCriminals;
+	},
+	getAvailableJobs: function() {
+		return this._availableJobs;
+	},
+	addAvailableJobs: function(amount) {
+		if(amount)
+			this._availableJobs += amount;
+		else
+			this._availableJobs++;
+	},
+	decreaseAvailableJobs: function(amount) {
+		if(amount)
+			this._availableJobs -= amount;
+		else
+			this._availableJobs--;
 	},
 	init: function() {
 		// Create player entity

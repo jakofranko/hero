@@ -78,7 +78,7 @@ Game.Lot.prototype.addJobLocation = function(location) {
 Game.Lot.prototype.getCompanies = function() {
 	return this._companies;
 };
-Game.Lot.prototype.setCompanies = function(companie) {
+Game.Lot.prototype.setCompanies = function(companies) {
 	this._companies = companies;
 };
 // Used during city generation to determine whether or not
@@ -163,7 +163,6 @@ Game.Lot.prototype.placeCenteredBuilding = function(lotTiles, building) {
 
 	building.build();
 	// Add building's job locaitons to lot job locations
-	debugger;
 	this.setCompanies(building.getCompanies());
 
 	var buildingMidWidth = building.getMidWidth();

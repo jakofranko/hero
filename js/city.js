@@ -29,6 +29,8 @@ Game.City = function(size) {
 	this._roadFrequency = 0.4;
 
 	this._items = {};
+
+	this._companies = [];
 	this._jobLocations = [];
 };
 // Getters and setters
@@ -42,13 +44,13 @@ Game.City.prototype.getLots = function() {
 	return this._lots;
 };
 Game.City.prototype.getJobLocations = function() {
-	this._jobLocations;
+	return this._jobLocations;
 };
 Game.City.prototype.addJobLocations = function(locations) {
 	this._jobLocations = this._jobLocations.concat(locations);
 };
 Game.City.prototype.getCompanies = function() {
-	this._companies;
+	return this._companies;
 };
 Game.City.prototype.addCompanies = function(companies) {
 	this._companies = this._companies.concat(companies);
@@ -163,9 +165,11 @@ Game.City.prototype.tilesFromLots = function() {
 			// Returns a 3-dimensional array of lot tiles
 			var tiles = this._lots[cityX][cityY].getTiles();
 
-			// Now that the tiles have been instantiated, add the job locations of the
-			// lot to the job locations of the city
-			this.addCompanies(this._lots[cityX][cityY].getCompanies());
+			// Now that the tiles have been instantiated, add the lot's companies
+			// to the total list of city companies
+			var lotCompanies = this._lots[cityX][cityY].getCompanies();
+			if(lotCompanies.length > 0)
+				this.addCompanies(lotCompanies);
 
 			// Load these tiles into the map at the appropriate
 			// offset based on which lot we're in. For reference:
