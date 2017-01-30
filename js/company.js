@@ -152,6 +152,7 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 				var jobLocation = this.jobLocations.random(),
 					jobIndex = this.jobLocations.indexOf(jobLocation);
 				entity.setJobLocation(jobLocation);
+				entity.setJobCompany(this.name);
 
 				// Remove this location from the available locations
 				this.jobLocations.splice(jobIndex, 1);

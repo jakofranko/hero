@@ -19,7 +19,8 @@ Game.EntityRepository.createEntity = function(name, template) {
 };
 
 Game.PlayerTemplate = {
-    name: 'human (you)',
+    name: 'human',
+    description: 'It\'s you!',
     character: '@',
     foreground: 'white',
     maxHp: 40,

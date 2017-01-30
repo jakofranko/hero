@@ -699,6 +699,7 @@ Game.EntityMixins.JobActor = {
     groupName: 'Actor',
     init: function(template) {
         this._jobTitle = template['jobTitle'] || null;
+        this._jobCompany = null;
         this._jobs = template['jobs'] || ['survive'];
         this._jobPriority = template['jobPriority'] || {};
         this._lastJobPrioritization = 0;
@@ -777,6 +778,12 @@ Game.EntityMixins.JobActor = {
     setJobTitle: function(title) {
         this._jobTitle = title;
     },
+    getJobCompany: function() {
+        return this._jobCompany;
+    },
+    setJobCompany: function(title) {
+        this._jobCompany = title;
+    },
     getPath: function() {
         return this._path;
     },
@@ -819,6 +826,12 @@ Game.EntityMixins.JobActor = {
                         this.setReaction(false);
                 }
             }
+        },
+        details: function() {
+            return [
+                { key: 'Job Title', value: this.getJobTitle() },
+                {key: 'Employer', value: this.getJobCompany() }
+            ];
         }
     }
 };
