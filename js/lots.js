@@ -124,7 +124,7 @@ Game.LotRepository.define('building', {
 		var companyNames = building.getCompanies().map(function(company) {
 			return company.name;
 		});
-		companyNames.unshift('Company Directory');
+		companyNames.unshift('Company Directory:');
 		this.addItem(cornerX + signOffsetX, cornerY + signOffsetY, 0, Game.ItemRepository.create('sign', {inscription: companyNames.join("\n")}));
 
 		return tiles;
