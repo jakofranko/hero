@@ -93,7 +93,7 @@ Game.Jobs.mugger = {
 			}
 
 			if(target.hasMixin('MemoryMaker')) {
-				target.remember('events', false, 'mugged by ' + entity.describe(), {entity: entity, expires: 50});
+				target.remember('events', false, 'mugged by ' + entity.getName(), {entity: entity, expires: 50});
 			}
 		} else {
 			entity.steal(target, target.getMoney());

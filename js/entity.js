@@ -78,14 +78,14 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
     
 	// If our z level changed, check if we are on stair
 	if(z > this.getZ()) {
-		if(tile.describe() != 'stairsUp') {
+		if(tile.getName() != 'stairsUp') {
 			Game.sendMessage(this, "You can't go up here!");
 		} else {
 			Game.sendMessage(this, "You ascend to level %s!", [z + 1]);
 			this.setPosition(x, y, z);
 		}
 	} else if(z < this.getZ()) {
-		if (tile.describe() != 'stairsDown') {
+		if (tile.getName() != 'stairsDown') {
             Game.sendMessage(this, "You can't go down here!");
         } else {
             this.setPosition(x, y, z);
@@ -179,24 +179,6 @@ Game.Entity.prototype.switchMap = function(newMap) {
     // Add to the new map
     newMap.addEntity(this);
 };
-Game.Entity.prototype.describeA = function(capitalize) {
-    // Optional parameter to capitalize the a/an.
-    var prefixes = capitalize ? ['A', 'An'] : ['a', 'an'];
-    var string = this._type;
-    var firstLetter = string.charAt(0).toLowerCase();
-    // If word starts by a vowel, use an, else use a. Note that this is not perfect.
-    var prefix = 'aeiou'.indexOf(firstLetter) >= 0 ? 1 : 0;
-
-    return prefixes[prefix] + ' ' + string;
-};
-Game.Entity.prototype.describeThe = function(capitalize) {
-    var prefix = capitalize ? 'The' : 'the';
-    if(this._shortDescription) {
-        return prefix + ' ' + this._shortDescription;
-    } else {
-        return prefix + ' ' + this._type;
-    }
-};
-Game.Entity.prototype.describe = function() {
+Game.Entity.prototype.getDescription = function() {
     return this._description;
 };

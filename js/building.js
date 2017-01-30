@@ -110,7 +110,7 @@ Game.Building = function(properties) {
 						tile = horizontalWall;
 					} else if(x === 0 || x == sWidth - 1) {
 						tile = verticalWall;
-					} else if(!stairsPlaced && z < this.getStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].describe() !== 'stairsDown') {
+					} else if(!stairsPlaced && z < this.getStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].getName() !== 'stairsDown') {
 						tile = stairsUp;
 						stairsPlaced = true;
 					}
@@ -341,7 +341,7 @@ Game.Building = function(properties) {
 							floorKeys: []
 						};
 					}
-					var description = this._blueprint[z][x][y].describe();
+
 					if(roomNumber !== 0) {
 						var key = x + "," + y;
 						rooms[roomNumber].floorKeys.push(key);
@@ -398,7 +398,7 @@ Game.Building = function(properties) {
 
 								if(
 									rooms[room].floorKeys.indexOf(offsetX + "," + offsetY) > -1 &&
-									this._blueprint[z][offsetX][offsetY].describe() == 'floor'
+									this._blueprint[z][offsetX][offsetY].getName() == 'floor'
 								) {
 									var chair = Game.ItemRepository.create('chair');
 									this.addItem(offsetX, offsetY, z, chair);
@@ -506,7 +506,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 			if(sliceOrientation == 'vertical') {
 				var randomX = Game.getRandomInRange(2, this._width - 2);
 				for (var i = 0; i < this._height; i++) {
-					if(floor[randomX][i].describe() == 'floor') {
+					if(floor[randomX][i].getName() === 'floor') {
 						currentWall.push({x: randomX, y: i});
 					} else if((floor[randomX][i].isInnerWall() && count + 2 <= this._roomNumber) || floor[randomX][i].isOuterWall()) {
 						continue;
@@ -517,7 +517,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 			} else if(sliceOrientation == 'horizontal') {
 				var randomY = Game.getRandomInRange(2, this._height - 2);
 				for (var i = 0; i < this._width; i++) {
-					if(floor[i][randomY].describe() == 'floor') {
+					if(floor[i][randomY].getName() === 'floor') {
 						currentWall.push({x: i, y: randomY});
 					} else if((floor[i][randomY].isInnerWall() && count + 2 <= this._roomNumber) || floor[i][randomY].isOuterWall()) {
 						continue;
@@ -711,7 +711,7 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 	} else {
 		for (var x = 0; x < floor.length; x++) {
 			for (var y = 0; y < floor[x].length; y++) {
-				if(floor[x][y].describe() == 'stairsDown') {
+				if(floor[x][y].getName() === 'stairsDown') {
 					startX = x;
 					startY = y;
 					break;

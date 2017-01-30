@@ -540,7 +540,7 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
             display.drawText(
                 0,
                 2 + row,
-                letter + ' ' + selectionState + ' ' + this._items[i].describe() + stack,
+                letter + ' ' + selectionState + ' ' + this._items[i].getName() + stack,
                 colWidth
             );
             row++;
@@ -566,7 +566,7 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
                 display.drawText(
                     midPoint + 1,
                     2 + altRow,
-                    altLetter + ' ' + altSelectionState + ' ' + this._altItems[k].describe() + altStack,
+                    altLetter + ' ' + altSelectionState + ' ' + this._altItems[k].getName() + altStack,
                     colWidth
                 );
                 altRow++;

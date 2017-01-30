@@ -41,7 +41,7 @@ Game.Tile.prototype.setInnerWall = function(innerWall) {
 Game.Tile.prototype.getDescription = function() {
     return this._description;
 };
-Game.Tile.prototype.describe = function() {
+Game.Tile.prototype.getName = function() {
     return this._name;
 };
 Game.getNeighborPositions = function(x, y) {

@@ -69,7 +69,7 @@ Game.Tasks.goToWork = function(entity) {
 		var nextStep = entity.getNextStep();
 		entity.tryMove(nextStep[0], nextStep[1], nextStep[2]);
 	} else {
-		console.log(entity.describe() + ": I made it to work!");
+		console.log(entity.getName() + ": I made it to work!");
 	}
 };
 

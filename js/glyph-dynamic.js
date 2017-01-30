@@ -78,10 +78,10 @@ Game.DynamicGlyph.prototype.details = function() {
     var details = [];
     var detailGroups = this.raiseEvent('details');
     // Iterate through each return value, grabbing the details from the arrays.
-    if (detailGroups) {
-        for (var i = 0, l = detailGroups.length; i < l; i++) {
-            if (detailGroups[i]) {
-                for (var j = 0; j < detailGroups[i].length; j++) {
+    if(detailGroups) {
+        for(var i = 0, l = detailGroups.length; i < l; i++) {
+            if(detailGroups[i]) {
+                for(var j = 0; j < detailGroups[i].length; j++) {
                     details.push(detailGroups[i][j].key + ': ' +  detailGroups[i][j].value);          
                 }
             }
@@ -95,7 +95,7 @@ Game.DynamicGlyph.prototype.describe = function() {
 Game.DynamicGlyph.prototype.describeA = function(capitalize) {
     // Optional parameter to capitalize the a/an.
     var prefixes = capitalize ? ['A', 'An'] : ['a', 'an'];
-    var string = this.describe();
+    var string = this.getName();
     var firstLetter = string.charAt(0).toLowerCase();
     // If word starts by a vowel, use an, else use a. Note that this is not perfect.
     var prefix = 'aeiou'.indexOf(firstLetter) >= 0 ? 1 : 0;
@@ -104,7 +104,7 @@ Game.DynamicGlyph.prototype.describeA = function(capitalize) {
 };
 Game.DynamicGlyph.prototype.describeThe = function(capitalize) {
     var prefix = capitalize ? 'The' : 'the';
-    return prefix + ' ' + this.describe();
+    return prefix + ' ' + this.getName();
 };
 
 Game.DynamicGlyph.prototype.raiseEvent = function(event) {

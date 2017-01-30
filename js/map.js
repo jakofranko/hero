@@ -240,7 +240,7 @@ Game.Map.prototype._generateEntities = function() {
 // Floors
 Game.Map.prototype.isEmptyFloor = function(x, y, z) {
     // Check if the tile is floor and also has no entity
-    return this.getTile(x, y, z).describe() == 'floor' && !this.getEntityAt(x, y, z);
+    return this.getTile(x, y, z).getName() == 'floor' && !this.getEntityAt(x, y, z);
 };
 Game.Map.prototype.getRandomFloorPosition = function(z) {
 	var x, y;
@@ -263,21 +263,19 @@ Game.Map.prototype.getTile = function(x, y, z) {
     }
 };
 Game.Map.prototype.getTileList = function(type) {
-    debugger;
     var tileList = [];
     for(var z = 0; z < this._depth; z++) {
         if(!tileList[z])
             tileList[z] = [];
         for(var x = 0; x < this._width; x++)
             for(var y = 0; y < this._height; y++)
-                if(this._tiles[z][x][y].describe() === type)
+                if(this._tiles[z][x][y].getName() === type)
                     tileList[z].push(x + ',' + y);
     }
 
     return tileList;
 };
 Game.Map.prototype.findNearestDownStair = function(x, y, z) {
-    debugger;
     var nearestIndex = null,
         nearestDistance = null;
     for (var i = 0; i < this._downStairs[z].length; i++) {
@@ -294,7 +292,6 @@ Game.Map.prototype.findNearestDownStair = function(x, y, z) {
     return this._downStairs[z][nearestIndex];
 };
 Game.Map.prototype.findNearestUpStair = function(x, y, z) {
-    debugger;
     var nearestIndex = null,
         nearestDistance = null;
     for (var i = 0; i < this._upStairs[z].length; i++) {
@@ -346,13 +343,13 @@ Game.Map.prototype._setupExploredArray = function() {
 };
 Game.Map.prototype.setExplored = function(x, y, z, state) {
     // Only update if the tile is within bounds
-    if (this.getTile(x, y, z).describe() !== 'null') {
+    if (this.getTile(x, y, z).getName() !== 'null') {
         this._explored[z][x][y] = state;
     }
 };
 Game.Map.prototype.isExplored = function(x, y, z) {
     // Only return the value if within bounds
-    if (this.getTile(x, y, z).describe() !== 'null') {
+    if (this.getTile(x, y, z).getName() !== 'null') {
         return this._explored[z][x][y];
     } else {
         return false;

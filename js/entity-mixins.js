@@ -53,7 +53,7 @@ Game.EntityMixins.Attacker = {
         var result = Game.rollDice(dice + "d6");
 
         if(!message)
-            message = "%s makes a presense attack!".format(this.describe());
+            message = "%s makes a presense attack!".format(this.getName());
 
         Game.sendMessageNearby(
             this.getMap(),
@@ -71,12 +71,12 @@ Game.EntityMixins.Attacker = {
             margin = result - target.getEGO();
         } else {
             Game.sendMessage(this, "Your presence attack fails to impress %s", [target.describeThe()]);
-            Game.sendMessage(target, "%s attempted and failed to impress you with a presense attack", [this.describe()]);
+            Game.sendMessage(target, "%s attempted and failed to impress you with a presense attack", [this.getName()]);
             return false;
         }
 
         Game.sendMessage(this, "Your presence attack succeeds in impressing %s by %s points!", [target.describeThe(), margin]);
-        Game.sendMessage(target, "%s has impressed you with a presense attack by %s points!", [this.describe(), margin]);
+        Game.sendMessage(target, "%s has impressed you with a presense attack by %s points!", [this.getName(), margin]);
         return margin;
     },
     _attackRoll: function(target) {
@@ -254,7 +254,7 @@ Game.EntityMixins.Characteristics = {
         // Make sure we don't take any less than zero damage
         this._STUN -= Math.max(0, (STUN - defense));
         if(this._STUN <= 0) {
-            Game.sendMessage(attacker, "You knocked %s unconscious", [this.describe()]);
+            Game.sendMessage(attacker, "You knocked %s unconscious", [this.getName()]);
             this.ko();
         } else {
             if(this.hasMixin('Reactor')) {
@@ -654,7 +654,7 @@ Game.EntityMixins.InventoryHolder = {
     canStackItem: function(item) {
         if(item.hasMixin('Stackable')) {
             for(var i = 0; i < this._items.length; i++) {
-                if(this._items[i].describe() == item.describe()) {
+                if(this._items[i].getName() == item.getName()) {
                     return i;
                 }
             }
@@ -965,11 +965,11 @@ Game.EntityMixins.MemoryMaker = {
                 event.expires = 5;
             }
 
-            this.remember('people', 'enemies', attacker.describe(), enemy);
-            this.remember('events', false, 'attacked by ' + attacker.describe(), event);
+            this.remember('people', 'enemies', attacker.getName(), enemy);
+            this.remember('events', false, 'attacked by ' + attacker.getName(), event);
 
             if(attacker.hasMixin('MemoryMaker')) 
-                attacker.remember('people', 'victims', this.describe(), {entity: this});
+                attacker.remember('people', 'victims', this.getName(), {entity: this});
         }
     }
 };
@@ -1222,12 +1222,12 @@ Game.EntityMixins.Sight = {
     listeners: {
         onCrime: function(entity) {
             if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
-                this.remember('people', 'criminals', entity.describe(), {entity: entity, expires: 200});
+                this.remember('people', 'criminals', entity.getName(), {entity: entity, expires: 200});
             }
         },
         onRepent: function(entity) {
             if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
-                this.forget('people', 'criminals', entity.describe());
+                this.forget('people', 'criminals', entity.getName());
             }
         }
     }
