@@ -254,7 +254,6 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 			return company;
 		}
 	} else {
-		console.log("Out of job positions");
 		return false;
 	}
 };
