@@ -107,3 +107,10 @@ Game.ItemRepository.define('corpse', {
     character: '%',
     foreground: Game.Palette.white,
 });
+
+Game.ItemRepository.define('sign', {
+    name: 'sign',
+    character: '?',
+    foreground: Game.Palette.white,
+    mixins: [Game.ItemMixins.Inscribable]
+});

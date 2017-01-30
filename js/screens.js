@@ -842,25 +842,25 @@ Game.Screen.TargetBasedScreen = function(template) {
         var z = this._player.getZ();
         var map = this._player.getMap();
         // If the tile is explored, we can give a better capton
-        if (map.isExplored(x, y, z)) {
+        if(map.isExplored(x, y, z)) {
             // If the tile isn't explored, we have to check if we can actually 
             // see it before testing if there's an entity or item.
-            if (this._visibleCells[x + ',' + y]) {
+            if(this._visibleCells[x + ',' + y]) {
                 var items = map.getItemsAt(x, y, z);
                 // If we have items, we want to render the top most item
-                if (items) {
+                if(map.getEntityAt(x, y, z)) {
+                    var entity = map.getEntityAt(x, y, z);
+                    return String.format('%s - %s (%s)',
+                        entity.getRepresentation(),
+                        entity.describeA(true),
+                        entity.details());
+                } else if(items) {
                     var item = items[items.length - 1];
                     return String.format('%s - %s (%s)',
                         item.getRepresentation(),
                         item.describeA(true),
                         item.details());
                 // Else check if there's an entity
-                } else if (map.getEntityAt(x, y, z)) {
-                    var entity = map.getEntityAt(x, y, z);
-                    return String.format('%s - %s (%s)',
-                        entity.getRepresentation(),
-                        entity.describeA(true),
-                        entity.details());
                 }
             }
             // If there was no entity/item or the tile wasn't visible, then use
@@ -875,6 +875,33 @@ Game.Screen.TargetBasedScreen = function(template) {
             return String.format('%s - %s',
                 nullTile.getRepresentation(),
                 nullTile.getDescription());
+        }
+    };
+    this._descriptionFunction = template['descriptionFunction'] || function(x, y) {
+        var z = this._player.getZ();
+        var map = this._player.getMap();
+        // If the tile is explored, we can give a better capton
+        if(map.isExplored(x, y, z)) {
+            // If the tile isn't explored, we have to check if we can actually 
+            // see it before testing if there's an entity or item.
+            if(this._visibleCells[x + ',' + y]) {
+                var items = map.getItemsAt(x, y, z);
+                // If we have items, we want to render the top most item
+                if(map.getEntityAt(x, y, z)) {
+                    var entity = map.getEntityAt(x, y, z);
+                    return String.format('%s %s', entity.getDescription(), entity.describe());
+                } else if(items) {
+                    var item = items[items.length - 1];
+                    return String.format('%s %s', item.getDescription(), item.describe());
+                // Else check if there's an entity
+                } else {
+                    return '';
+                }
+            } else {
+                return '';
+            }
+        } else {
+            return '';
         }
     };
 };
@@ -917,8 +944,19 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
     }
 
     // Render the caption at the bottom.
-    display.drawText(0, Game.getScreenHeight() - 1, 
-        this._captionFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY));
+    display.drawText(
+        0,
+        Game.getScreenHeight() - 1,
+        this._captionFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY)
+    );
+
+    // Render the description on the log display
+    Game.getLog().clear();
+    Game.getLog().drawText(
+        0, 
+        0,
+        this._descriptionFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY)
+    );
 };
 Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputData) {
     // Move the cursor
@@ -965,19 +1003,19 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
             if (this._visibleCells[x + ',' + y]) {
                 var items = map.getItemsAt(x, y, z);
                 // If we have items, we want to render the top most item
-                if (items) {
+                if (map.getEntityAt(x, y, z)) {
+                    var entity = map.getEntityAt(x, y, z);
+                    return String.format('%s - %s (%s)',
+                        entity.getRepresentation(),
+                        entity.describeA(true) + ' ('+ entity.getName() + ')',
+                        entity.details());
+                } else if (items) {
                     var item = items[items.length - 1];
                     return String.format('%s - %s (%s)',
                         item.getRepresentation(),
                         item.describeA(true),
                         item.details());
                 // Else check if there's an entity
-                } else if (map.getEntityAt(x, y, z)) {
-                    var entity = map.getEntityAt(x, y, z);
-                    return String.format('%s - %s (%s)',
-                        entity.getRepresentation(),
-                        entity.describeA(true) + ' ('+ entity.getName() + ')',
-                        entity.details());
                 }
             }
             // If there was no entity/item or the tile wasn't visible, then use

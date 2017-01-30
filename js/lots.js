@@ -107,6 +107,26 @@ Game.LotRepository.define('building', {
 			}
 		}
 
+		// Lastly, place a sign that has the names of the companies in each building
+		var signOffsetX = [0, building.getWidth()].random(),
+			signOffsetY = [0, building.getHeight()].random();
+
+		if(signOffsetX === 0)
+			signOffsetX--;
+		else
+			signOffsetX++;
+
+		if(signOffsetY === 0)
+			signOffsetY--;
+		else
+			signOffsetY++;
+
+		var companyNames = building.getCompanies().map(function(company) {
+			return company.name;
+		});
+		companyNames.unshift('Company Directory');
+		this.addItem(cornerX + signOffsetX, cornerY + signOffsetY, 0, Game.ItemRepository.create('sign', {inscription: companyNames.join("\n")}));
+
 		return tiles;
 	}
 });

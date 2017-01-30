@@ -1079,6 +1079,11 @@ Game.EntityMixins.PlayerActor = {
         this.getMap().getEngine().lock();
         this.clearMessages();
         this._acting = false;
+    },
+    listeners: {
+        describe: function() {
+            return ['Strapping muscles and dashing good looks', 'Everyone that looks upon you shall despair'];
+        }
     }
 };
 Game.EntityMixins.PlayerStatGainer = {

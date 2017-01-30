@@ -133,7 +133,8 @@ var Game = {
         	this._characterStats.render(this._stats);	
         }
 
-        this.displayMessages(player);
+        if(player)
+        	this.displayMessages(player);
     },
     sendMessage: function(recipient, message, args) {
 		// Make sure the recipient can receive messages

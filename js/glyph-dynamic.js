@@ -90,7 +90,19 @@ Game.DynamicGlyph.prototype.details = function() {
     return details.join(', ');
 };
 Game.DynamicGlyph.prototype.describe = function() {
-    return this._name;
+    var descriptions = [];
+    var descriptionGroups = this.raiseEvent('describe');
+    // Iterate through each return value, grabbing the descriptions from the arrays.
+    if(descriptionGroups) {
+        for(var i = 0, l = descriptionGroups.length; i < l; i++) {
+            if(descriptionGroups[i]) {
+                for(var j = 0; j < descriptionGroups[i].length; j++) {
+                    descriptions.push(descriptionGroups[i][j]);          
+                }
+            }
+        }
+    }
+    return descriptions.join('. ');
 };
 Game.DynamicGlyph.prototype.describeA = function(capitalize) {
     // Optional parameter to capitalize the a/an.
