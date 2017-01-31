@@ -202,6 +202,7 @@ Game.Map.prototype._generateEntities = function() {
     var criminals = 0,
         companies = this._city.getCompanies(),
         currentCompany = 0;
+    var addedWork = false;
     for (var i = 0; i < Game.getTotalEntities(); i++) {
         // The template has to be created each time, because making it once
         // outside the loop and then changing it changes all entities
@@ -229,6 +230,11 @@ Game.Map.prototype._generateEntities = function() {
             currentCompany++;
 
         companies[currentCompany].addEmployee(entity);
+        if(!addedWork) {
+            addedWork = true;
+            entity.addJob('work');
+        }
+
 
         this.addEntityAtRandomPosition(entity, 0);
 

@@ -24,7 +24,7 @@ var Game = {
 
 	// NPC Settings
 	_totalEntities: 500,
-	_totalCriminals: 100,
+	_totalCriminals: 10,
 	_availableJobs: 500 - 100,
 
 	getDisplay: function() {

@@ -185,12 +185,15 @@ Game.Screen.playScreen = {
         // Render player stats and time
         var stats = '%c{white}%b{black}';
         stats += String.format(
-            'HP: %s/%s XP: %s Money: $%s %s',
+            'HP: %s/%s XP: %s Money: $%s %s, x: %s y: %s z: %s',
             this._player.getHp(),
             this._player.getMaxHp(),
             this._player.getExperiencePoints(),
             this._player.getMoney(),
-            this._player.getMap().getTime().clock()
+            this._player.getMap().getTime().clock(),
+            this._player.getX(),
+            this._player.getY(),
+            this._player.getZ()
         );
         display.drawText(0, screenHeight, stats);
     },
