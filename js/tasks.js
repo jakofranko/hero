@@ -46,12 +46,15 @@ Game.Tasks.approach = function(entity, target) {
 	    	entity.tryMove(step[0], step[1], step[2]);
 	}
 };
-
+Game.Tasks.doWork = function(entity) {
+	var phrases = ["I'm totally working right now", "This is me, and I'm working", "Can you see me right now? I am so totally working.", "Work it, work it, work it"];
+	Game.sendMessageNearby(entity.getMap(), entity.getX(), entity.getY(), entity.getZ(), phrases.random());
+};
 Game.Tasks.goToWork = function(entity) {
-	var entityPath = entity.getPath();
-	if(!entity.isAtJobLocation() && !entityPath.length) {
-		var jobLocation = entity.getJobLocation(),
-			split = jobLocation.split(","),
+	var entityPath = entity.getPath(),
+		jobLocation = entity.getJobLocation();
+	if(jobLocation && !entity.isAtJobLocation() && !entityPath.length) {
+		var split = jobLocation.split(","),
 			destX = split[0],
 			destY = split[1],
 			destZ = split[2];
@@ -77,7 +80,10 @@ Game.Tasks.goToWork = function(entity) {
 // (I think the solution here would be to have them go to the ground level if they aren't already)
 Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
 	var map = entity.getMap(),
-		newPath = [];
+		newPath = [],
+		destX = Number(destX),
+		destY = Number(destY),
+		destZ = Number(destZ);
 	if(!currentPath)
 		currentPath = [];
 
@@ -89,11 +95,10 @@ Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
 	// stairs that are closest to the destination.
 	if(destZ < entity.getZ()) { // Entity is above destination
 		// Find the nearest up stair to the destiniation (since the destiniation is below)
-		var nearestUpStair = map.getNearestUpStair(destX, destY, destZ),
+		var nearestUpStair = map.findNearestUpStair(destX, destY, destZ),
 			splitNUS = nearestUpStair.split(","),
-			usX = splitNUS[0],
-			usY = split[1],
-			usZ = split[2];
+			usX = +splitNUS[0],
+			usY = +splitNUS[1];
 
 		// Instantiate a path with the target being the destination
 		var pathFromUpStair = new ROT.Path.AStar(destX, destY, function(x, y) {
@@ -102,7 +107,7 @@ Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
 
 		// Add the path from the upstair to the destination
 		pathFromUpStair.compute(usX, usY, function(x, y) {
-			newPath.push([x, y, usZ]);
+			newPath.push([x, y, destZ]);
 		});
 
 		if(newPath.length <= 0)
@@ -110,20 +115,19 @@ Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
 
 		// Recurse with new path, the new destination being the tile above the upstair
 		// which should be the corresponding down stair.
-		return Game.Tasks.getPath(entity, usX, usY, usZ + 1, newPath.concat(currentPath));
+		return Game.Tasks.getPath(entity, usX, usY, destZ + 1, newPath.concat(currentPath));
 	} else if(destZ > entity.getZ()) { // entity is below the destination
-		var nearestDownStair = map.getNearestDownStair(destX, destY, destZ),
+		var nearestDownStair = map.findNearestDownStair(destX, destY, destZ),
 			splitNDS = nearestDownStair.split(","),
-			dsX = splitNDS[0],
-			dsY = split[1],
-			dsZ = split[2];
+			dsX = +splitNDS[0],
+			dsY = +splitNDS[1];
 		var pathFromDownStair = new ROT.Path.AStar(destX, destY, function(x, y) {
 			return map.getTile(x, y, destZ).isWalkable();
 		});
 
 		// Add the pathed moves to the existing path, and then try call this function again.
 		pathFromDownStair.compute(dsX, dsY, function(x, y) {
-			newPath.push([x, y, dsZ]);
+			newPath.push([x, y, destZ]);
 		});
 
 		if(newPath.length <= 0)
@@ -131,7 +135,7 @@ Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
 
 		// Recurse with new path, which is a combo of the new path + the old path (in that order),
 		// attempting to find a path to tile beneath the downstair, which should be an upstair
-		return Game.Tasks.getPath(entity, dsX, dsY, dsZ - 1, newPath.concat(currentPath));
+		return Game.Tasks.getPath(entity, dsX, dsY, destZ - 1, newPath.concat(currentPath));
 	} else {
 		var pathToDest = new ROT.Path.AStar(destX, destY, function(x, y) {
 			return map.getTile(x, y, destZ).isWalkable();
@@ -160,7 +164,7 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 	// If the z levels are not the same, get a series of paths that
 	// lead to the nearest appropriate stair, starting from the destination
 	if(level < startZ) { // Entity is above destination
-		var nearestDownStair = map.getNearestDownStair(startX, startY, startZ),
+		var nearestDownStair = map.findNearestDownStair(startX, startY, startZ),
 			splitNDS = nearestDownStair.split(","),
 			dsX = splitNDS[0],
 			dsY = split[1],
@@ -187,7 +191,7 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 		// attempting to find a path to the next down stair starting from the tile beneath the downstair.
 		return Game.Tasks.getPathToLevel(entity, level, dsX, dsY, dsZ - 1, newPath.concat(currentPath));
 	} else if(level > startZ) { // entity is below the desired z-level
-		var nearestUpStair = map.getNearestUpStair(startX, startY, startZ),
+		var nearestUpStair = map.findNearestUpStair(startX, startY, startZ),
 			splitNUS = nearestUpStair.split(","),
 			usX = splitNUS[0],
 			usY = split[1],

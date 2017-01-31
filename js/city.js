@@ -55,6 +55,25 @@ Game.City.prototype.getCompanies = function() {
 Game.City.prototype.addCompanies = function(companies) {
 	this._companies = this._companies.concat(companies);
 };
+Game.City.prototype.adjustCompaniesLocations = function(companies, offsetX, offsetY) {
+	for (var i = 0; i < companies.length; i++) {
+		var jobLocations = companies[i].getJobLocations(),
+			newLocations = [];
+		for (var j = 0; j < jobLocations.length; j++) {
+			var oldLocation = jobLocations[j].split(","),
+				oldX = +oldLocation[0],
+				oldY = +oldLocation[1],
+				oldZ = +oldLocation[2];
+			var newX = oldX + offsetX,
+				newY = oldY + offsetY,
+				newLocation = newX + "," + newY + "," + oldZ;
+			newLocations.push(newLocation);
+		}
+
+		companies[i].setJobLocations(newLocations);
+	}
+	return companies;
+};
 Game.City.prototype.init = function() {
 	// Generate a random grid of roads
 	var lastKey;
@@ -163,13 +182,19 @@ Game.City.prototype.tilesFromLots = function() {
 	for(var cityX = 0; cityX < this._width; cityX++) {
 		for (var cityY = 0; cityY < this._height; cityY++) {
 			// Returns a 3-dimensional array of lot tiles
-			var tiles = this._lots[cityX][cityY].getTiles();
+			var lotOffsetX = (cityX * Game.getLotSize()),
+				lotOffsetY = (cityY * Game.getLotSize()),
+				tiles = this._lots[cityX][cityY].getTiles();
 
-			// Now that the tiles have been instantiated, add the lot's companies
-			// to the total list of city companies
-			var lotCompanies = this._lots[cityX][cityY].getCompanies();
+			// Now that the tiles have been instantiated, fetch the lot's companies,
+			// adjust their x and y values based on their location in the city, and 
+			// then add them to the list of city companies.
+			var lotCompanies = this.adjustCompaniesLocations(this._lots[cityX][cityY].getCompanies(), lotOffsetX, lotOffsetY);
 			if(lotCompanies.length > 0)
 				this.addCompanies(lotCompanies);
+
+			// And adjust the companies' job locations by the lot offset
+
 
 			// Load these tiles into the map at the appropriate
 			// offset based on which lot we're in. For reference:
@@ -182,7 +207,7 @@ Game.City.prototype.tilesFromLots = function() {
 					map[z] = new Array(this._width * Game.getLotSize());
 
 				for (var x = 0; x < tiles[z].length; x++) {
-					var offsetX = x + (cityX * Game.getLotSize());
+					var offsetX = x + lotOffsetX;
 
 					// Instantiate a new map column if it doesn't exist already
 					if(!map[z][offsetX])
@@ -192,7 +217,7 @@ Game.City.prototype.tilesFromLots = function() {
 						debugger;
 
 					for (var y = 0; y < tiles[z][x].length; y++) {
-						var offsetY = y + (cityY * Game.getLotSize());
+						var offsetY = y + lotOffsetY;
 						map[z][offsetX][offsetY] = tiles[z][x][y];
 
 						// Add items from lot to map

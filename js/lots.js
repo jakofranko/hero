@@ -62,6 +62,9 @@ Game.LotRepository.define('building', {
 			return tiles;
 		}
 
+		this.adjustCompaniesX(cornerX);
+		this.adjustCompaniesY(cornerY);
+
 		for (var z = 0; z < building.getStories(); z++) {
 			if(!tiles[z]) {
 				tiles[z] = new Array(this.getWidth());

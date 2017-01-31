@@ -201,6 +201,9 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 			if(this.jobLocations.indexOf(location) < 0)
 				this.jobLocations.push(location);
 		},
+		setJobLocations: function(locations) {
+			this.jobLocations = locations;
+		},
 		getJobLocations: function() {
 			return this.jobLocations;
 		}

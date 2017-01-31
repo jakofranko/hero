@@ -81,6 +81,40 @@ Game.Lot.prototype.getCompanies = function() {
 Game.Lot.prototype.setCompanies = function(companies) {
 	this._companies = companies;
 };
+Game.Lot.prototype.adjustCompaniesX = function(offsetX) {
+	for (var i = 0; i < this._companies.length; i++) {
+		var jobLocations = this._companies[i].getJobLocations(),
+			newLocations = [];
+		for (var j = 0; j < jobLocations.length; j++) {
+			var oldLocation = jobLocations[j].split(","),
+				oldX = +oldLocation[0],
+				oldY = +oldLocation[1],
+				oldZ = +oldLocation[2];
+			var newX = oldX + offsetX,
+				newLocation = newX + "," + oldY + "," + oldZ;
+			newLocations.push(newLocation);
+		}
+
+		this._companies[i].setJobLocations(newLocations);
+	}
+};
+Game.Lot.prototype.adjustCompaniesY = function(offsetY) {
+	for (var i = 0; i < this._companies.length; i++) {
+		var jobLocations = this._companies[i].getJobLocations(),
+			newLocations = [];
+		for (var j = 0; j < jobLocations.length; j++) {
+			var oldLocation = jobLocations[j].split(","),
+				oldX = +oldLocation[0],
+				oldY = +oldLocation[1],
+				oldZ = +oldLocation[2];
+			var newY = oldY + offsetY,
+				newLocation = oldX + "," + newY + "," + oldZ;
+			newLocations.push(newLocation);
+		}
+
+		this._companies[i].setJobLocations(newLocations);
+	}
+};
 // Used during city generation to determine whether or not
 // a lot will be placed based on the frequency those lots
 // appear in a given neigborhood.
@@ -176,6 +210,9 @@ Game.Lot.prototype.placeCenteredBuilding = function(lotTiles, building) {
 	if(cornerX < 0 || cornerY < 0) {
 		return lotTiles;
 	}
+
+	this.adjustCompaniesX(cornerX);
+	this.adjustCompaniesY(cornerY);
 
 	for (var z = 0; z < building.getStories(); z++) {
 		if(!lotTiles[z])
