@@ -5,7 +5,7 @@ Game.TemplateRepository.define('studio apartment', {
 	name: 'studio apartment',
 	template: [
 		'--------',
-		'|&O|t#l|',
+		'|&0|t#l|',
 		'|o +  c|',
 		'|---   |',
 		'|      |',
@@ -75,7 +75,7 @@ Game.TemplateRepository.define('one-bedroom apartment', {
 	name: 'one-bedroom apartment',
 	template: [
 		'------------',
-		'|&Oo|d  t#l|',
+		'|&0o|d  t#l|',
 		'|   |c     |',
 		'|+--|----+-|',
 		'|     tcl  |',
@@ -162,7 +162,7 @@ Game.TemplateRepository.define('two-bedroom apartment', {
 	template: [
 		'----------------',
 		'|&  | ld   t#l |',
-		'|O  +  c      c|',
+		'|0  +  c      c|',
 		'|o  |         t|',
 		'|------------+-|',
 		'|t V           |',
@@ -242,6 +242,173 @@ Game.TemplateRepository.define('two-bedroom apartment', {
 		'o': {
 			repository: 'ItemRepository',
 			name: 'sink'
+		},
+	}
+});
+
+// Bathroom: needs to be no more than 3x3
+Game.TemplateRepository.define('bathroom', {
+	name: 'bathroom',
+	template: [
+		'& o',
+		'  0'
+	],
+	templateKey: {
+		'&': {
+			repository: 'ItemRepository',
+			name: 'toilet'
+		},
+		'0': {
+			repository: 'ItemRepository',
+			name: 'bathtub'
+		},
+		'o': {
+			repository: 'ItemRepository',
+			name: 'sink'
+		},
+	}
+});
+
+// Needs to at most be 7x7
+Game.TemplateRepository.define('kitchen', {
+	name: 'kitchen',
+	template: [
+		'[o{  ',
+		'    h',
+		'    #',
+		'    h'
+	],
+	templateKey: {
+		'{': {
+			repository: 'ItemRepository',
+			name: 'oven'
+		},
+		'[': {
+			repository: 'ItemRepository',
+			name: 'refridgerator'
+		},
+		'o': { // don't say I didn't throw in the kitchen sink... heh heh heh
+			repository: 'ItemRepository',
+			name: 'sink'
+		},
+	}
+});
+
+// needs to be no bigger than 6x6
+Game.TemplateRepository.define('dining room', {
+	name: 'dining room',
+	template: [
+		'     ',
+		' h#h ',
+		' h#h ',
+		' h#h ',
+		'     '
+	],
+	templateKey: {
+		'h': {
+			repository: 'ItemRepository',
+			name: 'chair'
+		},
+		'#': {
+			repository: 'ItemRepository',
+			name: 'chair'
+		},
+	}
+});
+
+// needs to be no bigger than 6x6
+Game.TemplateRepository.define('living room', {
+	name: 'living room',
+	template: [
+		' l T *',
+		' h    ',
+		' tCCC ',
+		'      ',
+	],
+	templateKey: {
+		'T': {
+			repository: 'ItemRepository',
+			name: 'television'
+		},
+		'h': {
+			repository: 'ItemRepository',
+			name: 'chair'
+		},
+		'C': {
+			repository: 'ItemRepository',
+			name: 'couch'
+		},
+		'l': {
+			repository: 'ItemRepository',
+			name: 'floor lamp'
+		},
+		'*': {
+			repository: 'ItemRepository',
+			name: 'potted plant'
+		}
+	}
+});
+Game.TemplateRepository.define('bedroom', {
+	name: 'bedroom',
+	template: [
+		' t#l ',
+		'    ]',
+		'dh   '
+	],
+	templateKey: {
+		't': {
+			repository: 'ItemRepository',
+			name: 'end table'
+		},
+		'#': {
+			repository: 'ItemRepository',
+			name: 'bed'
+		},
+		'l': {
+			repository: 'ItemRepository',
+			name: 'floor lamp'
+		},
+		']': {
+			repository: 'ItemRepository',
+			name: 'dresser'
+		},
+		'd': {
+			repository: 'ItemRepository',
+			name: 'desk'
+		},
+		'h': {
+			repository: 'ItemRepository',
+			name: 'chair'
+		},
+	}
+});
+Game.TemplateRepository.define('office', {
+	name: 'office',
+	template: [
+		' ld ]',
+		't h ]',
+		'h   ]',
+	],
+	templateKey: {
+		't': {
+			repository: 'ItemRepository',
+			name: 'end table'
+		},
+		'l': {
+			repository: 'ItemRepository',
+			name: 'floor lamp'
+		},
+		']': {
+			repository: 'ItemRepository',
+			name: 'bookshelf'
+		},
+		'd': {
+			repository: 'ItemRepository',
+			name: 'desk'
+		},
+		'h': {
+			repository: 'ItemRepository',
+			name: 'chair'
 		},
 	}
 });
