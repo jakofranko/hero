@@ -33,14 +33,29 @@ Game.Template.prototype.getKey = function() {
 // Note, since this._template is an array of strings, 'i' in this._template[i] will 
 // reference the 'y' axis, and the character index 'j' at this._template[i][j]
 // will reference the 'x' axis. This is a bit backwards from how it is usually done.
-Game.Template.prototype.getProcessedTemplate = function() {
-	var map = {};
-	for(var y = 0; y < this._template.length; y++) {
-		for (var x = 0; x < this._template[y].length; x++) {
-			var char = this._template[y][x];
-			if(this._key[char]) {
-				var key = x + "," + y;
-				map[key] = this._key[char];
+Game.Template.prototype.getProcessedTemplate = function(template) {
+	var map = {},
+		t = template || this._template,
+		k = this._tempKey || this._key;
+
+	if(typeof t[0] === 'string') {
+		for(var y = 0; y < t.length; y++) {
+			for (var x = 0; x < t[y].length; x++) {
+				var char = t[y][x];
+				if(k[char]) {
+					var key = x + "," + y;
+					map[key] = k[char];
+				}
+			}
+		}
+	} else { // Optionally, a two-dimensional array can be passed in (like what's returned from rotateTemplate)
+		for (var x = 0; x < t[y].length; x++) {
+			for(var y = 0; y < t.length; y++) {
+				var char = t[x][y];
+				if(k[char]) {
+					var key = x + "," + y;
+					map[key] = k[char];
+				}
 			}
 		}
 	}
@@ -123,14 +138,28 @@ Game.Template.prototype.rotateTemplate = function(template) {
 // Process the template to get a map of x,y coords. and map tiles,
 // then flip these coordinates such that each template char will 
 // have the same y position, but a reversed x position.
-Game.Template.prototype.getProcessedTemplateFlipHorizontal = function() {
-	var map = {};
-	for(var y = 0; y < this._template.length; y++) {
-		for (var x = 0, i = this._template[y].length - 1; x < this._template[y].length; x++, i--) {
-			var char = this._template[y][i];
-			if(this._key[char]) {
-				var key = x + "," + y;
-				map[key] = this._key[char];
+Game.Template.prototype.getProcessedTemplateFlipHorizontal = function(template) {
+	var map = {},
+		t = template || this._template,
+		k = this._tempKey || this._key;
+	if(typeof t[0] === 'string') {
+		for(var y = 0; y < t.length; y++) {
+			for (var x = 0, i = t[y].length - 1; x < t[y].length; x++, i--) {
+				var char = t[y][i];
+				if(k[char]) {
+					var key = x + "," + y;
+					map[key] = k[char];
+				}
+			}
+		}
+	} else {
+		for (var x = 0, i = t[y].length - 1; x < t[y].length; x++, i--) {
+			for(var y = 0; y < t.length; y++) {
+				var char = t[y][i];
+				if(k[char]) {
+					var key = x + "," + y;
+					map[key] = k[char];
+				}
 			}
 		}
 	}
@@ -141,14 +170,28 @@ Game.Template.prototype.getProcessedTemplateFlipHorizontal = function() {
 // Process the template to get a map of x,y coords. and map tiles,
 // then flip these coordinates such that each template char will 
 // have the same x position, but a reversed y position.
-Game.Template.prototype.getProcessedTemplateFlipVertical = function() {
-	var map = {};
-	for(var y = 0, i = this._template.length - 1; y < this._template.length; y++, i--) {
-		for (var x = 0; x < this._template[y].length; x++) {
-			var char = this._template[i][x];
-			if(this._key[char]) {
-				var key = x + "," + y;
-				map[key] = this._key[char];
+Game.Template.prototype.getProcessedTemplateFlipVertical = function(template) {
+	var map = {},
+		t = template || this._template,
+		k = this._tempKey || this._key;
+	if(typeof t[0] === 'string') {
+		for(var y = 0, i = t.length - 1; y < t.length; y++, i--) {
+			for (var x = 0; x < t[y].length; x++) {
+				var char = t[i][x];
+				if(k[char]) {
+					var key = x + "," + y;
+					map[key] = k[char];
+				}
+			}
+		}
+	} else {
+		for (var x = 0; x < t[y].length; x++) {
+			for(var y = 0, i = t.length - 1; y < t.length; y++, i--) {
+				var char = t[i][x];
+				if(k[char]) {
+					var key = x + "," + y;
+					map[key] = k[char];
+				}
 			}
 		}
 	}
