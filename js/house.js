@@ -19,8 +19,8 @@ Game.House = function(options) {
 		"hall": 3 // If halls aren't limited, they will just spawn an infinite number of halls and closets
 	};
 	this.maxStories = options['maxStories'] || 1;
-	this.maxWidth = options['maxWidth'] || 10;	// TODO: based off of lot size / number of houses per lot
-	this.maxHeight = options['maxHeight'] || 10;	// TODO: based off of lot size / number of houses per lot
+	this.maxWidth = options['maxWidth'] || 10;
+	this.maxHeight = options['maxHeight'] || 10;
 
 	// Set initial number of rooms, to be incremented as they are added
 	this.roomNum = [];
@@ -31,10 +31,15 @@ Game.House = function(options) {
 	this.graph = this.generate('foyer');
 	this.tiles = this.render(['n', 'e', 's', 'w'].random());
 
+	this.items = {}; // This is set during the render() phase above
+
 	return this;
 };
 Game.House.prototype.getTiles = function() {
 	return this.tiles;
+};
+Game.House.prototype.getItems = function() {
+	return this.items;
 };
 Game.House.prototype.rooms = [
 	'foyer',		// 0
@@ -81,13 +86,13 @@ Game.House.prototype.Room = function(name) {
 // 'roomName': [min, max]
 Game.House.prototype.Room.prototype.roomSizes = {
 	'foyer': [3, 4],
-	'dining room': [6, 7],
-	'living room': [6, 8],
-	'kitchen': [5, 7],
-	'office': [5, 6],
+	'dining room': [8, 12],
+	'living room': [8, 12],
+	'kitchen': [8, 14],
+	'office': [7, 10],
 	'hall': [3, 5],
-	'bathroom': [5, 6],
-	'bedroom': [5, 8],
+	'bathroom': [5, 7],
+	'bedroom': [7, 11],
 	'closet': [3, 3],
 };
 Game.House.prototype.Room.prototype.getX = function() {
@@ -416,6 +421,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			house[z + 1][randomFloor.x][randomFloor.y] = Game.TileRepository.create('stairsDown');
 		}
 	}
+
+	// Now that the locations of all rooms have been set and adjusted, place items in each room
+	this._placeItems(this.graph);
+
 	// for (var z = 0; z < house.length; z++) {
 	// 	console.log(z);
 	// 	Game._consoleLogGrid(house[z], '_char');
@@ -473,6 +482,8 @@ Game.House.prototype._renderRoom = function(room, direction) {
 		tiles[doorX][doorY] = Game.TileRepository.create('door');
 	}
 
+	// TODO: populate the room with items (may need to be done after the whole house has been generated)
+
 	return tiles;
 };
 
@@ -523,6 +534,14 @@ Game.House.prototype._spaceFill = function(grid) {
 		}
 	}
 	return grid;
+};
+
+Game.House.prototype._placeItems = function(room) {
+	debugger;
+	if(room.room !== 'foyer' && room.room !== 'hall' && room.room !== 'closet') {
+		var itemsTemplate = Game.TemplateRepository.create(room.room); // Assumes that the room name is also the name of the template
+	}
+
 };
 
 // For testing
