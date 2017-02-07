@@ -102,6 +102,20 @@ Game.ItemRepository.define('sink', {
     mixins: [Game.ItemMixins.Fixture]
 });
 
+Game.ItemRepository.define('dresser', {
+    name: 'dresser',
+    character: ']',
+    foreground: Game.Palette.brown,
+    mixins: [Game.ItemMixins.Fixture, Game.ItemMixins.Container]
+});
+
+Game.ItemRepository.define('bookshelf', {
+    name: 'bookshelf',
+    character: '[',
+    foreground: Game.Palette.brown,
+    mixins: [Game.ItemMixins.Fixture, Game.ItemMixins.Container]
+});
+
 Game.ItemRepository.define('corpse', {
     name: 'corpse',
     character: '%',
@@ -112,5 +126,5 @@ Game.ItemRepository.define('sign', {
     name: 'sign',
     character: '?',
     foreground: Game.Palette.white,
-    mixins: [Game.ItemMixins.Inscribable]
+    mixins: [Game.ItemMixins.Inscribable, Game.ItemMixins.Fixture]
 });
