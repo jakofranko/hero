@@ -164,6 +164,10 @@ Game.Lot.prototype.fillLot = function(tile, extraProperties) {
 	return [result];
 };
 
+Game.Lot.prototype.getItems = function() {
+	return this._items;
+};
+
 Game.Lot.prototype.getItemsAt = function(x, y, z) {
     return this._items[x + ',' + y + ',' + z];
 };

@@ -28,10 +28,10 @@ Game.House = function(options) {
 		this.roomNum[this.rooms[i]] = 0;
 	}
 
+	this.items = {}; // This is set during the render() phase above
+
 	this.graph = this.generate('foyer');
 	this.tiles = this.render(['n', 'e', 's', 'w'].random());
-
-	this.items = {}; // This is set during the render() phase above
 
 	return this;
 };
@@ -40,6 +40,31 @@ Game.House.prototype.getTiles = function() {
 };
 Game.House.prototype.getItems = function() {
 	return this.items;
+};
+Game.House.prototype.getItemsAt = function(x, y, z) {
+    return this.items[x + ',' + y + ',' + z];
+};
+Game.House.prototype.adjustX = function(amount, room) {
+	var r = room || this.graph; // specific room or start with the foyer
+	r.x += amount;
+	if(r.children)
+		for (var i = 0; i < r.children.length; i++)
+			this.adjustX(amount, r.children[i]);
+
+};
+Game.House.prototype.adjustY = function(amount, room) {
+	var r = room || this.graph; // specific room or start with the foyer
+	r.y += amount;
+	if(r.children)
+		for (var i = 0; i < r.children.length; i++)
+			this.adjustY(amount, r.children[i]);
+
+};
+Game.House.prototype.addItem = function(x, y, z, item) {
+	var key = x + "," + y + "," + z;
+	if(key in this.items === false)
+		this.items[key] = [];
+	this.items[key].push(item);
 };
 Game.House.prototype.rooms = [
 	'foyer',		// 0
@@ -81,14 +106,15 @@ Game.House.prototype.Room = function(name) {
 	this.width = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.height = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
 	this.spawnDirection = null;
+	this.placed = true; // if this is skipped, set to false. Used in item placement
 	this.children = [];
 };
 // 'roomName': [min, max]
 Game.House.prototype.Room.prototype.roomSizes = {
 	'foyer': [3, 4],
-	'dining room': [8, 12],
-	'living room': [8, 12],
-	'kitchen': [8, 14],
+	'dining room': [8, 10],
+	'living room': [8, 10],
+	'kitchen': [8, 10],
 	'office': [7, 10],
 	'hall': [3, 5],
 	'bathroom': [5, 7],
@@ -101,18 +127,20 @@ Game.House.prototype.Room.prototype.getX = function() {
 Game.House.prototype.Room.prototype.setX = function(x) {
 	this.x = x;
 };
-Game.House.prototype.Room.prototype.adjustX = function(amount) {
-	this.x += amount;
-};
+// @deprecated Use Game.House.adjustX() instead (gets the whole graph)
+// Game.House.prototype.Room.prototype.adjustX = function(amount) {
+// 	this.x += amount;
+// };
 Game.House.prototype.Room.prototype.getY = function(y) {
 	return this.y;
 };
 Game.House.prototype.Room.prototype.setY = function(y) {
 	this.y = y;
 };
-Game.House.prototype.Room.prototype.adjustY = function(amount) {
-	this.y += amount;
-};
+// @deprecated Use Game.House.adjustY() instead (gets the whole graph)
+// Game.House.prototype.Room.prototype.adjustY = function(amount) {
+// 	this.y += amount;
+// };
 Game.House.prototype.Room.prototype.getZ = function(z) {
 	return this.z;
 };
@@ -137,11 +165,25 @@ Game.House.prototype.Room.prototype.getHeight = function(height) {
 Game.House.prototype.Room.prototype.setHeight = function(height) {
 	this.height = height;
 };
-Game.House.prototype.Room.prototype.getSpawnDirection = function(dir) {
+Game.House.prototype.Room.prototype.getSpawnDirection = function() {
 	return this.spawnDirection;
 };
 Game.House.prototype.Room.prototype.setSpawnDirection = function(dir) {
 	this.spawnDirection = dir;
+};
+Game.House.prototype.Room.prototype.getPlaced = function() {
+	return this.placed;
+};
+Game.House.prototype.Room.prototype.setPlaced = function(placed) {
+	this.placed = placed;
+
+	// This state should cascade to each of it's chidren
+	if(this.children) {
+		for (var i = 0; i < this.children.length; i++) {
+			this.children[i].setPlaced(placed);
+		}
+	}
+
 };
 Game.House.prototype.Room.prototype.addChild = function(child) {
 	if(child !== false)
@@ -193,7 +235,7 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 	// 5. After the new x and y values of the child and parent are known (and if they are on the same z level), it is possible to know what x and y coordinates they will share. This should be the shared wall. After getting a list of the coordinates they will share, eliminate the extreme x or y coordinates to avoid placing a door in a corner, and then randomly pick a coordinate for a door and replace the wall tile with a door tile.
 	// 6. Add the child (with assigned x, y, and z values) to the queue of rooms to render
 	while(queue.length > 0) {
-		var room = queue.pop();
+		var room = queue.shift();
 		var possibleDirections = this.possibleDirections[direction].randomize(); // For directions that have already been taken for child rooms
 		var x, y, z;
 		var existingRoom = false;
@@ -205,7 +247,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		x = room.getX();
 		y = room.getY();
 		z = room.getZ();
-
 
 		// Check to see if a room exists already. If it does, _roomCheck will try
 		// to return the coordinates of a floor tile so that stairs can be placed
@@ -228,7 +269,10 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 			default:
 				break;
 		}
+
+		// A room was found, so skip this room
 		if(existingRoom === true) {
+			room.setPlaced(false);
 			continue;
 		}
 
@@ -258,8 +302,15 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		// Process the room's children if it has any
 		if(room.children.length > 0) {
 			// Pick direction to branch from
-			for (var i = 0; i < room.children.length; i++) {
-				var child = room.children[i];
+			for (var k = 0; k < room.children.length; k++) {
+				// These might have changed since the last iteration. Make sure they 
+				// are up-to-date with the newest location of the current room
+				x = room.getX();
+				y = room.getY();
+				z = room.getZ();
+
+				// Get the current child and a random spawn direction
+				var child = room.children[k];
 				var dir = possibleDirections.pop();
 				child.setSpawnDirection(dir);
 
@@ -292,18 +343,17 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 
 							if(child.getY() < 0) {
 								// Loop through every column
-								for (var houseX = 0; houseX < house[z].length; houseX++) {
+								for(var houseX = 0; houseX < house[z].length; houseX++) {
 									// unshift() a patch of grass/air to every row based on room height
-									for (var houseY = 0; houseY < child.height; houseY++) {
+									for(var houseY = 0; houseY < child.height; houseY++) {
 										var tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+
 										house[z][houseX].unshift(tile);
+
 										// Adjust room and children y positions by child height
-										if(houseX === 0) { // Ensures we do this once, instead of for every row
-											room.adjustY(1);
-											for(var roomChild = 0; roomChild < room.children.length; roomChild++)
-												room.children[roomChild].adjustY(1); // This increments the 'child' var too
-											
-										}
+										if(houseX === 0) // Ensures we do this once, instead of for every row
+											this.adjustY(1); // TODO: make sure this also updates the objects in the queue
+
 									}
 								}	
 							}
@@ -324,10 +374,9 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 										// Always use index of 0 since we're adding the array to the beginning
 										house[z][0][houseY] = tile;
 									}
+
 									// Adjust room and children x positions by child width
-									room.adjustX(1);
-									for(var roomChild = 0; roomChild < room.children.length; roomChild++) 
-										room.children[roomChild].adjustX(1); // This increments the 'child' var too
+									this.adjustX(1);
 								}
 							}
 							break;
@@ -349,9 +398,9 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 					var roomXY = Game.listXY(room.getX(), room.getY(), room.getWidth(), room.getHeight());
 					var childXY = Game.listXY(child.getX(), child.getY(), child.getWidth(), child.getHeight());
 					var commonXY = [];
-					for (var i = 0; i < roomXY.length; i++)
-						if(childXY.indexOf(roomXY[i]) > -1)
-							commonXY.push(roomXY[i]);
+					for (var l = 0; l < roomXY.length; l++)
+						if(childXY.indexOf(roomXY[l]) > -1)
+							commonXY.push(roomXY[l]);
 					
 					// Make sure door isn't placed in a corner by eliminating the least and greatest x or y coordinates, depending on spawn direction
 					if(dir == 'n' || dir == 's') {
@@ -363,9 +412,9 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 						}, commonXY[0].split(",")[0]);
 
 						// Remove the extreme x tiles from the list
-						for (var i = 0; i < commonXY.length; i++) {
-							if(commonXY[i].split(",")[0] == lowestX || commonXY[i].split(",")[0] == highestX)
-								commonXY.splice(i, 1);
+						for (var m = 0; m < commonXY.length; m++) {
+							if(commonXY[m].split(",")[0] == lowestX || commonXY[m].split(",")[0] == highestX)
+								commonXY.splice(m, 1);
 						}
 					} else {
 						var lowestY = commonXY.reduce(function(prev, curr) {
@@ -375,9 +424,9 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 							return Math.max(prev, curr.split(",")[1]);
 						}, commonXY[0].split(",")[1]);
 						// Remove the extreme y tiles from the list
-						for (var i = 0; i < commonXY.length; i++) {
-							if(commonXY[i].split(",")[1] == lowestY || commonXY[i].split(",")[1] == highestY)
-								commonXY.splice(i, 1);
+						for (var n = 0; n < commonXY.length; n++) {
+							if(commonXY[n].split(",")[1] == lowestY || commonXY[n].split(",")[1] == highestY)
+								commonXY.splice(n, 1);
 						}
 					}
 
@@ -388,6 +437,7 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 					queue.push(child);
 				} else {
 					// Adding the child would exceed maxWidth or maxHeight and it cannot be placed above the parent, so skip it
+					child.setPlaced(false);
 					continue;
 				}
 			}
@@ -404,8 +454,8 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 
 		var floorTiles = this._getFloorTiles(house[z]);
 		var randomFloor = false;
-		for(var i = 0; i < floorTiles.length; i++) {
-			var f = floorTiles[i].split(",");
+		for(var o = 0; o < floorTiles.length; o++) {
+			var f = floorTiles[o].split(",");
 			if(!house[z + 1][f[0]][f[1]])
 				continue;
 			if(house[z + 1][f[0]][f[1]].getName() == 'floor') {
@@ -537,9 +587,43 @@ Game.House.prototype._spaceFill = function(grid) {
 };
 
 Game.House.prototype._placeItems = function(room) {
-	debugger;
-	if(room.room !== 'foyer' && room.room !== 'hall' && room.room !== 'closet') {
+	if(room.room !== 'foyer' && room.room !== 'hall' && room.room !== 'closet' && room.getPlaced() === true) {
+		var roomX = room.getX(),
+			roomY = room.getY(),
+			roomZ = room.getZ();
 		var itemsTemplate = Game.TemplateRepository.create(room.room); // Assumes that the room name is also the name of the template
+		var spawnDir = room.getSpawnDirection();
+		var options = {};
+		switch(spawnDir) {
+			case 's':
+				options.rotate = '180deg';
+				break;
+			case 'e':
+				options.rotate = '270deg';
+				break;
+			case 'w':
+			options.rotate = '90deg';
+				break;
+			case 'n':
+			default:
+				break;
+		}
+		var itemMap = itemsTemplate.getProcessedTemplate(options);
+		for(var key in itemMap) {
+			var repo = itemMap[key].repository,
+				name = itemMap[key].name,
+				itemX = Number(key.split(",")[0]),
+				itemY = Number(key.split(",")[1]);
+
+			// + 1 so that they are placed within the walls
+			this.addItem(itemX + roomX + 1, itemY + roomY + 1, roomZ, Game[repo].create(name));
+		}
+	}
+
+	if(room.children.length > 0) {
+		for (var i = 0; i < room.children.length; i++) {
+			this._placeItems(room.children[i]);
+		}
 	}
 
 };

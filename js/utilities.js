@@ -55,11 +55,13 @@ Game.rollDice = function(XdX) {
     return total;
 };
 
-Game._consoleLogGrid = function(grid, field) {
+Game._consoleLogGrid = function(grid, field, items, z) {
     var string = "";
     for (var y = 0; y < grid[0].length; y++) {
         for (var x = 0; x < grid.length; x++) {
-            if(!grid[x] || !grid[x][y])
+            if(items && z !== undefined && items[x + "," + y + "," + z])
+                string += items[x + "," + y + "," + z][0]._char;
+            else if(!grid[x] || !grid[x][y])
                 string += " ";
             else if(field)
                 string += String(grid[x][y][field]);

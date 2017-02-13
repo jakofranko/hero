@@ -291,8 +291,14 @@ Game.LotRepository.define('houses', {
 					for(x = 0, tilesX = startX; x < houseTiles[z].length; x++, tilesX++) {
 						if(!tiles[z][tilesX])
 							tiles[z][tilesX] = new Array(this.getHeight());
+
 						for (var y = 0, tilesY = startY; y < houseTiles[z][x].length; y++, tilesY++) {
 							tiles[z][tilesX][tilesY] = houseTiles[z][x][y];
+
+							// Add house items to lot items
+							var items = buildings[i].getItemsAt(x, y, z);
+							if(items)
+								this.setItemsAt(tilesX, tilesY, z, items);
 						}
 					}
 				}
@@ -301,7 +307,9 @@ Game.LotRepository.define('houses', {
 		}
 		tiles = Game.spaceFill(tiles);
 
-		// console.log(tiles);
+		// for (var z = 0; z < tiles.length; z++) {
+		// 	Game._consoleLogGrid(tiles[z], '_char', this.getItems(), z);
+		// }
 		return tiles;
 	}
 });
