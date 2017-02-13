@@ -9,6 +9,17 @@
 //				would generate the appropriate thing
 // TODO: Add support for adding multiple objects to a single place on the template via a template key
 // TODO: Add functions to turn a template by 90 degrees, and by 180 degrees (and maybe by 270 degrees)
+//
+// Usage: 	var template = Game.TemplateRepository.create('bedroom');
+//			var templateMap = template.getProccessedTemplate({ flip: 'vertical', rotate: '90deg' });
+// 			for(var key in templateMap) {
+// 				var x = key.split(",")[0],
+// 					y = key.split(",")[1],
+// 					repo = templateMap[key].repository,
+// 					object = templateMap[key].name;
+//
+// 				grid[x][y] = Game[repo].create(object);
+// 			}
 Game.Template = function(properties) {
 	if(this._validateTemplateKey(properties['templateKey']) && this._validateTemplate(properties['template'])) {
 		this._name = properties['name'];
@@ -33,11 +44,30 @@ Game.Template.prototype.getKey = function() {
 // Note, since this._template is an array of strings, 'i' in this._template[i] will 
 // reference the 'y' axis, and the character index 'j' at this._template[i][j]
 // will reference the 'x' axis. This is a bit backwards from how it is usually done.
-Game.Template.prototype.getProcessedTemplate = function(template) {
+Game.Template.prototype.getProcessedTemplate = function(options) {
 	var map = {},
-		t = template || this._template,
-		k = this._tempKey || this._key;
+		o = options || {},
+		t = this._template;
+		
 
+	if(o.rotate) {
+		switch(o.rotate) { // rotate function rotates counter-clockwise
+			case '90deg':
+				t = this.rotateTemplate(t);
+				break;
+			case '180deg':
+				t = this.flipTemplateVeritical(t);
+				break;
+			case '270deg':
+				t = this.rotateTemplate(t);
+				t = this.flipTemplateHorizontal(t);
+				break;
+			default:
+				break;
+		}
+	}
+
+	var k = this._tempKey || this._key;
 	if(typeof t[0] === 'string') {
 		for(var y = 0; y < t.length; y++) {
 			for (var x = 0; x < t[y].length; x++) {
@@ -48,9 +78,9 @@ Game.Template.prototype.getProcessedTemplate = function(template) {
 				}
 			}
 		}
-	} else { // Optionally, a two-dimensional array can be passed in (like what's returned from rotateTemplate)
-		for (var x = 0; x < t[y].length; x++) {
-			for(var y = 0; y < t.length; y++) {
+	} else { // Optionally, a two-dimensional array can be passed in (like our usual 2D arrays)
+		for (var x = 0; x < t.length; x++) {
+			for(var y = 0; y < t[x].length; y++) {
 				var char = t[x][y];
 				if(k[char]) {
 					var key = x + "," + y;
@@ -65,8 +95,8 @@ Game.Template.prototype.getProcessedTemplate = function(template) {
 // Process _template, rotating it by 90 degrees
 // by flipping x an y values. Returns a two-dimensional 
 // grid-like array (used for all our maps and throughout the game)
+// so that getProcessedTemplate can handle it
 Game.Template.prototype.rotateTemplate = function(template) {
-	debugger;
 	var width, height, newTemplate;
 	var templateKey = this._tempKey || this._key; // Use the tempKey unless it's null
 
@@ -138,65 +168,87 @@ Game.Template.prototype.rotateTemplate = function(template) {
 // Process the template to get a map of x,y coords. and map tiles,
 // then flip these coordinates such that each template char will 
 // have the same y position, but a reversed x position.
-Game.Template.prototype.getProcessedTemplateFlipHorizontal = function(template) {
-	var map = {},
+Game.Template.prototype.flipTemplateHorizontal = function(template) {
+	var newTemplate, width, height,
 		t = template || this._template,
 		k = this._tempKey || this._key;
+
+
 	if(typeof t[0] === 'string') {
+		width = t[0].length;
+		height = t.length;
+		newTemplate = new Array(width);
 		for(var y = 0; y < t.length; y++) {
 			for (var x = 0, i = t[y].length - 1; x < t[y].length; x++, i--) {
+				if(!newTemplate[x])
+					newTemplate[x] = new Array(height);
+
 				var char = t[y][i];
-				if(k[char]) {
-					var key = x + "," + y;
-					map[key] = k[char];
-				}
+				if(k[char])
+					newTemplate[x][y] = char;
+
 			}
 		}
 	} else {
-		for (var x = 0, i = t[y].length - 1; x < t[y].length; x++, i--) {
-			for(var y = 0; y < t.length; y++) {
-				var char = t[y][i];
-				if(k[char]) {
-					var key = x + "," + y;
-					map[key] = k[char];
-				}
+		width = t.length;
+		height = t[0].length;
+		newTemplate = new Array(width);
+		for (var x = 0, i = width - 1; x < width; x++, i--) {
+			if(!newTemplate[x])
+				newTemplate[x] = new Array(height);
+
+			for(var y = 0; y < height; y++) {
+				if(!t[i])
+					debugger;
+				var char = t[i][y];
+				if(k[char])
+					newTemplate[x][y] = char;
+
 			}
 		}
 	}
 
-	return map;
+	return newTemplate;
 };
 
 // Process the template to get a map of x,y coords. and map tiles,
 // then flip these coordinates such that each template char will 
 // have the same x position, but a reversed y position.
-Game.Template.prototype.getProcessedTemplateFlipVertical = function(template) {
-	var map = {},
+Game.Template.prototype.flipTemplateVeritical = function(template) {
+	var newTemplate, width, height,
 		t = template || this._template,
 		k = this._tempKey || this._key;
 	if(typeof t[0] === 'string') {
-		for(var y = 0, i = t.length - 1; y < t.length; y++, i--) {
-			for (var x = 0; x < t[y].length; x++) {
+		width = t[0].length;
+		height = t.length;
+		newTemplate = new Array(width);
+		for(var y = 0, i = height - 1; y < height; y++, i--) {
+			for (var x = 0; x < width; x++) {
+				if(!newTemplate[x])
+					newTemplate[x] = new Array(height);
+
 				var char = t[i][x];
-				if(k[char]) {
-					var key = x + "," + y;
-					map[key] = k[char];
-				}
+				if(k[char])
+					newTemplate[x][y] = char;
 			}
 		}
 	} else {
-		for (var x = 0; x < t[y].length; x++) {
-			for(var y = 0, i = t.length - 1; y < t.length; y++, i--) {
-				var char = t[i][x];
-				if(k[char]) {
-					var key = x + "," + y;
-					map[key] = k[char];
-				}
+		width = t.length;
+		height = t[0].length;
+		newTemplate = new Array(width);
+		for (var x = 0; x < width; x++) {
+			for(var y = 0, i = height - 1; y < height; y++, i--) {
+				if(!newTemplate[x])
+					newTemplate = new Array(height);
+
+				var char = t[x][i];
+				if(k[char])
+					newTemplate[x][y] = char;
 			}
 		}
 	}
 
-	return map;
+	return newTemplate;
 };
 
 Game.Template.prototype.getWidth = function() {

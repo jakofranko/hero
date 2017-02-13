@@ -143,7 +143,7 @@ Game.BuildingRepository.define('apartment', {
 						var diffY = totalHeight - at.getHeight();
 						offsetY = diffY + 2;
 					}
-					var templateMap = (firstRow) ? at.getProcessedTemplateFlipVertical() : at.getProcessedTemplate();
+					var templateMap = (firstRow) ? at.getProcessedTemplate({ rotate: '180deg' }) : at.getProcessedTemplate();
 					for(var templateKey in templateMap) {
 						var name = templateMap[templateKey].name;
 						var repo = templateMap[templateKey].repository;

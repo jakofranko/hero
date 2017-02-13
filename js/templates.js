@@ -311,7 +311,7 @@ Game.TemplateRepository.define('dining room', {
 		},
 		'#': {
 			repository: 'ItemRepository',
-			name: 'chair'
+			name: 'table'
 		},
 	}
 });
