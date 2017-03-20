@@ -38,6 +38,19 @@ Game.Jobs.work = {
 	}
 };
 
+Game.Jobs.home = {
+	doJob: function(entity) {
+		if(!entity.isAtJobLocation())
+			Game.Tasks.goHome(entity);
+		else
+			Game.Tasks.doWork(entity);
+	},
+	priority: function(entity) {
+		// TODO: Figure out how to prioritize going to work...
+		return 1;
+	}
+};
+
 Game.Jobs.mugger = {
 	crime: true,
 	noise: 15,
