@@ -698,9 +698,8 @@ Game.EntityMixins.JobActor = {
     name: 'JobActor',
     groupName: 'Actor',
     init: function(template) {
-        this._jobTitle = template['jobTitle'] || null;
-        this._jobCompany = null;
         this._jobs = template['jobs'] || ['survive'];
+        this._jobCurrent = null;
         this._jobPriority = template['jobPriority'] || {};
         this._lastJobPrioritization = 0;
         this._jobLocation = template['jobLocation'] || null;
@@ -716,25 +715,13 @@ Game.EntityMixins.JobActor = {
             return this.react();
         
         // Re-prioritize every hour
-        if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0) {
+        if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0)
             this.reprioritizeJobs();
-        }
 
-        // Get highest priority job, with a higher
-        // priority being a smaller int (0 is highest priority)
-        var highestPriority = null;
-        for(var job in this._jobPriority) {
-            if(highestPriority === null)
-                highestPriority = job;
-            else if(this._jobPriority[job] < this._jobPriority[highestPriority])
-                highestPriority = job;
-        }
+        Game.Jobs[this._jobCurrent].doJob(this);
 
-        Game.Jobs[highestPriority].doJob(this);
-
-        if(this.hasMixin('MemoryMaker')) {
+        if(this.hasMixin('MemoryMaker'))
             this.processMemories();
-        }
     },
     getJobs: function() {
         return this._jobs;
@@ -757,32 +744,42 @@ Game.EntityMixins.JobActor = {
     },
     reprioritizeJobs: function() {
         // Remove any jobs that the entity no longer has
-        for(var job in this._jobPriority) {
-            if(!this._jobs[job]) {
+        for(var job in this._jobPriority)
+            if(!this._jobs[job])
                 delete this._jobPriority[job];
+
+        // Re-prioritize
+        for(var i = 0; i < this._jobs.length; i++) {
+            // Add new jobs to the job priority list
+            if(!this._jobPriority[this._jobs[i]])
+                this._jobPriority[this._jobs[i]] = 0;
+
+            this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
+        }
+
+        // Get highest priority job, with a higher
+        // priority being a smaller int (0 is highest priority)
+        var highestPriority = null;
+        for(var newJob in this._jobPriority) {
+            if(highestPriority === null)
+                highestPriority = newJob;
+            else if(this._jobPriority[newJob] < this._jobPriority[highestPriority])
+                highestPriority = newJob;
+        }
+
+        // Set current job as the highest priority
+        this._jobCurrent = highestPriority;
+
+        // Set the job location to the new job
+        if(this.hasMixin('MemoryMaker')) {
+            var place = this.recall('places', highestPriority);
+            if(place) {
+                debugger;
+                this._jobLocation = place.location;
             }
         }
 
-        for(var i = 0; i < this._jobs.length; i++) {
-            // Add new jobs to the job priority list
-            if(!this._jobPriority[this._jobs[i]]) {
-                this._jobPriority[this._jobs[i]] = 0;
-            }
-            this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
-        }
         this._lastJobPrioritization = this._map.getTime().getHours();
-    },
-    getJobTitle: function() {
-        return this._jobTitle;
-    },
-    setJobTitle: function(title) {
-        this._jobTitle = title;
-    },
-    getJobCompany: function() {
-        return this._jobCompany;
-    },
-    setJobCompany: function(title) {
-        this._jobCompany = title;
     },
     getPath: function() {
         return this._path;
@@ -826,12 +823,6 @@ Game.EntityMixins.JobActor = {
                         this.setReaction(false);
                 }
             }
-        },
-        details: function() {
-            return [
-                { key: 'Job Title', value: this.getJobTitle() },
-                {key: 'Employer', value: this.getJobCompany() }
-            ];
         }
     }
 };
@@ -846,7 +837,10 @@ Game.EntityMixins.MemoryMaker = {
                 criminals: {},
                 victims: {}
             },
-            places: {},
+            places: {
+                work: {},
+                home: {}
+            },
             events: {}
         };
 
@@ -889,6 +883,8 @@ Game.EntityMixins.MemoryMaker = {
         } else if(subtype && !this._memory[type][subtype]) {
             console.log(this);
             throw new Error(this._name + ' has no category for \'' + subtype + '\' in their memory of \'' + type + '\' !');
+        } else if(!subtype && !memoryName) {
+            throw new Error("You must specify a type or a memory name in order to remember something");
         }
 
         // TODO: there is a possibility that an entity could get generated with a duplicate name and that could mess with an entities memory of that entity. However, since entities don't have much that differentiates them now other than their name, it probably doesn't matter/is kind of a funny 'real-life' way of entities (and maybe players?) getting confused...
@@ -906,10 +902,13 @@ Game.EntityMixins.MemoryMaker = {
         if(typeof memory.entity === undefined)
             memory.entity = false;
 
-        if(subtype)
-            this._memory[type][subtype][memoryName] = memory;
-        else
+        if(subtype && !memoryName)
+            this._memory[type][subtype] = memory;
+        else if(!subtype && memoryName)
             this._memory[type][memoryName] = memory;
+        else
+            this._memory[type][subtype][memoryName] = memory;
+
 
         if(memory.expires !== false && memory.expires !== undefined)
             this.addShortTermMemory(type, subtype, memoryName, memory);
@@ -983,6 +982,12 @@ Game.EntityMixins.MemoryMaker = {
 
             if(attacker.hasMixin('MemoryMaker')) 
                 attacker.remember('people', 'victims', this.getName(), {entity: this});
+        },
+        details: function() {
+            return [
+                {key: 'Job Title', value: this.recall('places', 'work').title},
+                {key: 'Employer', value: this.recall('places', 'work').name}
+            ];
         }
     }
 };

@@ -151,14 +151,19 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 				// Pick a random job location and give it to the entity
 				var jobLocation = this.jobLocations.random(),
 					jobIndex = this.jobLocations.indexOf(jobLocation);
-				entity.setJobLocation(jobLocation);
-				entity.setJobCompany(this.name);
+
+				// Store job info in the entities long-term memory
+				if(entity.hasMixin('MemoryMaker')) {
+					var memory = {
+						location: jobLocation,
+						name: this.name,
+						title: this.titles.random()
+					};
+					entity.remember('places', 'work', false, memory);
+				}
 
 				// Remove this location from the available locations
 				this.jobLocations.splice(jobIndex, 1);
-
-				// Set the entity's title
-				entity.setJobTitle(this.titles.random());
 
 				// Add to the employee roster
 				this.employees.push(entity);
