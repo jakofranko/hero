@@ -295,11 +295,23 @@ Game.Building = function(properties) {
 			// been placed
 			var regionTree = this._roomRegions[z].tree;
 			var isolatedRegions = this._getIsolatedRegions(regionTree, placedDoors);
+			var checkRegionTree = false; // Needed to prevent infinite loops
+			var breakIsolatedRegionsLoop = false;
 			while(isolatedRegions.length) {
 				// Take the first region off the list, and add a door too it, then update the isolatedRegions list
 				// to see if the added connections has un-isolated any of the regions.
 				var isolatedDoorPlaced = false;
 				for (var i = 0; i < isolatedRegions.length; i++) {
+					// If for some reason the isolated region has no length, then break out of the loop
+					// TODO: fix this? Not sure how this happens, or if when it happens, rooms are left isolated
+					if(Object.keys(regionTree[isolatedRegions[i]]).length === 0 && isolatedRegions.length === 1) {
+						debugger;
+						breakIsolatedRegionsLoop = true;
+						break;
+					} else if(Object.keys(regionTree[isolatedRegions[i]]).length === 0 && isolatedRegions.length > 1) {
+						debugger;
+					}
+
 					for(var isolatedConnection in regionTree[isolatedRegions[i]]) {
 						var isolatedPos = regionTree[isolatedRegions[i]][isolatedConnection];
 						var isolatedKey = isolatedPos.x + "," + isolatedPos.y;
@@ -314,6 +326,8 @@ Game.Building = function(properties) {
 					if(isolatedDoorPlaced)
 						break;
 				}
+				if(breakIsolatedRegionsLoop) // Just for preventing infinite loops on occasion
+					break;
 				isolatedRegions = this._getIsolatedRegions(regionTree, placedDoors);
 			}
 		}
