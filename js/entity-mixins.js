@@ -774,7 +774,8 @@ Game.EntityMixins.JobActor = {
         if(this.hasMixin('MemoryMaker')) {
             var place = this.recall('places', highestPriority);
             if(place) {
-                debugger;
+                if(!place.location)
+                    debugger;
                 this._jobLocation = place.location;
             }
         }
@@ -986,7 +987,8 @@ Game.EntityMixins.MemoryMaker = {
         details: function() {
             return [
                 {key: 'Job Title', value: this.recall('places', 'work').title},
-                {key: 'Employer', value: this.recall('places', 'work').name}
+                {key: 'Employer', value: this.recall('places', 'work').name},
+                {key: 'Job Location', value: this.recall('places', 'work').location}
             ];
         }
     }

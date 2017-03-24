@@ -152,6 +152,9 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 				var jobLocation = this.jobLocations.random(),
 					jobIndex = this.jobLocations.indexOf(jobLocation);
 
+				if(!jobLocation)
+					return false;
+
 				// Store job info in the entities long-term memory
 				if(entity.hasMixin('MemoryMaker')) {
 					var memory = {

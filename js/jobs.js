@@ -34,7 +34,10 @@ Game.Jobs.work = {
 	},
 	priority: function(entity) {
 		// TODO: Figure out how to prioritize going to work...
-		return 1;
+		var total = 0;
+		if(!entity.recall('places', 'work').location)
+			total += 100;
+		return total;
 	}
 };
 
