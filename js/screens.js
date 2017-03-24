@@ -203,6 +203,16 @@ Game.Screen.playScreen = {
         var newZ = this._player.getZ() + dZ;
         this._player.tryMove(newX, newY, newZ, this._player.getMap());
     },
+    swap: function(dX, dY, dZ) {
+        var newX = this._player.getX() + dX;
+        var newY = this._player.getY() + dY;
+        var newZ = this._player.getZ() + dZ;
+        var target = this._player.getMap().getEntityAt(newX, newY, newZ);
+        if(target)
+            this._player.swapPosition(target);
+        else
+            this._player.tryMove(newX, newY, newZ, this._player.getMap());
+    },
     handleInput: function(inputType, inputData) {
     	// If the game is over, enter will bring the user to the losing screen.
         if(this._gameEnded) {
@@ -229,13 +239,25 @@ Game.Screen.playScreen = {
         // Otherwise, handle input normally for this screen
         if (inputType === 'keydown') {
 	        if (inputData.keyCode === ROT.VK_LEFT) {
-	            this.move(-1, 0, 0);
+                if(inputData.shiftKey)
+                    this.swap(-1, 0, 0);
+                else
+	               this.move(-1, 0, 0);
 	        } else if (inputData.keyCode === ROT.VK_RIGHT) {
-	            this.move(1, 0, 0);
+                if(inputData.shiftKey)
+                    this.swap(1, 0, 0);
+                else
+	               this.move(1, 0, 0);
 	        } else if (inputData.keyCode === ROT.VK_UP) {
-	            this.move(0, -1, 0);
+	            if(inputData.shiftKey)
+                    this.swap(0, -1, 0);
+                else
+                   this.move(0, -1, 0);
 	        } else if (inputData.keyCode === ROT.VK_DOWN) {
-                this.move(0, 1, 0);
+                if(inputData.shiftKey)
+                    this.swap(0, 1, 0);
+                else
+                   this.move(0, 1, 0);
             } else if (inputData.keyCode === ROT.VK_I) {
                 // Show the inventory screen
                 this.showItemsSubScreen(Game.Screen.inventoryScreen, this._player.getItems(), 'You are not carrying anything.');
