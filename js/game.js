@@ -23,7 +23,7 @@ var Game = {
 	_startTime: '0700',
 
 	// NPC Settings
-	_totalEntities: 500,
+	_totalEntities: 150,
 	_totalCriminals: 10,
 	_availableJobs: 500 - 100,
 
