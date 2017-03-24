@@ -456,6 +456,8 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
 		var randomFloor = false;
 		for(var o = 0; o < floorTiles.length; o++) {
 			var f = floorTiles[o].split(",");
+			if(!house[z + 1][f[0]])
+				debugger;
 			if(!house[z + 1][f[0]][f[1]])
 				continue;
 			if(house[z + 1][f[0]][f[1]].getName() == 'floor') {

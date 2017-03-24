@@ -715,6 +715,7 @@ Game.EntityMixins.JobActor = {
             return this.react();
         
         // Re-prioritize every hour
+        // TODO: give a unique time for re-prioritization (still once an hour, just a different minute/second perhaps) so that the NPCs don't all reprioritize and the same time and lag the system
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0)
             this.reprioritizeJobs();
 

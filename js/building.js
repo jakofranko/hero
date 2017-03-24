@@ -305,7 +305,6 @@ Game.Building = function(properties) {
 					// If for some reason the isolated region has no length, then break out of the loop
 					// TODO: fix this? Not sure how this happens, or if when it happens, rooms are left isolated
 					if(Object.keys(regionTree[isolatedRegions[i]]).length === 0 && isolatedRegions.length === 1) {
-						debugger;
 						breakIsolatedRegionsLoop = true;
 						break;
 					} else if(Object.keys(regionTree[isolatedRegions[i]]).length === 0 && isolatedRegions.length > 1) {

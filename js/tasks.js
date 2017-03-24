@@ -61,6 +61,14 @@ Game.Tasks.goToWork = function(entity) {
 
 		var pathToWork = this.getPath(entity, destX, destY, destZ);
 
+		if(!pathToWork) {
+			debugger;
+			console.log("Dest:", destX, destY, destZ);
+			console.log("Entity:", entity.getX(), entity.getY(), entity.getZ());
+			// Game.Screen.playScreen._player.tryMove(destX, destY, destZ);
+			// Game.Screen.playScreen._player.tryMove(entity.getX(), entity.getY(), entity.getZ());
+		}
+
 		// If there isn't a path to work, go down to the ground floor and try again.
 		if(pathToWork)
 			entity.setPath(pathToWork);
@@ -305,9 +313,6 @@ Game.Tasks.retreat = function(self, target) {
 		y = 1; // target is above, so we want to go south
 	else if(selfPos.y - targetPos.y < 0)
 		y = -1; // target is below, so we want to go up
-
-	if(x === 0 && y === 0)
-		throw new Error('Two entities are on top of each other...how did that happen???');
 
 	self.tryMove(selfPos.x + x, selfPos.y + y, selfPos.z);
 };

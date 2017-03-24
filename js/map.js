@@ -229,13 +229,11 @@ Game.Map.prototype._generateEntities = function() {
         if(companies[currentCompany].getAvailablePositions() <= 0)
             currentCompany++;
 
+        // Add the entity as an employee of the current company
         companies[currentCompany].addEmployee(entity);
-        if(!addedWork) {
-            addedWork = true;
-            entity.addJob('work');
-        }
 
-
+        // Add the entity at a random position on the map
+        // TODO: Place entities in their homes
         this.addEntityAtRandomPosition(entity, 0);
 
         if(template.jobs.indexOf('mugger') > -1)
