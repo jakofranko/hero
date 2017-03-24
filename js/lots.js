@@ -281,8 +281,11 @@ Game.LotRepository.define('houses', {
 		i = 0;
 		for (var lotX = 0; lotX < w; lotX++) {
 			for (var lotY = 0; lotY < h; lotY++) {
-				var startX = lotX * (Game.getLotSize() / w);
-				var startY = lotY * (Game.getLotSize() / h);
+				// Adding to to the startX and startY will allow for a 1-tile perimeter
+				var startX = lotX * (Game.getLotSize() / w) + 1;
+				var startY = lotY * (Game.getLotSize() / h) + 1;
+
+				// In the house definition, a small sidewalk is accounted for by subtracting 2 from the width and height
 				var houseTiles = buildings[i].getTiles();
 				for (var z = 0; z < houseTiles.length; z++) {
 					if(!tiles[z])
