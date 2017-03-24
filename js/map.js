@@ -219,7 +219,7 @@ Game.Map.prototype._generateEntities = function() {
         } else {
             template = {
                 money: ROT.RNG.getNormal(100, 50),
-                jobs: ['survive']
+                jobs: ['work', 'survive']
             };
         }
 

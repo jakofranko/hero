@@ -789,6 +789,9 @@ Game.EntityMixins.JobActor = {
     getNextStep: function() {
         return this._path.shift();
     },
+    addNextStep: function(step) {
+        this._path.unshift(step);
+    },
     setPath: function(path) {
         this._path = path;
     },
