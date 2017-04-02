@@ -71,6 +71,7 @@ Game.Tasks.goToWork = function(entity) {
 			debugger;
 			console.log("Dest:", destX, destY, destZ);
 			console.log("Entity:", entity.getX(), entity.getY(), entity.getZ());
+			var debugPath = this.getPath(entity, destX, destY, destZ);
 			// Game.Screen.playScreen._player.tryMove(destX, destY, destZ);
 			// Game.Screen.playScreen._player.tryMove(entity.getX(), entity.getY(), entity.getZ());
 		}

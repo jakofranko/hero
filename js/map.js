@@ -274,9 +274,11 @@ Game.Map.prototype.getRandomFloorPosition = function(z) {
 // Gets the tile for a given coordinate set
 Game.Map.prototype.getTile = function(x, y, z) {
     // Make sure we are inside the bounds. 
-    //If we aren't, return null tile.
+    // If we aren't, return null tile.
     if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth) {
         return Game.TileRepository.create('null');
+    } else if(!this._tiles[z][x] || !this._tiles[z][x][y]) {
+        debugger;
     } else {
         return this._tiles[z][x][y] || Game.TileRepository.create('null');
     }
