@@ -38,6 +38,8 @@ Game.Lot = function(properties) {
 
 	this._items = properties['items'] || {};
 
+	this._livingLocations = properties['livingLocations'] || [];
+
 	this._jobLocations = properties['jobLocations'] || [];
 	this._companies = properties['companies'] || [];
 };
@@ -64,6 +66,16 @@ Game.Lot.prototype.getWidth = function() {
 };
 Game.Lot.prototype.getHeight = function() {
 	return this._height;
+};
+Game.Lot.prototype.getLivingLocations = function() {
+	return this._livingLocations;
+};
+Game.Lot.prototype.setLivingLocations = function(livingLocations) {
+	this._livingLocations = livingLocations;
+};
+Game.Lot.prototype.addLivingLocation = function(location) {
+	if(this._livingLocations.indexOf(location) < 0)
+		this._livingLocations.push(location);
 };
 Game.Lot.prototype.getJobLocations = function() {
 	return this._jobLocations;

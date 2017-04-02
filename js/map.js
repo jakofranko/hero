@@ -43,7 +43,8 @@ Game.Map = function(size, player) {
 
     // Add the Player
     this._player = player;
-    this.addEntityAtRandomPosition(player, 0);
+    var playerLoc = this._city.getLivingLocations()[0].split(",");
+    this.addEntityAt(player, playerLoc[0] - 1, playerLoc[1] - 1, 0);
 };
 
 // Standard getters
@@ -201,7 +202,9 @@ Game.Map.prototype.post12Recovery = function() {
 Game.Map.prototype._generateEntities = function() {
     var criminals = 0,
         companies = this._city.getCompanies(),
-        currentCompany = 0;
+        currentCompany = 0,
+        livingLocations = this._city.getLivingLocations(),
+        currentLivingLocation = 0;
     var addedWork = false;
     for (var i = 0; i < Game.getTotalEntities(); i++) {
         // The template has to be created each time, because making it once
@@ -233,8 +236,14 @@ Game.Map.prototype._generateEntities = function() {
         companies[currentCompany].addEmployee(entity);
 
         // Add the entity at a random position on the map
-        // TODO: Place entities in their homes
-        this.addEntityAtRandomPosition(entity, 0);
+        var livingLocation = livingLocations[currentLivingLocation];
+        if(livingLocation) {
+            var split = livingLocation.split(",");
+            this.addEntityAt(entity, split[0], split[1], split[2]);
+            currentLivingLocation++;
+        } else {
+            this.addEntityAtRandomPosition(entity, 0);
+        }
 
         if(template.jobs.indexOf('mugger') > -1)
             criminals++;

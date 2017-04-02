@@ -305,6 +305,18 @@ Game.LotRepository.define('houses', {
 						}
 					}
 				}
+
+				// If the house has any living locations, add them to the lot's living locations
+				var livingLocations = buildings[i].getLivingLocations();
+				if(livingLocations.length) {
+					for (var j = 0; j < livingLocations.length; j++) {
+						var split = livingLocations[j].split(","),
+							lx = Number(split[0]) + startX,
+							ly = Number(split[1]) + startY,
+							lz = Number(split[2]);
+						this.addLivingLocation(lx + "," + ly + "," + lz);
+					}
+				}
 				i++;
 			}	
 		}

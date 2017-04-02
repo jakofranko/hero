@@ -30,6 +30,8 @@ Game.City = function(size) {
 
 	this._items = {};
 
+	this._livingLocations = [];
+
 	this._companies = [];
 	this._jobLocations = [];
 };
@@ -43,6 +45,12 @@ Game.City.prototype.getHeight = function() {
 Game.City.prototype.getLots = function() {
 	return this._lots;
 };
+Game.City.prototype.getLivingLocations = function() {
+	return this._livingLocations;
+};
+Game.City.prototype.addLivingLocations = function(locations) {
+	this._livingLocations = this._livingLocations.concat(locations);
+};
 Game.City.prototype.getJobLocations = function() {
 	return this._jobLocations;
 };
@@ -54,6 +62,20 @@ Game.City.prototype.getCompanies = function() {
 };
 Game.City.prototype.addCompanies = function(companies) {
 	this._companies = this._companies.concat(companies);
+};
+Game.City.prototype.adjustLivingLocations = function(livingLocations, offsetX, offsetY) {
+	var newLocations = [];
+	for (var i = 0; i < livingLocations.length; i++) {
+		var oldLocation = livingLocations[i].split(","),
+			oldX = +oldLocation[0],
+			oldY = +oldLocation[1],
+			oldZ = +oldLocation[2];
+		var newX = oldX + offsetX,
+			newY = oldY + offsetY,
+			newLocation = newX + "," + newY + "," + oldZ;
+		newLocations.push(newLocation);
+	}
+	return newLocations;
 };
 Game.City.prototype.adjustCompaniesLocations = function(companies, offsetX, offsetY) {
 	for (var i = 0; i < companies.length; i++) {
@@ -193,7 +215,11 @@ Game.City.prototype.tilesFromLots = function() {
 			if(lotCompanies.length > 0)
 				this.addCompanies(lotCompanies);
 
-			// And adjust the companies' job locations by the lot offset
+			// If any living locations are present, add them to the city
+			var lotLivingLocations = this.adjustLivingLocations(this._lots[cityX][cityY].getLivingLocations(), lotOffsetX, lotOffsetY);
+			if(lotLivingLocations.length > 0)
+				this.addLivingLocations(lotLivingLocations);
+
 
 
 			// Load these tiles into the map at the appropriate

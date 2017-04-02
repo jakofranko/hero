@@ -28,6 +28,7 @@ Game.House = function(options) {
 		this.roomNum[this.rooms[i]] = 0;
 	}
 
+	this.livingLocations = [];
 	this.items = {}; // This is set during the render() phase above
 
 	this.graph = this.generate('foyer');
@@ -65,6 +66,13 @@ Game.House.prototype.addItem = function(x, y, z, item) {
 	if(key in this.items === false)
 		this.items[key] = [];
 	this.items[key].push(item);
+};
+Game.House.prototype.getLivingLocations = function() {
+	return this.livingLocations;
+};
+Game.House.prototype.addLivingLocation = function(location) {
+	if(this.livingLocations.indexOf(location) < 0)
+		this.livingLocations.push(location);
 };
 Game.House.prototype.rooms = [
 	'foyer',		// 0
@@ -615,10 +623,15 @@ Game.House.prototype._placeItems = function(room) {
 			var repo = itemMap[key].repository,
 				name = itemMap[key].name,
 				itemX = Number(key.split(",")[0]),
-				itemY = Number(key.split(",")[1]);
+				itemY = Number(key.split(",")[1]),
+				x = itemX + roomX + 1, // + 1 so that they are not placed on the walls
+				y = itemY + roomY + 1;
 
-			// + 1 so that they are placed within the walls
-			this.addItem(itemX + roomX + 1, itemY + roomY + 1, roomZ, Game[repo].create(name));
+			this.addItem(x, y, roomZ, Game[repo].create(name));
+
+			// Add living location
+			if(name === 'bed')
+				this.addLivingLocation(x + "," + y + "," + roomZ);
 		}
 	}
 
