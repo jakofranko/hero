@@ -119,6 +119,12 @@ Game.Map.prototype.addEntity = function(entity) {
         this._player = entity;
     }
 };
+Game.Map.prototype.addEntityAt = function(entity, x, y, z) {
+    entity.setX(x);
+    entity.setY(y);
+    entity.setZ(z);
+    this.addEntity(entity);
+};
 Game.Map.prototype.addEntityAtRandomPosition = function(entity, z) {
 	var position = this.getRandomFloorPosition(z);
 	entity.setX(position.x);
