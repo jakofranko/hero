@@ -105,7 +105,7 @@ Game.City.prototype.init = function() {
 			var key = x + "," + y;
 			// Only apply random roads on the first row/column,
 			// don't let them be right next to each other,
-			// dont' let them be within 2 units of each other,
+			// don't let them be within 2 units of each other,
 			// and don't put a road at 0,0
 			if((x === 0 || y === 0) && key != "0,0" && Math.random() < this._roadFrequency) {
 				var lastX = x - 1;

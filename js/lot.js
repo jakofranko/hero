@@ -212,7 +212,7 @@ Game.Lot.prototype.placeCenteredBuilding = function(lotTiles, building) {
 	var centerY = this.getMidHeight();
 
 	building.build();
-	// Add building's job locaitons to lot job locations
+	// Add building's job locations to lot job locations
 	this.setCompanies(building.getCompanies());
 
 	var buildingMidWidth = building.getMidWidth();
