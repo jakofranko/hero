@@ -289,9 +289,12 @@ Game.Map.prototype.getTileList = function(type) {
         if(!tileList[z])
             tileList[z] = [];
         for(var x = 0; x < this._width; x++)
-            for(var y = 0; y < this._height; y++)
+            for(var y = 0; y < this._height; y++) {
+                if(!this._tiles[z][x] || !this._tiles[z][x][y])
+                    continue;
                 if(this._tiles[z][x][y].getName() === type)
                     tileList[z].push(x + ',' + y);
+            }
     }
 
     return tileList;
