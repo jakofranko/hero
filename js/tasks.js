@@ -248,9 +248,9 @@ Game.Tasks.wander = function(entity) {
     var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
     // Flip coin to determine if moving in x direction or y direction
     if (Math.round(Math.random()) === 1) {
-        entity.tryMove(entity.getX() + moveOffset, entity.getY(), entity.getZ());
+        entity.tryMove(Number(entity.getX()) + moveOffset, entity.getY(), entity.getZ());
     } else {
-        entity.tryMove(entity.getX(), entity.getY() + moveOffset, entity.getZ());
+        entity.tryMove(entity.getX(), Number(entity.getY()) + moveOffset, entity.getZ());
     }
 };
 
