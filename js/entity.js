@@ -16,13 +16,13 @@ Game.Entity = function(properties) {
 Game.Entity.extend(Game.DynamicGlyph);
 
 Game.Entity.prototype.setX = function(x) {
-    this._x = x;
+    this._x = Number(x);
 };
 Game.Entity.prototype.setY = function(y) {
-    this._y = y;
+    this._y = Number(y);
 };
 Game.Entity.prototype.setZ = function(z) {
-	this._z = z;
+	this._z = Number(z);
 };
 Game.Entity.prototype.setSpeed = function(speed) {
     this._speed = speed;
@@ -32,9 +32,9 @@ Game.Entity.prototype.setPosition = function(x, y, z) {
 	var oldY = this._y;
 	var oldZ = this._z;
 	// Update position
-	this._x = x;
-	this._y = y;
-	this._z = z;
+	this.setX(x);
+	this.setY(y);
+	this.setZ(z);
 
 	// If the entity is on a map, notify the map that the entity has moved
 	if(this._map) {

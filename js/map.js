@@ -168,7 +168,7 @@ Game.Map.prototype.removeEntity = function(entity) {
 };
 Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
 	// Delete the old key if it is the same entity and we have old positons
-	if(typeof oldX === 'number') {
+	if(oldX !== undefined) {
 		var oldKey = oldX + "," + oldY + "," + oldZ;
 		if(this._entities[oldKey] == entity) {
 			delete this._entities[oldKey];
