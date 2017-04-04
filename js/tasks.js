@@ -197,11 +197,12 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 	if(level < startZ) { // Entity is above destination
 		var nearestDownStair = map.findNearestDownStair(startX, startY, startZ),
 			splitNDS = nearestDownStair.split(","),
-			dsX = splitNDS[0],
-			dsY = split[1],
-			dsZ = split[2];
+			dsX = +splitNDS[0],
+			dsY = +splitNDS[1];
+
+		// Set up a new path, with the nearest downstair as the target
 		var pathToDownStair = new ROT.Path.AStar(dsX, dsY, function(x, y) {
-			return map.getTile(x, y, destZ).isWalkable();
+			return map.getTile(x, y, startZ).isWalkable();
 		});
 
 		// Path from startX,startY to the downstair
@@ -215,18 +216,19 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 			return false;
 
 		// Descend once you've reached the downstair
-		newPath.push([dsX, dsY, dsZ - 1]);
+		newPath.push([dsX, dsY, startZ - 1]);
 
 
 		// Recurse with new path, which is a combo of the new path + the old path (in that order),
 		// attempting to find a path to the next down stair starting from the tile beneath the downstair.
-		return Game.Tasks.getPathToLevel(entity, level, dsX, dsY, dsZ - 1, newPath.concat(currentPath));
+		return Game.Tasks.getPathToLevel(entity, level, dsX, dsY, startZ - 1, newPath.concat(currentPath));
 	} else if(level > startZ) { // entity is below the desired z-level
 		var nearestUpStair = map.findNearestUpStair(startX, startY, startZ),
 			splitNUS = nearestUpStair.split(","),
-			usX = splitNUS[0],
-			usY = split[1],
-			usZ = split[2];
+			usX = +splitNUS[0],
+			usY = +splitNUS[1];
+
+		// Start a new path with the nearest upstair being the goal
 		var pathToUpStair = new ROT.Path.AStar(usX, usY, function(x, y) {
 			return map.getTile(x, y, startZ).isWalkable();
 		});
@@ -242,11 +244,11 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 			return false;
 
 		// Attempt to go up the upStair
-		newPath.push([x, y, startZ + 1]);
+		newPath.push([usX, usY, startZ + 1]);
 
-		// Recurse with new path, the new destination being the tile above the upstair
-		// which should be the corresponding down stair.
-		return Game.Tasks.getPathToLevel(entity, level, usX, usY, usZ + 1, newPath.concat(currentPath));
+		// Recurse with new path, the new destination being the tile 
+		// above the upstair which should be the corresponding down stair.
+		return Game.Tasks.getPathToLevel(entity, level, usX, usY, startZ + 1, newPath.concat(currentPath));
 	} else {
 		return currentPath;
 	}
