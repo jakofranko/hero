@@ -112,7 +112,7 @@ Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
 
 	// If the z levels are not the same, get a series of paths that
 	// lead to the nearest appropriate stair to the destination,
-	// find a path from that stair to the destination, and the recurse with
+	// find a path from that stair to the destination, and then recurse with
 	// the new destination being the tile above or below the up/down stair that
 	// was found. The result should be a path from the entity to a series of
 	// stairs that are closest to the destination.
@@ -144,11 +144,13 @@ Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
 			splitNDS = nearestDownStair.split(","),
 			dsX = +splitNDS[0],
 			dsY = +splitNDS[1];
+
+		// New path, with destination being the goal
 		var pathFromDownStair = new ROT.Path.AStar(destX, destY, function(x, y) {
 			return map.getTile(x, y, destZ).isWalkable();
 		});
 
-		// Add the pathed moves to the existing path, and then try call this function again.
+		// Attempt to path to the destination from the nearest downstair
 		pathFromDownStair.compute(dsX, dsY, function(x, y) {
 			newPath.push([x, y, destZ]);
 		});
@@ -172,6 +174,11 @@ Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
 		return newPath.concat(currentPath);
 	}
 };
+
+// This is different from getPath in that this is merely trying to a specified Z-level,
+// and doesn't care about a destination. Thus, it's able to find a path to a Z-level
+// just from knowing the start coords. getPath tries to get to a destination, which
+// may or may not be on a different Z-level. Similar methods, different goals.
 Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, currentPath) {
 	var map = entity.getMap(),
 		newPath = [];
@@ -196,7 +203,7 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 			return map.getTile(x, y, destZ).isWalkable();
 		});
 
-		// Add the pathed moves to the existing path, and then try call this function again.
+		// Path from startX,startY to the downstair
 		pathToDownStair.compute(startX, startY, function(x, y) {
 			if(x !== startX || y !== startY)
 				newPath.push([x, y, startZ]);
@@ -223,7 +230,7 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 			return map.getTile(x, y, startZ).isWalkable();
 		});
 
-		// Add the path from the upstair to the destination
+		// Path to the upstair from startX,startY
 		pathToUpStair.compute(startX, startY, function(x, y) {
 			if(x !== startX || y !== startY)
 				newPath.push([x, y, startZ]);

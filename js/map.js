@@ -299,6 +299,8 @@ Game.Map.prototype.getTileList = function(type) {
 
     return tileList;
 };
+
+// TODO: Figure out a way to do this to return an array of stairs within a radius, if one is passed
 Game.Map.prototype.findNearestDownStair = function(x, y, z) {
     var nearestIndex = null,
         nearestDistance = null;
@@ -315,6 +317,8 @@ Game.Map.prototype.findNearestDownStair = function(x, y, z) {
     }
     return this._downStairs[z][nearestIndex];
 };
+
+// TODO: Figure out a way to do this to return an array of stairs within a radius, if one is passed
 Game.Map.prototype.findNearestUpStair = function(x, y, z) {
     var nearestIndex = null,
         nearestDistance = null;
