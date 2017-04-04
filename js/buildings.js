@@ -148,12 +148,15 @@ Game.BuildingRepository.define('apartment', {
 						var name = templateMap[templateKey].name;
 						var repo = templateMap[templateKey].repository;
 						var splitKey = templateKey.split(",");
-						var tX = Number(splitKey[0]);
-						var tY = Number(splitKey[1]);
-						if(repo === "ItemRepository")
-							this.addItem(tX + offsetX, tY + offsetY, z, Game[repo].create(name));
+						var tX = Number(splitKey[0]) + offsetX;
+						var tY = Number(splitKey[1]) + offsetY;
+						if(repo === "ItemRepository") {
+							this.addItem(tX, tY, z, Game[repo].create(name));
+							if(name === 'bed')
+								this.addLivingLocation(tX + "," + tY + "," + z);
+						}
 						else if(repo === "TileRepository")
-							story[tX + offsetX][tY + offsetY] = Game[repo].create(name);
+							story[tX][tY] = Game[repo].create(name);
 						else
 							throw new Error("Need to account for repository '" + repo + "' that is trying to create '" + name + "'");
 					}

@@ -21,6 +21,8 @@ Game.Building = function(properties) {
 		// this.name = Game.Building.randomName();
 	}
 
+	this._livingLocations = [];
+
 	// Company generator and jobLocation storage
 	this._companyGenerator = new Game.CompanyGenerator();
 	this._companies = [];
@@ -481,6 +483,13 @@ Game.Building.prototype.getBlueprint = function() {
 };
 Game.Building.prototype.getName = function() {
 	return this._name;
+};
+Game.Building.prototype.getLivingLocations = function() {
+	return this._livingLocations;
+};
+Game.Building.prototype.addLivingLocation = function(location) {
+	if(this._livingLocations.indexOf(location) < 0)
+		this._livingLocations.push(location);
 };
 Game.Building.prototype.getJobLocations = function() {
 	return this._jobLocations;

@@ -254,6 +254,18 @@ Game.LotRepository.define('apartments', {
 				}
 			}
 		}
+
+		// Add living locations
+		var livingLocations = apartment.getLivingLocations();
+		if(livingLocations.length) {
+			for (var i = 0; i < livingLocations.length; i++) {
+				var loc = livingLocations[i].split(","),
+					lx = Number(loc[0]) + cornerX,
+					ly = Number(loc[1]) + cornerY,
+					lz = Number(loc[2]);
+				this.addLivingLocation(lx + "," + ly + "," + lz);
+			}
+		}
 		return tiles;
 	}
 });
