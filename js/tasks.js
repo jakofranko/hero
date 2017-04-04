@@ -68,7 +68,8 @@ Game.Tasks.goToWork = function(entity) {
 		var pathToWork = this.getPath(entity, destX, destY, destZ);
 
 		if(!pathToWork) {
-			debugger;
+			// debugger;
+			console.log(entity.getName());
 			console.log("Dest:", destX, destY, destZ);
 			console.log("Entity:", entity.getX(), entity.getY(), entity.getZ());
 			var debugPath = this.getPath(entity, destX, destY, destZ);
