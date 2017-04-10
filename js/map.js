@@ -300,7 +300,78 @@ Game.Map.prototype.getTileList = function(type) {
     return tileList;
 };
 
-// TODO: Figure out a way to do this to return an array of stairs within a radius, if one is passed
+// TODO: Have this support both string coords ("x,y") and arrays ([x,y])
+// Return a comparisonFunction for use in Array.prototype.sort()
+Game.Map.prototype._createSortByDistance = function(coord) {
+    var coordSplit = coord.split(","),
+        sourceX = coordSplit[0],
+        sourceY = coordSplit[1];
+    return function(coordA, coordB) {
+        var splitA = coordA.split(","),
+            aX = splitA[0],
+            aY = splitA[1],
+            splitB = coordB.split(","),
+            bX = splitB[0],
+            bY = splitB[1];
+
+        var dA = Game.Geometry.distance(sourceX, sourceY, aX, aY);
+        var dB = Game.Geometry.distance(sourceX, sourceY, bX, bY);
+        return dA - dB;
+    };
+};
+// TODO: Optimize these get path functions to sort the stairs by distance first, then find path. Additionally, most of this code is duplicated between the two functions, and could be reduced to a single function that takes a direction param
+Game.Map.prototype.getPathToNearestStair = function(x, y, z, type) {
+    var nearestIndex = null,
+        nearestDistance = null,
+        steps = [],
+        map = this,
+        stairType = '_' + type + 'Stairs',
+        stairsX, stairsY, distance, pather;
+
+    var canWalk = function(floorX, floorY) {
+        return map.getTile(floorX, floorY, z).isWalkable();
+    };
+
+    var pushSteps = function(floorX, floorY) {
+        steps.push([floorX, floorY, z]);
+    };
+
+    // Sort stairs by distance
+    var stairs = this[stairType][z].sort(this._createSortByDistance(x + "," + y));
+
+    for (var i = 0; i < stairs.length; i++) {
+        var split = stairs[i].split(",");
+
+        newSteps = [];
+        stairsX = Number(split[0]);
+        stairsY = Number(split[1]);
+
+        // If nearest stair IS x,y, then this as the only path step
+        if(stairsX === x && stairsY === y)
+            return [[stairsX, stairsY, z]];
+
+        pather = new ROT.Path.AStar(stairsX, stairsY, canWalk);
+
+        pather.compute(x, y, pushSteps); // pushes to steps
+
+        // Since steps are already sorted by distance, just return the first one with a valid path
+        if(steps.length)
+            return steps;
+    }
+    return steps;
+};
+Game.Map.prototype.getDownStairsInRadius = function(x, y, z, r) {
+    var stairs = [];
+    for (var i = 0; i < this._downStairs[z].length; i++) {
+        var split = this._downStairs[z][i].split(","),
+            currentX = split[0],
+            currentY = split[1],
+            distance = Game.Geometry.distance(x, y, currentX, currentY);
+        if(distance <= r)
+            stairs.push(this._downStairs[z][i]);
+    }
+    return stairs;
+};
 Game.Map.prototype.findNearestDownStair = function(x, y, z) {
     var nearestIndex = null,
         nearestDistance = null;
@@ -317,8 +388,18 @@ Game.Map.prototype.findNearestDownStair = function(x, y, z) {
     }
     return this._downStairs[z][nearestIndex];
 };
-
-// TODO: Figure out a way to do this to return an array of stairs within a radius, if one is passed
+Game.Map.prototype.getUpStairsInRadius = function(x, y, z, r) {
+    var stairs = [];
+    for (var i = 0; i < this._upStairs[z].length; i++) {
+        var split = this._upStairs[z][i].split(","),
+            currentX = split[0],
+            currentY = split[1],
+            distance = Game.Geometry.distance(x, y, currentX, currentY);
+        if(distance <= r)
+            stairs.push(this._upStairs[z][i]);
+    }
+    return stairs;
+};
 Game.Map.prototype.findNearestUpStair = function(x, y, z) {
     var nearestIndex = null,
         nearestDistance = null;
