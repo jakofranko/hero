@@ -27,6 +27,9 @@ var Game = {
 	_totalCriminals: 10,
 	_availableJobs: 500 - 100,
 
+	debug: true,
+	watchName: null,
+
 	getDisplay: function() {
 		return this._display;
 	},

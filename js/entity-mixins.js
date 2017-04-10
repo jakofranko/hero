@@ -706,6 +706,9 @@ Game.EntityMixins.JobActor = {
         this._path = [];
     },
     act: function() {
+        if(Game.debug && Game.watchName == this.getName())
+            debugger;
+        
         if(!this.isConscious()) 
             return;
 
@@ -806,6 +809,9 @@ Game.EntityMixins.JobActor = {
         return currentLocation === this._jobLocation;
     },
     listeners: {
+        overlay: function() {
+            return [{key: 'path', points: this._path, char: '#', color: 'purple'}];
+        },
         onRegainConsciousness: function() {
             if(this.hasJob('mugger')) {
                 // TODO: upon waking up, the NPC loses 'petty crime' jobs?

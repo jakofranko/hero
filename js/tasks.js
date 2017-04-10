@@ -65,6 +65,7 @@ Game.Tasks.goToWork = function(entity) {
 			destY = split[1],
 			destZ = split[2];
 
+		debugger;
 		var pathToWork = this.getPath(entity, destX, destY, destZ);
 
 		if(!pathToWork) {

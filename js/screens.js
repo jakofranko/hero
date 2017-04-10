@@ -340,6 +340,9 @@ Game.Screen.playScreen = {
                 // Setup the look screen.
                 this.setSubScreen(Game.Screen.helpScreen);
                 return;
+            } else if(keyChar === '*') {
+                Game.watchName = prompt("Enter NPC name");
+                return;
             } else {
         		// Not a valid key
         		return;
@@ -862,6 +865,7 @@ Game.Screen.TargetBasedScreen = function(template) {
     this._okFunction = template['okFunction'] || function(x, y) {
         return false;
     };
+    this._overlayFunction = template['overlayFunction'] || function(){};
     // The defaut caption function returns a description of the tiles or creatures.
     this._captionFunction = template['captionFunction'] || function(x, y) {
         var z = this._player.getZ();
@@ -968,6 +972,23 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
         
     }
 
+    // Render any overlay information
+    var overlays = this._overlayFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY);
+    if(overlays) {
+        for (var j = 0; j < overlays.length; j++) {
+            debugger;
+            for (var k = 0; k < overlays[j].length; k++) {
+                if(!overlays[j][k].points.length)
+                    continue;
+                for (var m = 0; m < overlays[j][k].points.length; m++) {
+                    var point = overlays[j][k].points[m];
+                    console.log(point);
+                    display.drawText(point[0] - this._offsetX, point[1] - this._offsetY, "%c{" + overlays[j][k].color + "}" + overlays[j][k].char);
+                }
+            }
+        }
+    }
+
     // Render the caption at the bottom.
     display.drawText(
         0,
@@ -1018,6 +1039,22 @@ Game.Screen.TargetBasedScreen.prototype.executeOkFunction = function() {
 
 // Target-based screens
 Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
+    overlayFunction: function(x, y) {
+        var z = this._player.getZ();
+        var map = this._player.getMap();
+        // If the tile is explored, we can give a better capton
+        if(Game.debug) {
+            var items = map.getItemsAt(x, y, z);
+            // If we have items, we want to render the top most item
+            if(map.getEntityAt(x, y, z)) {
+                var entity = map.getEntityAt(x, y, z);
+                var overlay = entity.raiseEvent('overlay');
+                return overlay;
+            }
+            // TODO: Support for items?
+            // TODO: Default action?
+        }
+    },
     captionFunction: function(x, y) {
         var z = this._player.getZ();
         var map = this._player.getMap();
