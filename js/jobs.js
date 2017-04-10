@@ -72,8 +72,8 @@ Game.Jobs.mugger = {
 			}
 		}
 
-		// If the target is not conscious or out of money, don't target them.
-		if(target !== null && target !== false && (!target.isConscious() || !target.isAlive() || target.getMoney() <= 0)) {
+		// If the target is not conscious, visible, or is out of money, don't target them.
+		if(target !== null && target !== false && (!target.isConscious() || !target.isAlive() || target.getMoney() <= 0 || !entity.canSee(target))) {
 			target = entity.setTarget(null);
 		}
 
