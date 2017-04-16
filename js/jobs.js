@@ -28,7 +28,7 @@ Game.Jobs.survive = {
 Game.Jobs.work = {
 	doJob: function(entity) {
 		if(!entity.isAtJobLocation())
-			Game.Tasks.goToWork(entity);
+			Game.Tasks.goToJobLocation(entity);
 		else
 			Game.Tasks.doWork(entity);
 	},

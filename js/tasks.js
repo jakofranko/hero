@@ -56,7 +56,7 @@ Game.Tasks.doWork = function(entity) {
 	var phrases = ["I'm totally working right now", "This is me, and I'm working", "Can you see me right now? I am so totally working.", "Work it, work it, work it"];
 	Game.sendMessageNearby(entity.getMap(), entity.getX(), entity.getY(), entity.getZ(), phrases.random());
 };
-Game.Tasks.goToWork = function(entity) {
+Game.Tasks.goToJobLocation = function(entity) {
 	var entityPath = entity.getPath(),
 		jobLocation = entity.getJobLocation();
 	if(jobLocation && !entity.isAtJobLocation() && !entityPath.length) {
@@ -65,9 +65,9 @@ Game.Tasks.goToWork = function(entity) {
 			destY = split[1],
 			destZ = split[2];
 
-		var pathToWork = this.getPath(entity, destX, destY, destZ);
+		var pathToJob = this.getPath(entity, destX, destY, destZ);
 
-		if(!pathToWork) {
+		if(!pathToJob) {
 			// debugger;
 			console.log(entity.getName());
 			console.log("Dest:", destX, destY, destZ);
@@ -78,8 +78,8 @@ Game.Tasks.goToWork = function(entity) {
 		}
 
 		// If there isn't a path to work, go down to the ground floor and try again.
-		if(pathToWork)
-			entity.setPath(pathToWork);
+		if(pathToJob)
+			entity.setPath(pathToJob);
 		else if(entity.getZ() !== 0)
 			entity.setPath(this.getPathToLevel(entity, 0));
 		else
