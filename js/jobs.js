@@ -33,8 +33,10 @@ Game.Jobs.work = {
 			Game.Tasks.doWork(entity);
 	},
 	priority: function(entity) {
-		// TODO: Figure out how to prioritize going to work...
-		var total = 0;
+		var total = 10;
+		var hour = entity.getMap().getTime().getHours();
+		if(hour >= 8 && hour < 17)
+			total -= 5;
 		if(!entity.recall('places', 'work').location)
 			total += 100;
 		return total;
@@ -44,13 +46,16 @@ Game.Jobs.work = {
 Game.Jobs.home = {
 	doJob: function(entity) {
 		if(!entity.isAtJobLocation())
-			Game.Tasks.goHome(entity);
+			Game.Tasks.goJobLocation(entity);
 		else
-			Game.Tasks.doWork(entity);
+			Game.Tasks.wander(entity);
 	},
 	priority: function(entity) {
-		// TODO: Figure out how to prioritize going to work...
-		return 1;
+		var total = 10;
+		var hour = entity.getMap().getTime().getHours();
+		if(hour >= 17)
+			total -= 5;
+		return total;
 	}
 };
 

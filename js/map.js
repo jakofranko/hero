@@ -223,12 +223,12 @@ Game.Map.prototype._generateEntities = function() {
                 // their money / survive priority needs to be higher
                 // than 10 (which is the survive priority). I.e., >100
                 money: ROT.RNG.getNormal(50, 25),
-                jobs: ['mugger', 'survive']
+                jobs: ['mugger', 'home', 'survive']
             };
         } else {
             template = {
                 money: ROT.RNG.getNormal(100, 50),
-                jobs: ['work', 'survive']
+                jobs: ['work', 'home', 'survive']
             };
         }
 
@@ -244,6 +244,11 @@ Game.Map.prototype._generateEntities = function() {
         // Add the entity at a random position on the map
         var livingLocation = livingLocations[currentLivingLocation];
         if(livingLocation) {
+            // Make sure they remember where home is
+            var memory = {location: livingLocation};
+            entity.remember('places', 'home', false, memory);
+
+            // Spawn them at this location
             var split = livingLocation.split(",");
             this.addEntityAt(entity, split[0], split[1], split[2]);
             currentLivingLocation++;
