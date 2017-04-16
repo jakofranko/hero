@@ -17,7 +17,12 @@ Game.CompanyGenerator = function() {
 		'Ruby',
 		'Contour',
 		'Obulix',
-		'Enigma'
+		'Enigma',
+		'Vortex',
+		'Contrast',
+		'Capricorn',
+		'Ares',
+		'Poseiden'
 	];
 	this._corpIndustries = [
 		'R & D',
