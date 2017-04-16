@@ -204,7 +204,6 @@ Game.Map.prototype.post12Recovery = function() {
     }
 };
 
-// TODO: Give entities jobs at companies upon creation
 Game.Map.prototype._generateEntities = function() {
     var criminals = 0,
         companies = this._city.getCompanies(),

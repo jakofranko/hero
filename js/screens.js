@@ -976,7 +976,6 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
     var overlays = this._overlayFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY);
     if(overlays) {
         for (var j = 0; j < overlays.length; j++) {
-            debugger;
             for (var k = 0; k < overlays[j].length; k++) {
                 if(!overlays[j][k].points.length)
                     continue;
