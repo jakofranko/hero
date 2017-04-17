@@ -46,7 +46,7 @@ Game.Jobs.work = {
 Game.Jobs.home = {
 	doJob: function(entity) {
 		if(!entity.isAtJobLocation())
-			Game.Tasks.goJobLocation(entity);
+			Game.Tasks.goToJobLocation(entity);
 		else
 			Game.Tasks.wander(entity);
 	},
