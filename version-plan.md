@@ -38,6 +38,8 @@ layout: page
     * Upper story of house generation sometimes don't have downstairs or doors between walls, or are disconnected.
 * v0.6 - Items
   * Support for using weapons and armor! Perhaps best to pull in the system used in MonsterHunterRL (since it has a robust slot-based system for items)
+  * Improvements
+    * More intelligent reactions (or a better reaction system) depending on events happening around NPCs
 * v0.7 - Locations
   * More lot types and building types for things like Banks, Restaurants, Grocery Stores, Pharmacies, Warehouses etc. Basically one-story locations that could be the target of robberies, or the 'hangout' of villains
 * v0.8 - Animations
