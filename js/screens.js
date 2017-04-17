@@ -13,10 +13,10 @@ Game.Screen.startScreen = {
         var w = Game.getScreenWidth();
         var h = Game.getScreenHeight();
         var text = "%c{#585DF5}Justice%c{}: A Superhero Roguelike";
-        display.drawText((w/2) - (text.length / 2), 2, text);
+        display.drawText((w/2) - (30 / 2), 2, text);
 
         text = "Press [%c{#585DF5}Enter%c{}] to start!";
-        display.drawText((w/2) - (text.length / 2), 3, text);
+        display.drawText((w/2) - (23 / 2), 3, text);
         // The widest point of the scale is 74 characters, so, use that to pad the rest
         var widestPoint = "'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'";
         // var padLeft = Math.round(widestPoint.length / 2);
@@ -47,7 +47,7 @@ Game.Screen.startScreen = {
         ];
 
         for (var i = 0; i < scalesASCII.length; i++) {
-            display.drawText(3 + (widestPoint.length - scalesASCII[i].length) / 2, i + 7, "%c{#F5F058}" + scalesASCII[i]);
+            display.drawText((w / 2) - (scalesASCII[i].length / 2), i + 7, "%c{#F5F058}" + scalesASCII[i]);
         }
 
         //             ,ggg,                   gg                   ,ggg,
@@ -73,6 +73,9 @@ Game.Screen.startScreen = {
         //                                _,ad8888ba,_
         //                     __,,aaaadd888888888888888bbaaaa,,__
         //                   d8888888888888888888888888888888888888b
+
+        var version = "v0.3";
+        display.drawText((w / 2) - (version.length / 2), scalesASCII.length + 8, version);
 
 	},
 	handleInput: function(inputType, inputData) {
