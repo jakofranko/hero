@@ -15,15 +15,12 @@ layout: page
   * Lot sizes should probably be bigger, which means that roads and sidewalks should be generated more intelligently
 * v0.3 - NPC improvements
   * Bug Fixes and improvements
-    * Better captioning for menus (namely the action menu for putting things in containers)
     * Performance Audit improvements
       * Pathfinding efficiency improvements
     * Items in houses
   * Pathfinding between z-levels and through doors
   * Path finding from work to home and vice-versa
   * Schedule-based jobs (between 9-5, I should be working, between 10-7 I should be sleeping etc)
-  * Work jobs that give the NPC money
-  * More intelligent reactions (or a better reaction system) depending on events happening around them
 * v0.4 - Events
   * Event system! The event system will comprise three or four (for now) components: Event Sources, and Events
     * Event Sources are the objects that will contain logic for generating events, and can be affected by in game actions. Some will be standard (appear in every game), whereas others will be tied directly to an NPC (perhaps as a mixin). Event sources will always have a condition for 'spawning' events that is tied either to the NPC that is creating them, the Justice meters, or both. Event 'sources' should define what kinds of events they spawn. 
