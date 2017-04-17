@@ -25,6 +25,40 @@ Game.Jobs.survive = {
 	}
 };
 
+Game.Jobs.work = {
+	doJob: function(entity) {
+		if(!entity.isAtJobLocation())
+			Game.Tasks.goToJobLocation(entity);
+		else
+			Game.Tasks.doWork(entity);
+	},
+	priority: function(entity) {
+		var total = 10;
+		var hour = entity.getMap().getTime().getHours();
+		if(hour >= 8 && hour < 17)
+			total -= 5;
+		if(!entity.recall('places', 'work').location)
+			total += 100;
+		return total;
+	}
+};
+
+Game.Jobs.home = {
+	doJob: function(entity) {
+		if(!entity.isAtJobLocation())
+			Game.Tasks.goToJobLocation(entity);
+		else
+			Game.Tasks.wander(entity);
+	},
+	priority: function(entity) {
+		var total = 10;
+		var hour = entity.getMap().getTime().getHours();
+		if(hour >= 17)
+			total -= 5;
+		return total;
+	}
+};
+
 Game.Jobs.mugger = {
 	crime: true,
 	noise: 15,
@@ -43,8 +77,8 @@ Game.Jobs.mugger = {
 			}
 		}
 
-		// If the target is not conscious or out of money, don't target them.
-		if(target !== null && target !== false && (!target.isConscious() || !target.isAlive() || target.getMoney() <= 0)) {
+		// If the target is not conscious, visible, or is out of money, don't target them.
+		if(target !== null && target !== false && (!target.isConscious() || !target.isAlive() || target.getMoney() <= 0 || !entity.canSee(target))) {
 			target = entity.setTarget(null);
 		}
 
@@ -80,7 +114,7 @@ Game.Jobs.mugger = {
 			}
 
 			if(target.hasMixin('MemoryMaker')) {
-				target.remember('events', false, 'mugged by ' + entity.describe(), {entity: entity, expires: 50});
+				target.remember('events', false, 'mugged by ' + entity.getName(), {entity: entity, expires: 50});
 			}
 		} else {
 			entity.steal(target, target.getMoney());

@@ -53,7 +53,7 @@ Game.EntityMixins.Attacker = {
         var result = Game.rollDice(dice + "d6");
 
         if(!message)
-            message = "%s makes a presense attack!".format(this.describe());
+            message = "%s makes a presense attack!".format(this.getName());
 
         Game.sendMessageNearby(
             this.getMap(),
@@ -71,12 +71,12 @@ Game.EntityMixins.Attacker = {
             margin = result - target.getEGO();
         } else {
             Game.sendMessage(this, "Your presence attack fails to impress %s", [target.describeThe()]);
-            Game.sendMessage(target, "%s attempted and failed to impress you with a presense attack", [this.describe()]);
+            Game.sendMessage(target, "%s attempted and failed to impress you with a presense attack", [this.getName()]);
             return false;
         }
 
         Game.sendMessage(this, "Your presence attack succeeds in impressing %s by %s points!", [target.describeThe(), margin]);
-        Game.sendMessage(target, "%s has impressed you with a presense attack by %s points!", [this.describe(), margin]);
+        Game.sendMessage(target, "%s has impressed you with a presense attack by %s points!", [this.getName(), margin]);
         return margin;
     },
     _attackRoll: function(target) {
@@ -254,7 +254,7 @@ Game.EntityMixins.Characteristics = {
         // Make sure we don't take any less than zero damage
         this._STUN -= Math.max(0, (STUN - defense));
         if(this._STUN <= 0) {
-            Game.sendMessage(attacker, "You knocked %s unconscious", [this.describe()]);
+            Game.sendMessage(attacker, "You knocked %s unconscious", [this.getName()]);
             this.ko();
         } else {
             if(this.hasMixin('Reactor')) {
@@ -654,7 +654,7 @@ Game.EntityMixins.InventoryHolder = {
     canStackItem: function(item) {
         if(item.hasMixin('Stackable')) {
             for(var i = 0; i < this._items.length; i++) {
-                if(this._items[i].describe() == item.describe()) {
+                if(this._items[i].getName() == item.getName()) {
                     return i;
                 }
             }
@@ -699,10 +699,16 @@ Game.EntityMixins.JobActor = {
     groupName: 'Actor',
     init: function(template) {
         this._jobs = template['jobs'] || ['survive'];
+        this._jobCurrent = null;
         this._jobPriority = template['jobPriority'] || {};
         this._lastJobPrioritization = 0;
+        this._jobLocation = template['jobLocation'] || null;
+        this._path = [];
     },
     act: function() {
+        if(Game.debug && Game.watchName == this.getName())
+            debugger;
+        
         if(!this.isConscious()) 
             return;
 
@@ -712,25 +718,14 @@ Game.EntityMixins.JobActor = {
             return this.react();
         
         // Re-prioritize every hour
-        if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0) {
+        // TODO: give a unique time for re-prioritization (still once an hour, just a different minute/second perhaps) so that the NPCs don't all reprioritize and the same time and lag the system
+        if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0)
             this.reprioritizeJobs();
-        }
 
-        // Get highest priority job, with a higher
-        // priority being a smaller int (0 is highest priority)
-        var highestPriority = null;
-        for(var job in this._jobPriority) {
-            if(highestPriority === null)
-                highestPriority = job;
-            else if(this._jobPriority[job] < this._jobPriority[highestPriority])
-                highestPriority = job;
-        }
+        Game.Jobs[this._jobCurrent].doJob(this);
 
-        Game.Jobs[highestPriority].doJob(this);
-
-        if(this.hasMixin('MemoryMaker')) {
+        if(this.hasMixin('MemoryMaker'))
             this.processMemories();
-        }
     },
     getJobs: function() {
         return this._jobs;
@@ -753,22 +748,70 @@ Game.EntityMixins.JobActor = {
     },
     reprioritizeJobs: function() {
         // Remove any jobs that the entity no longer has
-        for(var job in this._jobPriority) {
-            if(!this._jobs[job]) {
+        for(var job in this._jobPriority)
+            if(!this._jobs[job])
                 delete this._jobPriority[job];
+
+        // Re-prioritize
+        for(var i = 0; i < this._jobs.length; i++) {
+            // Add new jobs to the job priority list
+            if(!this._jobPriority[this._jobs[i]])
+                this._jobPriority[this._jobs[i]] = 0;
+
+            this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
+        }
+
+        // Get highest priority job, with a higher
+        // priority being a smaller int (0 is highest priority)
+        var highestPriority = null;
+        for(var newJob in this._jobPriority) {
+            if(highestPriority === null)
+                highestPriority = newJob;
+            else if(this._jobPriority[newJob] < this._jobPriority[highestPriority])
+                highestPriority = newJob;
+        }
+
+        // Set current job as the highest priority
+        this._jobCurrent = highestPriority;
+
+        // Set the job location to the new job
+        if(this.hasMixin('MemoryMaker')) {
+            var place = this.recall('places', highestPriority);
+            if(place) {
+                if(!place.location)
+                    debugger;
+                this._jobLocation = place.location;
             }
         }
 
-        for(var i = 0; i < this._jobs.length; i++) {
-            // Add new jobs to the job priority list
-            if(!this._jobPriority[this._jobs[i]]) {
-                this._jobPriority[this._jobs[i]] = 0;
-            }
-            this._jobPriority[this._jobs[i]] = Game.Jobs.getPriority(this, this._jobs[i]);
-        }
         this._lastJobPrioritization = this._map.getTime().getHours();
     },
+    getPath: function() {
+        return this._path;
+    },
+    getNextStep: function() {
+        return this._path.shift();
+    },
+    addNextStep: function(step) {
+        this._path.unshift(step);
+    },
+    setPath: function(path) {
+        this._path = path;
+    },
+    getJobLocation: function() {
+        return this._jobLocation;
+    },
+    setJobLocation: function(jobLocation) {
+        this._jobLocation = jobLocation;
+    },
+    isAtJobLocation: function() {
+        var currentLocation = this.getX() + "," + this.getY() + "," + this.getZ();
+        return currentLocation === this._jobLocation;
+    },
     listeners: {
+        overlay: function() {
+            return [{key: 'path', points: this._path, char: '#', color: 'purple'}];
+        },
         onRegainConsciousness: function() {
             if(this.hasJob('mugger')) {
                 // TODO: upon waking up, the NPC loses 'petty crime' jobs?
@@ -805,7 +848,10 @@ Game.EntityMixins.MemoryMaker = {
                 criminals: {},
                 victims: {}
             },
-            places: {},
+            places: {
+                work: {},
+                home: {}
+            },
             events: {}
         };
 
@@ -848,6 +894,8 @@ Game.EntityMixins.MemoryMaker = {
         } else if(subtype && !this._memory[type][subtype]) {
             console.log(this);
             throw new Error(this._name + ' has no category for \'' + subtype + '\' in their memory of \'' + type + '\' !');
+        } else if(!subtype && !memoryName) {
+            throw new Error("You must specify a type or a memory name in order to remember something");
         }
 
         // TODO: there is a possibility that an entity could get generated with a duplicate name and that could mess with an entities memory of that entity. However, since entities don't have much that differentiates them now other than their name, it probably doesn't matter/is kind of a funny 'real-life' way of entities (and maybe players?) getting confused...
@@ -865,10 +913,13 @@ Game.EntityMixins.MemoryMaker = {
         if(typeof memory.entity === undefined)
             memory.entity = false;
 
-        if(subtype)
-            this._memory[type][subtype][memoryName] = memory;
-        else
+        if(subtype && !memoryName)
+            this._memory[type][subtype] = memory;
+        else if(!subtype && memoryName)
             this._memory[type][memoryName] = memory;
+        else
+            this._memory[type][subtype][memoryName] = memory;
+
 
         if(memory.expires !== false && memory.expires !== undefined)
             this.addShortTermMemory(type, subtype, memoryName, memory);
@@ -937,11 +988,18 @@ Game.EntityMixins.MemoryMaker = {
                 event.expires = 5;
             }
 
-            this.remember('people', 'enemies', attacker.describe(), enemy);
-            this.remember('events', false, 'attacked by ' + attacker.describe(), event);
+            this.remember('people', 'enemies', attacker.getName(), enemy);
+            this.remember('events', false, 'attacked by ' + attacker.getName(), event);
 
             if(attacker.hasMixin('MemoryMaker')) 
-                attacker.remember('people', 'victims', this.describe(), {entity: this});
+                attacker.remember('people', 'victims', this.getName(), {entity: this});
+        },
+        details: function() {
+            return [
+                {key: 'Job Title', value: this.recall('places', 'work').title},
+                {key: 'Employer', value: this.recall('places', 'work').name},
+                {key: 'Job Location', value: this.recall('places', 'work').location}
+            ];
         }
     }
 };
@@ -1038,6 +1096,11 @@ Game.EntityMixins.PlayerActor = {
         this.getMap().getEngine().lock();
         this.clearMessages();
         this._acting = false;
+    },
+    listeners: {
+        describe: function() {
+            return ['Strapping muscles and dashing good looks', 'Everyone that looks upon you shall despair'];
+        }
     }
 };
 Game.EntityMixins.PlayerStatGainer = {
@@ -1194,12 +1257,12 @@ Game.EntityMixins.Sight = {
     listeners: {
         onCrime: function(entity) {
             if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
-                this.remember('people', 'criminals', entity.describe(), {entity: entity, expires: 200});
+                this.remember('people', 'criminals', entity.getName(), {entity: entity, expires: 200});
             }
         },
         onRepent: function(entity) {
             if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
-                this.forget('people', 'criminals', entity.describe());
+                this.forget('people', 'criminals', entity.getName());
             }
         }
     }

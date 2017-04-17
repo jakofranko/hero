@@ -45,6 +45,11 @@ Game.LotRepository.define('building', {
 
 		var building = this.getBuildings()[0];
 		building.build();
+
+		// Add building's job locaitons to lot job locations
+		this.setCompanies(building.getCompanies());
+
+		// Set up dimensions and fetch the blueprint
 		var buildingMidWidth = building.getMidWidth();
 		var buildingMidHeight = building.getMidHeight();
 		var b = building.getBlueprint();
@@ -57,7 +62,9 @@ Game.LotRepository.define('building', {
 			return tiles;
 		}
 
-		// debugger;
+		this.adjustCompaniesX(cornerX);
+		this.adjustCompaniesY(cornerY);
+
 		for (var z = 0; z < building.getStories(); z++) {
 			if(!tiles[z]) {
 				tiles[z] = new Array(this.getWidth());
@@ -102,6 +109,26 @@ Game.LotRepository.define('building', {
 				}
 			}
 		}
+
+		// Lastly, place a sign that has the names of the companies in each building
+		var signOffsetX = [0, building.getWidth()].random(),
+			signOffsetY = [0, building.getHeight()].random();
+
+		if(signOffsetX === 0)
+			signOffsetX--;
+		else
+			signOffsetX++;
+
+		if(signOffsetY === 0)
+			signOffsetY--;
+		else
+			signOffsetY++;
+
+		var companyNames = building.getCompanies().map(function(company) {
+			return company.name;
+		});
+		companyNames.unshift('Company Directory:');
+		this.addItem(cornerX + signOffsetX, cornerY + signOffsetY, 0, Game.ItemRepository.create('sign', {inscription: companyNames.join("\n")}));
 
 		return tiles;
 	}
@@ -227,6 +254,18 @@ Game.LotRepository.define('apartments', {
 				}
 			}
 		}
+
+		// Add living locations
+		var livingLocations = apartment.getLivingLocations();
+		if(livingLocations.length) {
+			for (var i = 0; i < livingLocations.length; i++) {
+				var loc = livingLocations[i].split(","),
+					lx = Number(loc[0]) + cornerX,
+					ly = Number(loc[1]) + cornerY,
+					lz = Number(loc[2]);
+				this.addLivingLocation(lx + "," + ly + "," + lz);
+			}
+		}
 		return tiles;
 	}
 });
@@ -254,8 +293,11 @@ Game.LotRepository.define('houses', {
 		i = 0;
 		for (var lotX = 0; lotX < w; lotX++) {
 			for (var lotY = 0; lotY < h; lotY++) {
-				var startX = lotX * (Game.getLotSize() / w);
-				var startY = lotY * (Game.getLotSize() / h);
+				// Adding to to the startX and startY will allow for a 1-tile perimeter
+				var startX = lotX * (Game.getLotSize() / w) + 1;
+				var startY = lotY * (Game.getLotSize() / h) + 1;
+
+				// In the house definition, a small sidewalk is accounted for by subtracting 2 from the width and height
 				var houseTiles = buildings[i].getTiles();
 				for (var z = 0; z < houseTiles.length; z++) {
 					if(!tiles[z])
@@ -264,9 +306,27 @@ Game.LotRepository.define('houses', {
 					for(x = 0, tilesX = startX; x < houseTiles[z].length; x++, tilesX++) {
 						if(!tiles[z][tilesX])
 							tiles[z][tilesX] = new Array(this.getHeight());
+
 						for (var y = 0, tilesY = startY; y < houseTiles[z][x].length; y++, tilesY++) {
 							tiles[z][tilesX][tilesY] = houseTiles[z][x][y];
+
+							// Add house items to lot items
+							var items = buildings[i].getItemsAt(x, y, z);
+							if(items)
+								this.setItemsAt(tilesX, tilesY, z, items);
 						}
+					}
+				}
+
+				// If the house has any living locations, add them to the lot's living locations
+				var livingLocations = buildings[i].getLivingLocations();
+				if(livingLocations.length) {
+					for (var j = 0; j < livingLocations.length; j++) {
+						var split = livingLocations[j].split(","),
+							lx = Number(split[0]) + startX,
+							ly = Number(split[1]) + startY,
+							lz = Number(split[2]);
+						this.addLivingLocation(lx + "," + ly + "," + lz);
 					}
 				}
 				i++;
@@ -274,7 +334,9 @@ Game.LotRepository.define('houses', {
 		}
 		tiles = Game.spaceFill(tiles);
 
-		// console.log(tiles);
+		// for (var z = 0; z < tiles.length; z++) {
+		// 	Game._consoleLogGrid(tiles[z], '_char', this.getItems(), z);
+		// }
 		return tiles;
 	}
 });

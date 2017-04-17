@@ -37,6 +37,11 @@ Game.Lot = function(properties) {
 	}
 
 	this._items = properties['items'] || {};
+
+	this._livingLocations = properties['livingLocations'] || [];
+
+	this._jobLocations = properties['jobLocations'] || [];
+	this._companies = properties['companies'] || [];
 };
 // Make items inherit all the functionality from glyphs
 Game.Lot.extend(Game.DynamicGlyph);
@@ -62,7 +67,66 @@ Game.Lot.prototype.getWidth = function() {
 Game.Lot.prototype.getHeight = function() {
 	return this._height;
 };
+Game.Lot.prototype.getLivingLocations = function() {
+	return this._livingLocations;
+};
+Game.Lot.prototype.setLivingLocations = function(livingLocations) {
+	this._livingLocations = livingLocations;
+};
+Game.Lot.prototype.addLivingLocation = function(location) {
+	if(this._livingLocations.indexOf(location) < 0)
+		this._livingLocations.push(location);
+};
+Game.Lot.prototype.getJobLocations = function() {
+	return this._jobLocations;
+};
+Game.Lot.prototype.setJobLocations = function(jobLocations) {
+	this._jobLocations = jobLocations;
+};
+Game.Lot.prototype.addJobLocation = function(location) {
+	if(this._jobLocations.indexOf(location) < 0)
+		this._jobLocations.push(location);
+};
+Game.Lot.prototype.getCompanies = function() {
+	return this._companies;
+};
+Game.Lot.prototype.setCompanies = function(companies) {
+	this._companies = companies;
+};
+Game.Lot.prototype.adjustCompaniesX = function(offsetX) {
+	for (var i = 0; i < this._companies.length; i++) {
+		var jobLocations = this._companies[i].getJobLocations(),
+			newLocations = [];
+		for (var j = 0; j < jobLocations.length; j++) {
+			var oldLocation = jobLocations[j].split(","),
+				oldX = +oldLocation[0],
+				oldY = +oldLocation[1],
+				oldZ = +oldLocation[2];
+			var newX = oldX + offsetX,
+				newLocation = newX + "," + oldY + "," + oldZ;
+			newLocations.push(newLocation);
+		}
 
+		this._companies[i].setJobLocations(newLocations);
+	}
+};
+Game.Lot.prototype.adjustCompaniesY = function(offsetY) {
+	for (var i = 0; i < this._companies.length; i++) {
+		var jobLocations = this._companies[i].getJobLocations(),
+			newLocations = [];
+		for (var j = 0; j < jobLocations.length; j++) {
+			var oldLocation = jobLocations[j].split(","),
+				oldX = +oldLocation[0],
+				oldY = +oldLocation[1],
+				oldZ = +oldLocation[2];
+			var newY = oldY + offsetY,
+				newLocation = oldX + "," + newY + "," + oldZ;
+			newLocations.push(newLocation);
+		}
+
+		this._companies[i].setJobLocations(newLocations);
+	}
+};
 // Used during city generation to determine whether or not
 // a lot will be placed based on the frequency those lots
 // appear in a given neigborhood.
@@ -112,6 +176,10 @@ Game.Lot.prototype.fillLot = function(tile, extraProperties) {
 	return [result];
 };
 
+Game.Lot.prototype.getItems = function() {
+	return this._items;
+};
+
 Game.Lot.prototype.getItemsAt = function(x, y, z) {
     return this._items[x + ',' + y + ',' + z];
 };
@@ -144,6 +212,9 @@ Game.Lot.prototype.placeCenteredBuilding = function(lotTiles, building) {
 	var centerY = this.getMidHeight();
 
 	building.build();
+	// Add building's job locations to lot job locations
+	this.setCompanies(building.getCompanies());
+
 	var buildingMidWidth = building.getMidWidth();
 	var buildingMidHeight = building.getMidHeight();
 	var b = building.getBlueprint();
@@ -155,6 +226,9 @@ Game.Lot.prototype.placeCenteredBuilding = function(lotTiles, building) {
 	if(cornerX < 0 || cornerY < 0) {
 		return lotTiles;
 	}
+
+	this.adjustCompaniesX(cornerX);
+	this.adjustCompaniesY(cornerY);
 
 	for (var z = 0; z < building.getStories(); z++) {
 		if(!lotTiles[z])
@@ -185,6 +259,27 @@ Game.Lot.prototype.placeCenteredBuilding = function(lotTiles, building) {
 			}
 		}
 	}
+
+	// Lastly, place a sign that has the names of the companies in each building
+	var signOffsetX = [0, building.getWidth()].random(),
+		signOffsetY = [0, building.getHeight()].random();
+
+	if(signOffsetX === 0)
+		signOffsetX--;
+	else
+		signOffsetX++;
+
+	if(signOffsetY === 0)
+		signOffsetY--;
+	else
+		signOffsetY++;
+
+	var companyNames = building.getCompanies().map(function(company) {
+		return company.name;
+	});
+	companyNames.unshift('Company Directory:');
+	this.addItem(cornerX + signOffsetX, cornerY + signOffsetY, 0, Game.ItemRepository.create('sign', {inscription: companyNames.join("\n")}));
+
 
 	return lotTiles;
 };

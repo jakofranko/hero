@@ -9,7 +9,7 @@ Game.Time = function() {
 
 	// In the HERO System, one phase = 1 second, and one round = 12 phases
 	// So 5 rounds = 1 minute. All entities have a SPD between 1 and 10, and 
-	// your SPD determine's how many phases (turns) that entity gets per round.
+	// your SPD determines how many phases (turns) that entity gets per round.
 	this._rounds = 0;
 
 	// In order to keep track of how many turns have passed, time will be an actor
@@ -19,23 +19,23 @@ Game.Time = function() {
 Game.Time.prototype.act = function() {
 	this._rounds++;
 	this._seconds += 12;
-	if(this._seconds % 60 == 0 && this._seconds !== 0) {
+	if(this._seconds % 60 === 0 && this._seconds !== 0) {
 		this._seconds = 0;
 		this._minutes++;
 	}
-	if(this._minutes % 60 == 0 && this._minutes !== 0) {
+	if(this._minutes % 60 === 0 && this._minutes !== 0) {
 		this._minutes = 0;
 		this._hours++;
 	}
-	if(this._hours % 24 == 0 && this._hours !== 0) {
+	if(this._hours % 24 === 0 && this._hours !== 0) {
 		this._hours = 0;
 		this._days++;
 	}
-	if(this._days % 30 == 0 && this._days !== 0) {
+	if(this._days % 30 === 0 && this._days !== 0) {
 		this._days = 0;
 		this._months++;
 	}
-	if(this._months % 12 == 0 && this._months !== 0) {
+	if(this._months % 12 === 0 && this._months !== 0) {
 		this._months = 0;
 		this._years++;
 	}

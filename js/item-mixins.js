@@ -115,6 +115,23 @@ Game.ItemMixins.Heavy = {
         }
     }
 };
+Game.ItemMixins.Inscribable = {
+    name: "Inscribable",
+    init: function(template) {
+        this._inscription = template['inscription'] || '';
+    },
+    getInscription: function() {
+        return this._inscription;
+    },
+    setInscription: function(inscription) {
+        this._inscription = inscription;
+    },
+    listeners: {
+        describe: function() {
+            return [this.getInscription()];
+        }
+    }
+};
 Game.ItemMixins.Stackable = {
     name: 'Stackable',
     init: function(template) {

@@ -23,8 +23,12 @@ var Game = {
 	_startTime: '0700',
 
 	// NPC Settings
-	_totalEntities: 100,
-	_totalCriminals: 25,
+	_totalEntities: 150,
+	_totalCriminals: 10,
+	_availableJobs: 500 - 100,
+
+	debug: true,
+	watchName: null,
 
 	getDisplay: function() {
 		return this._display;
@@ -68,6 +72,21 @@ var Game = {
 	},
 	getTotalCriminals: function() {
 		return this._totalCriminals;
+	},
+	getAvailableJobs: function() {
+		return this._availableJobs;
+	},
+	addAvailableJobs: function(amount) {
+		if(amount)
+			this._availableJobs += amount;
+		else
+			this._availableJobs++;
+	},
+	decreaseAvailableJobs: function(amount) {
+		if(amount)
+			this._availableJobs -= amount;
+		else
+			this._availableJobs--;
 	},
 	init: function() {
 		// Create player entity
@@ -117,7 +136,8 @@ var Game = {
         	this._characterStats.render(this._stats);	
         }
 
-        this.displayMessages(player);
+        if(player)
+        	this.displayMessages(player);
     },
     sendMessage: function(recipient, message, args) {
 		// Make sure the recipient can receive messages

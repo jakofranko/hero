@@ -21,6 +21,13 @@ Game.Building = function(properties) {
 		// this.name = Game.Building.randomName();
 	}
 
+	this._livingLocations = [];
+
+	// Company generator and jobLocation storage
+	this._companyGenerator = new Game.CompanyGenerator();
+	this._companies = [];
+	this._jobLocations = [];
+
 	// Map of item locations
 	this._items = properties['items'] || {};
 
@@ -29,6 +36,7 @@ Game.Building = function(properties) {
 	// Initialize blueprint and room regions arrays
 	this._blueprint = new Array(this._stories);
 	this._roomRegions = new Array(this._stories);
+	this._rooms = [];
 
 	this._createBlueprint = properties['createBlueprint'] || function() {
 		var floor = Game.TileRepository.create('floor');
@@ -104,7 +112,7 @@ Game.Building = function(properties) {
 						tile = horizontalWall;
 					} else if(x === 0 || x == sWidth - 1) {
 						tile = verticalWall;
-					} else if(!stairsPlaced && z < this.getStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].describe() !== 'stairsDown') {
+					} else if(!stairsPlaced && z < this.getStories() - 1 && (y == sHeight - 2 || y == sHeight - 3) && this._blueprint[z][topLeft.x + x][topLeft.y + y].getName() !== 'stairsDown') {
 						tile = stairsUp;
 						stairsPlaced = true;
 					}
@@ -289,11 +297,22 @@ Game.Building = function(properties) {
 			// been placed
 			var regionTree = this._roomRegions[z].tree;
 			var isolatedRegions = this._getIsolatedRegions(regionTree, placedDoors);
+			var checkRegionTree = false; // Needed to prevent infinite loops
+			var breakIsolatedRegionsLoop = false;
 			while(isolatedRegions.length) {
 				// Take the first region off the list, and add a door too it, then update the isolatedRegions list
 				// to see if the added connections has un-isolated any of the regions.
 				var isolatedDoorPlaced = false;
 				for (var i = 0; i < isolatedRegions.length; i++) {
+					// If for some reason the isolated region has no length, then break out of the loop
+					// TODO: fix this? Not sure how this happens, or if when it happens, rooms are left isolated
+					if(Object.keys(regionTree[isolatedRegions[i]]).length === 0 && isolatedRegions.length === 1) {
+						breakIsolatedRegionsLoop = true;
+						break;
+					} else if(Object.keys(regionTree[isolatedRegions[i]]).length === 0 && isolatedRegions.length > 1) {
+						debugger;
+					}
+
 					for(var isolatedConnection in regionTree[isolatedRegions[i]]) {
 						var isolatedPos = regionTree[isolatedRegions[i]][isolatedConnection];
 						var isolatedKey = isolatedPos.x + "," + isolatedPos.y;
@@ -308,6 +327,8 @@ Game.Building = function(properties) {
 					if(isolatedDoorPlaced)
 						break;
 				}
+				if(breakIsolatedRegionsLoop) // Just for preventing infinite loops on occasion
+					break;
 				isolatedRegions = this._getIsolatedRegions(regionTree, placedDoors);
 			}
 		}
@@ -335,7 +356,7 @@ Game.Building = function(properties) {
 							floorKeys: []
 						};
 					}
-					var description = this._blueprint[z][x][y].describe();
+
 					if(roomNumber !== 0) {
 						var key = x + "," + y;
 						rooms[roomNumber].floorKeys.push(key);
@@ -392,15 +413,35 @@ Game.Building = function(properties) {
 
 								if(
 									rooms[room].floorKeys.indexOf(offsetX + "," + offsetY) > -1 &&
-									this._blueprint[z][offsetX][offsetY].describe() == 'floor'
+									this._blueprint[z][offsetX][offsetY].getName() == 'floor'
 								) {
 									var chair = Game.ItemRepository.create('chair');
 									this.addItem(offsetX, offsetY, z, chair);
+
+									// Add this to a list of job locations
+									this.addJobLocation(offsetX + ',' + offsetY + ',' + z);
 								}
 							}
 						}
 					}
 				}
+			}
+			this._rooms[z] = rooms;
+		}
+	};
+
+	this._placeJobs = properties['placeJobs'] || function() {
+		var company = this._companyGenerator.generate('corp');
+		this._companies.push(company);
+
+		while(this._jobLocations.length && company) {
+			if(company.getJobLocations().length < company.getAvailablePositions())
+				company.addJobLocation(this._jobLocations.shift());
+			else {
+				// If jobs have been filled or there is an error, company will return false
+				company = this._companyGenerator.generate('corp');
+				if(company)
+					this._companies.push(company);
 			}
 		}
 	};
@@ -410,16 +451,16 @@ Game.Building = function(properties) {
 		// wall (including windows), doors, and optional stairways
 		this._createBlueprint();
 		
-		if(this._stories > 1) {
+		if(this._stories > 1)
 			this._placeStairs();
-		}
-		if(this._roomNumber !== false) {
+
+		if(this._roomNumber !== false)
 			this._placeRooms();
-		}
 
 		this._generateRoomRegions();
 		this._placeDoors();
 		this._placeItems();
+		this._placeJobs();
 	};
 };
 Game.Building.prototype.getWidth = function() {
@@ -443,7 +484,23 @@ Game.Building.prototype.getBlueprint = function() {
 Game.Building.prototype.getName = function() {
 	return this._name;
 };
-
+Game.Building.prototype.getLivingLocations = function() {
+	return this._livingLocations;
+};
+Game.Building.prototype.addLivingLocation = function(location) {
+	if(this._livingLocations.indexOf(location) < 0)
+		this._livingLocations.push(location);
+};
+Game.Building.prototype.getJobLocations = function() {
+	return this._jobLocations;
+};
+Game.Building.prototype.addJobLocation = function(location) {
+	if(this._jobLocations.indexOf(location) < 0)
+		this._jobLocations.push(location);
+};
+Game.Building.prototype.getCompanies = function() {
+	return this._companies;
+};
 Game.Building.prototype._sliceMethod = function(floor) {
 	// This assumes that the perimeter tiles are outerWalls, 
 	// and that rooms should be placed within the perimeter.
@@ -471,7 +528,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 			if(sliceOrientation == 'vertical') {
 				var randomX = Game.getRandomInRange(2, this._width - 2);
 				for (var i = 0; i < this._height; i++) {
-					if(floor[randomX][i].describe() == 'floor') {
+					if(floor[randomX][i].getName() === 'floor') {
 						currentWall.push({x: randomX, y: i});
 					} else if((floor[randomX][i].isInnerWall() && count + 2 <= this._roomNumber) || floor[randomX][i].isOuterWall()) {
 						continue;
@@ -482,7 +539,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
 			} else if(sliceOrientation == 'horizontal') {
 				var randomY = Game.getRandomInRange(2, this._height - 2);
 				for (var i = 0; i < this._width; i++) {
-					if(floor[i][randomY].describe() == 'floor') {
+					if(floor[i][randomY].getName() === 'floor') {
 						currentWall.push({x: i, y: randomY});
 					} else if((floor[i][randomY].isInnerWall() && count + 2 <= this._roomNumber) || floor[i][randomY].isOuterWall()) {
 						continue;
@@ -676,7 +733,7 @@ Game.Building.prototype._fillRooms = function(floor, z) {
 	} else {
 		for (var x = 0; x < floor.length; x++) {
 			for (var y = 0; y < floor[x].length; y++) {
-				if(floor[x][y].describe() == 'stairsDown') {
+				if(floor[x][y].getName() === 'stairsDown') {
 					startX = x;
 					startY = y;
 					break;

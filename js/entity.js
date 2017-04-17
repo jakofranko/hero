@@ -16,13 +16,13 @@ Game.Entity = function(properties) {
 Game.Entity.extend(Game.DynamicGlyph);
 
 Game.Entity.prototype.setX = function(x) {
-    this._x = x;
+    this._x = Number(x);
 };
 Game.Entity.prototype.setY = function(y) {
-    this._y = y;
+    this._y = Number(y);
 };
 Game.Entity.prototype.setZ = function(z) {
-	this._z = z;
+	this._z = Number(z);
 };
 Game.Entity.prototype.setSpeed = function(speed) {
     this._speed = speed;
@@ -32,14 +32,32 @@ Game.Entity.prototype.setPosition = function(x, y, z) {
 	var oldY = this._y;
 	var oldZ = this._z;
 	// Update position
-	this._x = x;
-	this._y = y;
-	this._z = z;
+	this.setX(x);
+	this.setY(y);
+	this.setZ(z);
 
 	// If the entity is on a map, notify the map that the entity has moved
 	if(this._map) {
 		this._map.updateEntityPosition(this, oldX, oldY, oldZ);
 	}
+};
+Game.Entity.prototype.swapPosition = function(target) {
+    var tx = target.getX(),
+        ty = target.getY(),
+        tz = target.getZ(),
+        ex = this.getX(),
+        ey = this.getY(),
+        ez = this.getZ(),
+        tempPos = this.getMap().getRandomFloorPosition(tz);
+
+    // Move target temporarily
+    target.setPosition(tempPos.x, tempPos.y, tempPos.z);
+
+    // Move the entity to the target's old pos
+    this.setPosition(tx, ty, tz);
+
+    // Move the target to the entity's pos
+    target.setPosition(ex, ey, ez);
 };
 Game.Entity.prototype.getSpeed = function() {
     if(this.hasMixin('Characteristics')) {
@@ -74,35 +92,44 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
 	}
 	// Must use starting z
 	var tile = map.getTile(x, y, this.getZ());
-	var target = map.getEntityAt(x, y, this.getZ());
+	var target = map.getEntityAt(x, y, z);
+
+    // Target shouldn't be itself
+    if(target === this)
+        target = false;
+
+    // An entity can only attack if the entity has the Attacker 
+    // mixin and either the entity or the target is the player.
+    var canAttack = target ? 
+        (this.hasMixin('Characteristics') && 
+            (this.hasMixin(Game.EntityMixins.PlayerActor) || 
+            target.hasMixin(Game.EntityMixins.PlayerActor)))
+        : false;
     
-	// If our z level changed, check if we are on stair
-	if(z > this.getZ()) {
-		if(tile.describe() != 'stairsUp') {
-			Game.sendMessage(this, "You can't go up here!");
-		} else {
-			Game.sendMessage(this, "You ascend to level %s!", [z + 1]);
-			this.setPosition(x, y, z);
-		}
-	} else if(z < this.getZ()) {
-		if (tile.describe() != 'stairsDown') {
+	if(canAttack) {
+        this.hthAttack(target);
+        return true;
+    } else if(target) {
+        // There is a target at x,y,z, but the entity can't attack, so swap positions with them
+        this.swapPosition(target);
+        return true;
+    } else if(z < this.getZ()) { // If our z level changed, check if we are on stair
+		if (tile.getName() != 'stairsDown') {
             Game.sendMessage(this, "You can't go down here!");
+            return false;
         } else {
             this.setPosition(x, y, z);
             Game.sendMessage(this, "You descend to level %s!", [z + 1]);
         }
-	} else if(target) {
-		// An entity can only attack if the entity has the Attacker mixin and 
-        // either the entity or the target is the player.
-        if (this.hasMixin('Characteristics') &&
-        	(this.hasMixin(Game.EntityMixins.PlayerActor) || target.hasMixin(Game.EntityMixins.PlayerActor))) {
-            this.hthAttack(target);
-            return true;
-        } 
-
-        // If not nothing we can do, but we can't move to the tile
-        return false;
-	} else if(tile.isWalkable()) {
+	} else if(z > this.getZ()) {
+        if(tile.getName() != 'stairsUp') {
+            Game.sendMessage(this, "You can't go up here!");
+            return false;
+        } else {
+            Game.sendMessage(this, "You ascend to level %s!", [z + 1]);
+            this.setPosition(x, y, z);
+        }
+    } else if(tile.isWalkable()) {
 		this.setPosition(x, y, z);
 		// Notify the entity that there are items at this position
         var items = this.getMap().getItemsAt(x, y, z);
@@ -179,24 +206,6 @@ Game.Entity.prototype.switchMap = function(newMap) {
     // Add to the new map
     newMap.addEntity(this);
 };
-Game.Entity.prototype.describeA = function(capitalize) {
-    // Optional parameter to capitalize the a/an.
-    var prefixes = capitalize ? ['A', 'An'] : ['a', 'an'];
-    var string = this._type;
-    var firstLetter = string.charAt(0).toLowerCase();
-    // If word starts by a vowel, use an, else use a. Note that this is not perfect.
-    var prefix = 'aeiou'.indexOf(firstLetter) >= 0 ? 1 : 0;
-
-    return prefixes[prefix] + ' ' + string;
-};
-Game.Entity.prototype.describeThe = function(capitalize) {
-    var prefix = capitalize ? 'The' : 'the';
-    if(this._shortDescription) {
-        return prefix + ' ' + this._shortDescription;
-    } else {
-        return prefix + ' ' + this._type;
-    }
-};
-Game.Entity.prototype.describe = function() {
+Game.Entity.prototype.getDescription = function() {
     return this._description;
 };

@@ -14,6 +14,10 @@ Game.Map = function(size, player) {
     this._width = this._tiles[0].length;
     this._height = this._tiles[0][0].length;
 
+    // Cache certain tile types for path-finding
+    this._downStairs = this.getTileList('stairsDown');
+    this._upStairs = this.getTileList('stairsUp');
+
     // Setup the field of visions
     this._fov = [];
     this.setupFov();
@@ -39,7 +43,8 @@ Game.Map = function(size, player) {
 
     // Add the Player
     this._player = player;
-    this.addEntityAtRandomPosition(player, 0);
+    var playerLoc = this._city.getLivingLocations()[0].split(",");
+    this.addEntityAt(player, playerLoc[0] - 1, playerLoc[1] - 1, 0);
 };
 
 // Standard getters
@@ -114,6 +119,12 @@ Game.Map.prototype.addEntity = function(entity) {
         this._player = entity;
     }
 };
+Game.Map.prototype.addEntityAt = function(entity, x, y, z) {
+    entity.setX(x);
+    entity.setY(y);
+    entity.setZ(z);
+    this.addEntity(entity);
+};
 Game.Map.prototype.addEntityAtRandomPosition = function(entity, z) {
 	var position = this.getRandomFloorPosition(z);
 	entity.setX(position.x);
@@ -163,7 +174,7 @@ Game.Map.prototype.removeEntity = function(entity) {
 };
 Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
 	// Delete the old key if it is the same entity and we have old positons
-	if(typeof oldX === 'number') {
+	if(oldX !== undefined) {
 		var oldKey = oldX + "," + oldY + "," + oldZ;
 		if(this._entities[oldKey] == entity) {
 			delete this._entities[oldKey];
@@ -192,8 +203,14 @@ Game.Map.prototype.post12Recovery = function() {
             this._entities[e].raiseEvent('post12Recovery');
     }
 };
+
 Game.Map.prototype._generateEntities = function() {
-    var criminals = 0;
+    var criminals = 0,
+        companies = this._city.getCompanies(),
+        currentCompany = 0,
+        livingLocations = this._city.getLivingLocations(),
+        currentLivingLocation = 0;
+    var addedWork = false;
     for (var i = 0; i < Game.getTotalEntities(); i++) {
         // The template has to be created each time, because making it once
         // outside the loop and then changing it changes all entities
@@ -205,16 +222,38 @@ Game.Map.prototype._generateEntities = function() {
                 // their money / survive priority needs to be higher
                 // than 10 (which is the survive priority). I.e., >100
                 money: ROT.RNG.getNormal(50, 25),
-                jobs: ['mugger', 'survive']
+                jobs: ['mugger', 'home', 'survive']
             };
         } else {
             template = {
                 money: ROT.RNG.getNormal(100, 50),
-                jobs: ['survive']
+                jobs: ['work', 'home', 'survive']
             };
         }
 
-        this.addEntityAtRandomPosition(Game.EntityRepository.createEntity('person', template), 0);
+        var entity = Game.EntityRepository.createEntity('person', template);
+
+        // Give the entity a job
+        if(companies[currentCompany].getAvailablePositions() <= 0)
+            currentCompany++;
+
+        // Add the entity as an employee of the current company
+        companies[currentCompany].addEmployee(entity);
+
+        // Add the entity at a random position on the map
+        var livingLocation = livingLocations[currentLivingLocation];
+        if(livingLocation) {
+            // Make sure they remember where home is
+            var memory = {location: livingLocation};
+            entity.remember('places', 'home', false, memory);
+
+            // Spawn them at this location
+            var split = livingLocation.split(",");
+            this.addEntityAt(entity, split[0], split[1], split[2]);
+            currentLivingLocation++;
+        } else {
+            this.addEntityAtRandomPosition(entity, 0);
+        }
 
         if(template.jobs.indexOf('mugger') > -1)
             criminals++;
@@ -224,13 +263,13 @@ Game.Map.prototype._generateEntities = function() {
 // Floors
 Game.Map.prototype.isEmptyFloor = function(x, y, z) {
     // Check if the tile is floor and also has no entity
-    return this.getTile(x, y, z).describe() == 'floor' && !this.getEntityAt(x, y, z);
+    return this.getTile(x, y, z).getName() == 'floor' && !this.getEntityAt(x, y, z);
 };
 Game.Map.prototype.getRandomFloorPosition = function(z) {
 	var x, y;
 	do {
-		x = Math.floor(Math.random() * this._width);
-		y = Math.floor(Math.random() * this._height);
+		x = Math.floor(Math.random() * (this._width - 1));
+		y = Math.floor(Math.random() * (this._height - 1));
 	} while(!this.isEmptyFloor(x, y, z));
 	return {x: x, y: y, z: z};
 };
@@ -239,14 +278,148 @@ Game.Map.prototype.getRandomFloorPosition = function(z) {
 // Gets the tile for a given coordinate set
 Game.Map.prototype.getTile = function(x, y, z) {
     // Make sure we are inside the bounds. 
-    //If we aren't, return null tile.
+    // If we aren't, return null tile.
     if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth) {
         return Game.TileRepository.create('null');
+    } else if(!this._tiles[z][x] || !this._tiles[z][x][y]) {
+        debugger;
     } else {
         return this._tiles[z][x][y] || Game.TileRepository.create('null');
     }
 };
+Game.Map.prototype.getTileList = function(type) {
+    var tileList = [];
+    for(var z = 0; z < this._depth; z++) {
+        if(!tileList[z])
+            tileList[z] = [];
+        for(var x = 0; x < this._width; x++)
+            for(var y = 0; y < this._height; y++) {
+                if(!this._tiles[z][x] || !this._tiles[z][x][y])
+                    continue;
+                if(this._tiles[z][x][y].getName() === type)
+                    tileList[z].push(x + ',' + y);
+            }
+    }
 
+    return tileList;
+};
+
+// TODO: Have this support both string coords ("x,y") and arrays ([x,y])
+// Return a comparisonFunction for use in Array.prototype.sort()
+Game.Map.prototype._createSortByDistance = function(coord) {
+    var coordSplit = coord.split(","),
+        sourceX = coordSplit[0],
+        sourceY = coordSplit[1];
+    return function(coordA, coordB) {
+        var splitA = coordA.split(","),
+            aX = splitA[0],
+            aY = splitA[1],
+            splitB = coordB.split(","),
+            bX = splitB[0],
+            bY = splitB[1];
+
+        var dA = Game.Geometry.distance(sourceX, sourceY, aX, aY);
+        var dB = Game.Geometry.distance(sourceX, sourceY, bX, bY);
+        return dA - dB;
+    };
+};
+// TODO: Optimize these get path functions to sort the stairs by distance first, then find path. Additionally, most of this code is duplicated between the two functions, and could be reduced to a single function that takes a direction param
+Game.Map.prototype.getPathToNearestStair = function(x, y, z, type) {
+    var nearestIndex = null,
+        nearestDistance = null,
+        steps = [],
+        map = this,
+        stairType = '_' + type + 'Stairs',
+        stairsX, stairsY, distance, pather;
+
+    var canWalk = function(floorX, floorY) {
+        return map.getTile(floorX, floorY, z).isWalkable();
+    };
+
+    var pushSteps = function(floorX, floorY) {
+        steps.push([floorX, floorY, z]);
+    };
+
+    // Sort stairs by distance
+    var stairs = this[stairType][z].sort(this._createSortByDistance(x + "," + y));
+
+    for (var i = 0; i < stairs.length; i++) {
+        var split = stairs[i].split(",");
+
+        newSteps = [];
+        stairsX = Number(split[0]);
+        stairsY = Number(split[1]);
+
+        // If nearest stair IS x,y, then this as the only path step
+        if(stairsX === x && stairsY === y)
+            return [[stairsX, stairsY, z]];
+
+        pather = new ROT.Path.AStar(stairsX, stairsY, canWalk);
+
+        pather.compute(x, y, pushSteps); // pushes to steps
+
+        // Since steps are already sorted by distance, just return the first one with a valid path
+        if(steps.length)
+            return steps;
+    }
+    return steps;
+};
+Game.Map.prototype.getDownStairsInRadius = function(x, y, z, r) {
+    var stairs = [];
+    for (var i = 0; i < this._downStairs[z].length; i++) {
+        var split = this._downStairs[z][i].split(","),
+            currentX = split[0],
+            currentY = split[1],
+            distance = Game.Geometry.distance(x, y, currentX, currentY);
+        if(distance <= r)
+            stairs.push(this._downStairs[z][i]);
+    }
+    return stairs;
+};
+Game.Map.prototype.findNearestDownStair = function(x, y, z) {
+    var nearestIndex = null,
+        nearestDistance = null;
+    for (var i = 0; i < this._downStairs[z].length; i++) {
+        var split = this._downStairs[z][i].split(","),
+            currentX = split[0],
+            currentY = split[1],
+            distance = Game.Geometry.distance(x, y, currentX, currentY);
+
+        if(nearestDistance === null || distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestIndex = i;
+        }
+    }
+    return this._downStairs[z][nearestIndex];
+};
+Game.Map.prototype.getUpStairsInRadius = function(x, y, z, r) {
+    var stairs = [];
+    for (var i = 0; i < this._upStairs[z].length; i++) {
+        var split = this._upStairs[z][i].split(","),
+            currentX = split[0],
+            currentY = split[1],
+            distance = Game.Geometry.distance(x, y, currentX, currentY);
+        if(distance <= r)
+            stairs.push(this._upStairs[z][i]);
+    }
+    return stairs;
+};
+Game.Map.prototype.findNearestUpStair = function(x, y, z) {
+    var nearestIndex = null,
+        nearestDistance = null;
+    for (var i = 0; i < this._upStairs[z].length; i++) {
+        var split = this._upStairs[z][i].split(","),
+            currentX = split[0],
+            currentY = split[1],
+            distance = Game.Geometry.distance(x, y, currentX, currentY);
+
+        if(nearestDistance === null || distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestIndex = i;
+        }
+    }
+    return this._upStairs[z][nearestIndex];
+};
 // FOV
 Game.Map.prototype.setupFov = function() {
     // Keep this in 'map' variable so that we don't lose it.
@@ -283,13 +456,13 @@ Game.Map.prototype._setupExploredArray = function() {
 };
 Game.Map.prototype.setExplored = function(x, y, z, state) {
     // Only update if the tile is within bounds
-    if (this.getTile(x, y, z).describe() !== 'null') {
+    if (this.getTile(x, y, z).getName() !== 'null') {
         this._explored[z][x][y] = state;
     }
 };
 Game.Map.prototype.isExplored = function(x, y, z) {
     // Only return the value if within bounds
-    if (this.getTile(x, y, z).describe() !== 'null') {
+    if (this.getTile(x, y, z).getName() !== 'null') {
         return this._explored[z][x][y];
     } else {
         return false;
