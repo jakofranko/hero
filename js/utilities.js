@@ -1,4 +1,4 @@
-if (!String.prototype.splice) {
+if(!String.prototype.splice) {
     /**
      * {JSDoc}
      *
@@ -15,6 +15,7 @@ if (!String.prototype.splice) {
         return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount));
     };
 }
+
 
 // Since Ondras isn't updating ROT.js much these days, I need the unbroken version of this function
 Array.prototype.randomize = function() {
