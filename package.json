@@ -24,5 +24,8 @@
   "dependencies": {
     "bower": "^1.6.5",
     "jsdoc": "^3.4.0"
+  },
+  "jshintConfig": {
+    "esversion": 6
   }
-}
+},
