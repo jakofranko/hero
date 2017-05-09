@@ -18,6 +18,7 @@ Game.EntityRepository.createEntity = function(name, template) {
     return Game.EntityRepository.create.call(this, name, template);
 };
 
+// TODO: Write special event NPCs like 'robber' and 'gunman' etc.
 Game.PlayerTemplate = {
     name: 'human',
     description: 'It\'s you!',

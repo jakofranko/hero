@@ -1,4 +1,6 @@
 // @size should be square number of lots for a city.
+// TODO: Add utilities to handle activeEvent queue
+// TODO: Add utilities to fetch event sources from the city and then schedule them
 Game.Map = function(size, player) {
     this._city = new Game.City(size);
     this._city.init();

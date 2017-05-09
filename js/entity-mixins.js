@@ -1,6 +1,7 @@
 // From http://www.codingcookies.com/2013/04/20/building-a-roguelike-in-javascript-part-4/
 Game.EntityMixins = {};
 
+// TODO: Write 'Event' mixin that handles being assigned an event and listeners that will trigger that event's listeners for things like 'onDeath' etc.
 Game.EntityMixins.Attacker = {
     name: 'Attacker',
     groupName: 'Attacker',
