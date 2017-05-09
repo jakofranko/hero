@@ -28,6 +28,21 @@ Array.prototype.randomize = function() {
     return result;
 };
 
+if(Object.prototype.randomKey) {
+    /**
+     * {JSDoc}
+     *
+     * The randomKey() method will fetch a random key from an object
+     *
+     * @this {Object}
+     * @return {String} A string which is the randomly selected key.
+     */
+     Object.prototype.randomKey = function() {
+        var keys = Object.keys(this);
+        return keys.random();
+     };
+}
+
 Game.extend = function(src, dest) {
     // Create a copy of the source.
     var result = {};
