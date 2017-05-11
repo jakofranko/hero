@@ -4,8 +4,8 @@
 // 2. Logic on where to spawn them
 // 3. Hooks for what happens when an NPC or item is interacted with in a way that effects the event
 //
-// The rest really should be handled by the player and the NPCs/items, which will mean adding mixins that are attached to these special entities
-// TODO: Add property to handle win and lose conditions and handlers for events (to be ultimately defined by the event template)
+// The rest really should be handled by the player and the NPCs/items, which will mean adding mixins that are attached to these special entities.
+// The 'Active Event Queue' should be where the loss and success conditions are checked.
 Game.Event = function(properties) {
     var requiredProps = [
         'name',
@@ -13,7 +13,11 @@ Game.Event = function(properties) {
         'spawnLocations',
         'entityTypes',
         'minEntities',
-        'maxEntities'
+        'maxEntities',
+        'successCondition',
+        'lossCondition',
+        'successEffect',
+        'lossEffect',
     ];
 
     // Ensure required props else throw error
@@ -29,8 +33,15 @@ Game.Event = function(properties) {
     this._minEntities    = properties['minEntities'];
     this._maxEntities    = properties['maxEntities'];
 
+    // Conditions for the event being a 'success' or a 'loss'
+    this._successCondition = properties['successCondition'];
+    this._successEffect    = properties['successEffect'];
+    this._lossCondition    = properties['lossCondition'];
+    this._lossEffect       = properties['lossEffect'];
+
     // 'Hooks' or 'Listeners' for when event entities do stuff
-    this._onEntityDeath  = properties['onEntityDeath'] || function(entity) { console.log(`Entity '${entity.getName()}' has died`); } ;
+    this._onDeath  = properties['onDeath'] || function(entity) { console.log(`Entity '${entity.getName()}' has died`); };
+    this._onInteraction  = properties['onInteraction'] || function(entity, interaction) { console.log(`Entity '${entity.getName()}' was interacted with`); };
 
     // Cache objects for when the event starts
     this._entities = [];
@@ -82,5 +93,7 @@ Game.Event.prototype.start = function() {
         this._spawnLocations.push(`${spawnX},${spawnY},${splitLocation[2]}`);
         this._entities.push(entity);
     }
-    Game.addActiveEvent(this);
+
+    // Add this event to the active events queue of the map
+    this.map.addActiveEvent(this);
 };
