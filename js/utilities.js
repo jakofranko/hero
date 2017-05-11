@@ -43,6 +43,22 @@ if(Object.prototype.randomKey) {
      };
 }
 
+// Math helper for calculating percentages
+if(Math.prototype.percent) {
+    /**
+     * {JSDoc}
+     *
+     * The randomKey() method will fetch a random key from an object
+     * @param {Number} num smaller number.
+     * @param {Number} denominator bigger number.
+     * @this {Object}
+     * @return {Number} percent which is (num / denominator) * 100.
+     */
+     Math.prototype.percent = function(num, denominator) {
+        return (num / denominator) * 100;
+     };
+}
+
 Game.extend = function(src, dest) {
     // Create a copy of the source.
     var result = {};
