@@ -14,9 +14,7 @@ Game.EventSource = function(properties) {
     this._activeEvents       = [];
     this._eventTypes         = properties['eventTypes'];    // ['robbery', 'drug deal', 'arms deal']
     this._spawnChance        = properties['spawnChance'] || 0.01;   // Between 0 and 1, 0 being no chance and 1 being every time
-
-    // TODO: need to add property 'spawnCondition' that is factored when 
-    // spawning to handle things like "only spawn if spawnChance && crime > 50" etc.
+    this._spawnCondition     = properties['spawnCondition'] || function() { return true; };
 
     // Should only act once per 'round'
     this._speed = 1;
@@ -38,6 +36,8 @@ Game.EventSource.prototype.act = function() {
 
 Game.EventSource.prototype._spawn = function() {
     if(this.activeEvents.length + 1 > this.maxActiveEvents)
+        return false;
+    else if(this._spawnCondition() === false)
         return false;
 
     var type = this.eventTypes.random(),
