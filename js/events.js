@@ -26,5 +26,29 @@ Game.EventRepository.define('bank robbery', {
     spawnLocations: ['vault door', 'cash register', 'safe'],
     entityTypes: ['person'], // TODO: Create specific templates for 'robbers', 'gunman' etc. 
     minEntities: 2,
-    maxEntities: 6
+    maxEntities: 6,
+    successCondition: function() {
+        var entities = this.getEntities();
+
+        if(entities.length < 1)
+            return true;
+        else
+            return false;
+    },
+    lossCondition: function() {
+        // No loss condition right now
+        return false;
+    },
+    successEffect: function() {
+        var map = this.getMap(),
+            justice = map.getJustice();
+
+        justice.addRespectForLaw(5);
+    },
+    lossEffect: function() {
+        var map = this.getMap(),
+            justice = map.getJustice();
+
+        justice.removeRespectForLaw(5);
+    }
 });
