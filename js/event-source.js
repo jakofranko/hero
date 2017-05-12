@@ -26,7 +26,7 @@ Game.EventSource.prototype.getMap = function() {
     return this._map;
 };
 Game.EventSource.prototype.getActiveEvents = function() {
-    return this._map;
+    return this._activeEvents;
 };
 
 Game.EventSource.prototype.act = function() {
