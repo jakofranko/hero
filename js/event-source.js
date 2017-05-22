@@ -22,6 +22,9 @@ Game.EventSource = function(properties) {
 Game.EventSource.prototype.getName = function() {
     return this._name;
 };
+Game.EventSource.prototype.getSpeed = function() {
+    return this._speed;
+};
 Game.EventSource.prototype.getMap = function() {
     return this._map;
 };
