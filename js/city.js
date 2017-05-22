@@ -34,6 +34,16 @@ Game.City = function(size) {
 
 	this._companies = [];
 	this._jobLocations = [];
+
+	// Event sources
+	var crimeEvents = new Game.EventSource({
+		name: 'crime',
+		maxActiveEvents: 2,
+		eventTypes: ['bank robbery'],
+		spawnChance: 1,
+		// TODO: [EVENTS] add spawnCondition func
+	});
+	this._eventSources = [crimeEvents];
 };
 // Getters and setters
 Game.City.prototype.getWidth = function() {
@@ -95,6 +105,12 @@ Game.City.prototype.adjustCompaniesLocations = function(companies, offsetX, offs
 		companies[i].setJobLocations(newLocations);
 	}
 	return companies;
+};
+Game.City.prototype.getEventSources = function() {
+	return this._eventSources;
+};
+Game.City.prototype.addEventSource = function(eventSource) {
+	this._eventSources.push(eventSource);
 };
 Game.City.prototype.init = function() {
 	// Generate a random grid of roads
