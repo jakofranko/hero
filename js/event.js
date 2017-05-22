@@ -64,8 +64,8 @@ Game.Event.prototype.getEntities = function() {
 
 Game.Event.prototype.start = function() {
     var numEntities = Game.getRandomInRange(this._minEntities, this._maxEntities),
-        spawnItem = this._map.getRandomItemByType(this._spawnLocations.random()), // will return an object: {location: string, item: object}
-        spawnLocation = spawnItem.location,
+        spawnItem = this._map.getRandomItemByType(this._spawnLocations.random()),
+        spawnLocation = spawnItem.getLocation(),
         splitLocation = spawnLocation.split(","),
         spawnRadius = Math.max(3, Math.ceil(numEntities / 2)),
         spawnLocations = [],

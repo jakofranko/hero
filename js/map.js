@@ -485,6 +485,9 @@ Game.Map.prototype.setItemsAt = function(x, y, z, items) {
         }
     } else {
         // Simply update the items at that key
+        items.forEach(item => {
+            item.setLocation(key);
+        });
         this._items[key] = items;
     }
 };
@@ -492,6 +495,7 @@ Game.Map.prototype.setItemsAt = function(x, y, z, items) {
 Game.Map.prototype.addItem = function(x, y, z, item) {
     // If we already have items at that position, simply append the item to the list of items.
     var key = x + ',' + y + ',' + z;
+    item.setLocation(key);
     if (this._items[key]) {
         this._items[key].push(item);
     } else {
