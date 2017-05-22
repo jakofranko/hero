@@ -77,23 +77,23 @@ Game.Event.prototype.start = function() {
         var numTimes = 0,
             spawnX, spawnY;
         do {
-            spawnX = splitLocation[0] + Game.getRandomInRange(-spawnRadius, spawnRadius);
-            spawnY = splitLocation[1] + Game.getRandomInRange(-spawnRadius, spawnRadius);
+            spawnX = Number(splitLocation[0]) + Game.getRandomInRange(-spawnRadius, spawnRadius);
+            spawnY = Number(splitLocation[1]) + Game.getRandomInRange(-spawnRadius, spawnRadius);
             numTimes++;
-        } while(!this._map.isEmptyFloor(spawnX, spawnY, split[2]) && spawnLocations.indexOf(`${spawnX},${spawnY},${splitLocation[2]}`) === -1 && numTimes < maxTimes);
+        } while(!this._map.isEmptyFloor(spawnX, spawnY, splitLocation[2]) && spawnLocations.indexOf(`${spawnX},${spawnY},${splitLocation[2]}`) !== -1 && numTimes < maxTimes);
 
         if(numTimes === maxTimes)
             throw new Error('Exceeded number of tries for placing an entity for an event');
 
+        spawnLocations.push(`${spawnX},${spawnY},${splitLocation[2]}`);
 
         // TODO: Might need to update this to include special settings for the entity's event mixin based on the event template
         var entity = Game.EntityRepository.create(this._entityTypes.random(), {event: this});
 
-        this._map.addEntityAtRandomPosition(entity, splitLocation[2]);
-        this._spawnLocations.push(`${spawnX},${spawnY},${splitLocation[2]}`);
+        this._map.addEntityAt(entity, spawnX, spawnY, splitLocation[2]);
         this._entities.push(entity);
     }
 
     // Add this event to the active events queue of the map
-    this.map.addActiveEvent(this);
+    this._map.addActiveEvent(this);
 };

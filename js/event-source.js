@@ -1,6 +1,6 @@
 // An event source is essentially an actor that, every turn, has a low chance of 'spawning' an event. Event sources determine the kinds of events they can spawn, how often, and logic on how to disable them (if applicable) 
 Game.EventSource = function(properties) {
-    var requiredProps = ['name', 'maxEvents', 'eventTypes'];
+    var requiredProps = ['name', 'maxActiveEvents', 'eventTypes'];
 
     // Make sure the required properties are defined
     requiredProps.forEach(p => {
@@ -10,9 +10,9 @@ Game.EventSource = function(properties) {
 
     this._map                = null;
     this._name               = properties['name'];
-    this._maxActiveEvents    = properties['maxActiveEvents'];     // 2; Max
+    this._maxActiveEvents    = properties['maxActiveEvents'];       // 2; Max
     this._activeEvents       = [];
-    this._eventTypes         = properties['eventTypes'];    // ['robbery', 'drug deal', 'arms deal']
+    this._eventTypes         = properties['eventTypes'];            // ['robbery', 'drug deal', 'arms deal']
     this._spawnChance        = properties['spawnChance'] || 0.01;   // Between 0 and 1, 0 being no chance and 1 being every time
     this._spawnCondition     = properties['spawnCondition'] || function() { return true; };
 
@@ -35,16 +35,16 @@ Game.EventSource.prototype.act = function() {
 };
 
 Game.EventSource.prototype._spawn = function() {
-    if(this.activeEvents.length + 1 > this.maxActiveEvents)
+    if(this._activeEvents.length + 1 > this._maxActiveEvents)
         return false;
     else if(this._spawnCondition() === false)
         return false;
 
-    var type = this.eventTypes.random(),
+    var type = this._eventTypes.random(),
         event = Game.EventRepository.create(type, {map: this._map});
 
     event.start();
-    this.activeEvents.push(event);
+    this._activeEvents.push(event);
 
     return true;
 };

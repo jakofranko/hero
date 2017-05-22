@@ -28,7 +28,7 @@ Array.prototype.randomize = function() {
     return result;
 };
 
-if(Object.prototype.randomKey) {
+if(!Object.prototype.randomKey) {
     /**
      * {JSDoc}
      *
@@ -37,14 +37,16 @@ if(Object.prototype.randomKey) {
      * @this {Object}
      * @return {String} A string which is the randomly selected key.
      */
-     Object.prototype.randomKey = function() {
-        var keys = Object.keys(this);
-        return keys.random();
-     };
+     Object.defineProperty(Object.prototype, 'randomKey', {
+        value: function() {
+            var keys = Object.keys(this);
+            return keys.random();
+        }
+     });
 }
 
 // Math helper for calculating percentages
-if(Math.prototype.percent) {
+if(!Math.percent) {
     /**
      * {JSDoc}
      *
