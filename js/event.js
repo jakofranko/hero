@@ -26,6 +26,7 @@ Game.Event = function(properties) {
             throw new Error(`The property '${prop}' is not set for this event, and is required`);
     });
 
+    this._id             = null; // For finding events in active event queues. Assigned upon start.
     this._name           = properties['name'];
     this._map            = properties['map'];
     this._spawnLocations = properties['spawnLocations']; // Types of items (usually) where an event can spawn
@@ -60,6 +61,14 @@ Game.Event.prototype.getEntityTypes = function() {
 };
 Game.Event.prototype.getEntities = function() {
     return this._entities;
+};
+Game.Event.prototype.getId = function() {
+    return this._id;
+};
+
+// Setters
+Game.Event.prototype.setId = function(id) {
+    this._id = id;
 };
 
 Game.Event.prototype.start = function() {

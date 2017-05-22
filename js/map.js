@@ -35,8 +35,9 @@ Game.Map = function(size, player) {
     this._time = new Game.Time();
     this.schedule(this._time);
 
-    // Fetch event sources from city and schedule them
+    // Event settings. Fetch event sources from city and schedule them
     this._activeEvents = [];
+    this._currentEventId = 0;
     this._eventSources = this._city.getEventSources();
     for(var i = 0; i < this._eventSources.length; i++)
         this.schedule(this._eventSources[i]);
@@ -96,6 +97,9 @@ Game.Map.prototype.getEventSources = function() {
 };
 Game.Map.prototype.getActiveEvents = function() {
     return this._activeEvents;
+};
+Game.Map.prototype.getCurrentEventId = function() {
+    return this._currentEventId;
 };
 
 // For just adding actors to the scheduler
@@ -558,5 +562,14 @@ Game.Map.prototype.getRandomItemByType = function(type) {
 
 // Events
 Game.Map.prototype.addActiveEvent = function(event) {
+    event.setId(this._currentEventId);
+    this._currentEventId++;
     this._activeEvents.push(event);
+};
+Game.Map.prototype.getEventById = function(id) {
+    for(var i = 0; i < this._activeEvents.length; i++)
+        if(this._activeEvents[i].getId() === id)
+            return this._activeEvents[i];
+
+    return false;
 };
