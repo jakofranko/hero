@@ -41,12 +41,15 @@ Game.Event = function(properties) {
     this._lossEffect       = properties['lossEffect'];
 
     // 'Hooks' or 'Listeners' for when event entities do stuff
-    this._onDeath  = properties['onDeath'] || function(entity) { console.log(`Entity '${entity.getName()}' has died`); };
+    this._onDeath  = properties['onDeath'] || function(victim, killer) { console.log(`Entity '${victim.getName()}' was kill by '${killer.getName()}'`); };
+    this._onKill  = properties['onKill'] || function(killer, victim) { console.log(`Entity '${killer.getName()}' has killed '${victim.getName()}'`); };
     this._onInteraction  = properties['onInteraction'] || function(entity, interaction) { console.log(`Entity '${entity.getName()}' was interacted with`); };
 
     // Cache objects for when the event starts
     this._entities = [];
 };
+
+// Getters
 Game.Event.prototype.getName = function() {
     return this._name;
 };
@@ -85,6 +88,7 @@ Game.Event.prototype.start = function() {
         // Check that we haven't already spawned an entity at the random location and the floor is empty
         var numTimes = 0,
             spawnX, spawnY;
+
         do {
             spawnX = Number(splitLocation[0]) + Game.getRandomInRange(-spawnRadius, spawnRadius);
             spawnY = Number(splitLocation[1]) + Game.getRandomInRange(-spawnRadius, spawnRadius);
@@ -97,7 +101,7 @@ Game.Event.prototype.start = function() {
         spawnLocations.push(`${spawnX},${spawnY},${splitLocation[2]}`);
 
         // TODO: Might need to update this to include special settings for the entity's event mixin based on the event template
-        var entity = Game.EntityRepository.create(this._entityTypes.random(), {event: this});
+        var entity = Game.EntityRepository.createEntity(this._entityTypes.random(), {event: this});
 
         this._map.addEntityAt(entity, spawnX, spawnY, splitLocation[2]);
         this._entities.push(entity);

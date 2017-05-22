@@ -56,9 +56,9 @@ Game.Map = function(size, player) {
     this.addEntityAt(player, playerLoc[0] - 1, playerLoc[1] - 1, 0);
 
     // TODO: [EVENTS] Delete this after creating banks and such
-    this.addItem(Number(playerLoc[0]) + 1, playerLoc[1], 0, Game.ItemRepository.create('safe'));
-    this.addItem(Number(playerLoc[0]) + 2, playerLoc[1], 0, Game.ItemRepository.create('vault door'));
-    this.addItem(Number(playerLoc[0]), playerLoc[1] + 1, 0, Game.ItemRepository.create('cash register'));
+    this.addItem(Number(playerLoc[0]) + 1, Number(playerLoc[1]), 0, Game.ItemRepository.create('safe'));
+    this.addItem(Number(playerLoc[0]) + 2, Number(playerLoc[1]), 0, Game.ItemRepository.create('vault door'));
+    this.addItem(Number(playerLoc[0]), Number(playerLoc[1]) + 1, 0, Game.ItemRepository.create('cash register'));
 };
 
 // Standard getters
