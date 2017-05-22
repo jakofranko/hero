@@ -35,6 +35,12 @@ Game.Map = function(size, player) {
     this._time = new Game.Time();
     this.schedule(this._time);
 
+    // Fetch event sources from city and schedule them
+    this._activeEvents = [];
+    this._eventSources = this._city.getEventSources();
+    for(var i = 0; i < this._eventSources.length; i++)
+        this.schedule(this._eventSources[i]);
+
     // Setup the explored array
     this._explored = new Array(this._depth);
     this._setupExploredArray();
@@ -79,6 +85,12 @@ Game.Map.prototype.getTime = function() {
 };
 Game.Map.prototype.getJustice = function() {
     return this._justice;
+};
+Game.Map.prototype.getEventSources = function() {
+    return this._eventSources;
+};
+Game.Map.prototype.getActiveEvents = function() {
+    return this._activeEvents;
 };
 
 // For just adding actors to the scheduler
