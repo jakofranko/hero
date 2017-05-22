@@ -488,11 +488,24 @@ Game.Map.prototype.isExplored = function(x, y, z) {
     }
 };
 
-// Items - TODO: move this?
+// Items
 Game.Map.prototype.getItemsAt = function(x, y, z) {
     return this._items[x + ',' + y + ',' + z];
 };
 
+// TODO: If a cache doesn't exist, create one
+Game.Map.prototype.getItemsByType = function(type) {
+    var items = [];
+    var searchCoords = function(item) {
+        if(item.getName() === type)
+            items.push(item);
+    };
+
+    for(var coords in this._items)
+        this._items[coords].forEach(searchCoords);
+
+    return items;
+};
 Game.Map.prototype.setItemsAt = function(x, y, z, items) {
     // If our items array is empty, then delete the key from the table.
     var key = x + ',' + y + ',' + z;
@@ -523,4 +536,27 @@ Game.Map.prototype.addItem = function(x, y, z, item) {
 Game.Map.prototype.addItemAtRandomPosition = function(item, z) {
     var position = this.getRandomFloorPosition(z);
     this.addItem(position.x, position.y, position.z, item);
+};
+
+Game.Map.prototype.getRandomItemByType = function(type) {
+    debugger;
+    // First look to see if we have a cache of this item type
+    var camelCaseType = type.camelCase(),
+        items, item, cache, location;
+    if(this.hasOwnProperty('_' + camelCaseType)) {
+        cache = this['_' + camelCaseType];
+        location = cache.randomKey();
+        item = cache[location].random();
+
+        return item;
+    } else {
+        items = this.getItemsByType(type);
+        item = items.random();
+        return item;
+    }
+};
+
+// Events
+Game.Map.prototype.addActiveEvent = function(event) {
+    this._activeEvents.push(event);
 };
