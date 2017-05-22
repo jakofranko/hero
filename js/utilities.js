@@ -56,9 +56,22 @@ if(!Math.percent) {
      * @this {Object}
      * @return {Number} percent which is (num / denominator) * 100.
      */
-     Math.prototype.percent = function(num, denominator) {
+     Math.percent = function(num, denominator) {
         return (num / denominator) * 100;
      };
+}
+
+// camelCase a string
+if(!String.prototype.camelCase) {
+    String.prototype.camelCase = function() {
+        // Capitalize words after first
+        var capitalized = this.replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
+            return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
+        });
+
+        // Remove spaces
+        return capitalized.replace(/\s+/g, '');
+  };
 }
 
 Game.extend = function(src, dest) {
