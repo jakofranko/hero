@@ -60,10 +60,9 @@ Game.Justice.prototype.updateCrime = function() {
 	// The Crime level should be a function of the number of criminals times
 	// respect for the law, such that when respect for the law is highest, crime
 	// is reduced by half. (other things later)
-	debugger;
 	var crimePercentage = Math.percent(this._criminals, Game.getTotalEntities()),
-		rflPercentage = Math.percent(this._respect_for_law, 100),
-		totalCrime = Math.round(crimePercentage * ((rflPercentage / 100) / 2)); // if rflPercentage is 90, then -> crimePercentage * 0.9 / 2
+		rflModifier = (this._respect_for_law / 100) + 1,
+		totalCrime = crimePercentage / rflModifier;
 	this._crime = totalCrime;
 };
 
