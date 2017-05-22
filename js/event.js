@@ -97,3 +97,12 @@ Game.Event.prototype.start = function() {
     // Add this event to the active events queue of the map
     this._map.addActiveEvent(this);
 };
+
+// Handling events
+Game.Event.prototype.raiseEvent = function(event, ...args) {
+    var hook = `_${event}`;
+    if(!this[hook])
+        throw new Error(`There is no hook for '${event}.' Please define one in the event definition`);
+
+    return this[hook].apply(this, args);
+};

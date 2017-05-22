@@ -67,6 +67,7 @@ Game.EntityRepository.define('person', {
         Game.EntityMixins.Attacker,
         Game.EntityMixins.CorpseDropper,
         Game.EntityMixins.Destructible,
+        Game.EntityMixins.EventParticipant,
         Game.EntityMixins.ExperienceGainer,
         Game.EntityMixins.JobActor,
         Game.EntityMixins.MemoryMaker,

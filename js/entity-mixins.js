@@ -494,6 +494,25 @@ Game.EntityMixins.Equipper = {
         }
     }
 };
+Game.EntityMixins.EventParticipant = {
+    name: 'EventParticipant',
+    groupName: 'Event',
+    init: function(template) {
+        // TODO: [EVENTS] Handle being able to participate in multiple events?
+        this._event = template['event'] || false;
+    },
+    getEvent: function() {
+        return this._event;
+    },
+    listeners: {
+        onDeath: function(killer) {
+            this._event.raiseEvent('onDeath', this, killer);
+        },
+        onKill: function(victim) {
+            this._event.raiseEvent('onKill', this, victim);
+        }
+    }
+};
 Game.EntityMixins.ExperienceGainer = {
     name: 'ExperienceGainer',
     groupName: 'CharacterPoints',
