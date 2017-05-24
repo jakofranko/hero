@@ -74,6 +74,11 @@ Game.Event.prototype.setId = function(id) {
     this._id = id;
 };
 
+// Misc. functions
+Game.Event.prototype.removeEntity = function(entityIndex) {
+    this._entities.splice(entityIndex, 1);
+};
+
 Game.Event.prototype.start = function() {
     var numEntities = Game.getRandomInRange(this._minEntities, this._maxEntities),
         spawnItem = this._map.getRandomItemByType(this._spawnLocations.random()),

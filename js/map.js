@@ -573,3 +573,11 @@ Game.Map.prototype.getEventById = function(id) {
 
     return false;
 };
+Game.Map.prototype.removeActiveEvent = function(id) {
+    for (var i = 0; i < this._activeEvents.length; i++) {
+        if(this._activeEvents[i].getId() === id) {
+            this._activeEvents.splice(i, 1);
+            break;
+        }
+    }
+};
