@@ -52,7 +52,9 @@ Game.Map = function(size, player) {
 
     // Add the Player
     this._player = player;
-    var playerLoc = this._city.getLivingLocations()[0].split(",");
+    // var playerLoc = this._city.getLivingLocations()[0].split(",");
+    var floorLoc = this.getRandomFloorPosition(0);
+    var playerLoc = [floorLoc.x, floorLoc.y, floorLoc.z];
     this.addEntityAt(player, playerLoc[0] - 1, playerLoc[1] - 1, 0);
 
     // TODO: [EVENTS] Delete this after creating banks and such
