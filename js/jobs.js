@@ -5,6 +5,7 @@
 //
 // Another property of jobs is their 'noise-level.' This is basically the radius within which all entities
 // will have various listeners triggered, particularly the 'onCrime' listener.
+// TODO: [EVENTS] Create job for robbers
 Game.Jobs = {};
 
 Game.Jobs.getPriority = function(entity, job) {

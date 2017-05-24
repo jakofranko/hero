@@ -543,7 +543,6 @@ Game.Map.prototype.addItemAtRandomPosition = function(item, z) {
 };
 
 Game.Map.prototype.getRandomItemByType = function(type) {
-    debugger;
     // First look to see if we have a cache of this item type
     var camelCaseType = type.camelCase(),
         items, item, cache, location;

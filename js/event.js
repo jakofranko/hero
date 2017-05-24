@@ -88,7 +88,6 @@ Game.Event.prototype.start = function() {
         spawnLocations = [],
         maxTimes = 100;
 
-    debugger;
     for (var i = 0; i < numEntities; i++) {
         // Check that we haven't already spawned an entity at the random location and the floor is empty
         var numTimes = 0,
