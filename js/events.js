@@ -21,20 +21,30 @@ Game.EventRepository.define('bank robbery', {
         else
             return false;
     },
-    lossCondition: function() {
-        // No loss condition right now
-        return false;
-    },
     successEffect: function() {
         var map = this.getMap(),
             justice = map.getJustice();
 
         justice.addRespectForLaw(5);
     },
+    lossCondition: function() {
+        // No loss condition right now
+        return false;
+    },
     lossEffect: function() {
         var map = this.getMap(),
             justice = map.getJustice();
 
         justice.removeRespectForLaw(5);
+    },
+    onDeath: function(victim, killer) {
+        var entities = this.getEntities();
+        for (var i = 0; i < entities.length; i++) {
+            if(victim == entities[i]) {
+                this.removeEntity(i);
+                break;
+            }
+        }
+        console.log(`Entity '${victim.getName()}' was kill by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
     }
 });

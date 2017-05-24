@@ -121,5 +121,16 @@ Game.Event.prototype.raiseEvent = function(event, ...args) {
     if(!this[hook])
         throw new Error(`There is no hook for '${event}.' Please define one in the event definition`);
 
-    return this[hook].apply(this, args);
+    // Trigger the hook
+    this[hook].apply(this, args);
+
+    // Check to see if the event is over (success or loss)
+    if(this._successCondition()) {
+        this._successEffect();
+        this._map.removeActiveEvent(this._id);
+    } else if(this._lossCondition()) {
+        this._lossEffect();
+    }
+
+    return true;
 };
