@@ -60,6 +60,19 @@ Game.Jobs.home = {
 	}
 };
 
+Game.Jobs.robber = {
+	crime: true,
+	noise: 20,
+	doJob: function(entity) {
+		// Locate nearest 'robable' object
+		// If one is not found, then wander
+		// If one is found, attempt to approach it, take what is inside, and then run away
+	},
+	priority: function(entity) {
+		return 5;
+	}
+};
+
 Game.Jobs.mugger = {
 	crime: true,
 	noise: 15,

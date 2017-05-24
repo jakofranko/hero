@@ -10,7 +10,7 @@ Game.EventRepository = new Game.Repository('events', Game.Event);
 Game.EventRepository.define('bank robbery', {
     name: 'bank robbery',
     spawnLocations: ['vault door', 'cash register', 'safe'],
-    entityTypes: ['person'], // TODO: [EVENTS] Create specific templates for 'robbers', 'gunman' etc. 
+    entityTypes: ['robber'], // TODO: [EVENTS] Create specific templates for 'robbers', 'gunman' etc. 
     minEntities: 2,
     maxEntities: 6,
     successCondition: function() {
