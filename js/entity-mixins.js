@@ -1262,17 +1262,31 @@ Game.EntityMixins.Sight = {
         }
 
         // Compute the FOV and check if the coordinates are in there.
-        // TODO: This should use the existing FOV isntead of re-computing
+        // TODO: This should use the existing FOV instead of re-computing
         var found = false;
         this.getMap().getFov(this.getZ()).compute(
-            this.getX(), this.getY(), 
+            this.getX(),
+            this.getY(),
             this.getSightRadius(), 
             function(x, y, radius, visibility) {
-                if (x === otherX && y === otherY) {
+                if (x === otherX && y === otherY)
                     found = true;
-                }
-            });
+            }
+        );
         return found;
+    },
+    getEntitiesInSight: function(type) { // type can be a string or array
+        debugger;
+        var entities = this.getMap().getEntitiesWithinRadius(this._sightRadius),
+            seen = [];
+        entities.forEach(entity => {
+            // If we are looking for a specific type then only add entities
+            // that can be seen and are of a certain type, otherwise just seen
+            isType = type ? (entity.getType() == type || type.indexOf(entity.getType()) > -1) : true;
+            if(this.canSee(entity) && isType)
+                seen.push(entity);
+        });
+        return seen;
     },
     increaseSightRadius: function(value) {
         // If no value was passed, default to 1.
