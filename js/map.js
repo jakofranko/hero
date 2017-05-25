@@ -498,7 +498,32 @@ Game.Map.prototype.isExplored = function(x, y, z) {
 Game.Map.prototype.getItemsAt = function(x, y, z) {
     return this._items[x + ',' + y + ',' + z];
 };
+// name can be a string or an array of strings
+Game.Map.prototype.getItemsInRadius = function(x, y, z, radius, name) {
+    var x1 = x - radius,
+        x2 = x + radius,
+        y1 = y - radius,
+        y2 = y + radius,
+        items = [];
+    debugger;
+    for(var mapX = x1; mapX < x2; mapX++) {
+        for(var mapY = y1; mapY < y2; mapY++) {
+            var mapItems = this._items[`${mapX},${mapY},${z}`];
+            if(mapItems && mapItems.length) {
+                if(name) {
+                    mapItems.forEach(item => { 
+                        if(item.getName() == name || name.indexOf(item.getName() > -1))
+                            items.push(item);
+                    });
+                } else {
+                    items.concat(mapItems);
+                }
+            }
+        }
+    }
 
+    return items;
+};
 // TODO: If a cache doesn't exist, create one
 Game.Map.prototype.getItemsByType = function(type) {
     var items = [];
