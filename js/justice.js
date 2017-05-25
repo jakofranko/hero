@@ -42,7 +42,7 @@ Game.Justice.prototype.updateJustice = function() {
 
 	// Justice is a function of the second tier meters (crime and corruption)
 	// Neither Crime nor Corruption should be more that 50
-	this._justice = 100 - this._crime - this._corruption;
+	this._justice = 100 - (this._crime / 2) - (this._corruption / 2);
 
 	// If Justice == 100, you win!
 	if(this._justice >= 100 && !Game.won())
