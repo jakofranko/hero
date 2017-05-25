@@ -720,6 +720,7 @@ Game.EntityMixins.JobActor = {
     init: function(template) {
         this._jobs = template['jobs'] || ['survive'];
         this._jobCurrent = null;
+        this._jobComplete = {};
         this._jobPriority = template['jobPriority'] || {};
         this._lastJobPrioritization = 0;
         this._jobLocation = template['jobLocation'] || null;
@@ -827,6 +828,12 @@ Game.EntityMixins.JobActor = {
     isAtJobLocation: function() {
         var currentLocation = this.getX() + "," + this.getY() + "," + this.getZ();
         return currentLocation === this._jobLocation;
+    },
+    isJobComplete: function(job) {
+        return this._jobComplete[job];
+    },
+    setJobComplete: function(job, complete) {
+        this._jobComplete[job] = !!complete;
     },
     listeners: {
         overlay: function() {
