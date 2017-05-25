@@ -85,6 +85,7 @@ Game.Tasks.goToJobLocation = function(entity) {
 		else
 			this.wander(entity);
 	} else if(!entity.isAtJobLocation() && entityPath.length) {
+		// TODO: [EVENTS] Implement the new follow path method either here, or at the job level
 		var nextStep = entity.getNextStep();
 		var success = entity.tryMove(nextStep[0], nextStep[1], nextStep[2]);
 
@@ -214,9 +215,12 @@ Game.Tasks.wander = function(entity) {
 };
 
 Game.Tasks.hunt = function(entity) {
+	if(!entity.hasMixin('Targeting'))
+		throw new Error(`The '${entity.getType()}' entity needs to have the Targeting mixin assigned to do the hunt job`);
+
 	// Check to see if an entity already has a target. If not, pick a new one.
 	var target = entity.getTarget();
-	if(entity.hasMixin('Targeting') && (target === null || target === false)) {
+	if(target === null || target === false) {
 		// Pick a random entity that they can see
 		entity.setTarget(this.findRandomEntityInSight(entity));
 	}
