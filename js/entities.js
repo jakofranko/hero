@@ -23,6 +23,7 @@ Game.PlayerTemplate = {
     name: 'human',
     description: 'It\'s you!',
     character: '@',
+    type: 'Player',
     foreground: 'white',
     maxHp: 40,
     attackValue: 10,
@@ -51,6 +52,7 @@ Game.EntityRepository.define('person', {
     name: 'person',
     character: 'm',
     foreground: 'white',
+    type: 'NPC',
     maxHp: 10,
     basePoints: 8,
     STR: 8,
@@ -82,6 +84,7 @@ Game.EntityRepository.define('person', {
 Game.EntityRepository.define('robber', {
     name: 'robber', // Randomized with createEntity
     character: 'm', // Randomized with createEntity
+    type: 'Event NPC - Robber',
     foreground: 'white',
     maxHp: 10,
     basePoints: 8,

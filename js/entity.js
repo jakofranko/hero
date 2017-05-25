@@ -86,6 +86,9 @@ Game.Entity.prototype.getMap = function() {
 Game.Entity.prototype.getName = function() {
     return this._name;
 };
+Game.Entity.prototype.getType = function() {
+    return this._type;
+};
 Game.Entity.prototype.tryMove = function(x, y, z, map) {
 	if(!map) {
 		map = this.getMap();
