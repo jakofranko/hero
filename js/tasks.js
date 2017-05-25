@@ -203,6 +203,29 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 		return currentPath.concat(newPath);
 	}
 };
+
+// endAction should be structured like the MenuScreen items should be: an array of arrays,
+// with each array having three values: a function to call, an array of params for that function, and the 'this' context
+Game.Tasks.followPath = function(entity, endActions) {
+	var nextStep = entity.getNextStep(),
+		remainingPath = entity.getPath(),
+		success = entity.tryMove(nextStep[0], nextStep[1], nextStep[2]);
+
+	// If moving wasn't a success, put the next step back
+	// TODO: Perhaps recalculate path from new position?
+	if(!success)
+		entity.addNextStep(nextStep);
+
+	// If at the end of the path, if there is an array of endActions, perform them
+	if(remainingPath.length < 1) {
+		for (var i = 0; i < endActions.length; i++) {
+			var func = endActions[i][0],
+				args = endActions[i][1],
+				context = endActions[i][2] || this;
+			func.apply(context, args);
+		}
+	}
+};
 Game.Tasks.wander = function(entity) {
 	// Flip coin to determine if moving by 1 in the positive or negative direction
     var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
