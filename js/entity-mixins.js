@@ -767,10 +767,14 @@ Game.EntityMixins.JobActor = {
     hasJob: function(job) {
         return this._jobs.indexOf(job) > -1;
     },
+    setCurrentJob: function(job) {
+        if(Game.Jobs[job])
+            this._jobCurrent = job;
+    },
     reprioritizeJobs: function() {
         // Remove any jobs that the entity no longer has
         for(var job in this._jobPriority)
-            if(!this._jobs[job])
+            if(this._jobs.indexOf(job) === -1)
                 delete this._jobPriority[job];
 
         // Re-prioritize

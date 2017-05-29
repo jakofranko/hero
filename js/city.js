@@ -39,7 +39,8 @@ Game.City = function(size) {
 	var crimeEvents = new Game.EventSource({
 		name: 'crime',
 		maxActiveEvents: 3,
-		eventTypes: ['bank robbery']
+		eventTypes: ['bank robbery'],
+		spawnChance: 1,
 		// TODO: [EVENTS] add spawnCondition func
 	});
 	this._eventSources = [crimeEvents];

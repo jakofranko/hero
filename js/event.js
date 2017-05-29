@@ -97,14 +97,19 @@ Game.Event.prototype.start = function() {
             spawnX = Number(splitLocation[0]) + Game.getRandomInRange(-spawnRadius, spawnRadius);
             spawnY = Number(splitLocation[1]) + Game.getRandomInRange(-spawnRadius, spawnRadius);
             numTimes++;
-        } while(!this._map.isEmptyFloor(spawnX, spawnY, splitLocation[2]) && spawnLocations.indexOf(`${spawnX},${spawnY},${splitLocation[2]}`) !== -1 && numTimes < maxTimes);
+        } while(
+            !this._map.isEmptyFloor(spawnX, spawnY, splitLocation[2]) &&
+            this._map.getEntityAt(spawnX, spawnY, splitLocation[2]) &&
+            spawnLocations.indexOf(`${spawnX},${spawnY},${splitLocation[2]}`) !== -1 &&
+            numTimes < maxTimes
+        );
 
         if(numTimes === maxTimes)
             throw new Error('Exceeded number of tries for placing an entity for an event');
 
         spawnLocations.push(`${spawnX},${spawnY},${splitLocation[2]}`);
 
-        // TODO: Might need to update this to include special settings for the entity's event mixin based on the event template
+        // TODO: [EVENTS] Might need to update this to include special settings for the entity's event mixin based on the event template
         var entity = Game.EntityRepository.createEntity(this._entityTypes.random(), {event: this});
 
         this._map.addEntityAt(entity, spawnX, spawnY, splitLocation[2]);

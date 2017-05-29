@@ -133,19 +133,27 @@ Game.ItemRepository.define('cash register', {
     name: 'cash register',
     character: '[',
     foreground: Game.Palette.green,
-    mixins: [Game.ItemMixins.Heavy]
+    mixins: [Game.ItemMixins.Heavy, Game.ItemMixins.Container]
 });
 
 Game.ItemRepository.define('vault door', {
     name: 'vault door',
     character: '0',
     foreground: Game.Palette.green,
-    mixins: [Game.ItemMixins.Fixture]
+    items: ['gold bullion'],
+    mixins: [Game.ItemMixins.Fixture, Game.ItemMixins.Container]
 });
 
 Game.ItemRepository.define('safe', {
     name: 'safe',
     character: '}',
     foreground: Game.Palette.green,
-    mixins: [Game.ItemMixins.Fixture]
+    items: ['gold bullion'],
+    mixins: [Game.ItemMixins.Fixture, Game.ItemMixins.Container]
+});
+
+Game.ItemRepository.define('gold bullion', {
+    name: 'gold bullion',
+    character: '_',
+    foreground: Game.Palette.yellow
 });

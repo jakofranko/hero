@@ -188,6 +188,8 @@ Game.ItemMixins.Container = {
     name: 'Container',
     init: function(template) {
         this._items = [];
+        if(template['items'])
+            template['items'].forEach(item => { this._items.push(Game.ItemRepository.create(item)); });
     },
     getItems: function() {
         return this._items;

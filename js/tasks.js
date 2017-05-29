@@ -217,7 +217,7 @@ Game.Tasks.followPath = function(entity, endActions) {
 		entity.addNextStep(nextStep);
 
 	// If at the end of the path, if there is an array of endActions, perform them
-	if(remainingPath.length < 1) {
+	if(remainingPath.length < 1 && endActions && endActions.length) {
 		for (var i = 0; i < endActions.length; i++) {
 			var func = endActions[i][0],
 				args = endActions[i][1],
@@ -252,6 +252,7 @@ Game.Tasks.hunt = function(entity) {
 	if(!target) {
 		this.wander(entity);
 	} else {
+		// TODO: Update this to use the entities current path if it isn't set already
 		// If we are adjacent to the target, then attack instead of hunting.
 	    // TODO: if I'm not mistaken, this enforces a topology 4 and doesn't account for diagnally adjacent
 	    var offsets = Math.abs(target.getX() - entity.getX()) + Math.abs(target.getY() - entity.getY());
@@ -282,6 +283,16 @@ Game.Tasks.hunt = function(entity) {
 	        }
 	        count++;
 	    });
+	}
+};
+
+Game.Tasks.huntEntitiesInSight = function(entity, types) {
+	var entitiesInSight = entity.getEntitiesInSight(types);
+	if(entitiesInSight.length) {
+		entity.setTarget(entitiesInSight.random());
+		this.hunt(entity);
+	} else {
+		this.wander(entity);
 	}
 };
 

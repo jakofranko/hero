@@ -23,9 +23,11 @@ Game.EventRepository.define('bank robbery', {
     },
     successEffect: function() {
         var map = this.getMap(),
-            justice = map.getJustice();
+            justice = map.getJustice(),
+            entities = this.getEntities();
 
         justice.addRespectForLaw(5);
+        entities.forEach(entity => { map.removeEntity(entity); });
     },
     lossCondition: function() {
         // No loss condition right now
@@ -33,9 +35,11 @@ Game.EventRepository.define('bank robbery', {
     },
     lossEffect: function() {
         var map = this.getMap(),
-            justice = map.getJustice();
+            justice = map.getJustice(),
+            entities = this.getEntities();
 
         justice.removeRespectForLaw(5);
+        entities.forEach(entity => { map.removeEntity(entity); });
     },
     onDeath: function(victim, killer) {
         var entities = this.getEntities();

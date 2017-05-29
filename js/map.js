@@ -183,19 +183,28 @@ Game.Map.prototype.getEntitiesWithinRadius = function(centerX, centerY, centerZ,
 Game.Map.prototype.removeEntity = function(entity) {
 	// Find the entity in the list of entities if it is present
     var key = entity.getX() + ',' + entity.getY() + ',' + entity.getZ();
-    if(this._entities[key] == entity) {
+
+    if(this._entities[key] == entity)
     	delete this._entities[key];
-    }
 
     // If the entity is an actor, remove them from the scheduler
-    if (entity.hasMixin('Actor')) {
+    if(entity.hasMixin('Actor'))
         this._scheduler.remove(entity);
+
+    // If the entity is a criminal, update the city's justice system
+    if(entity.hasMixin('JobActor')) {
+        var jobs = entity.getJobs();
+        for (var i = 0; i < jobs.length; i++) {
+            if(Game.Jobs[jobs[i]].crime) {
+                this.getJustice().removeCriminals(1);
+                break;
+            }
+        }
     }
 
     // If the entity is the player, update the player field.
-    if (entity.hasMixin(Game.EntityMixins.PlayerActor)) {
+    if(entity.hasMixin(Game.EntityMixins.PlayerActor))
         this._player = undefined;
-    }
 };
 Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
 	// Delete the old key if it is the same entity and we have old positons
@@ -210,13 +219,17 @@ Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
 	if (entity.getX() < 0 || entity.getX() >= this._width ||
 		entity.getY() < 0 || entity.getY() >= this._height ||
 		entity.getZ() < 0 || entity.getZ() >= this._depth) {
+        console.log(entity);
 		throw new Error("Entity's position is out of bounds.");
 	}
 
 	// Sanity check to make sure there is no entity at the new position
 	var key = entity.getX() + "," + entity.getY() + "," + entity.getZ();
 	if (this._entities[key]) {
-        throw new Error('Tried to add an entity at an occupied position.');
+        console.log(entity);
+        console.log(this._entities[key]);
+        console.log(entity == this._entities[key]);
+        console.error(`Tried to add an entity at an occupied position (${entity.getX()},${entity.getY()},${entity.getZ()})`);
     }
 
     // Add the entity to the table of entities
@@ -304,13 +317,12 @@ Game.Map.prototype.getRandomFloorPosition = function(z) {
 Game.Map.prototype.getTile = function(x, y, z) {
     // Make sure we are inside the bounds. 
     // If we aren't, return null tile.
-    if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth) {
+    if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth)
         return Game.TileRepository.create('null');
-    } else if(!this._tiles[z][x] || !this._tiles[z][x][y]) {
+    else if(!this._tiles[z][x] || !this._tiles[z][x][y])
         debugger;
-    } else {
+    else
         return this._tiles[z][x][y] || Game.TileRepository.create('null');
-    }
 };
 Game.Map.prototype.getTileList = function(type) {
     var tileList = [];
@@ -512,7 +524,7 @@ Game.Map.prototype.getItemsInRadius = function(x, y, z, radius, name) {
             if(mapItems && mapItems.length) {
                 if(name) {
                     mapItems.forEach(item => { 
-                        if(item.getName() == name || name.indexOf(item.getName() > -1))
+                        if(item.getName() == name || name.indexOf(item.getName()) > -1)
                             items.push(item);
                     });
                 } else {
