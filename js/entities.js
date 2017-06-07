@@ -97,7 +97,7 @@ Game.EntityRepository.define('robber', {
     EGO: 6,
     PRE: 5,
     COM: 5,
-    jobs: ['robber'],
+    jobs: ['robber', 'home'],
     mixins: [
         Game.EntityMixins.Characteristics,
         Game.EntityMixins.BasePoints,
