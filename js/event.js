@@ -33,6 +33,7 @@ Game.Event = function(properties) {
     this._entityTypes    = properties['entityTypes'];
     this._minEntities    = properties['minEntities'];
     this._maxEntities    = properties['maxEntities'];
+    this._onEntitySpawn  = properties['onEntitySpawn'] || function(entity){console.log(entity)};
 
     // Conditions for the event being a 'success' or a 'loss'
     this._successCondition = properties['successCondition'];
@@ -114,6 +115,9 @@ Game.Event.prototype.start = function() {
 
         this._map.addEntityAt(entity, spawnX, spawnY, splitLocation[2]);
         this._entities.push(entity);
+
+        // Finally perform the event-specific actions for entity spawn
+        this._onEntitySpawn(entity);
     }
 
     // Add this event to the active events queue of the map

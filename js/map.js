@@ -20,6 +20,9 @@ Game.Map = function(size, player) {
     this._downStairs = this.getTileList('stairsDown');
     this._upStairs = this.getTileList('stairsUp');
 
+    this._availableLivingLocations = this._city.getLivingLocations();
+    this._occupiedLivingLocations = [];
+
     // Setup the field of visions
     this._fov = [];
     this.setupFov();
@@ -102,6 +105,25 @@ Game.Map.prototype.getActiveEvents = function() {
 };
 Game.Map.prototype.getCurrentEventId = function() {
     return this._currentEventId;
+};
+Game.Map.prototype.getAvailableLivingLocations = function() {
+    return this._availableLivingLocations;
+};
+Game.Map.prototype.getOccupiedLivingLocations = function() {
+    return this._occupiedLivingLocations;
+};
+
+Game.Map.prototype.occupyLivingLocation = function(i) {
+    // Add the value of the available location to the occupied location
+    // and then splice it from the available locations
+    this._occupiedLivingLocations.push(this._availableLivingLocations[i]);
+    this._availableLivingLocations.splice(i, 1);
+};
+Game.Map.prototype.vacateLivingLocation = function(i) {
+    // Add the value of the available location to the occupied location
+    // and then splice it from the available locations
+    this._availableLivingLocations.push(this._occupiedLivingLocations[i]);
+    this._occupiedLivingLocations.splice(i, 1);
 };
 
 // For just adding actors to the scheduler
@@ -189,6 +211,13 @@ Game.Map.prototype.removeEntity = function(entity) {
     if(entity.hasMixin('Actor'))
         this._scheduler.remove(entity);
 
+    // Add their livingLocation to the available list if applicable
+    var home = entity.recall('places', 'home');
+    if(home) {
+        var index = this._occupiedLivingLocations.indexOf(home);
+        this.vacateLivingLocation(index);
+    }
+
     // If the entity is a criminal, update the city's justice system
     if(entity.hasMixin('JobActor')) {
         var jobs = entity.getJobs();
@@ -244,9 +273,8 @@ Game.Map.prototype._generateEntities = function() {
     var criminals = 0,
         companies = this._city.getCompanies(),
         currentCompany = 0,
-        livingLocations = this._city.getLivingLocations(),
-        currentLivingLocation = 0;
-    var addedWork = false;
+        addedWork = false;
+
     for (var i = 0; i < Game.getTotalEntities(); i++) {
         // The template has to be created each time, because making it once
         // outside the loop and then changing it changes all entities
@@ -277,7 +305,7 @@ Game.Map.prototype._generateEntities = function() {
         companies[currentCompany].addEmployee(entity);
 
         // Add the entity at a random position on the map
-        var livingLocation = livingLocations[currentLivingLocation];
+        var livingLocation = this._availableLivingLocations[0];
         if(livingLocation) {
             // Make sure they remember where home is
             var memory = {location: livingLocation};
@@ -286,7 +314,9 @@ Game.Map.prototype._generateEntities = function() {
             // Spawn them at this location
             var split = livingLocation.split(",");
             this.addEntityAt(entity, split[0], split[1], split[2]);
-            currentLivingLocation++;
+
+            // Occupy the living location and then move to the next
+            this.occupyLivingLocation(0);
         } else {
             this.addEntityAtRandomPosition(entity, 0);
         }

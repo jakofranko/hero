@@ -70,10 +70,7 @@ Game.Jobs.robber = {
 
 		// If they have completed a robbery, escape home, or fight the nearest enemy
 		if(entity.isJobComplete('robber')) {
-			if(Math.random() > 0.5)
-				Game.Tasks.huntEntitiesInSight(['Player', 'police']);
-			else
-				entity.setCurrentJob('home');
+			entity.setCurrentJob('home');
 		} else {
 			var entityPath = entity.getPath(),
 				target = entity.getTarget(),

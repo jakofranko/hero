@@ -41,6 +41,16 @@ Game.EventRepository.define('bank robbery', {
         justice.removeRespectForLaw(5);
         entities.forEach(entity => { map.removeEntity(entity); });
     },
+    onEntitySpawn: function(entity) {
+        // For now, give them a place to live
+        var map = this.getMap(),
+            availableLivingLocations = map.getAvailableLivingLocations();
+        debugger;
+        if(availableLivingLocations.length) {
+            entity.remember('places', 'home', false, {location: availableLivingLocations[0]});
+            map.occupyLivingLocation(0);
+        }
+    },
     onDeath: function(victim, killer) {
         var entities = this.getEntities();
         for (var i = 0; i < entities.length; i++) {
