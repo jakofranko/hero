@@ -821,7 +821,7 @@ Game.EntityMixins.JobActor = {
         this._path.unshift(step);
     },
     setPath: function(path) {
-        this._path = path;
+        this._path = path || [];
     },
     getJobLocation: function() {
         return this._jobLocation;

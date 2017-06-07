@@ -209,12 +209,17 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 Game.Tasks.followPath = function(entity, endActions) {
 	var nextStep = entity.getNextStep(),
 		remainingPath = entity.getPath(),
+		success = false;
+
+	if(nextStep)
 		success = entity.tryMove(nextStep[0], nextStep[1], nextStep[2]);
 
 	// If moving wasn't a success, put the next step back
 	// TODO: Perhaps recalculate path from new position?
-	if(!success)
+	if(!success && nextStep)
 		entity.addNextStep(nextStep);
+	else if(!success)
+		this.wander(entity);
 
 	// If at the end of the path, if there is an array of endActions, perform them
 	if(remainingPath.length < 1 && endActions && endActions.length) {

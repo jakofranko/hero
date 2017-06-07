@@ -124,9 +124,8 @@ Game.Map.prototype.addEntity = function(entity) {
 
 	// Check to see if the entity is an actor
 	// If so, add them to the scheduler
-	if(entity.hasMixin('Actor')) {
+	if(entity.hasMixin('Actor'))
 		this._scheduler.add(entity, true);
-	}
 
     // If the entity is a criminal, update the city's justice system
     if(entity.hasMixin('JobActor')) {
@@ -140,9 +139,8 @@ Game.Map.prototype.addEntity = function(entity) {
     }
 
     // If the entity is the player, set the player.
-    if (entity.hasMixin(Game.EntityMixins.PlayerActor)) {
+    if(entity.hasMixin(Game.EntityMixins.PlayerActor))
         this._player = entity;
-    }
 };
 Game.Map.prototype.addEntityAt = function(entity, x, y, z) {
     entity.setX(x);
@@ -301,7 +299,11 @@ Game.Map.prototype._generateEntities = function() {
 // Floors
 Game.Map.prototype.isEmptyFloor = function(x, y, z) {
     // Check if the tile is floor and also has no entity
-    return this.getTile(x, y, z).getName() == 'floor' && !this.getEntityAt(x, y, z);
+    var tile = this.getTile(x, y, z);
+    if(!tile)
+        return false;
+
+    return tile.getName() == 'floor' && !this.getEntityAt(x, y, z);
 };
 Game.Map.prototype.getRandomFloorPosition = function(z) {
 	var x, y;
