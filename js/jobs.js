@@ -88,6 +88,12 @@ Game.Jobs.robber = {
 				// Robbery complete, now reprioritize so that an escape can be made
 				entity.setJobComplete('robber', true);
 				entity.reprioritizeJobs();
+
+				// Trigger the onCrime event for witnesses
+				var witnesses = entity.getMap().getEntitiesWithinRadius(entity.getX(), entity.getY(), entity.getZ(), this.noise);
+				for(var i = 0; i < witnesses.length; i++)
+					witnesses[i].raiseEvent('onCrime', entity);
+
 				return true;
 			} else if(target) {
 				// If the entity already has a target, then set the path and follow it

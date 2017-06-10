@@ -845,7 +845,7 @@ Game.EntityMixins.JobActor = {
             return [{key: 'path', points: this._path, char: '#', color: 'purple'}];
         },
         onRegainConsciousness: function() {
-            if(this.hasJob('mugger')) {
+            if(Game.Jobs[this._jobCurrent] && Game.Jobs[this._jobCurrent].crime) {
                 // TODO: upon waking up, the NPC loses 'petty crime' jobs?
                 if(Math.random() > 0.5) {
                     Game.sendMessageNearby(
@@ -855,7 +855,7 @@ Game.EntityMixins.JobActor = {
                         this.getZ(),
                         "Ok ok! I'll never do it again!"
                     );
-                    this.removeJob('mugger');
+                    this.removeJob(this._jobCurrent);
                     this.reprioritizeJobs();
                     var witnesses = this.getMap().getEntitiesWithinRadius(this.getX(), this.getY(), this.getZ(), 25);
                     for (var i = 0; i < witnesses.length; i++) {
