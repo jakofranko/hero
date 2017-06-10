@@ -45,7 +45,7 @@ Game.EventRepository.define('bank robbery', {
         // For now, give them a place to live
         var map = this.getMap(),
             availableLivingLocations = map.getAvailableLivingLocations();
-        debugger;
+
         if(availableLivingLocations.length) {
             entity.remember('places', 'home', false, {location: availableLivingLocations[0]});
             map.occupyLivingLocation(0);

@@ -639,18 +639,19 @@ Game.EntityMixins.InventoryHolder = {
         return true;
     },
     removeItem: function(i, amount) {
+        if(!this._items[i])
+            return false;
+
         // If we can equip items, then make sure we unequip the item we are removing.
-        if (this._items[i] && this.hasMixin(Game.EntityMixins.Equipper)) {
+        if(this._items[i] && this.hasMixin(Game.EntityMixins.Equipper))
             this.unequip(this._items[i]);
-        }
 
         // If the item is in a stack, decrement the stack amount
-        if(this._items[i].hasMixin('Stackable') && this._items[i].amount() > 1) {
+        if(this._items[i].hasMixin('Stackable') && this._items[i].amount() > 1)
             this._items[i].removeFromStack();
-        } else {
+        else
             // Simply clear the inventory slot.
             this._items[i] = null;    
-        }
     },
     canAddItem: function(item) {
         if(item.hasMixin("Fixture")) {

@@ -198,7 +198,6 @@ Game.ItemMixins.Container = {
         return this._items[i];
     },
     addItem: function(entity, index, amount) {
-        debugger;
         if(!entity.hasMixin('InventoryHolder') && !entity.hasMixin('Container')) {
             return false;
         }
@@ -211,7 +210,6 @@ Game.ItemMixins.Container = {
 
     },
     removeItem: function(entity, index, amount) {
-        debugger;
         if(!entity.hasMixin('InventoryHolder') && !entity.hasMixin('Container')) {
             return false;
         }

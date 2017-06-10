@@ -64,7 +64,6 @@ Game.Jobs.robber = {
 	crime: true,
 	noise: 20,
 	doJob: function(entity) {
-		debugger;
 		if(!entity.hasMixin('Targeting'))
 			throw new Error(`The '${entity.getType()}' entity must have the Targeting mixin in order to perform the robber job`);
 

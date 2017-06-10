@@ -549,7 +549,7 @@ Game.Map.prototype.getItemsInRadius = function(x, y, z, radius, name) {
         y1 = y - radius,
         y2 = y + radius,
         items = [];
-    debugger;
+
     for(var mapX = x1; mapX < x2; mapX++) {
         for(var mapY = y1; mapY < y2; mapY++) {
             var mapItems = this._items[`${mapX},${mapY},${z}`];
