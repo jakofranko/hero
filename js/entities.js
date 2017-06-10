@@ -98,6 +98,10 @@ Game.EntityRepository.define('robber', {
     PRE: 5,
     COM: 5,
     jobs: ['robber', 'home'],
+    reactionTypes: ['defend'],
+    reactionMessages: {
+        defend: ['Who do you think you are?? Take that!', 'I\'ll get the hero. How do you like pain??', 'You won\'t stop me this time!']
+    },
     mixins: [
         Game.EntityMixins.Characteristics,
         Game.EntityMixins.BasePoints,

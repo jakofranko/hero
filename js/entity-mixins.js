@@ -259,7 +259,7 @@ Game.EntityMixins.Characteristics = {
             this.ko();
         } else {
             if(this.hasMixin('Reactor')) {
-                var reaction = Math.round(Math.random()) ? 'defend' : 'runAway';
+                var reaction = this.getReactionTypes().random();
                 this.setReaction(reaction);
             }
         }
@@ -1181,17 +1181,20 @@ Game.EntityMixins.Reactor = {
     name: 'Reactor',
     init: function(template) {
         var self = this;
+        this._reactionTypes = template['reactionTypes'] || ['defend', 'runAway'];
         this._reacting = false;
         this._reaction = false;
-        this._reactions = {
+        this._reactions = Object.assign({}, {
             defend: function() {
-                Game.sendMessageNearby(self.getMap(), self.getX(), self.getY(), self.getZ(), 'Take that you ruffian!');
                 Game.Tasks.hunt(self);
             },
             runAway: function() {
-                Game.sendMessageNearby(self.getMap(), self.getX(), self.getY(), self.getZ(), 'Help! Somebody help!');
                 Game.Tasks.retreat(self, self.getTarget());
             }
+        }, template['reactions']);
+        this._reactionMessages = template['reactionMessages'] || {
+            runAway: ['Help! Somebody help!', 'Help! I\'m being attacked!'],
+            defend: ['Take that you ruffian!', 'I\'m not as defenseless as I look!']
         };
     },
     isReacting: function() {
@@ -1199,6 +1202,9 @@ Game.EntityMixins.Reactor = {
     },
     getReaction: function() {
         return this._reaction;
+    },
+    getReactionTypes: function() {
+        return this._reactionTypes;
     },
     setReaction: function(reaction) {
         this._reaction = reaction;
@@ -1208,8 +1214,11 @@ Game.EntityMixins.Reactor = {
             this._reacting = false;
     },
     react: function() {
-        if(this._reaction)
+        if(this._reaction) {
+            console.log(this._reaction, this._reactionMessages);
+            Game.sendMessageNearby(this.getMap(), this.getX(), this.getY(), this.getZ(), this._reactionMessages[this._reaction].random());
             this._reactions[this._reaction]();
+        }
         else
             return false;
 
@@ -1223,7 +1232,7 @@ Game.EntityMixins.Reactor = {
         onAttack: function(attacker) {
             // Only switch it up if not already reacting
             if(!this._reacting) {
-                var reaction = Math.round(Math.random()) ? 'defend' : 'runAway';
+                var reaction = this._reactionTypes.random();
                 this.setReaction(reaction);
 
                 if(this.hasMixin('Targeting'))
