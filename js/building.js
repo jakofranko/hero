@@ -482,6 +482,18 @@ Game.Building.prototype.getStories = function() {
 Game.Building.prototype.getBlueprint = function() {
 	return this._blueprint;
 };
+Game.Building.prototype.getRoomRegions = function() {
+	return this._roomRegions;
+};
+Game.Building.prototype.getRandomRegionTile = function(region, z) {
+	var regionCoords = [];
+	for(var x = 0; x < this._roomRegions[z].regions.length; x++)
+		for(var y = 0; y < this._roomRegions[z].regions[x].length; y++)
+			if(this._roomRegions[z].regions[x][y] === region)
+				regionCoords.push(`${x},${y},${z}`);
+
+	return regionCoords.random();
+};
 Game.Building.prototype.getName = function() {
 	return this._name;
 };
