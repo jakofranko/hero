@@ -82,8 +82,19 @@ Game.Event.prototype.removeEntity = function(entityIndex) {
 
 Game.Event.prototype.start = function() {
     var numEntities = Game.getRandomInRange(this._minEntities, this._maxEntities),
-        spawnItem = this._map.getRandomItemByType(this._spawnLocations.random()),
-        spawnLocation = spawnItem.getLocation(),
+        spawnItem = false;
+
+    // Try to grab a random spawn location
+    var tries = 20;
+    while(tries > 0 && !spawnItem) {
+        spawnItem = this._map.getRandomItemByType(this._spawnLocations.random());
+        tries--;
+    }
+
+    if(!spawnItem)
+        debugger;
+
+    var spawnLocation = spawnItem.getLocation(),
         splitLocation = spawnLocation.split(","),
         spawnRadius = Math.max(3, Math.ceil(numEntities / 2)),
         spawnLocations = [],
