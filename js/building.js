@@ -430,8 +430,9 @@ Game.Building = function(properties) {
 		}
 	};
 
-	this._placeJobs = properties['placeJobs'] || function() {
-		var company = this._companyGenerator.generate('corp');
+	this._placeJobs = properties['placeJobs'] || function(companyType) {
+		var type = companyType || 'corp';
+		var company = this._companyGenerator.generate(type);
 		this._companies.push(company);
 
 		while(this._jobLocations.length && company) {
