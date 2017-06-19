@@ -199,7 +199,6 @@ Game.BuildingRepository.define('apartment', {
 				break;
 			default:
 				throw new Error("Huh?");
-				break;
 		}
 		for (var z = 0; z < this._stories; z++) {
 			// If it's the bottom floor, only place up stairs

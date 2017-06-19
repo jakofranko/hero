@@ -231,7 +231,7 @@ Game.Building = function(properties) {
 				}
 
 				// In very rare circumstances, a region will only have one connecting region.
-				// I think this only happens in artifical cicumstances where there is a region
+				// I think this only happens in artificial circumstances where there is a region
 				// isolated within a region (a room within a room). This happens when I place
 				// stairwells after using the slice method to place rooms. If this
 				// 'room within a room' has a high region number, then a door will be placed
@@ -272,10 +272,10 @@ Game.Building = function(properties) {
 				// region 4 is isolated from the other regions since when processing region 4,
 				// a door was placed to region 8, and region 8 is connected to only region 4,
 				// so it could not do anything. My solution will be to detect whether 
-				// the current region has only a single neigboring region.
-				// If it only has a single neigboring region (again, this should not be possible
-				// when using only the slice method), then add a door between the neigboring region
-				// and one of it's neiboring regions. This SHOULD un-isolate the region.
+				// the current region has only a single neighboring region.
+				// If it only has a single neighboring region (again, this should not be possible
+				// when using only the slice method), then add a door between the neighboring region
+				// and one of it's neighboring regions. This SHOULD un-isolate the region.
 				var connectingRegions = Object.keys(this._roomRegions[z].tree[region]);
 				if(connectingRegions.length === 1) {
 					var parentRegion = this._roomRegions[z].tree[connectingRegions[0]];

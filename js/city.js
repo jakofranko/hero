@@ -2,8 +2,9 @@
 // lots, which will in turn be used to generate the player level
 // This is HEAVILY inspired by Shamus Young's post here:http://www.shamusyoung.com/twentysidedtale/?p=2983.
 // Creating the city will involve a few steps, the first of which is creating a grid of roads. I want to start off with just creating a semi-random grid.
-// TODO: Could be made more interesting by including a highway or two which would cut sort of diagnally across the city. Additionally, a river or nearby lake might be a neat addition as well. Perhaps a large, central park type of construct as well?
 // After generating the roads, lots will be placed semi-randomly in the non-road portions
+// TODO: Could be made more interesting by including a highway or two which would cut sort of diagnally across the city. Additionally, a river or nearby lake might be a neat addition as well. Perhaps a large, central park type of construct as well?
+// TODO: Remove duplication between city and map functionality. Everything really should live in one place or the other, with map delegating to city for everything that is city related, or with the map owning most of the functionality. Map ultimately should be the 'current' city, allowing the player to switch between multiple cities.
 
 Game.City = function(size) {
 	// Cities will be square for easier math
