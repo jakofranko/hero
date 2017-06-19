@@ -44,6 +44,27 @@ Game.BuildingRepository.define('skyscraper', {
 	roomNumber: 10
 });
 
+Game.BuildingRepository.define('bank', {
+	name: 'Bank',
+	width: Game.getLotSize() / 3,
+	height: Game.getLotSize() / 3,
+	stories: 1,
+	roomNumber: 5,
+	placeItems: function() {
+		// debugger;
+		var regions = this.getRoomRegions();
+		var safe = Game.ItemRepository.create('safe');
+		var safeCoord = this.getRandomRegionTile(4, 0) || this.getRandomRegionTile(3, 0) || this.getRandomRegionTile(2, 0),
+			x, y, z;
+		if(safeCoord) {
+			var coord = safeCoord.split(",");
+			this.addItem(coord[0], coord[1], coord[2], safe);
+		} else {
+			debugger;
+		}
+	}
+});
+
 Game.BuildingRepository.define('apartment', {
 	name: 'Apartment Complex',
 	exactProperties: true,
