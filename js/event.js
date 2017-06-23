@@ -110,9 +110,9 @@ Game.Event.prototype.start = function() {
             spawnY = Number(splitLocation[1]) + Game.getRandomInRange(-spawnRadius, spawnRadius);
             numTimes++;
         } while(
-            !this._map.isEmptyFloor(spawnX, spawnY, splitLocation[2]) &&
-            this._map.getEntityAt(spawnX, spawnY, splitLocation[2]) &&
-            spawnLocations.indexOf(`${spawnX},${spawnY},${splitLocation[2]}`) !== -1 &&
+            (!this._map.isEmptyFloor(spawnX, spawnY, splitLocation[2]) ||
+            this._map.getEntityAt(spawnX, spawnY, splitLocation[2]) ||
+            spawnLocations.indexOf(`${spawnX},${spawnY},${splitLocation[2]}`) !== -1) &&
             numTimes < maxTimes
         );
 
