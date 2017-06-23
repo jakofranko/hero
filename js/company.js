@@ -1,5 +1,6 @@
 // TODO: Have this create different types of companies based on the size and other demographics of the city
 // TODO: Add special generator for News companies (like stores and corps)
+// TODO: Add special generator for Banks
 Game.CompanyGenerator = function() {
 	this._totalJobs = Game.getAvailableJobs();
 	this._usedCorpNames = [];
@@ -22,7 +23,7 @@ Game.CompanyGenerator = function() {
 		'Contrast',
 		'Capricorn',
 		'Ares',
-		'Poseiden'
+		'Poseidon'
 	];
 	this._corpIndustries = [
 		'R & D',
