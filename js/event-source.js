@@ -33,6 +33,21 @@ Game.EventSource.prototype.getActiveEvents = function() {
 };
 
 Game.EventSource.prototype.act = function() {
+    // Update active events
+    for(var i = 0; i < this._activeEvents.length; i++) {
+        var event = this._activeEvents[i];
+        event.addTurn();
+        event.raiseEvent('onTurn');
+        if(event.isWon() || event.isLost()) {
+            this._map.removeActiveEvent(event.getId());
+            this._activeEvents.splice(i, 1);
+            if(event.isWon())
+                Game.sendMessage(this._map.getPlayer(), event.getSuccessMessage());
+            else if(event.isLost())
+                Game.sendMessage(this._map.getPlayer(), event.getFailMessage());
+        }
+    }
+
     if(Math.random() < this._spawnChance)
         this._spawn();
 };
@@ -48,6 +63,10 @@ Game.EventSource.prototype._spawn = function() {
 
     event.start();
     this._activeEvents.push(event);
+    this._map.addActiveEvent(event);
+
+    // Send an alert message to the player
+    Game.sendMessage(this._map.getPlayer(), event.getStartMessage());
 
     return true;
 };
