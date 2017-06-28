@@ -41,7 +41,7 @@ Game.City = function(size) {
 		name: 'crime',
 		maxActiveEvents: 3,
 		eventTypes: ['bank robbery'],
-		spawnChance: 1,
+		spawnChance: 0.1,
 		// TODO: [EVENTS] add spawnCondition func
 	});
 	this._eventSources = [crimeEvents];

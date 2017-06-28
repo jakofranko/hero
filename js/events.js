@@ -9,6 +9,7 @@ Game.EventRepository = new Game.Repository('events', Game.Event);
 // an actor will have the map associated with it)
 Game.EventRepository.define('bank robbery', {
     name: 'bank robbery',
+    message: 'A bank robbery is underway',
     spawnLocations: ['vault door', 'cash register', 'safe'],
     entityTypes: ['robber'], // TODO: [EVENTS] Create specific templates for 'robbers', 'gunman' etc. 
     minEntities: 2,
