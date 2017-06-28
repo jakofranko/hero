@@ -28,6 +28,7 @@ Game.Justice = function() {
 
 	// Third Tier meters
 	this._criminals = 0;
+	this._respect_for_law = 0;
 
 	// Initialize justice level based on other starting levels
 	this.updateJustice();
@@ -40,7 +41,8 @@ Game.Justice.prototype.updateJustice = function() {
 	this.updateCrime();
 
 	// Justice is a function of the second tier meters (crime and corruption)
-	this._justice = 100 - this._crime - this._corruption;
+	// Neither Crime nor Corruption should be more that 50
+	this._justice = 100 - (this._crime / 2) - (this._corruption / 2);
 
 	// If Justice == 100, you win!
 	if(this._justice >= 100 && !Game.won())
@@ -55,8 +57,13 @@ Game.Justice.prototype.getCrime = function() {
 	return this._crime;
 };
 Game.Justice.prototype.updateCrime = function() {
-	// The Crime level should be a function of the number of criminals (other things later)
-	this._crime = this._criminals;
+	// The Crime level should be a function of the number of criminals times
+	// respect for the law, such that when respect for the law is highest, crime
+	// is reduced by half. (other things later)
+	var crimePercentage = Math.percent(this._criminals, Game.getTotalEntities()),
+		rflModifier = (this._respect_for_law / 100) + 1,
+		totalCrime = crimePercentage / rflModifier;
+	this._crime = totalCrime;
 };
 
 // Third Tier methods
@@ -69,5 +76,20 @@ Game.Justice.prototype.addCriminals = function(criminals) {
 };
 Game.Justice.prototype.removeCriminals = function(criminals) {
 	this._criminals -= criminals;
+	this.updateJustice();
+};
+
+Game.Justice.prototype.getRespectForLaw = function() {
+	return this._respect_for_law;
+};
+Game.Justice.prototype.addRespectForLaw = function(respect) {
+	// Should not be more than 100
+	this._respect_for_law += respect;
+	if(this._respect_for_law > 100)
+		this._respect_for_law = 100;
+	this.updateJustice();
+};
+Game.Justice.prototype.removeRespectForLaw = function(respect) {
+	this._respect_for_law -= respect;
 	this.updateJustice();
 };

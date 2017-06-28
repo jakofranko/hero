@@ -85,6 +85,7 @@ Game.Tasks.goToJobLocation = function(entity) {
 		else
 			this.wander(entity);
 	} else if(!entity.isAtJobLocation() && entityPath.length) {
+		// TODO: [EVENTS] Implement the new follow path method either here, or at the job level
 		var nextStep = entity.getNextStep();
 		var success = entity.tryMove(nextStep[0], nextStep[1], nextStep[2]);
 
@@ -202,6 +203,34 @@ Game.Tasks.getPathToLevel = function(entity, level, startX, startY, startZ, curr
 		return currentPath.concat(newPath);
 	}
 };
+
+// endAction should be structured like the MenuScreen items should be: an array of arrays,
+// with each array having three values: a function to call, an array of params for that function, and the 'this' context
+Game.Tasks.followPath = function(entity, endActions) {
+	var nextStep = entity.getNextStep(),
+		remainingPath = entity.getPath(),
+		success = false;
+
+	if(nextStep)
+		success = entity.tryMove(nextStep[0], nextStep[1], nextStep[2]);
+
+	// If moving wasn't a success, put the next step back
+	// TODO: Perhaps recalculate path from new position?
+	if(!success && nextStep)
+		entity.addNextStep(nextStep);
+	else if(!success)
+		this.wander(entity);
+
+	// If at the end of the path, if there is an array of endActions, perform them
+	if(remainingPath.length < 1 && endActions && endActions.length) {
+		for (var i = 0; i < endActions.length; i++) {
+			var func = endActions[i][0],
+				args = endActions[i][1],
+				context = endActions[i][2] || this;
+			func.apply(context, args);
+		}
+	}
+};
 Game.Tasks.wander = function(entity) {
 	// Flip coin to determine if moving by 1 in the positive or negative direction
     var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
@@ -214,9 +243,12 @@ Game.Tasks.wander = function(entity) {
 };
 
 Game.Tasks.hunt = function(entity) {
+	if(!entity.hasMixin('Targeting'))
+		throw new Error(`The '${entity.getType()}' entity needs to have the Targeting mixin assigned to do the hunt job`);
+
 	// Check to see if an entity already has a target. If not, pick a new one.
 	var target = entity.getTarget();
-	if(entity.hasMixin('Targeting') && (target === null || target === false)) {
+	if(target === null || target === false) {
 		// Pick a random entity that they can see
 		entity.setTarget(this.findRandomEntityInSight(entity));
 	}
@@ -225,6 +257,7 @@ Game.Tasks.hunt = function(entity) {
 	if(!target) {
 		this.wander(entity);
 	} else {
+		// TODO: Update this to use the entities current path if it isn't set already
 		// If we are adjacent to the target, then attack instead of hunting.
 	    // TODO: if I'm not mistaken, this enforces a topology 4 and doesn't account for diagnally adjacent
 	    var offsets = Math.abs(target.getX() - entity.getX()) + Math.abs(target.getY() - entity.getY());
@@ -255,6 +288,16 @@ Game.Tasks.hunt = function(entity) {
 	        }
 	        count++;
 	    });
+	}
+};
+
+Game.Tasks.huntEntitiesInSight = function(entity, types) {
+	var entitiesInSight = entity.getEntitiesInSight(types);
+	if(entitiesInSight.length) {
+		entity.setTarget(entitiesInSight.random());
+		this.hunt(entity);
+	} else {
+		this.wander(entity);
 	}
 };
 

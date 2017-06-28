@@ -74,7 +74,7 @@ Game.Screen.startScreen = {
         //                     __,,aaaadd888888888888888bbaaaa,,__
         //                   d8888888888888888888888888888888888888b
 
-        var version = "v0.3";
+        var version = "v0.4";
         display.drawText((w / 2) - (version.length / 2), scalesASCII.length + 8, version);
 
 	},
@@ -94,17 +94,38 @@ Game.Screen.overview = {
     },
     exit: function() { console.log('Exited the overview screen'); },
     render: function(display) {
-        var playerX = Math.floor(this._player.getX() / Game.getLotSize());
-        var playerY = Math.floor(this._player.getY() / Game.getLotSize());
+        var lotSize = Game.getLotSize();
+        var playerX = Math.floor(this._player.getX() / lotSize);
+        var playerY = Math.floor(this._player.getY() / lotSize);
         var lots = this._city.getLots();
+
+        // Get the lot locations of active events
+        var events = this._player.getMap().getActiveEvents();
+        var eventLocations = [];
+        events.forEach(event => {
+            var location = event.getLocation().split(",");
+            var eventX = Math.floor(location[0] / lotSize);
+            var eventY = Math.floor(location[1] / lotSize);
+            eventLocations.push([eventX, eventY]);
+        });
+
         for(var x = 0; x < this._city.getWidth(); x++) {
             for (var y = 0; y < this._city.getHeight(); y++) {
                 var lot = lots[x][y];
                 var background;
                 if(playerX == x && playerY == y)
-                    background = 'grey';
+                    background = Game.Palette.grey;
                 else
                     background = lot.getBackground();
+
+                // Indicate events
+                for (var i = 0; i < eventLocations.length; i++) {
+                    if(eventLocations[i][0] == x && eventLocations[i][1] == y) {
+                        background = Game.Palette.blue;
+                        break;
+                    }
+                }
+
 
                 display.draw(
                     x,

@@ -258,7 +258,7 @@ Game.EntityMixins.Characteristics = {
             this.ko();
         } else {
             if(this.hasMixin('Reactor')) {
-                var reaction = Math.round(Math.random()) ? 'defend' : 'runAway';
+                var reaction = this.getReactionTypes().random();
                 this.setReaction(reaction);
             }
         }
@@ -493,6 +493,25 @@ Game.EntityMixins.Equipper = {
         }
     }
 };
+Game.EntityMixins.EventParticipant = {
+    name: 'EventParticipant',
+    groupName: 'Event',
+    init: function(template) {
+        // TODO: [EVENTS] Handle being able to participate in multiple events?
+        this._event = template['event'] || false;
+    },
+    getEvent: function() {
+        return this._event;
+    },
+    listeners: {
+        onDeath: function(killer) {
+            this._event.raiseEvent('onDeath', this, killer);
+        },
+        onKill: function(victim) {
+            this._event.raiseEvent('onKill', this, victim);
+        }
+    }
+};
 Game.EntityMixins.ExperienceGainer = {
     name: 'ExperienceGainer',
     groupName: 'CharacterPoints',
@@ -619,18 +638,19 @@ Game.EntityMixins.InventoryHolder = {
         return true;
     },
     removeItem: function(i, amount) {
+        if(!this._items[i])
+            return false;
+
         // If we can equip items, then make sure we unequip the item we are removing.
-        if (this._items[i] && this.hasMixin(Game.EntityMixins.Equipper)) {
+        if(this._items[i] && this.hasMixin(Game.EntityMixins.Equipper))
             this.unequip(this._items[i]);
-        }
 
         // If the item is in a stack, decrement the stack amount
-        if(this._items[i].hasMixin('Stackable') && this._items[i].amount() > 1) {
+        if(this._items[i].hasMixin('Stackable') && this._items[i].amount() > 1)
             this._items[i].removeFromStack();
-        } else {
+        else
             // Simply clear the inventory slot.
             this._items[i] = null;    
-        }
     },
     canAddItem: function(item) {
         if(item.hasMixin("Fixture")) {
@@ -700,6 +720,7 @@ Game.EntityMixins.JobActor = {
     init: function(template) {
         this._jobs = template['jobs'] || ['survive'];
         this._jobCurrent = null;
+        this._jobComplete = {};
         this._jobPriority = template['jobPriority'] || {};
         this._lastJobPrioritization = 0;
         this._jobLocation = template['jobLocation'] || null;
@@ -746,10 +767,14 @@ Game.EntityMixins.JobActor = {
     hasJob: function(job) {
         return this._jobs.indexOf(job) > -1;
     },
+    setCurrentJob: function(job) {
+        if(Game.Jobs[job])
+            this._jobCurrent = job;
+    },
     reprioritizeJobs: function() {
         // Remove any jobs that the entity no longer has
         for(var job in this._jobPriority)
-            if(!this._jobs[job])
+            if(this._jobs.indexOf(job) === -1)
                 delete this._jobPriority[job];
 
         // Re-prioritize
@@ -796,7 +821,7 @@ Game.EntityMixins.JobActor = {
         this._path.unshift(step);
     },
     setPath: function(path) {
-        this._path = path;
+        this._path = path || [];
     },
     getJobLocation: function() {
         return this._jobLocation;
@@ -808,12 +833,18 @@ Game.EntityMixins.JobActor = {
         var currentLocation = this.getX() + "," + this.getY() + "," + this.getZ();
         return currentLocation === this._jobLocation;
     },
+    isJobComplete: function(job) {
+        return this._jobComplete[job];
+    },
+    setJobComplete: function(job, complete) {
+        this._jobComplete[job] = !!complete;
+    },
     listeners: {
         overlay: function() {
             return [{key: 'path', points: this._path, char: '#', color: 'purple'}];
         },
         onRegainConsciousness: function() {
-            if(this.hasJob('mugger')) {
+            if(Game.Jobs[this._jobCurrent] && Game.Jobs[this._jobCurrent].crime) {
                 // TODO: upon waking up, the NPC loses 'petty crime' jobs?
                 if(Math.random() > 0.5) {
                     Game.sendMessageNearby(
@@ -823,7 +854,7 @@ Game.EntityMixins.JobActor = {
                         this.getZ(),
                         "Ok ok! I'll never do it again!"
                     );
-                    this.removeJob('mugger');
+                    this.removeJob(this._jobCurrent);
                     this.reprioritizeJobs();
                     var witnesses = this.getMap().getEntitiesWithinRadius(this.getX(), this.getY(), this.getZ(), 25);
                     for (var i = 0; i < witnesses.length; i++) {
@@ -1150,17 +1181,20 @@ Game.EntityMixins.Reactor = {
     name: 'Reactor',
     init: function(template) {
         var self = this;
+        this._reactionTypes = template['reactionTypes'] || ['defend', 'runAway'];
         this._reacting = false;
         this._reaction = false;
-        this._reactions = {
+        this._reactions = Object.assign({}, {
             defend: function() {
-                Game.sendMessageNearby(self.getMap(), self.getX(), self.getY(), self.getZ(), 'Take that you ruffian!');
                 Game.Tasks.hunt(self);
             },
             runAway: function() {
-                Game.sendMessageNearby(self.getMap(), self.getX(), self.getY(), self.getZ(), 'Help! Somebody help!');
                 Game.Tasks.retreat(self, self.getTarget());
             }
+        }, template['reactions']);
+        this._reactionMessages = template['reactionMessages'] || {
+            runAway: ['Help! Somebody help!', 'Help! I\'m being attacked!'],
+            defend: ['Take that you ruffian!', 'I\'m not as defenseless as I look!']
         };
     },
     isReacting: function() {
@@ -1168,6 +1202,9 @@ Game.EntityMixins.Reactor = {
     },
     getReaction: function() {
         return this._reaction;
+    },
+    getReactionTypes: function() {
+        return this._reactionTypes;
     },
     setReaction: function(reaction) {
         this._reaction = reaction;
@@ -1177,8 +1214,10 @@ Game.EntityMixins.Reactor = {
             this._reacting = false;
     },
     react: function() {
-        if(this._reaction)
+        if(this._reaction) {
+            Game.sendMessageNearby(this.getMap(), this.getX(), this.getY(), this.getZ(), this._reactionMessages[this._reaction].random());
             this._reactions[this._reaction]();
+        }
         else
             return false;
 
@@ -1192,7 +1231,7 @@ Game.EntityMixins.Reactor = {
         onAttack: function(attacker) {
             // Only switch it up if not already reacting
             if(!this._reacting) {
-                var reaction = Math.round(Math.random()) ? 'defend' : 'runAway';
+                var reaction = this._reactionTypes.random();
                 this.setReaction(reaction);
 
                 if(this.hasMixin('Targeting'))
@@ -1235,17 +1274,31 @@ Game.EntityMixins.Sight = {
         }
 
         // Compute the FOV and check if the coordinates are in there.
-        // TODO: This should use the existing FOV isntead of re-computing
+        // TODO: This should use the existing FOV instead of re-computing
         var found = false;
         this.getMap().getFov(this.getZ()).compute(
-            this.getX(), this.getY(), 
+            this.getX(),
+            this.getY(),
             this.getSightRadius(), 
             function(x, y, radius, visibility) {
-                if (x === otherX && y === otherY) {
+                if (x === otherX && y === otherY)
                     found = true;
-                }
-            });
+            }
+        );
         return found;
+    },
+    getEntitiesInSight: function(type) { // type can be a string or array
+        debugger;
+        var entities = this.getMap().getEntitiesWithinRadius(this._sightRadius),
+            seen = [];
+        entities.forEach(entity => {
+            // If we are looking for a specific type then only add entities
+            // that can be seen and are of a certain type, otherwise just seen
+            isType = type ? (entity.getType() == type || type.indexOf(entity.getType()) > -1) : true;
+            if(this.canSee(entity) && isType)
+                seen.push(entity);
+        });
+        return seen;
     },
     increaseSightRadius: function(value) {
         // If no value was passed, default to 1.

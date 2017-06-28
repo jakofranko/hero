@@ -133,6 +133,25 @@ Game.LotRepository.define('building', {
 		return tiles;
 	}
 });
+Game.LotRepository.define('bank', {
+	name: 'bank',
+	character: '$',
+	downtown: 0.5,
+	midtown: 0.5,
+	uptown: 0.5,
+	suburbs: 0.5,
+	buildingSpecs: [
+		{
+			type: 'bank',
+			amount: 1,
+			repo: 'BuildingRepository'
+		}
+	],
+	buildTiles: function() {
+		var initialTiles = this.fillLot('grass');
+		return this.placeCenteredBuilding(initialTiles, this.getBuildings()[0]);
+	}
+});
 Game.LotRepository.define('road', {
 	name: 'road',
 	character: '.',

@@ -1,4 +1,6 @@
 // @size should be square number of lots for a city.
+// TODO: Add utilities to handle activeEvent queue
+// TODO: Add utilities to fetch event sources from the city and then schedule them
 Game.Map = function(size, player) {
     this._city = new Game.City(size);
     this._city.init();
@@ -6,7 +8,8 @@ Game.Map = function(size, player) {
     // Justice System for this city
     this._justice = new Game.Justice();
 
-    // Used for drawing to various displays 
+    // Used for drawing to various displays
+    // TODO: Get item creation out of tile creation
     this._tiles = this._city.tilesFromLots();
 
     // Cache dimensions
@@ -17,6 +20,9 @@ Game.Map = function(size, player) {
     // Cache certain tile types for path-finding
     this._downStairs = this.getTileList('stairsDown');
     this._upStairs = this.getTileList('stairsUp');
+
+    this._availableLivingLocations = this._city.getLivingLocations();
+    this._occupiedLivingLocations = [];
 
     // Setup the field of visions
     this._fov = [];
@@ -33,6 +39,13 @@ Game.Map = function(size, player) {
     this._time = new Game.Time();
     this.schedule(this._time);
 
+    // Event settings. Fetch event sources from city and schedule them
+    this._activeEvents = [];
+    this._currentEventId = 0;
+    this._eventSources = this._city.getEventSources();
+    for(var i = 0; i < this._eventSources.length; i++)
+        this.schedule(this._eventSources[i]);
+
     // Setup the explored array
     this._explored = new Array(this._depth);
     this._setupExploredArray();
@@ -43,8 +56,15 @@ Game.Map = function(size, player) {
 
     // Add the Player
     this._player = player;
-    var playerLoc = this._city.getLivingLocations()[0].split(",");
+    // var playerLoc = this._city.getLivingLocations()[0].split(",");
+    var floorLoc = this.getRandomFloorPosition(0);
+    var playerLoc = [floorLoc.x, floorLoc.y, floorLoc.z];
     this.addEntityAt(player, playerLoc[0] - 1, playerLoc[1] - 1, 0);
+
+    // TODO: [EVENTS] Delete this after creating banks and such
+    // this.addItem(Number(playerLoc[0]) + 1, Number(playerLoc[1]), 0, Game.ItemRepository.create('safe'));
+    // this.addItem(Number(playerLoc[0]) + 2, Number(playerLoc[1]), 0, Game.ItemRepository.create('vault door'));
+    // this.addItem(Number(playerLoc[0]), Number(playerLoc[1]) + 1, 0, Game.ItemRepository.create('cash register'));
 };
 
 // Standard getters
@@ -78,6 +98,34 @@ Game.Map.prototype.getTime = function() {
 Game.Map.prototype.getJustice = function() {
     return this._justice;
 };
+Game.Map.prototype.getEventSources = function() {
+    return this._eventSources;
+};
+Game.Map.prototype.getActiveEvents = function() {
+    return this._activeEvents;
+};
+Game.Map.prototype.getCurrentEventId = function() {
+    return this._currentEventId;
+};
+Game.Map.prototype.getAvailableLivingLocations = function() {
+    return this._availableLivingLocations;
+};
+Game.Map.prototype.getOccupiedLivingLocations = function() {
+    return this._occupiedLivingLocations;
+};
+
+Game.Map.prototype.occupyLivingLocation = function(i) {
+    // Add the value of the available location to the occupied location
+    // and then splice it from the available locations
+    this._occupiedLivingLocations.push(this._availableLivingLocations[i]);
+    this._availableLivingLocations.splice(i, 1);
+};
+Game.Map.prototype.vacateLivingLocation = function(i) {
+    // Add the value of the available location to the occupied location
+    // and then splice it from the available locations
+    this._availableLivingLocations.push(this._occupiedLivingLocations[i]);
+    this._occupiedLivingLocations.splice(i, 1);
+};
 
 // For just adding actors to the scheduler
 Game.Map.prototype.schedule = function(actor) {
@@ -99,9 +147,8 @@ Game.Map.prototype.addEntity = function(entity) {
 
 	// Check to see if the entity is an actor
 	// If so, add them to the scheduler
-	if(entity.hasMixin('Actor')) {
+	if(entity.hasMixin('Actor'))
 		this._scheduler.add(entity, true);
-	}
 
     // If the entity is a criminal, update the city's justice system
     if(entity.hasMixin('JobActor')) {
@@ -115,9 +162,8 @@ Game.Map.prototype.addEntity = function(entity) {
     }
 
     // If the entity is the player, set the player.
-    if (entity.hasMixin(Game.EntityMixins.PlayerActor)) {
+    if(entity.hasMixin(Game.EntityMixins.PlayerActor))
         this._player = entity;
-    }
 };
 Game.Map.prototype.addEntityAt = function(entity, x, y, z) {
     entity.setX(x);
@@ -158,19 +204,35 @@ Game.Map.prototype.getEntitiesWithinRadius = function(centerX, centerY, centerZ,
 Game.Map.prototype.removeEntity = function(entity) {
 	// Find the entity in the list of entities if it is present
     var key = entity.getX() + ',' + entity.getY() + ',' + entity.getZ();
-    if(this._entities[key] == entity) {
+
+    if(this._entities[key] == entity)
     	delete this._entities[key];
-    }
 
     // If the entity is an actor, remove them from the scheduler
-    if (entity.hasMixin('Actor')) {
+    if(entity.hasMixin('Actor'))
         this._scheduler.remove(entity);
+
+    // Add their livingLocation to the available list if applicable
+    var home = entity.recall('places', 'home');
+    if(home) {
+        var index = this._occupiedLivingLocations.indexOf(home);
+        this.vacateLivingLocation(index);
+    }
+
+    // If the entity is a criminal, update the city's justice system
+    if(entity.hasMixin('JobActor')) {
+        var jobs = entity.getJobs();
+        for (var i = 0; i < jobs.length; i++) {
+            if(Game.Jobs[jobs[i]].crime) {
+                this.getJustice().removeCriminals(1);
+                break;
+            }
+        }
     }
 
     // If the entity is the player, update the player field.
-    if (entity.hasMixin(Game.EntityMixins.PlayerActor)) {
+    if(entity.hasMixin(Game.EntityMixins.PlayerActor))
         this._player = undefined;
-    }
 };
 Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
 	// Delete the old key if it is the same entity and we have old positons
@@ -185,13 +247,17 @@ Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
 	if (entity.getX() < 0 || entity.getX() >= this._width ||
 		entity.getY() < 0 || entity.getY() >= this._height ||
 		entity.getZ() < 0 || entity.getZ() >= this._depth) {
+        console.log(entity);
 		throw new Error("Entity's position is out of bounds.");
 	}
 
 	// Sanity check to make sure there is no entity at the new position
 	var key = entity.getX() + "," + entity.getY() + "," + entity.getZ();
 	if (this._entities[key]) {
-        throw new Error('Tried to add an entity at an occupied position.');
+        console.log(entity);
+        console.log(this._entities[key]);
+        console.log(entity == this._entities[key]);
+        console.error(`Tried to add an entity at an occupied position (${entity.getX()},${entity.getY()},${entity.getZ()})`);
     }
 
     // Add the entity to the table of entities
@@ -208,9 +274,8 @@ Game.Map.prototype._generateEntities = function() {
     var criminals = 0,
         companies = this._city.getCompanies(),
         currentCompany = 0,
-        livingLocations = this._city.getLivingLocations(),
-        currentLivingLocation = 0;
-    var addedWork = false;
+        addedWork = false;
+
     for (var i = 0; i < Game.getTotalEntities(); i++) {
         // The template has to be created each time, because making it once
         // outside the loop and then changing it changes all entities
@@ -241,7 +306,7 @@ Game.Map.prototype._generateEntities = function() {
         companies[currentCompany].addEmployee(entity);
 
         // Add the entity at a random position on the map
-        var livingLocation = livingLocations[currentLivingLocation];
+        var livingLocation = this._availableLivingLocations[0];
         if(livingLocation) {
             // Make sure they remember where home is
             var memory = {location: livingLocation};
@@ -250,7 +315,9 @@ Game.Map.prototype._generateEntities = function() {
             // Spawn them at this location
             var split = livingLocation.split(",");
             this.addEntityAt(entity, split[0], split[1], split[2]);
-            currentLivingLocation++;
+
+            // Occupy the living location and then move to the next
+            this.occupyLivingLocation(0);
         } else {
             this.addEntityAtRandomPosition(entity, 0);
         }
@@ -263,7 +330,11 @@ Game.Map.prototype._generateEntities = function() {
 // Floors
 Game.Map.prototype.isEmptyFloor = function(x, y, z) {
     // Check if the tile is floor and also has no entity
-    return this.getTile(x, y, z).getName() == 'floor' && !this.getEntityAt(x, y, z);
+    var tile = this.getTile(x, y, z);
+    if(!tile)
+        return false;
+
+    return tile.getName() == 'floor' && !this.getEntityAt(x, y, z);
 };
 Game.Map.prototype.getRandomFloorPosition = function(z) {
 	var x, y;
@@ -279,13 +350,12 @@ Game.Map.prototype.getRandomFloorPosition = function(z) {
 Game.Map.prototype.getTile = function(x, y, z) {
     // Make sure we are inside the bounds. 
     // If we aren't, return null tile.
-    if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth) {
+    if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth)
         return Game.TileRepository.create('null');
-    } else if(!this._tiles[z][x] || !this._tiles[z][x][y]) {
+    else if(!this._tiles[z][x] || !this._tiles[z][x][y])
         debugger;
-    } else {
+    else
         return this._tiles[z][x][y] || Game.TileRepository.create('null');
-    }
 };
 Game.Map.prototype.getTileList = function(type) {
     var tileList = [];
@@ -469,11 +539,49 @@ Game.Map.prototype.isExplored = function(x, y, z) {
     }
 };
 
-// Items - TODO: move this?
+// Items
 Game.Map.prototype.getItemsAt = function(x, y, z) {
     return this._items[x + ',' + y + ',' + z];
 };
+// name can be a string or an array of strings
+Game.Map.prototype.getItemsInRadius = function(x, y, z, radius, name) {
+    var x1 = x - radius,
+        x2 = x + radius,
+        y1 = y - radius,
+        y2 = y + radius,
+        items = [];
 
+    for(var mapX = x1; mapX < x2; mapX++) {
+        for(var mapY = y1; mapY < y2; mapY++) {
+            var mapItems = this._items[`${mapX},${mapY},${z}`];
+            if(mapItems && mapItems.length) {
+                if(name) {
+                    mapItems.forEach(item => { 
+                        if(item.getName() == name || name.indexOf(item.getName()) > -1)
+                            items.push(item);
+                    });
+                } else {
+                    items.concat(mapItems);
+                }
+            }
+        }
+    }
+
+    return items;
+};
+// TODO: If a cache doesn't exist, create one
+Game.Map.prototype.getItemsByType = function(type) {
+    var items = [];
+    var searchCoords = function(item) {
+        if(item.getName() === type)
+            items.push(item);
+    };
+
+    for(var coords in this._items)
+        this._items[coords].forEach(searchCoords);
+
+    return items;
+};
 Game.Map.prototype.setItemsAt = function(x, y, z, items) {
     // If our items array is empty, then delete the key from the table.
     var key = x + ',' + y + ',' + z;
@@ -483,6 +591,9 @@ Game.Map.prototype.setItemsAt = function(x, y, z, items) {
         }
     } else {
         // Simply update the items at that key
+        items.forEach(item => {
+            item.setLocation(key);
+        });
         this._items[key] = items;
     }
 };
@@ -490,6 +601,7 @@ Game.Map.prototype.setItemsAt = function(x, y, z, items) {
 Game.Map.prototype.addItem = function(x, y, z, item) {
     // If we already have items at that position, simply append the item to the list of items.
     var key = x + ',' + y + ',' + z;
+    item.setLocation(key);
     if (this._items[key]) {
         this._items[key].push(item);
     } else {
@@ -500,4 +612,43 @@ Game.Map.prototype.addItem = function(x, y, z, item) {
 Game.Map.prototype.addItemAtRandomPosition = function(item, z) {
     var position = this.getRandomFloorPosition(z);
     this.addItem(position.x, position.y, position.z, item);
+};
+
+Game.Map.prototype.getRandomItemByType = function(type) {
+    // First look to see if we have a cache of this item type
+    var camelCaseType = type.camelCase(),
+        items, item, cache, location;
+    if(this.hasOwnProperty('_' + camelCaseType)) {
+        cache = this['_' + camelCaseType];
+        location = cache.randomKey();
+        item = cache[location].random();
+
+        return item;
+    } else {
+        items = this.getItemsByType(type);
+        item = items.random();
+        return item;
+    }
+};
+
+// Events
+Game.Map.prototype.addActiveEvent = function(event) {
+    event.setId(this._currentEventId);
+    this._currentEventId++;
+    this._activeEvents.push(event);
+};
+Game.Map.prototype.getEventById = function(id) {
+    for(var i = 0; i < this._activeEvents.length; i++)
+        if(this._activeEvents[i].getId() === id)
+            return this._activeEvents[i];
+
+    return false;
+};
+Game.Map.prototype.removeActiveEvent = function(id) {
+    for (var i = 0; i < this._activeEvents.length; i++) {
+        if(this._activeEvents[i].getId() === id) {
+            this._activeEvents.splice(i, 1);
+            break;
+        }
+    }
 };

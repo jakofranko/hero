@@ -5,6 +5,7 @@
 //
 // Another property of jobs is their 'noise-level.' This is basically the radius within which all entities
 // will have various listeners triggered, particularly the 'onCrime' listener.
+// TODO: [EVENTS] Create job for robbers
 Game.Jobs = {};
 
 Game.Jobs.getPriority = function(entity, job) {
@@ -56,6 +57,84 @@ Game.Jobs.home = {
 		if(hour >= 17)
 			total -= 5;
 		return total;
+	}
+};
+
+Game.Jobs.robber = {
+	crime: true,
+	noise: 20,
+	doJob: function(entity) {
+		if(!entity.hasMixin('Targeting'))
+			throw new Error(`The '${entity.getType()}' entity must have the Targeting mixin in order to perform the robber job`);
+
+		// If they have completed a robbery, escape home, or fight the nearest enemy
+		if(entity.isJobComplete('robber')) {
+			entity.setCurrentJob('home');
+		} else {
+			var entityPath = entity.getPath(),
+				target = entity.getTarget(),
+				location;
+
+			// If the entity already has a path, follow it
+			if(entityPath && entityPath.length)
+				return Game.Tasks.followPath(entity);
+
+			// If the entity has a target and at the end of the path, then attempt to get the items out of the target
+			if(target && entityPath && entityPath.length === 0) {
+				var numItems = target.getItems().length;
+				for(var i = 0; i < numItems; i++)
+					target.removeItem(entity, i);
+
+				// Robbery complete, now reprioritize so that an escape can be made
+				entity.setJobComplete('robber', true);
+				entity.reprioritizeJobs();
+
+				// Trigger the onCrime event for witnesses
+				var witnesses = entity.getMap().getEntitiesWithinRadius(entity.getX(), entity.getY(), entity.getZ(), this.noise);
+				for(var i = 0; i < witnesses.length; i++)
+					witnesses[i].raiseEvent('onCrime', entity);
+
+				return true;
+			} else if(target) {
+				// If the entity already has a target, then set the path and follow it
+				if(target instanceof Game.Item)
+					location = target.getLocation().split(",");
+				else if(target instanceof Game.Entity)
+					location = [target.getX(), target.getY(), target.getZ()];
+
+				entity.setPath(Game.Tasks.getPath(entity, location[0], location[1], location[2]));
+				return Game.Tasks.followPath(entity);
+			}
+
+			// Otherwise, find a target, and path to it
+			// Locate nearest 'robbable' object
+			var map = entity.getMap(),
+				item = map.getItemsInRadius(entity.getX(), entity.getY(), entity.getZ(), entity.getSightRadius(), ['vault door', 'cash register', 'safe']).random();
+
+			if(item) {
+				entity.setTarget(item);
+				location = item.getLocation().split(",");
+				entity.setPath(Game.Tasks.getPath(entity, location[0], location[1], location[2]));
+				return Game.Tasks.followPath(entity);
+			} else {
+				Game.Tasks.huntEntitiesInSight(entity, ['Player', 'police']);
+			}
+		}
+	},
+	priority: function(entity) {
+		// If the entity has completed a robbery, then heavily de-prioritize this job for them, but reset the completion
+		// so that they will potentially rob the next time it's time to re-prioritize
+		var priority = 0;
+		var crime = entity.getMap().getJustice().getCrime();
+		if(entity.isJobComplete('robber')) {
+			priority += 100;
+			entity.setJobComplete('robber', false);
+		} else {
+			priority += 10;
+			priority -= Math.round(crime / 10);
+			priority = Math.max(0, priority); // Make sure it's not less than 0
+		}
+		return priority;
 	}
 };
 

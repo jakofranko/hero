@@ -24,7 +24,9 @@ Game.DynamicGlyph = function(properties) {
         // as it's not the name or the init property. We
         // also make sure not to override a property that
         // already exists on the entity.
-        for(var key in mixins[i]) {
+        var mixinKeys = Object.keys(mixins[i]);
+        for(var j = 0; j < mixinKeys.length; j++) {
+            var key = mixinKeys[j];
             if(this.hasOwnProperty(key)) {
                 console.log(this);
                 throw new Error("Mixin '" + mixins[i].name + "' is attempting to add duplicate property '" + key + "'");
@@ -40,7 +42,9 @@ Game.DynamicGlyph = function(properties) {
         }
         // Add all of our listeners
         if(mixins[i].listeners) {
-            for (var listener in mixins[i].listeners) {
+            var listeners = Object.keys(mixins[i].listeners)
+            for(var k = 0; k < listeners.length; k++) {
+                var listener = listeners[k];
                 // If we don't already have a listener for this event in our listeners array, add it.
                 if (!this._listeners[listener]) {
                     this._listeners[listener] = [];

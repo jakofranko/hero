@@ -1,4 +1,4 @@
-if (!String.prototype.splice) {
+if(!String.prototype.splice) {
     /**
      * {JSDoc}
      *
@@ -16,6 +16,7 @@ if (!String.prototype.splice) {
     };
 }
 
+
 // Since Ondras isn't updating ROT.js much these days, I need the unbroken version of this function
 Array.prototype.randomize = function() {
     var result = [];
@@ -26,6 +27,52 @@ Array.prototype.randomize = function() {
     }
     return result;
 };
+
+if(!Object.prototype.randomKey) {
+    /**
+     * {JSDoc}
+     *
+     * The randomKey() method will fetch a random key from an object
+     *
+     * @this {Object}
+     * @return {String} A string which is the randomly selected key.
+     */
+     Object.defineProperty(Object.prototype, 'randomKey', {
+        value: function() {
+            var keys = Object.keys(this);
+            return keys.random();
+        }
+     });
+}
+
+// Math helper for calculating percentages
+if(!Math.percent) {
+    /**
+     * {JSDoc}
+     *
+     * The randomKey() method will fetch a random key from an object
+     * @param {Number} num smaller number.
+     * @param {Number} denominator bigger number.
+     * @this {Object}
+     * @return {Number} percent which is (num / denominator) * 100.
+     */
+     Math.percent = function(num, denominator) {
+        return (num / denominator) * 100;
+     };
+}
+
+// camelCase a string
+if(!String.prototype.camelCase) {
+    String.prototype.camelCase = function() {
+        // Capitalize words after first
+        var capitalized = this.replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
+            return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
+        });
+
+        // Remove spaces
+        return capitalized.replace(/\s+/g, '');
+  };
+}
 
 Game.extend = function(src, dest) {
     // Create a copy of the source.

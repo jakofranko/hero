@@ -1,9 +1,10 @@
 // Create a small grid of roads and lots that will be used to create
 // lots, which will in turn be used to generate the player level
-// This is HEAVILY inspired by Shamus Young's post here:http://www.shamusyoung.com/twentysidedtale/?p=2983.
+// This is HEAVILY inspired by Shamus Young's post here: http://www.shamusyoung.com/twentysidedtale/?p=2983.
 // Creating the city will involve a few steps, the first of which is creating a grid of roads. I want to start off with just creating a semi-random grid.
-// TODO: Could be made more interesting by including a highway or two which would cut sort of diagnally across the city. Additionally, a river or nearby lake might be a neat addition as well. Perhaps a large, central park type of construct as well?
 // After generating the roads, lots will be placed semi-randomly in the non-road portions
+// TODO: Could be made more interesting by including a highway or two which would cut sort of diagnally across the city. Additionally, a river or nearby lake might be a neat addition as well. Perhaps a large, central park type of construct as well?
+// TODO: Remove duplication between city and map functionality. Everything really should live in one place or the other, with map delegating to city for everything that is city related, or with the map owning most of the functionality. Map ultimately should be the 'current' city, allowing the player to switch between multiple cities.
 
 Game.City = function(size) {
 	// Cities will be square for easier math
@@ -34,6 +35,16 @@ Game.City = function(size) {
 
 	this._companies = [];
 	this._jobLocations = [];
+
+	// Event sources
+	var crimeEvents = new Game.EventSource({
+		name: 'crime',
+		maxActiveEvents: 3,
+		eventTypes: ['bank robbery'],
+		spawnChance: 0.1,
+		// TODO: [EVENTS] add spawnCondition func
+	});
+	this._eventSources = [crimeEvents];
 };
 // Getters and setters
 Game.City.prototype.getWidth = function() {
@@ -95,6 +106,12 @@ Game.City.prototype.adjustCompaniesLocations = function(companies, offsetX, offs
 		companies[i].setJobLocations(newLocations);
 	}
 	return companies;
+};
+Game.City.prototype.getEventSources = function() {
+	return this._eventSources;
+};
+Game.City.prototype.addEventSource = function(eventSource) {
+	this._eventSources.push(eventSource);
 };
 Game.City.prototype.init = function() {
 	// Generate a random grid of roads
@@ -291,6 +308,9 @@ Game.City.prototype.setItemsAt = function(x, y, z, items) {
         }
     } else {
         // Simply update the items at that key
+        items.forEach(item => {
+            item.setLocation(key);
+        });
         this._items[key] = items;
     }
 };
@@ -298,6 +318,7 @@ Game.City.prototype.setItemsAt = function(x, y, z, items) {
 Game.City.prototype.addItem = function(x, y, z, item) {
     // If we already have items at that position, simply append the item to the list of items.
     var key = x + ',' + y + ',' + z;
+    item.setLocation(key);
     if (this._items[key]) {
         this._items[key].push(item);
     } else {
