@@ -31,8 +31,8 @@ Game.EventRepository.define('bank robbery', {
         entities.forEach(entity => { map.removeEntity(entity); });
     },
     lossCondition: function() {
-        // No loss condition right now
-        return false;
+        // TODO: need to tweak this for funness
+        return this.getTurns() > 150;
     },
     lossEffect: function() {
         var map = this.getMap(),

@@ -29,6 +29,14 @@ Game.Event = function(properties) {
     this._id             = null; // For finding events in active event queues. Assigned upon start.
     this._name           = properties['name'];
     this._map            = properties['map'];
+    this._location       = null; // Will be determined on start
+    this._turns          = 0; // incremented by the event source
+    this._won            = false;
+    this._lost           = false;
+    this._isPublic       = properties['isPublic'] || true;
+    this._startMessage   = properties['startMessage'] || `A ${this._name} event started`;
+    this._successMessage = properties['successMessage'] || `You succeed in completing the ${this._name} event`;
+    this._failMessage    = properties['failMessage'] || `You failed to complete the ${this._name} event`;
     this._spawnLocations = properties['spawnLocations']; // Types of items (usually) where an event can spawn
     this._entityTypes    = properties['entityTypes'];
     this._minEntities    = properties['minEntities'];
@@ -45,6 +53,7 @@ Game.Event = function(properties) {
     this._onDeath  = properties['onDeath'] || function(victim, killer) { console.log(`Entity '${victim.getName()}' was kill by '${killer.getName()}'`); };
     this._onKill  = properties['onKill'] || function(killer, victim) { console.log(`Entity '${killer.getName()}' has killed '${victim.getName()}'`); };
     this._onInteraction  = properties['onInteraction'] || function(entity, interaction) { console.log(`Entity '${entity.getName()}' was interacted with`); };
+    this._onTurn = properties['onTurn'] || function() { console.log('Turn: ' + this._turns); };
 
     // Cache objects for when the event starts
     this._entities = [];
@@ -57,8 +66,17 @@ Game.Event.prototype.getName = function() {
 Game.Event.prototype.getMap = function() {
     return this._map;
 };
+Game.Event.prototype.getLocation = function() {
+    return this._location;
+};
 Game.Event.prototype.getSpawnLocations = function() {
     return this._spawnLocations;
+};
+Game.Event.prototype.getTurns = function() {
+    return this._turns;
+};
+Game.Event.prototype.addTurn = function() {
+    this._turns++;
 };
 Game.Event.prototype.getEntityTypes = function() {
     return this._entityTypes;
@@ -68,6 +86,24 @@ Game.Event.prototype.getEntities = function() {
 };
 Game.Event.prototype.getId = function() {
     return this._id;
+};
+Game.Event.prototype.isWon = function() {
+    return this._won;
+};
+Game.Event.prototype.isLost = function() {
+    return this._lost;
+};
+Game.Event.prototype.isPublic = function() {
+    return this._isPublic;
+};
+Game.Event.prototype.getStartMessage = function() {
+    return this._startMessage;
+};
+Game.Event.prototype.getFailMessage = function() {
+    return this._failMessage;
+};
+Game.Event.prototype.getSuccessMessage = function() {
+    return this._successMessage;
 };
 
 // Setters
@@ -131,8 +167,7 @@ Game.Event.prototype.start = function() {
         this._onEntitySpawn(entity);
     }
 
-    // Add this event to the active events queue of the map
-    this._map.addActiveEvent(this);
+    this._location = spawnLocation;
 };
 
 // Handling events
@@ -147,9 +182,10 @@ Game.Event.prototype.raiseEvent = function(event, ...args) {
     // Check to see if the event is over (success or loss)
     if(this._successCondition()) {
         this._successEffect();
-        this._map.removeActiveEvent(this._id);
+        this._won = true;
     } else if(this._lossCondition()) {
         this._lossEffect();
+        this._lost = true;
     }
 
     return true;
