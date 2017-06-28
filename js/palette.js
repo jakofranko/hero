@@ -1,12 +1,18 @@
 Game.Palette = {
-	red: "#ea003b",
-	green: "#00ff78",
+	// Cool colors
 	blue: "#585DF5",
 	lightBlue: "#B8DBFF",
+	teal: "teal",
+	green: "#00ff78",
+
+	// Warm colors
+	red: "#ea003b",
 	yellow: "#F5F058",
 	brown: "#935800",
+
+	// Neutral colors
 	silver: "silver",
 	white: "white",
-	teal: "teal",
-	metalGrey: "#a4a6aa"
+	metalGrey: "#a4a6aa",
+	grey: "grey"
 };

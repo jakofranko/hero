@@ -59,6 +59,6 @@ Game.EventRepository.define('bank robbery', {
                 break;
             }
         }
-        console.log(`Entity '${victim.getName()}' was kill by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
+        console.log(`Entity '${victim.getName()}' was killed by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
     }
 });

@@ -1,7 +1,6 @@
 // From http://www.codingcookies.com/2013/04/20/building-a-roguelike-in-javascript-part-4/
 Game.EntityMixins = {};
 
-// TODO: Write 'Event' mixin that handles being assigned an event and listeners that will trigger that event's listeners for things like 'onDeath' etc.
 Game.EntityMixins.Attacker = {
     name: 'Attacker',
     groupName: 'Attacker',
@@ -1216,7 +1215,6 @@ Game.EntityMixins.Reactor = {
     },
     react: function() {
         if(this._reaction) {
-            console.log(this._reaction, this._reactionMessages);
             Game.sendMessageNearby(this.getMap(), this.getX(), this.getY(), this.getZ(), this._reactionMessages[this._reaction].random());
             this._reactions[this._reaction]();
         }
