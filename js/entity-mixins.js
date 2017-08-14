@@ -14,7 +14,7 @@ Game.EntityMixins.Attacker = {
     },
     hthAttack: function(target) {
         // No matter what, some entity took a swing at another entity,
-        // so trigger the onAttack event. onHit on the otherhand...
+        // so trigger the onAttack event. onHit on the other hand...
         target.raiseEvent('onAttack', this);
 
         var hit = this._attackRoll(target);
