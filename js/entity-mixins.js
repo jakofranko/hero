@@ -1112,7 +1112,7 @@ Game.EntityMixins.PowerUser = {
         }
     },
     addPower: function(powerName) {
-        var newPower = new Game.BasePowers[power]();
+        var newPower = Game.Powers.create(powerName);
         newPower.setEntity(this);
         this.powers.push(newPower);
     }
