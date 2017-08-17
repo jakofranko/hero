@@ -383,7 +383,7 @@ Game.EntityMixins.CorpseDropper = {
                         foreground: this._foreground
                     })
                 );
-            }    
+            }
         }
     }
 };
@@ -396,7 +396,7 @@ Game.EntityMixins.Destructible = {
     },
     getDefenseValue: function() {
         var modifier = 0;
-        // If we can equip items, then have to take into 
+        // If we can equip items, then have to take into
         // consideration weapon and armor
         if (this.hasMixin(Game.EntityMixins.Equipper)) {
             if (this.getWeapon()) {
@@ -426,7 +426,7 @@ Game.EntityMixins.Destructible = {
     },
     setHp: function(hp) {
         this._hp = hp;
-    },  
+    },
     increaseDefenseValue: function(value) {
         // If no value was passed, default to 2.
         value = value || 2;
@@ -730,7 +730,7 @@ Game.EntityMixins.JobActor = {
         if(Game.debug && Game.watchName == this.getName())
             debugger;
         
-        if(!this.isConscious()) 
+        if(!this.isConscious())
             return;
 
         // If entity can react and is reacting right now,
@@ -1022,7 +1022,7 @@ Game.EntityMixins.MemoryMaker = {
             this.remember('people', 'enemies', attacker.getName(), enemy);
             this.remember('events', false, 'attacked by ' + attacker.getName(), event);
 
-            if(attacker.hasMixin('MemoryMaker')) 
+            if(attacker.hasMixin('MemoryMaker'))
                 attacker.remember('people', 'victims', this.getName(), {entity: this});
         },
         details: function() {
@@ -1061,10 +1061,10 @@ Game.EntityMixins.MoneyHolder = {
                 Game.sendMessage(target, 'Someone just stole $%s from you!', [amount]);
             }
             if(this.hasMixin('MessageRecipient')) {
-                Game.sendMessage(this, 'You successfully stole $%s from %s', [amount, target.describeThe()]);   
+                Game.sendMessage(this, 'You successfully stole $%s from %s', [amount, target.describeThe()]);
             }
         } else if(this.hasMixin('MessageRecipient')) {
-            Game.sendMessage(this, '%s doesn\'t have any money', [target.describeThe()]);   
+            Game.sendMessage(this, '%s doesn\'t have any money', [target.describeThe()]);
         }
     },
     give: function(target, amount) {
@@ -1080,10 +1080,10 @@ Game.EntityMixins.MoneyHolder = {
                 Game.sendMessage(target, '%s just gave you $%s', [this.describeThe(), amount]);
             }
             if(this.hasMixin('MessageRecipient')) {
-                Game.sendMessage(this, 'You just gave $%s to %s', [amount, target.describeThe()]);   
+                Game.sendMessage(this, 'You just gave $%s to %s', [amount, target.describeThe()]);
             }
         } else if(this.hasMixin('MessageRecipient')) {
-            Game.sendMessage(this, '%s can\'t take money', [target.describeThe()]);   
+            Game.sendMessage(this, '%s can\'t take money', [target.describeThe()]);
         
         }
     }

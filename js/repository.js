@@ -29,7 +29,7 @@ Game.Repository.prototype.create = function(name, extraProperties) {
             // {random: true, values: ['val1', 'val2', 'val3']}
             // then create the element with a random value
             if(
-                extraProperties[key]['random'] && 
+                extraProperties[key]['random'] &&
                 extraProperties[key]['random'] === true &&
                 extraProperties[key]['values'] &&
                 extraProperties[key]['values'].constructor === Array
@@ -51,7 +51,7 @@ Game.Repository.prototype.createRandom = function() {
 };
 
 // Cycle through all the templates. If a template has a function that's name
-// matches the criteria string, it will execute that function to determine whether 
+// matches the criteria string, it will execute that function to determine whether
 // or not to create the current template. If none are found, return false.
 Game.Repository.prototype.createIf = function(criteria) {
     var names = [];
