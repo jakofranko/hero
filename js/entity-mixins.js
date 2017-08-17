@@ -1103,6 +1103,20 @@ Game.EntityMixins.MessageRecipient = {
         this._messages = [];
     }
 };
+Game.EntityMixins.PowerUser = {
+    init: function(template) {
+        this.powersList = template['powers'] || [];
+        this.powers = [];
+        if(this.powersList.length) {
+            this.powersList.forEach(power => this.addPower(power));
+        }
+    },
+    addPower: function(powerName) {
+        var newPower = new Game.BasePowers[power]();
+        newPower.setEntity(this);
+        this.powers.push(newPower);
+    }
+};
 Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
