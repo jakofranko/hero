@@ -34,15 +34,15 @@ Game.Power =  function(properties) {
     if(properties['type'] === 'attack' && properties['damageType'] === undefined)
         throw new Error(`You must define a damage type for attack power ${properties.name}`);
 
-    this.name      = properties['name'];
-    this.type      = properties['type'];
-    this.cost      = properties['cost'];
-    this.duration  = properties['duration'];
-    this.pointsMin = properties['pointsMin'];
-    this.pointsMax = properties['pointsMax'];
-    this.points    = properties['points'] || 0;
-    this.entity    = properties['entity'];
-    this.END       = properties['END'] || function() { return Math.max(1, Math.round(points / 10)); };
+    this.name       = properties['name'];
+    this.type       = properties['type'];
+    this.cost       = properties['cost'];
+    this.duration   = properties['duration'];
+    this.pointsMin  = properties['pointsMin'];
+    this.pointsMax  = properties['pointsMax'] || Infinity;
+    this.points     = properties['points'] || 0;
+    this.entity     = properties['entity'] || undefined;
+    this.END        = properties['END'] || function() { return Math.max(1, Math.round(points / 10)); };
     this.damageType = properties['damageType'];
 
     // Depending on the type of range, assign a different function to the range property
@@ -72,12 +72,38 @@ Game.Power =  function(properties) {
 
     // The effect of a power should take into account the above properties when performing the effect.
     // For instance, when calculating the amount of damage for an energy blast, the effect will deal
-    // 1 * Math.round(this.points / 5) d6 of damage to the target, spend the power's END value of the 
-    // character's END, and do it immediately. If the power is activating a constant power, then the 
+    // 1 * Math.round(this.points / 5) d6 of damage to the target, spend the power's END value of the
+    // character's END, and do it immediately. If the power is activating a constant power, then the
     // effect should be to spend the entities endurance, and then add the power to the character's list
     // of active powers.
     this.effect = properties['effect'] || function() { console.error("This power needs to have an effect function defined."); };
 
     this.onQueue = properties['onQueue'] || function() {};
     this.onDequeue = properties['onDequeue'] || function() {};
+};
+Game.Power.prototype.setEntity = function(entity) {
+    this.entity = entity;
+};
+Game.Power.prototype.addPoints = function(amount) {
+    if(!this.entity || !this.entity.hasMixin('BasePoints'))
+        throw new Error('Entity is not defined or does not have the BasePoints mixin');
+    if(amount + this.points < this.pointsMin || amount + this.points > this.pointsMax)
+        throw new Error(`The amount '${amount}' is less than ${this.pointsMin} or the new total will be greater than ${this.pointsMax} and this is not allowed)`);
+    if(this.entity.getSpendablePoints() < amount)
+        throw new Error('The entity does not have that many points to spend');
+
+    this.points += amount;
+    this.entity.subtractSpendablePoints(amount);
+};
+Game.Power.prototype.subtractPoints = function(amount) {
+    var diff = this.points - amount;
+    if(!this.entity || !this.entity.hasMixin('BasePoints'))
+        throw new Error('Entity is not defined or does not have the BasePoints mixin');
+    if(diff < this.pointsMin)
+        throw new Error(`The amount '${amount}' will reduce the power below its pointsMin of ${this.pointsMin}`);
+
+    var subAmount = diff < 0 ? amount + diff : amount;
+
+    this.points -= subAmount;
+    this.entity.addSpendablePoints(amount);
 };
