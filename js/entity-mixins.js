@@ -650,7 +650,7 @@ Game.EntityMixins.InventoryHolder = {
             this._items[i].removeFromStack();
         else
             // Simply clear the inventory slot.
-            this._items[i] = null;    
+            this._items[i] = null;
     },
     canAddItem: function(item) {
         if(item.hasMixin("Fixture")) {
@@ -688,7 +688,7 @@ Game.EntityMixins.InventoryHolder = {
         var added = 0;
         // Iterate through all indices.
         for (var i = 0; i < indices.length; i++) {
-            // Try to add the item. If our inventory is not full, then splice the 
+            // Try to add the item. If our inventory is not full, then splice the
             // item out of the list of items. In order to fetch the right item, we
             // have to offset the number of items already added.
             if (this.addItem(mapItems[indices[i] - added])) {
@@ -710,7 +710,7 @@ Game.EntityMixins.InventoryHolder = {
             if (this._map) {
                 this._map.addItem(this.getX(), this.getY(), this.getZ(), this._items[i]);
             }
-            this.removeItem(i);      
+            this.removeItem(i);
         }
     }
 };
@@ -1111,7 +1111,7 @@ Game.EntityMixins.PlayerActor = {
             return;
         }
         this._acting = true;
-        
+
         // Detect if the game is over
         if(!this.isAlive()) {
             Game.Screen.playScreen.setGameEnded(true);

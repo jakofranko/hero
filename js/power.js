@@ -1,14 +1,14 @@
 // The Power prototype is the basic template for a power. Powers will all have an effect function
 // that will be called whenever it is activated. If a power has a duration that is longer than 'instant'
 // then activating the power will put it into one of the various duration queues that will be associated
-// with the entity that has the PowerUser mixin. 
+// with the entity that has the PowerUser mixin.
 //
 // For instance, if the player activates a 'flight' power
 // that has a duration of constant, then the effect function will consist of spending the entity's END,
 // and then putting the power into the entity's 'constant' queue. At the start of that entity's turn,
 // the game will loop through the powers in the 'constant' queue and execute each power's 'constant' method.
 //
-// Powers that have these other duration methods should probably also have 'queue' and 'dequeue' methods for 
+// Powers that have these other duration methods should probably also have 'queue' and 'dequeue' methods for
 // what to do when they are added or taken out of a queue.
 // TODO: [POWERS] Support for advantages
 // TODO: [POWERS] Support for adders
