@@ -1107,6 +1107,11 @@ Game.EntityMixins.PowerUser = {
     init: function(template) {
         this.powersList = template['powers'] || [];
         this.powers = [];
+        this.constantPowers = [];
+        this.persistantPowers = [];
+        this.inherentPowers = [];
+
+        // Initialize powers
         if(this.powersList.length) {
             this.powersList.forEach(power => this.addPower(power));
         }
@@ -1115,6 +1120,19 @@ Game.EntityMixins.PowerUser = {
         var newPower = Game.Powers.create(powerName);
         newPower.setEntity(this);
         this.powers.push(newPower);
+    },
+    usePower: function(i, target) {
+        var power = this.powers[i];
+        if(power.inRange(this.getX(), this.getY(), target.getX(), target.getY()))
+            power.effect(target);
+
+        // TODO: [POWERS] handle non-instant powers every turn
+        // TODO: Update entity mixins to support an 'onAct' or some such method (update pattern)
+        if(power['duration'] != 'instant') {
+            var queue = power['duration'] + 'Powers'; // e.g., 'constantPowers'
+            this[queue].push(power);
+            power.enqueue();
+        }
     }
 };
 Game.EntityMixins.PlayerActor = {
