@@ -27,10 +27,10 @@ Game.Power =  function(properties) {
         throw new Error(`The duration '${properties['duration']}' is not valid, and must be one of these: ${DURATIONS.join(', ')}`);
     if(!RANGES.includes(properties['range']))
         throw new Error(`The range '${properties['range']}' is not valid, and must be one of these: ${RANGES.join(', ')}`);
-    if(!properties[properties['duration']])
+    if(properties['duration'] != 'instant' && !properties[properties['duration']])
         throw new Error(`You must define a '${properties['duration']}' function in the properties`);
-    if(properties['duration'] != 'instant' && (properties['onQueue'] === undefined && properties['onDequeue'] === undefined))
-        throw new Error(`The power ${properties.name} has a duration of '${properties.duration}' and must have both an 'onQueue' and 'onDequeue' function defined`);
+    if(properties['duration'] != 'instant' && (properties['enqueue'] === undefined && properties['dequeue'] === undefined))
+        throw new Error(`The power ${properties.name} has a duration of '${properties.duration}' and must have both an 'enqueue' and 'dequeue' function defined`);
     if(properties['type'] === 'attack' && properties['damageType'] === undefined)
         throw new Error(`You must define a damage type for attack power ${properties.name}`);
 
@@ -46,6 +46,7 @@ Game.Power =  function(properties) {
     this.damageType = properties['damageType'];
 
     // Depending on the type of range, assign a different function to the range property
+    this.inRange = function() { console.error(`${this.name} does not have the inRange() method defined`); };
     switch(properties['range']) {
         case 'self':
             this.inRange = function(startX, startY, targetX, targetY) {
@@ -76,10 +77,10 @@ Game.Power =  function(properties) {
     // character's END, and do it immediately. If the power is activating a constant power, then the
     // effect should be to spend the entities endurance, and then add the power to the character's list
     // of active powers.
-    this.effect = properties['effect'] || function() { console.error("This power needs to have an effect function defined."); };
+    this.effect = properties['effect'] || function() { console.error(`${this.name} needs to have an effect function defined.`); };
 
-    this.onQueue = properties['onQueue'] || function() {};
-    this.onDequeue = properties['onDequeue'] || function() {};
+    this.enqueue = properties['enqueue'] || function() {};
+    this.dequeue = properties['dequeue'] || function() {};
 };
 Game.Power.prototype.setEntity = function(entity) {
     this.entity = entity;

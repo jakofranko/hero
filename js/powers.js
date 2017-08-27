@@ -2,7 +2,7 @@ Game.Powers = {};
 Game.Powers.create = function(name) {
     for(var repo in this) {
         if(repo == 'create') continue;
-        for(var power in this[repo]) {
+        for(var power in this[repo]._templates) {
             if(power === name)
                 return this[repo].create(name);
         }

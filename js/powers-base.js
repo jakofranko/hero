@@ -50,6 +50,7 @@ Game.BasePower = function(properties, powerOptions) {
     combinedParams = Object.assign({}, properties, powerOptions);
     Game.Power.call(this, properties);
 };
+// Game.BasePower.extend(Game.Power);
 Game.BasePower.prototype.immutableProps = ['type', 'cost', 'pointsMin', 'pointsMax']; // TODO: should effect, queue and dequeue also be immutable?
 
 // BasePower definitions
@@ -100,5 +101,5 @@ Game.BasePowers.energyBlast = function(options) {
         }
     };
 
-    Game.Power.call(this, properties, options);
+    Game.BasePower.call(this, properties, options);
 };
