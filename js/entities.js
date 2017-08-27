@@ -30,6 +30,7 @@ Game.PlayerTemplate = {
     sightRadius: 20,
     inventorySlots: 22,
     basePoints: 10,
+    powers: ['energyBolt', 'throwingStar'],
     mixins: [
         Game.EntityMixins.Characteristics,
         Game.EntityMixins.BasePoints,
@@ -42,6 +43,7 @@ Game.PlayerTemplate = {
         Game.EntityMixins.MemoryMaker,
         Game.EntityMixins.MoneyHolder,
         Game.EntityMixins.MessageRecipient,
+        Game.EntityMixins.PowerUser,
         Game.EntityMixins.PlayerStatGainer,
         Game.EntityMixins.Thrower,
         Game.EntityMixins.ExperienceGainer
