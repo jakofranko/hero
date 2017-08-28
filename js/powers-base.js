@@ -32,29 +32,25 @@ else throw new Error('Game.BasePowers already defined');
 // its own repo. For example: 'EnergyBlastRepository' which would have templates
 // for all the different kinds of energy blasts etc.
 Game.BasePower = function(properties, powerOptions) {
-    // Throw errors if required properties are not defined
-    if(properties['requiredProperties']) {
-        properties['requiredProperties'].forEach(prop => {
-            if(!properties[prop])
-                throw new Error(`The power '${properties.name}' must have the property '${prop}' defined.`);
-        });
-    }
-
     // Throw errors if powerOptions are trying to alter one of the immutable properties
-    powerOptions.forEach(prop => {
-        debugger;
-        if(this.immutableProps.includes(prop))
+    for(var prop in powerOptions) {
+        if(Game.BasePower.immutableProps.includes(prop))
             throw new Error(`The power '${this.name}' is attempting to set the property '${prop}', which is defined in the base power and cannot be altered`);
-    });
+    }
 
     combinedParams = Object.assign({}, properties, powerOptions);
     Game.Power.call(this, properties);
 };
-// Game.BasePower.extend(Game.Power);
-Game.BasePower.prototype.immutableProps = ['type', 'cost', 'pointsMin', 'pointsMax']; // TODO: should effect, queue and dequeue also be immutable?
+Game.BasePower.extend(Game.Power);
+
+// TODO: should effect, queue and dequeue also be immutable?
+Game.BasePower.immutableProps = ['type', 'cost', 'pointsMin', 'pointsMax'];
 
 // BasePower definitions
 Game.BasePowers.energyBlast = function(options) {
+    if(!('damageType' in options))
+        throw new Error('An energyBlast must specify a damage type');
+
     var properties = {
         name: 'Energy Blast',
         type: 'Attack',
@@ -64,7 +60,6 @@ Game.BasePowers.energyBlast = function(options) {
         pointsMax: false,
         points: 0,
         range: 'standard',
-        requiredProperties: ['damageType'],
         effect: function(target) {
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this);
@@ -103,3 +98,4 @@ Game.BasePowers.energyBlast = function(options) {
 
     Game.BasePower.call(this, properties, options);
 };
+Game.BasePowers.energyBlast.extend(Game.BasePower);
