@@ -330,12 +330,15 @@ Game.Screen.playScreen = {
                     }
                 } else {
                     this.showItemsSubScreen(Game.Screen.pickupScreen, items, 'There is nothing here to pick up.');
-                } 
+                }
             } else if(inputData.keyCode === ROT.VK_PERIOD) {
                 // Skip turn
                 this._player.getMap().getEngine().unlock();
                 // If you don't stop it here, then it will try to perform two actions for the player
                 return;
+            } else if(inputData.keyCode === ROT.VK_P) {
+                Game.Screen.powersScreen.setup(this._player);
+                this.setSubScreen(Game.Screen.powersScreen);
             } else {
                 // Not a valid key
                 return;
@@ -1443,6 +1446,30 @@ Game.Screen.gainStatScreen = {
                 this._entity.clearMessages();
             }
         } else if(inputType === 'keydown' && (inputData.keyCode === ROT.VK_RETURN || inputData.keyCode === ROT.VK_ESCAPE)) {
+            Game.Screen.playScreen.setSubScreen(undefined);
+        }
+    }
+};
+
+// Manage character powers screen
+Game.Screen.powersScreen = {
+    setup: function(entity) {
+        // Must be called before rendering.
+        this._entity = entity;
+        this._powers = entity.getPowers();
+    },
+    render: function(display) {
+        var letters = 'abcdefghijklmnopqrstuvwxyz';
+        display.drawText(0, 0, 'Powers:');
+
+        // Iterate through each of our powers
+        for (var i = 0; i < this._powers.length; i++) {
+            var powerName = this._powers[i]['name'];
+            display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName);
+        }
+    },
+    handleInput: function(inputType, inputData) {
+        if(inputType === 'keydown' && (inputData.keyCode === ROT.VK_RETURN || inputData.keyCode === ROT.VK_ESCAPE)) {
             Game.Screen.playScreen.setSubScreen(undefined);
         }
     }

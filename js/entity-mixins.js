@@ -1105,31 +1105,34 @@ Game.EntityMixins.MessageRecipient = {
 };
 Game.EntityMixins.PowerUser = {
     init: function(template) {
-        this.powersList = template['powers'] || [];
-        this.powers = [];
-        this.constantPowers = [];
-        this.persistantPowers = [];
-        this.inherentPowers = [];
+        this._powersList = template['powers'] || [];
+        this._powers = [];
+        this._constantPowers = [];
+        this._persistantPowers = [];
+        this._inherentPowers = [];
 
         // Initialize powers
-        if(this.powersList.length) {
-            this.powersList.forEach(power => this.addPower(power));
+        if(this._powersList.length) {
+            this._powersList.forEach(power => this.addPower(power));
         }
+    },
+    getPowers: function() {
+        return this._powers;
     },
     addPower: function(powerName) {
         var newPower = Game.Powers.create(powerName);
         newPower.setEntity(this);
-        this.powers.push(newPower);
+        this._powers.push(newPower);
     },
     usePower: function(i, target) {
-        var power = this.powers[i];
+        var power = this._powers[i];
         if(power.inRange(this.getX(), this.getY(), target.getX(), target.getY()))
             power.effect(target);
 
         // TODO: [POWERS] handle non-instant powers every turn
         // TODO: Update entity mixins to support an 'onAct' or some such method (update pattern)
         if(power['duration'] != 'instant') {
-            var queue = power['duration'] + 'Powers'; // e.g., 'constantPowers'
+            var queue = '_' + power['duration'] + 'Powers'; // e.g., '_constantPowers'
             this[queue].push(power);
             power.enqueue();
         }
