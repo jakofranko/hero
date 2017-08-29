@@ -20,9 +20,12 @@ Game.Repository.prototype.create = function(name, extraProperties) {
     if(!this._templates[name]) {
         throw new Error("No template named '" + name + "' in repository '" + this._name + "'");
     }
+
     // Copy the template
-    var template = Object.create(this._templates[name]);
+    var template = Object.assign({}, this._templates[name]);
+
     // Apply any extra properties
+    // TODO: Could be refactored with the above method to be var template = Object.assign({}, this._templates[name], extraProperties)
     if(extraProperties) {
         for (var key in extraProperties) {
             // If a template has a property like

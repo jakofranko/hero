@@ -38,8 +38,8 @@ Game.BasePower = function(properties, powerOptions) {
             throw new Error(`The power '${this.name}' is attempting to set the property '${prop}', which is defined in the base power and cannot be altered`);
     }
 
-    combinedParams = Object.assign({}, properties, powerOptions);
-    Game.Power.call(this, properties);
+    var combinedParams = Object.assign({}, properties, powerOptions);
+    Game.Power.call(this, combinedParams);
 };
 Game.BasePower.extend(Game.Power);
 
