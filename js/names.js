@@ -5,7 +5,7 @@ Game.NameGenerator = function() {
 
 	var that = this;
 	var r = new XMLHttpRequest();
-	r.open('get', 'http://raw.githubusercontent.com/jakofranko/random-name/master/names.json', true);
+	r.open('get', 'https://raw.githubusercontent.com/jakofranko/random-name/master/names.json', true);
 	r.send();
 	r.onreadystatechange = function() {
 	    if (r.readyState != 4) 
