@@ -88,8 +88,8 @@ Game.BasePowers.energyBlast = function(options) {
                     Game.sendMessage(this.entity, "You do %s STUN and %s BODY to %s!", [STUN, BODY, target.describeThe()]);
                     return true;
                 } else {
-                    Game.sendMessage(target, "%s misses you!", [this.describeThe()]);
-                    Game.sendMessage(this, "You miss!");
+                    Game.sendMessage(target, "%s misses you!", [this.entity.describeThe()]);
+                    Game.sendMessage(this.entity, "You miss!");
                     return false;
                 }
             }
