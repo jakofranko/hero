@@ -1176,7 +1176,7 @@ Game.Screen.helpScreen = {
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
         display.drawText(0, y++, '%c{#585DF5}Arrow keys%c{} to move');
-        display.drawText(0, y++, '%c{#585DF5}Shift + Arrow keys%c{} to swap positions with NPC');
+        display.drawText(0, y++, '%c{#585DF5}Ctrl + Arrow keys%c{} to swap positions with NPC');
         display.drawText(0, y++, '[%c{#585DF5},%c{}] to pick up items');
         display.drawText(0, y++, '[%c{#585DF5}d%c{}] to drop items');
         display.drawText(0, y++, '[%c{#585DF5}w%c{}] to wield items');
