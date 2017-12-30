@@ -158,7 +158,7 @@ var Game = {
 	        message = message.format.apply(this, args);
 	    }
 	    // Get the nearby entities
-	    entities = map.getEntitiesWithinRadius(centerX, centerY, centerZ, 5);
+	    var entities = map.getEntitiesWithinRadius(centerX, centerY, centerZ, 5);
 	    // Iterate through nearby entities, sending the message if
 	    // they can receive it.
 	    for(var i = 0; i < entities.length; i++) {
