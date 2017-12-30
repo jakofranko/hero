@@ -148,8 +148,8 @@ Game.Commands.MenuScreenOkCommand = function(mainScreen) {
     return function() {
         var subScreen = mainScreen.getSubScreen();
         return subScreen.executeOkFunction();
-    }
-}
+    };
+};
 
 Game.Commands.removeSubScreenCommand = function(mainScreen) {
     return function() {
