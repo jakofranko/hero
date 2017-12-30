@@ -160,7 +160,13 @@ Game.Commands.removeSubScreenCommand = function(mainScreen) {
 Game.Commands.debugCommand = function(debugFunc) {
   return function(entity) {
       return debugFunc(entity);
-  }
+  };
+};
+
+Game.Commands.boolCommand = function(bool) {
+    return function() {
+        return !!bool; // Cast to bool if not
+    };
 };
 
 Game.Commands.nullCommand = function() {
