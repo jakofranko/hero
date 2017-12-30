@@ -62,13 +62,12 @@ Game.Commands.showItemScreenCommand = function(itemScreen, mainScreen, noItemsMe
 
         var items = getItems ? getItems(entity) : entity.getItems();
         if(!items) items = [];
+
         var acceptableItems = itemScreen.setup(entity, items);
         if(acceptableItems > 0)
             mainScreen.setSubScreen(itemScreen);
-        else {
+        else
             Game.sendMessage(entity, noItemsMessage);
-            Game.refresh();
-        }
     };
 };
 
