@@ -4,6 +4,7 @@
   "description": "A JavaScript roguelike",
   "main": "index.html",
   "scripts": {
+    "setup": "bower install rot.js",
     "test": "npm test"
   },
   "repository": {
