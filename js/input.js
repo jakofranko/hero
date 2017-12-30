@@ -38,7 +38,7 @@ Game.Input.controlMaps.playScreen = {
         '.':            Game.Commands.boolCommand.bind(this, true), // Skips turn
         '*':            Game.Commands.debugCommand.bind(this, function() { Game.watchName = prompt("Enter NPC name"); })
     },
-    shift: {
+    ctrl: {
         keydown: {
             'ArrowRight':   Game.Commands.swapCommand.bind(this, -1, 0, 0),
             'ArrowLeft':    Game.Commands.swapCommand.bind(this, 1, 0, 0),
@@ -110,12 +110,11 @@ Game.Input.handleInput = function(screen, inputType, inputData) {
     // by passing in a specific entity to the function returned from `handleInput`
     // TODO: inputData.key is only good for key events. need a way to abstract out data depending on event type
     let inputMap = Game.Input.controlMaps[screen];
-    if(inputMap && inputData.shiftKey)
-        inputMap = inputMap.shift;
-        
+    if(inputMap && inputData.ctrlKey)
+        inputMap = inputMap.ctrl;
+
     if(inputMap && inputMap[inputType] && inputMap[inputType][inputData.key])
         return inputMap[inputType][inputData.key]();
-    else {
+    else
         return Game.Commands.nullCommand();
-    }
 };
