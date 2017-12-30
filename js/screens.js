@@ -126,7 +126,6 @@ Game.Screen.overview = {
                     }
                 }
 
-
                 display.draw(
                     x,
                     y,
@@ -175,7 +174,7 @@ Game.Screen.playScreen = {
         this._player = new Game.Entity(Game.PlayerTemplate);
         var map = new Game.Map(Game.getCitySize(), this._player);
 
-        // Once player has been created, the map generated and the 
+        // Once player has been created, the map generated and the
         // map assigned to the player (happens in map creation),
         // we can set the minimap to reflect the city overview.
         Game.setMiniMap(Game.Screen.overview, this._player);
@@ -403,13 +402,13 @@ Game.Screen.playScreen = {
         var visibleCells = {};
         // Store this._player.getMap() and player's z to prevent losing it in callbacks
         var map = this._player.getMap();
-        
+
         var currentDepth = this._player.getZ();
         // Find all visible cells and update the object
         map.getFov(currentDepth).compute(
-            this._player.getX(), 
-            this._player.getY(), 
-            this._player.getSightRadius(), 
+            this._player.getX(),
+            this._player.getY(),
+            this._player.getSightRadius(),
             function(x, y, radius, visibility) {
                 visibleCells[x + "," + y] = true;
                 // Mark cell as explored
@@ -453,17 +452,17 @@ Game.Screen.playScreen = {
                     } else {
                         // Not in our FOV, so just display the terrain
                         glyph = map.getTile(x, y, currentDepth);
-                        // Since the tile was previously explored but is not 
+                        // Since the tile was previously explored but is not
                         // visible, we want to change the foreground color to
                         // dark gray.
                         foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
                     }
-                    
+
                     display.draw(
                         x - topLeftX,
                         y - topLeftY,
-                        glyph.getChar(), 
-                        foreground, 
+                        glyph.getChar(),
+                        foreground,
                         glyph.getBackground()
                     );
                 }
@@ -625,7 +624,7 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
                     colWidth
                 );
                 altRow++;
-            }  
+            }
         }
     }
 };
@@ -656,7 +655,7 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
         // enter without any items selected, simply cancel out
         if(inputData.keyCode === ROT.VK_ESCAPE ||
             (inputData.keyCode === ROT.VK_RETURN &&
-                (!this._canSelectItem || 
+                (!this._canSelectItem ||
                     (Object.keys(this._selectedIndices).length === 0 && Object.keys(this._altSelectedIndices).length === 0)))) {
             Game.Screen.playScreen.setSubScreen(undefined);
 
@@ -684,7 +683,7 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
             var shift = inputData.shiftKey ? 26 : 0;
             var index = inputData.keyCode - ROT.VK_A + shift;
 
-            // This works because of the way letters are added to each item. 
+            // This works because of the way letters are added to each item.
             // After all the items are rendered, we begin to render altItems
             // (if they exist), and continue to use the next letter in the sequence.
             // Thus, the index needs to be 'reset' like this when we begin checking
@@ -830,7 +829,7 @@ Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
             var details = item.details();
             if(details && details != "") {
                 description += " (%s).";
-                Game.sendMessage(this._player, description, 
+                Game.sendMessage(this._player, description,
                 [
                     item.describeA(false),
                     item.details()
@@ -838,7 +837,7 @@ Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
             } else {
                 Game.sendMessage(this._player, description, [item.describeA(false)]);
             }
-            
+
         }
         return true;
     }
@@ -899,7 +898,7 @@ Game.Screen.TargetBasedScreen = function(template) {
         var map = this._player.getMap();
         // If the tile is explored, we can give a better capton
         if(map.isExplored(x, y, z)) {
-            // If the tile isn't explored, we have to check if we can actually 
+            // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
             if(this._visibleCells[x + ',' + y]) {
                 var items = map.getItemsAt(x, y, z);
@@ -938,7 +937,7 @@ Game.Screen.TargetBasedScreen = function(template) {
         var map = this._player.getMap();
         // If the tile is explored, we can give a better capton
         if(map.isExplored(x, y, z)) {
-            // If the tile isn't explored, we have to check if we can actually 
+            // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
             if(this._visibleCells[x + ',' + y]) {
                 var items = map.getItemsAt(x, y, z);
@@ -976,8 +975,8 @@ Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY,
     // Cache the FOV
     var visibleCells = {};
     this._player.getMap().getFov(this._player.getZ()).compute(
-        this._player.getX(), this._player.getY(), 
-        this._player.getSightRadius(), 
+        this._player.getX(), this._player.getY(),
+        this._player.getSightRadius(),
         function(x, y, radius, visibility) {
             visibleCells[x + "," + y] = true;
         });
@@ -994,9 +993,9 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
         if(i == l - 1) {
             display.drawText(points[i].x, points[i].y, '%c{white}X');
         } else {
-            display.drawText(points[i].x, points[i].y, '%c{white}*');    
+            display.drawText(points[i].x, points[i].y, '%c{white}*');
         }
-        
+
     }
 
     // Render any overlay information
@@ -1025,7 +1024,7 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
     // Render the description on the log display
     Game.getLog().clear();
     Game.getLog().drawText(
-        0, 
+        0,
         0,
         this._descriptionFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY)
     );
@@ -1086,7 +1085,7 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
         var map = this._player.getMap();
         // If the tile is explored, we can give a better capton
         if (map.isExplored(x, y, z)) {
-            // If the tile isn't explored, we have to check if we can actually 
+            // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
             if (this._visibleCells[x + ',' + y]) {
                 var items = map.getItemsAt(x, y, z);
@@ -1355,11 +1354,11 @@ Game.Screen.justiceScreen = {
     },
     /**
      * @display     The same ROT.Display object passed to the this.render()
-     * @startX 
-     * @startY 
+     * @startX
+     * @startY
      * @title       The text to put above the meter
      * @percentage  Amount the gauge should be filled. Percentage should be a decimal (0.54 for 54%)
-     * @inverse     If set && true, then the more empty the greener it should be. 
+     * @inverse     If set && true, then the more empty the greener it should be.
      *              Otherwise, the more full it is, the greener it should be
      **/
     _drawMeter: function(display, startX, startY, title, percentage, inverse) {
@@ -1493,7 +1492,7 @@ Game.Screen.winScreen = {
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
 			Game.Screen.playScreen.setSubScreen(undefined);
-		}   
+		}
     }
 };
 
@@ -1512,6 +1511,6 @@ Game.Screen.loseScreen = {
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
 			location.reload();
-		}     
+		}
     }
 };
