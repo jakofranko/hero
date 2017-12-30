@@ -2,6 +2,8 @@
 // ASCII art from http://www.chris.com/ascii/index.php?art=objects/scales; altered by me.
 // TODO: Build a 'fromTemplate' function to parse files or a logo or something like that
 // TODO: Flesh out startScreen to be more of a menu, flipping between current items etc.
+
+/* global Game */
 Game.Screen = {};
 
 // Define start screen
