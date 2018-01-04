@@ -98,7 +98,7 @@ Game.EntityMixins.Characteristics = {
         this._PRE = template['PRE'] || 10;
         this._COM = template['COM'] || 10;
 
-        // Figured characteristics. These will update as primary 
+        // Figured characteristics. These will update as primary
         // characteristics change, but cannot be added to.
         this._PD = template['PD'] || this._STR / 5;
         this._ED = template['ED'] || this._CON / 5;
@@ -120,7 +120,7 @@ Game.EntityMixins.Characteristics = {
         this._maxSTUNmod = 0;
 
         // It should be noted that BODY, STUN and END are tracked as the current values, whereas
-        // maxBODY, maxSTUN and maxEND is the upper limit that they can recover too, and 
+        // maxBODY, maxSTUN and maxEND is the upper limit that they can recover too, and
         // maxBODYmod, maxSTUNmod, and maxENDmod are what get incrememnted when spending XP
 
         // Combat values
@@ -149,16 +149,16 @@ Game.EntityMixins.Characteristics = {
             return this[characteristic];
     },
     getSTR: function() {
-        return this._STR;    
+        return this._STR;
     },
     getDEX: function() {
-        return this._DEX;    
+        return this._DEX;
     },
     getCON: function() {
-        return this._CON;    
+        return this._CON;
     },
     getBODY: function() {
-        return this._BODY;    
+        return this._BODY;
     },
     takeBODY: function(attacker, BODY, type, killing) {
         var defense;
@@ -188,52 +188,52 @@ Game.EntityMixins.Characteristics = {
         return this._maxBODY;
     },
     getINT: function() {
-        return this._INT;    
+        return this._INT;
     },
     getEGO: function() {
-        return this._EGO;    
+        return this._EGO;
     },
     getPRE: function() {
-        return this._PRE;    
+        return this._PRE;
     },
     getCOM: function() {
-        return this._COM;    
+        return this._COM;
     },
     getPD: function() {
-        return this._PD;    
+        return this._PD;
     },
     getPDmod: function() {
-        return this._PDmod;    
+        return this._PDmod;
     },
     getED: function() {
-        return this._ED;    
+        return this._ED;
     },
     getEDmod: function() {
-        return this._EDmod;    
+        return this._EDmod;
     },
     getSPD: function() {
-        return this._SPD;    
+        return this._SPD;
     },
     getSPDmod: function() {
-        return this._SPDmod;    
+        return this._SPDmod;
     },
     getREC: function() {
-        return this._REC;    
+        return this._REC;
     },
     getRECmod: function() {
-        return this._RECmod;    
+        return this._RECmod;
     },
     getEND: function() {
-        return this._END;    
+        return this._END;
     },
     getMaxEND: function() {
         return this._maxEND;
     },
     getMaxENDmod: function() {
-        return this._maxENDmod;    
+        return this._maxENDmod;
     },
     getSTUN: function() {
-        return this._STUN;    
+        return this._STUN;
     },
     getMaxSTUN: function() {
         return this._maxSTUN;
@@ -729,7 +729,7 @@ Game.EntityMixins.JobActor = {
     act: function() {
         if(Game.debug && Game.watchName == this.getName())
             debugger;
-        
+
         if(!this.isConscious())
             return;
 
@@ -737,7 +737,7 @@ Game.EntityMixins.JobActor = {
         // do that instead of performing job.
         if(this.hasMixin('Reactor') && this.isReacting())
             return this.react();
-        
+
         // Re-prioritize every hour
         // TODO: give a unique time for re-prioritization (still once an hour, just a different minute/second perhaps) so that the NPCs don't all reprioritize and the same time and lag the system
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0)
@@ -1084,7 +1084,7 @@ Game.EntityMixins.MoneyHolder = {
             }
         } else if(this.hasMixin('MessageRecipient')) {
             Game.sendMessage(this, '%s can\'t take money', [target.describeThe()]);
-        
+
         }
     }
 };
@@ -1107,6 +1107,7 @@ Game.EntityMixins.PowerUser = {
     init: function(template) {
         this._powersList = template['powers'] || [];
         this._powers = [];
+        this._activePower = null;
         this._constantPowers = [];
         this._persistantPowers = [];
         this._inherentPowers = [];
@@ -1144,6 +1145,8 @@ Game.EntityMixins.PowerUser = {
             this[queue].push(power);
             power.enqueue();
         }
+
+        return power.effect(target);
     }
 };
 Game.EntityMixins.PlayerActor = {
@@ -1278,14 +1281,14 @@ Game.EntityMixins.Reactor = {
                 this.setReaction(reaction);
 
                 if(this.hasMixin('Targeting'))
-                    this.setTarget(attacker);    
+                    this.setTarget(attacker);
             }
         },
         onForget: function(memoryName, memory) {
             if(this._reacting) {
                 if((memoryName.search(/mugged by/) !== -1 || memoryName.search(/attacked by/) !== -1) && memory.entity == this.getTarget())
                     this.setReaction(false);
-                
+
             }
         }
     }
@@ -1322,7 +1325,7 @@ Game.EntityMixins.Sight = {
         this.getMap().getFov(this.getZ()).compute(
             this.getX(),
             this.getY(),
-            this.getSightRadius(), 
+            this.getSightRadius(),
             function(x, y, radius, visibility) {
                 if (x === otherX && y === otherY)
                     found = true;
@@ -1368,7 +1371,7 @@ Game.EntityMixins.TaskActor = {
     groupName: 'Actor',
     init: function(template) {
         // Load tasks
-        this._tasks = template['tasks'] || ['wander']; 
+        this._tasks = template['tasks'] || ['wander'];
     },
     act: function() {
         // Iterate through all our tasks
@@ -1490,7 +1493,7 @@ Game.EntityMixins.Thrower = {
                 break;
             } else {
                 lastPoint = linePoints[i];
-            }   
+            }
         };
 
         // If nothing is in the way, the end point is targetX and targetY
@@ -1510,7 +1513,7 @@ Game.EntityMixins.Thrower = {
                 Game.sendMessage(entity, "%s throws %s at you!", [this.describeThe(), item.describeA()]);
                 entity.takeDamage(this, damage);
             }
-            
+
             var amount = 0;
             if(item.hasMixin('Stackable')) {
                 amount = Math.min(1, item.amount() - 1);
