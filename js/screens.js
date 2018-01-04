@@ -348,6 +348,9 @@ Game.Screen.playScreen = {
     setGameEnded: function(gameEnded) {
         this._gameEnded = gameEnded;
     },
+    getSubScreen: function() {
+        return this._subScreen;
+    },
     setSubScreen: function(subScreen) {
         this._subScreen = subScreen;
         Game.refresh();
@@ -1003,6 +1006,14 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
     }
 });
 
+Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
+    okFunction: function(x, y) {
+        debugger;
+        var target = this._player.getMap().getEntityAt(x, y, this._player.getZ());
+        return this._player.usePower(target);
+    }
+});
+
 // Menu screens
 Game.Screen.MenuScreen = function(template) {
     template = template || {};
@@ -1332,21 +1343,32 @@ Game.Screen.powersScreen = {
         // Must be called before rendering.
         this._entity = entity;
         this._powers = entity.getPowers();
+        this._letters = 'abcdefghijklmnopqrstuvwxyz';
     },
     render: function(display) {
-        var letters = 'abcdefghijklmnopqrstuvwxyz';
         display.drawText(0, 0, 'Powers:');
 
         // Iterate through each of our powers
         for (var i = 0; i < this._powers.length; i++) {
             var powerName = this._powers[i]['name'];
-            display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName);
+            display.drawText(0, 3 + i, this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName);
         }
     },
     handleInput: function(inputType, inputData) {
-        if(inputType === 'keydown' && (inputData.keyCode === ROT.VK_RETURN || inputData.keyCode === ROT.VK_ESCAPE)) {
-            Game.Screen.playScreen.setSubScreen(undefined);
-        }
+        var command = Game.Input.handleInput('powersScreen', inputType, inputData);
+        var unlock = command ? command(this._entity) : false;
+
+        if(unlock)
+            this._entity.getMap().getEngine().unlock();
+        else
+            Game.refresh(this._entity);
+    },
+    activatePower: function(letter) {
+        var showScreenCommand = Game.Commands.showTargettingScreenCommand(Game.Screen.powerTargetScreen, Game.Screen.playScreen);
+        var index = this._letters.indexOf(letter);
+        this._entity.setActivePower(index);
+
+        showScreenCommand(this._entity);
     }
 };
 
