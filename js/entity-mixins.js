@@ -1124,10 +1124,18 @@ Game.EntityMixins.PowerUser = {
         newPower.setEntity(this);
         this._powers.push(newPower);
     },
-    usePower: function(i, target) {
-        var power = this._powers[i];
-        if(power.inRange(this.getX(), this.getY(), target.getX(), target.getY()))
-            power.effect(target);
+    getActivePower: function() {
+        return this._activePower;
+    },
+    setActivePower: function(i) {
+        this._activePower = this._powers[i];
+    },
+    usePower: function(target) {
+        var power = this._activePower;
+        if(!target) {
+            Game.sendMessage(this, "There's nothing there!");
+            return false; // don't end turn
+        }
 
         // TODO: [POWERS] handle non-instant powers every turn
         // TODO: Update entity mixins to support an 'onAct' or some such method (update pattern)
