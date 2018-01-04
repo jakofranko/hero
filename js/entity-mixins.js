@@ -1146,7 +1146,10 @@ Game.EntityMixins.PowerUser = {
             power.enqueue();
         }
 
-        return power.effect(target);
+        // TODO: Handle miss? True if hit, false if miss
+        power.effect(target);
+
+        return true;
     }
 };
 Game.EntityMixins.PlayerActor = {
