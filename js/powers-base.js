@@ -62,7 +62,7 @@ Game.BasePowers.energyBlast = function(options) {
         range: 'standard',
         effect: function(target) {
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
-                target.raiseEvent('onAttack', this);
+                target.raiseEvent('onAttack', this.entity);
 
                 var hit = this.entity._attackRoll(target);
                 if(hit) {
