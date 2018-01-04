@@ -58,7 +58,7 @@ Game.BasePowers.energyBlast = function(options) {
         duration: 'instant',
         pointsMin: 5,
         pointsMax: false,
-        points: 0,
+        points: 10,
         range: 'standard',
         effect: function(target) {
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
