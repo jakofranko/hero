@@ -101,6 +101,13 @@ Game.Input.controlMaps.MenuScreen = {
         " ": Game.Commands.MenuScreenOkCommand.bind(this, Game.Screen.playScreen),
         "Escape": Game.Commands.removeSubScreenCommand.bind(this, Game.Screen.playScreen)
     }
+};
+
+Game.Input.controlMaps.powersScreen = {
+    keydown: {
+        "a": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "a"),
+        "b": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "b")
+    }
 }
 
 // This function is meant to handle input data of all types
