@@ -151,6 +151,13 @@ Game.Commands.MenuScreenOkCommand = function(mainScreen) {
     };
 };
 
+Game.Commands.activatePowerCommand = function(mainScreen, letter) {
+    return function(entity) {
+        var powerScreen = mainScreen.getSubScreen();
+        return powerScreen.activatePower(letter);
+    };
+};
+
 Game.Commands.removeSubScreenCommand = function(mainScreen) {
     return function() {
         mainScreen.setSubScreen(undefined);
