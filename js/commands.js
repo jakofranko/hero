@@ -134,15 +134,15 @@ Game.Commands.moveCursorCommand = function(mainScreen, offsetX, offsetY) {
 Game.Commands.TargetBasedScreenOkCommand = function(mainScreen) {
     return function() {
         return mainScreen.getSubScreen().executeOkFunction();
-    }
-}
+    };
+};
 
 Game.Commands.moveMenuIndexCommand = function(mainScreen, amount) {
     return function() {
         var subScreen = mainScreen.getSubScreen();
         subScreen.moveMenuIndex(amount);
-    }
-}
+    };
+};
 
 Game.Commands.MenuScreenOkCommand = function(mainScreen) {
     return function() {
