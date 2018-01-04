@@ -38,6 +38,7 @@ Game.Power =  function(properties) {
     this.type       = properties['type'];
     this.cost       = properties['cost'];
     this.duration   = properties['duration'];
+    this.range      = properties['range'];
     this.pointsMin  = properties['pointsMin'];
     this.pointsMax  = properties['pointsMax'] || Infinity;
     this.points     = properties['points'] || 0;
