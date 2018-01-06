@@ -58,8 +58,12 @@ Game.BasePowers.energyBlast = function(options) {
         duration: 'instant',
         pointsMin: 5,
         pointsMax: false,
-        points: 10,
+        points: 0,
         range: 'standard',
+        hitTargetMessage: "%s does %s STUN and %s BODY to you!",
+        hitMessage: "You do %s STUN and %s BODY to %s!",
+        missTargetMessage: "%s misses you!",
+        missMessage: "You miss!",
         effect: function(target) {
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this.entity);
@@ -84,14 +88,17 @@ Game.BasePowers.energyBlast = function(options) {
 
                     target.takeSTUN(this.entity, STUN, this.damageType);
                     target.takeBODY(this.entity, BODY, this.damageType);
-                    Game.sendMessage(target, "%s does %s STUN and %s BODY to you!", [this.entity.describeThe(), STUN, BODY]);
-                    Game.sendMessage(this.entity, "You do %s STUN and %s BODY to %s!", [STUN, BODY, target.describeThe()]);
+                    Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
+                    Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
                     return true;
                 } else {
-                    Game.sendMessage(target, "%s misses you!", [this.entity.describeThe()]);
-                    Game.sendMessage(this.entity, "You miss!");
+                    Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
+                    Game.sendMessage(this.entity, this.missMessage);
                     return false;
                 }
+            } else {
+                Game.sendMessage(this.entity, "Out of range.");
+                return false;
             }
         }
     };
