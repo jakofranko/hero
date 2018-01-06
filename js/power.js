@@ -34,17 +34,21 @@ Game.Power =  function(properties) {
     if(properties['type'] === 'attack' && properties['damageType'] === undefined)
         throw new Error(`You must define a damage type for attack power ${properties.name}`);
 
-    this.name       = properties['name'];
-    this.type       = properties['type'];
-    this.cost       = properties['cost'];
-    this.duration   = properties['duration'];
-    this.range      = properties['range'];
-    this.pointsMin  = properties['pointsMin'];
-    this.pointsMax  = properties['pointsMax'] || Infinity;
-    this.points     = properties['points'] || 0;
-    this.entity     = properties['entity'] || undefined;
-    this.END        = properties['END'] || function() { return Math.max(1, Math.round(points / 10)); };
-    this.damageType = properties['damageType'];
+    this.name              = properties['name'];
+    this.type              = properties['type'];
+    this.cost              = properties['cost'];
+    this.duration          = properties['duration'];
+    this.range             = properties['range'];
+    this.pointsMin         = properties['pointsMin'];
+    this.pointsMax         = properties['pointsMax'] || Infinity;
+    this.points            = properties['points'] || 0;
+    this.entity            = properties['entity'] || undefined;
+    this.END               = properties['END'] || function() { return Math.max(1, Math.round(points / 10)); };
+    this.damageType        = properties['damageType'];
+    this.hitMessage        = properties['hitMessage'] || '';
+    this.hitTargetMessage  = properties['hitTargetMessage'] || '';
+    this.missMessage       = properties['missMessage'] || '';
+    this.missTargetMessage = properties['missTargetMessage'] || '';
 
     // Depending on the type of range, assign a different function to the range property
     this.inRange = function() { console.error(`${this.name} does not have the inRange() method defined`); };
