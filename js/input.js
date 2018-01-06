@@ -106,7 +106,9 @@ Game.Input.controlMaps.MenuScreen = {
 Game.Input.controlMaps.powersScreen = {
     keydown: {
         "a": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "a"),
-        "b": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "b")
+        "b": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "b"),
+        "c": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "c"),
+        "d": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "d")
     }
 }
 
