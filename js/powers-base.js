@@ -106,3 +106,65 @@ Game.BasePowers.energyBlast = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.energyBlast.extend(Game.BasePower);
+
+// BasePower definitions
+Game.BasePowers.handToHandAttack = function(options) {
+    if(!('damageType' in options))
+        throw new Error('An handToHandAttack must specify a damage type');
+
+    var properties = {
+        name: 'Hand-to-Hand Attack',
+        type: 'Attack',
+        cost: 5,
+        duration: 'instant',
+        pointsMin: 5,
+        pointsMax: false,
+        points: 0,
+        range: 'no range',
+        hitTargetMessage: "%s does %s STUN and %s BODY to you!",
+        hitMessage: "You do %s STUN and %s BODY to %s!",
+        missTargetMessage: "%s misses you!",
+        missMessage: "You miss!",
+        effect: function(target) {
+            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                target.raiseEvent('onAttack', this.entity);
+
+                var hit = this.entity._attackRoll(target);
+                if(hit) {
+                    debugger;
+                    var dice = Math.floor((this.points / 5) + (this.entity.getSTR() / 5));
+                    var STUN = 0;
+                    var BODY = 0;
+
+                    for(var i = 0; i < dice; i++) {
+                        var dieRoll = Game.rollDice("1d6");
+
+                        STUN += dieRoll;
+                        if(dieRoll == 6) {
+                            BODY += 2;
+                        } else if(dieRoll > 1) {
+                            BODY += 1;
+                        }
+
+                    }
+
+                    target.takeSTUN(this.entity, STUN, this.damageType);
+                    target.takeBODY(this.entity, BODY, this.damageType);
+                    Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
+                    Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
+                    return true;
+                } else {
+                    Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
+                    Game.sendMessage(this.entity, this.missMessage);
+                    return false;
+                }
+            } else {
+                Game.sendMessage(this.entity, "Out of range.");
+                return false;
+            }
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.handToHandAttack.extend(Game.BasePower);
