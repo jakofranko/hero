@@ -14,11 +14,19 @@ Game.Powers.create = function(name) {
 // Energy Blasts
 Game.Powers.EnergyBlastPowerRepository = new Game.Repository('energy blast powers', Game.BasePowers.energyBlast);
 
-Game.Powers.EnergyBlastPowerRepository.define('energyBolt', {
+Game.Powers.EnergyBlastPowerRepository.define('energy bolt', {
     name: 'Energy Bolt',
-    damageType: 'energy'
+    damageType: 'energy',
+    hitTargetMessage: "%s fries you with an Energy bolt, doing %s STUN and %s BODY!",
+    hitMessage: "You let loose a crackling bolt of energy, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s misses you with their energy bolt!",
+    missMessage: "Your energy bolt goes wide!",
 });
-Game.Powers.EnergyBlastPowerRepository.define('throwingStar', {
+Game.Powers.EnergyBlastPowerRepository.define('throwing star', {
     name: 'Throwing Star',
-    damageType: 'physical'
+    damageType: 'physical',
+    hitTargetMessage: "%s slices you with a throwing star, doing %s STUN and %s BODY!",
+    hitMessage: "You hit with your throwing star, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s's throwing star whizzes past, missing you!",
+    missMessage: "Your throwing star misses!",
 });
