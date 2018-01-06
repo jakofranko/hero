@@ -30,3 +30,24 @@ Game.Powers.EnergyBlastPowerRepository.define('throwing star', {
     missTargetMessage: "%s's throwing star whizzes past, missing you!",
     missMessage: "Your throwing star misses!",
 });
+
+// Hand-to-Hand Attacks
+Game.Powers.HandToHandAttackPowerRepository = new Game.Repository('hand-to-hand attack powers', Game.BasePowers.handToHandAttack);
+
+Game.Powers.HandToHandAttackPowerRepository.define('bo staff', {
+    name: 'Bo Staff',
+    damageType: 'physical',
+    hitTargetMessage: "%s cracks you with their bo staff, doing %s STUN and %s BODY!",
+    hitMessage: "Your bo staff connects, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s misses you with their bo staff!",
+    missMessage: "You miss with your bo staff!",
+});
+
+Game.Powers.HandToHandAttackPowerRepository.define('stun fist', {
+    name: 'Stun Fist',
+    damageType: 'energy',
+    hitTargetMessage: "%s hits you with their stun fist, doing %s STUN and %s BODY!",
+    hitMessage: "You land a solid hit with your stun fist, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s swings wide with their stun fist, missing you!",
+    missMessage: "You swing and miss with your stun fist!",
+});
