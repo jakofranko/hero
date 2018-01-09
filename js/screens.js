@@ -1278,24 +1278,35 @@ Game.Screen.gainStatScreen = {
         // Must be called before rendering.
         this._entity = entity;
         this._options = entity.getPointOptions();
+        this._powers = entity.getPowers();
+
+        // Screen controls
+        this._letters = 'abcdefghijklmnopqrstuvwxyz';
+        this._numbers = '0123456789';
     },
     render: function(display) {
-        var letters = 'abcdefghijklmnopqrstuvwxyz';
-        display.drawText(0, 0, 'Choose a stat to increase: ');
-        display.drawText(4, 2, 'CHAR  COST  VAL');
+        display.drawText(0, 0, 'Choose a stat or power to increase: ');
+        display.drawText(0, 1, `Remaining points: %c{${Game.Palette.green}}${this._entity.getSpendablePoints()}`);
+        display.drawText(4, 3, 'CHAR  COST  VAL');
 
         // Iterate through each of our options
-        for (var i = 0; i < this._options.length; i++) {
+        for(let i = 0; i < this._options.length; i++) {
             // When displaying and checking costs, strip out 'max' and 'mod' from name
             var charName = this._options[i][0].replace(/^max(\w+)/, "$1").replace(/(\w+)mod$/, "$1");
             var spacer1 = "".lpad(" ", 4 - charName.length + 3);
             var spacer2 = "".lpad(" ", 3 - String(Game.Cost.Characteristics[charName]).length + 2);
 
-            display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - %c{#585DF5}' + charName + '%c{}' + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + '%c{#585DF5}' + this._entity.getCharacteristic(charName, true, true));
+            display.drawText(0, 4 + i, this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + charName + '%c{}' + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + '%c{#585DF5}' + this._entity.getCharacteristic(charName, true, true));
         }
 
-        // Render remaining stat points
-        display.drawText(0, 4 + this._options.length, "Remaining points: %c{#00ff78}" + this._entity.getSpendablePoints());
+        display.drawText(0, 3 + this._options.length + 2, 'Powers:')
+        for(let i = 0; i < this._powers.length; i++) {
+            let spacer = "".lpad(" ", 15 - this._powers[i].name.length + 3);
+            display.drawText(
+                0,
+                4 + this._options.length + i + 3,
+                `${this._numbers.substring(i, i + 1)} - %c{${Game.Palette.blue}}${this._powers[i].name} (${this._powers[i].points})%c{}${spacer}Cost: ${this._powers[i].cost}`)
+        }
     },
     handleInput: function(inputType, inputData) {
         // TODO: instead of pressing letters, use direction keys to highlight characteristics to increase
