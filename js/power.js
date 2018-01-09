@@ -93,10 +93,12 @@ Game.Power.prototype.setEntity = function(entity) {
 Game.Power.prototype.addPoints = function(amount) {
     if(!this.entity || !this.entity.hasMixin('BasePoints'))
         throw new Error('Entity is not defined or does not have the BasePoints mixin');
-    if(amount + this.points < this.pointsMin || amount + this.points > this.pointsMax)
-        throw new Error(`The amount '${amount}' is less than ${this.pointsMin} or the new total will be greater than ${this.pointsMax} and this is not allowed)`);
+    if(amount + this.points < this.pointsMin)
+        throw new Error(`The amount '${amount}' is less than ${this.pointsMin}`);
+    if(amount + this.points > this.pointsMax)
+        throw new Error(`The new point total will be greater than ${this.pointsMax}, which is the maximum amount for this power.`);
     if(this.entity.getSpendablePoints() < amount)
-        throw new Error('The entity does not have that many points to spend');
+        throw new Error('Not enough points.');
 
     this.points += amount;
     this.entity.subtractSpendablePoints(amount);
