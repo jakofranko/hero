@@ -112,6 +112,36 @@ Game.Input.controlMaps.powersScreen = {
     }
 }
 
+Game.Input.controlMaps.gainStatScreen = {
+    keydown: {
+        "Escape": Game.Commands.removeSubScreenCommand.bind(this, Game.Screen.playScreen),
+        "a": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "a"),
+        "b": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "b"),
+        "c": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "c"),
+        "d": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "d"),
+        "e": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "e"),
+        "f": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "f"),
+        "g": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "g"),
+        "h": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "h"),
+        "i": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "i"),
+        "j": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "j"),
+        "k": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "k"),
+        "l": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "l"),
+        "m": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "m"),
+        "n": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "n"),
+        "0": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "0"),
+        "1": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "1"),
+        "2": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "2"),
+        "3": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "3"),
+        "4": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "4"),
+        "5": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "5"),
+        "6": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "6"),
+        "7": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "7"),
+        "8": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "8"),
+        "9": Game.Commands.incrementPowerCommand.bind(this, Game.Screen.playScreen, "9")
+    }
+}
+
 // This function is meant to handle input data of all types
 Game.Input.handleInput = function(screen, inputType, inputData) {
     // Each keyMap object should contain a list of references to Commands with specific parameters
