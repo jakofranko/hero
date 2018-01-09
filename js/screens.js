@@ -1314,30 +1314,13 @@ Game.Screen.gainStatScreen = {
         // characteristics are affected, and be able to move your spendible points around (without
         // selling back what the character has previously put points into). Up/down to hightlihg, left/right
         // to spend and take back points, enter to accept (making the purchase permanent).
-        if(inputType === 'keydown' && inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
-            // If a letter was pressed, check if it matches to a valid option.
-            if(this._entity.getSpendablePoints() > 0) {
-                // Check if it maps to a valid item by subtracting 'a' from the character
-                // to know what letter of the alphabet we used.
-                var index = inputData.keyCode - ROT.VK_A;
-                if (this._options[index]) {
-                    // When displaying and checking costs, strip out 'max' and 'mod' from name
-                    var charName = this._options[index][0].replace(/^max(\w+)/, "$1").replace(/(\w+)mod$/, "$1");
-                    // Call the stat increasing function with the name of the stat as an argument
-                    this._options[index][1].call(this._entity, this._options[index][0]);
-                    // Decrease stat points
-                    this._entity.subtractSpendablePoints(Game.Cost.Characteristics[charName]);
+        var command = Game.Input.handleInput("gainStatScreen", inputType, inputData);
+        var unlock = command ? command(this._entity) : false;
 
-                    Game.refresh(this._entity);
-                }
-            } else {
-                Game.sendMessage(this._entity, 'You have no more points to spend.');
-                Game.refresh(this._entity);
-                this._entity.clearMessages();
-            }
-        } else if(inputType === 'keydown' && (inputData.keyCode === ROT.VK_RETURN || inputData.keyCode === ROT.VK_ESCAPE)) {
-            Game.Screen.playScreen.setSubScreen(undefined);
-        }
+        if(unlock)
+            this._entity.getMap().getEngine().unlock();
+        else
+            Game.refresh(this._entity);
     }
 };
 
