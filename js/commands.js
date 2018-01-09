@@ -158,6 +158,54 @@ Game.Commands.activatePowerCommand = function(mainScreen, letter) {
     };
 };
 
+Game.Commands.incrementStatCommand = function(mainScreen, character) {
+    return function(entity) {
+        var statScreen = mainScreen.getSubScreen();
+
+        // If a letter was pressed, check if it matches to a valid option.
+        if(entity.getSpendablePoints() > 0) {
+            // Check if it maps to a valid item by subtracting 'a' from the character
+            // to know what letter of the alphabet we used.
+            var index = statScreen._letters.indexOf(character);
+            if(statScreen._options[index]) {
+                // When displaying and checking costs, strip out 'max' and 'mod' from name
+                var charName = statScreen._options[index][0].replace(/^max(\w+)/, "$1").replace(/(\w+)mod$/, "$1");
+
+                // Call the stat increasing function with the name of the stat as an argument
+                statScreen._options[index][1].call(entity, statScreen._options[index][0]);
+
+                // Decrease stat points
+                entity.subtractSpendablePoints(Game.Cost.Characteristics[charName]);
+            }
+        } else {
+            Game.sendMessage(entity, 'You have no more points to spend.');
+        }
+
+        return false; // Either way, don't end the entity's turn
+    };
+};
+
+Game.Commands.incrementPowerCommand = function(mainScreen, character) {
+    return function(entity) {
+        var statScreen = mainScreen.getSubScreen();
+
+        // If a letter was pressed, check if it matches to a valid option.
+        if(entity.getSpendablePoints() > 0) {
+            // Check if it maps to a valid item by subtracting 'a' from the character
+            // to know what letter of the alphabet we used.
+            var index = statScreen._numbers.indexOf(character);
+            if(statScreen._powers[index])
+                // Call the power's upgrade function (handles entity points)
+                statScreen._powers[index].upgradePower();
+        
+        } else {
+            Game.sendMessage(entity, 'You have no more points to spend.');
+        }
+
+        return false; // Either way, don't end the entity's turn
+    };
+};
+
 Game.Commands.removeSubScreenCommand = function(mainScreen) {
     return function() {
         mainScreen.setSubScreen(undefined);
