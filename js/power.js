@@ -115,3 +115,12 @@ Game.Power.prototype.subtractPoints = function(amount) {
     this.points -= subAmount;
     this.entity.addSpendablePoints(amount);
 };
+Game.Power.prototype.upgradePower = function() {
+    try {
+        this.addPoints(this.cost);
+    } catch(e) {
+        console.error(e);
+    }
+
+    return false; // Don't end turn, refresh screen
+}
