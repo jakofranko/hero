@@ -51,3 +51,24 @@ Game.Powers.HandToHandAttackPowerRepository.define('stun fist', {
     missTargetMessage: "%s swings wide with their stun fist, missing you!",
     missMessage: "You swing and miss with your stun fist!",
 });
+
+// Hand-to-Hand Killing Attacks
+Game.Powers.HandToHandKillingAttackPowerRepository = new Game.Repository('hand-to-hand killing attack powers', Game.BasePowers.handToHandAttack);
+
+Game.Powers.HandToHandKillingAttackPowerRepository.define('katana', {
+    name: 'Katana',
+    damageType: 'physical',
+    hitTargetMessage: "%s slices you with their katana, doing %s STUN and %s BODY!",
+    hitMessage: "You hit, doing %s STUN and %s BODY to %s with your katana!",
+    missTargetMessage: "%s misses you with their katana!",
+    missMessage: "Your katana cuts only the air!",
+});
+
+Game.Powers.HandToHandKillingAttackPowerRepository.define('light lance', {
+    name: 'Light Lance',
+    damageType: 'energy',
+    hitTargetMessage: "%s hits you with lance made of pure light, doing %s STUN and %s BODY!",
+    hitMessage: "Your lance materializes and then connects, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s misses you with their light lance!",
+    missMessage: "You fail to hit with your light lance!",
+});
