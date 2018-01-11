@@ -53,7 +53,7 @@ Game.Powers.HandToHandAttackPowerRepository.define('stun fist', {
 });
 
 // Hand-to-Hand Killing Attacks
-Game.Powers.HandToHandKillingAttackPowerRepository = new Game.Repository('hand-to-hand killing attack powers', Game.BasePowers.handToHandAttack);
+Game.Powers.HandToHandKillingAttackPowerRepository = new Game.Repository('hand-to-hand killing attack powers', Game.BasePowers.handToHandKillingAttack);
 
 Game.Powers.HandToHandKillingAttackPowerRepository.define('katana', {
     name: 'Katana',
