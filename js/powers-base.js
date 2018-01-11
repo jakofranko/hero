@@ -69,7 +69,7 @@ Game.BasePowers.energyBlast = function(options) {
 
                 var hit = this.entity._attackRoll(target);
                 if(hit) {
-                    var dice = Math.floor(this.points / 5);
+                    var dice = Math.floor(this.points / this.cost);
                     var STUN = 0;
                     var BODY = 0;
 
@@ -130,7 +130,7 @@ Game.BasePowers.handToHandAttack = function(options) {
                 var hit = this.entity._attackRoll(target);
                 if(hit) {
                     debugger;
-                    var dice = Math.floor((this.points / 5) + (this.entity.getSTR() / 5));
+                    var dice = Math.floor((this.points / this.cost) + (this.entity.getSTR() / this.cost));
                     var STUN = 0;
                     var BODY = 0;
 
@@ -190,7 +190,7 @@ Game.BasePowers.handToHandKillingAttack = function(options) {
                 var hit = this.entity._attackRoll(target);
                 if(hit) {
                     debugger;
-                    var dice = Math.floor((this.points / 5) + (this.entity.getSTR() / 5));
+                    var dice = Math.floor((this.points / this.cost) + (this.entity.getSTR() / this.cost));
                     var STUN = 0;
                     var BODY = 0;
 
