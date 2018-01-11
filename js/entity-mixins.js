@@ -130,6 +130,10 @@ Game.EntityMixins.Characteristics = {
         this._ECV = Math.round(this._EGO / 3);
         this._EOCVmod = 0;
         this._EDCVmod = 0;
+
+        // Resistant Defenses. Can only be updated by powers (armor, resistant defense)
+        this._rPD = 0;
+        this._rED = 0;
     },
     updateFiguredCharacteristics: function() {
         this._PD        = Math.round(this._STR / 5);
@@ -162,12 +166,14 @@ Game.EntityMixins.Characteristics = {
     },
     takeBODY: function(attacker, BODY, type, killing) {
         var defense;
-        if(!type || type == 'physical') {
-            defense = this._PD;
-        } else if(type == 'energy') {
-            defense = this._ED;
+        if(killing) {
+            if(!type || type == 'physical') defense = this._rPD;
+            else if(type == 'energy')       defense = this._rED;
+            else                            defense = 0;
         } else {
-            defense = 0;
+            if(!type || type == 'physical') defense = this._PD;
+            else if(type == 'energy')       defense = this._ED;
+            else                            defense = 0;
         }
 
         // Make sure we don't take any less than zero damage
@@ -243,12 +249,15 @@ Game.EntityMixins.Characteristics = {
     },
     takeSTUN: function(attacker, STUN, type, killing) {
         var defense;
-        if(!type || type == 'physical') {
-            defense = this._PD;
-        } else if(type == 'energy') {
-            defense = this._ED;
+        if(killing) {
+            // Page 410 of the 5th Ed. -- can apply normal defenses against killing STUN if they have resistant defenses
+            if(!type || type == 'physical') defense = this._rPD ? this._rPD + this._PD : 0;
+            else if(type == 'energy')       defense = this._rED ? this._rPD + this._ED : 0;
+            else                            defense = 0;
         } else {
-            defense = 0;
+            if(!type || type == 'physical') defense = this._PD;
+            else if(type == 'energy')       defense = this._ED;
+            else                            defense = 0;
         }
 
         // Make sure we don't take any less than zero damage
