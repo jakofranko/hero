@@ -221,3 +221,58 @@ Game.BasePowers.handToHandKillingAttack = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.handToHandKillingAttack.extend(Game.BasePower);
+
+Game.BasePowers.rangedKillingAttack = function(options) {
+    if(!('damageType' in options))
+        throw new Error('An rangedKillingAttack must specify a damage type');
+
+    var properties = {
+        name: 'Ranged Killing Attack',
+        type: 'Attack',
+        cost: 15,
+        duration: 'instant',
+        pointsMin: 15,
+        points: 0,
+        range: 'standard',
+        hitTargetMessage: "%s does %s STUN and %s BODY to you!",
+        hitMessage: "You do %s STUN and %s BODY to %s!",
+        missTargetMessage: "%s misses you!",
+        missMessage: "You miss!",
+        effect: function(target) {
+            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                target.raiseEvent('onAttack', this.entity);
+
+                var hit = this.entity._attackRoll(target);
+                if(hit) {
+                    debugger;
+                    var dice = Math.floor(this.points / this.cost);
+                    var STUN = 0;
+                    var BODY = 0;
+
+                    // BODY is the number rolled on the dice
+                    for(var i = 0; i < dice; i++) {
+                        BODY += Game.rollDice("1d6");
+                    }
+
+                    STUN = BODY * Math.max(1, Game.rollDice("1d6") - 1);
+
+                    target.takeSTUN(this.entity, STUN, this.damageType, true);
+                    target.takeBODY(this.entity, BODY, this.damageType, true);
+                    Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
+                    Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
+                    return true;
+                } else {
+                    Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
+                    Game.sendMessage(this.entity, this.missMessage);
+                    return false;
+                }
+            } else {
+                Game.sendMessage(this.entity, "Out of range.");
+                return false;
+            }
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.rangedKillingAttack.extend(Game.BasePower);
