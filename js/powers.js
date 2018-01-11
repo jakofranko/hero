@@ -72,3 +72,24 @@ Game.Powers.HandToHandKillingAttackPowerRepository.define('light lance', {
     missTargetMessage: "%s misses you with their light lance!",
     missMessage: "You fail to hit with your light lance!",
 });
+
+// Ranged Killing Attacks
+Game.Powers.RangedKillingAttackPowerRepository = new Game.Repository('ranged killing attack powers', Game.BasePowers.rangedKillingAttack);
+
+Game.Powers.RangedKillingAttackPowerRepository.define('pistol', {
+    name: 'Colt M1911A',
+    damageType: 'physical',
+    hitTargetMessage: "%s shoots you with their pistol, doing %s STUN and %s BODY!",
+    hitMessage: "Your bullet hits, doing %s STUN and %s BODY to %s with your Colt M1911A!",
+    missTargetMessage: "%s's shot barely grazes you, doing no damage!",
+    missMessage: "Your bullet goes wide!",
+});
+
+Game.Powers.RangedKillingAttackPowerRepository.define('lightning bolt', {
+    name: 'Lightning Bolt',
+    damageType: 'energy',
+    hitTargetMessage: "%s strikes you with a bolt of lightning, doing %s STUN and %s BODY!",
+    hitMessage: "You loose a bolt of lightning from your hands, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s misses you with their lightning bolt!",
+    missMessage: "Your lightning bolt misses your target!",
+});
