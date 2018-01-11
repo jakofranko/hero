@@ -108,13 +108,22 @@ Game.Input.controlMaps.powersScreen = {
         "a": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "a"),
         "b": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "b"),
         "c": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "c"),
-        "d": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "d")
+        "d": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "d"),
+        "e": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "e"),
+        "f": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "f"),
+        "g": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "g"),
+        "h": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "h"),
+        "i": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "i"),
+        "j": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "j"),
+        "k": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "k"),
+        "l": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "l")
     }
 }
 
 Game.Input.controlMaps.gainStatScreen = {
     keydown: {
         "Escape": Game.Commands.removeSubScreenCommand.bind(this, Game.Screen.playScreen),
+        "Enter": Game.Commands.removeSubScreenCommand.bind(this, Game.Screen.playScreen),
         "a": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "a"),
         "b": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "b"),
         "c": Game.Commands.incrementStatCommand.bind(this, Game.Screen.playScreen, "c"),
