@@ -59,7 +59,7 @@ Game.Powers.HandToHandKillingAttackPowerRepository.define('katana', {
     name: 'Katana',
     damageType: 'physical',
     hitTargetMessage: "%s slices you with their katana, doing %s STUN and %s BODY!",
-    hitMessage: "You hit, doing %s STUN and %s BODY to %s with your katana!",
+    hitMessage: "You slice into your opponent, doing %s STUN and %s BODY to %s with your katana!",
     missTargetMessage: "%s misses you with their katana!",
     missMessage: "Your katana cuts only the air!",
 });
