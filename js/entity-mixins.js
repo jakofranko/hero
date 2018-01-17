@@ -1085,7 +1085,7 @@ Game.EntityMixins.PowerUser = {
         this._powers = [];
         this._activePower = null;
         this._constantPowers = [];
-        this._persistantPowers = [];
+        this._persistentPowers = [];
         this._inherentPowers = [];
 
         // Initialize powers
