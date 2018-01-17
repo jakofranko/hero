@@ -49,6 +49,7 @@ Game.Power =  function(properties) {
     this.hitTargetMessage  = properties['hitTargetMessage'] || '';
     this.missMessage       = properties['missMessage'] || '';
     this.missTargetMessage = properties['missTargetMessage'] || '';
+    this.active            = properties['active'] || false;
 
     // Depending on the type of range, assign a different function to the range property
     this.inRange = function() { console.error(`${this.name} does not have the inRange() method defined`); };

@@ -276,3 +276,59 @@ Game.BasePowers.rangedKillingAttack = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.rangedKillingAttack.extend(Game.BasePower);
+
+// Every 3 points of armor is 2 points of resistant defense
+Game.BasePowers.armor = function(options) {
+    if(!('damageType' in options))
+        throw new Error('An rangedKillingAttack must specify a damage type');
+
+    var properties = {
+        name: 'Armor',
+        type: 'Attack',
+        cost: 3,
+        duration: 'persistent',
+        pointsMin: 3,
+        points: 0,
+        range: 'self',
+        hitTargetMessage: '',
+        hitMessage: "You activate your armor.",
+        missTargetMessage: '',
+        missMessage: 'You take off your armor',
+        active: false, // special property for non-instant powers
+        persistent: function(){}, // unused right now...
+        effect: function(target) {
+            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                if(this.active)
+                    Game.sendMessage(this.entity, this.hitMessage);
+                else
+                    Game.sendMessage(this.entity, this.missMessage);
+            } else {
+                Game.sendMessage(this.entity, "Out of range.");
+                return false;
+            }
+        },
+        enqueue: function() {
+            if(!this.active) {
+                if(this.damageType === 'physical')
+                    this.entity._rPD += this.points / 1.5; // 3 points of armor = 2 rD -> 3 = 2 -> 3/2 = 2/2 -> 1.5
+                else if(this.damageType === 'energy')
+                    this.entity._rED += this.points / 1.5;
+
+                this.active = true;
+            }
+        },
+        dequeue: function() {
+            if(this.active) {
+                if(this.damageType === 'physical')
+                    this.entity._rPD -= this.points / 1.5; // 3 points of armor = 2 rD -> 3 = 2 -> 3/2 = 2/2 -> 1.5
+                else if(this.damageType === 'energy')
+                    this.entity._rED -= this.points / 1.5;
+
+                this.active = false;
+            }
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.armor.extend(Game.BasePower);
