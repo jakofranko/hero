@@ -93,3 +93,20 @@ Game.Powers.RangedKillingAttackPowerRepository.define('lightning bolt', {
     missTargetMessage: "%s misses you with their lightning bolt!",
     missMessage: "Your lightning bolt misses your target!",
 });
+
+// Armor
+Game.Powers.ArmorPowerRepository = new Game.Repository('armor powers', Game.BasePowers.armor);
+
+Game.Powers.ArmorPowerRepository.define('kevlar', {
+    name: 'Kevlar Body Armor',
+    damageType: 'physical',
+    hitMessage: "You strap on your kevlar body armor.",
+    missMessage: "You take off your kevlar body armor.",
+});
+
+Game.Powers.ArmorPowerRepository.define('phase skin', {
+    name: 'Phase Skin',
+    damageType: 'energy',
+    hitMessage: "You activate your energy-resistant phase skin.",
+    missMessage: "You deactivate your phase skin.",
+});
