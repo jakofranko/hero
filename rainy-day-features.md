@@ -11,3 +11,4 @@ As I have been developing Justice, I pretty consistently start out to work on a 
 * Migrate all files over to a RequireJS system
 * Better captioning for menus (namely the action menu for putting things in containers)
 * Work jobs that give the NPC money
+* Convert all instances of `Math.random()` to `ROT.RNG.getUniform()`
