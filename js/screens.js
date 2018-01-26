@@ -2,6 +2,8 @@
 // ASCII art from http://www.chris.com/ascii/index.php?art=objects/scales; altered by me.
 // TODO: Build a 'fromTemplate' function to parse files or a logo or something like that
 // TODO: Flesh out startScreen to be more of a menu, flipping between current items etc.
+
+/* global Game */
 Game.Screen = {};
 
 // Define start screen
@@ -126,7 +128,6 @@ Game.Screen.overview = {
                     }
                 }
 
-
                 display.draw(
                     x,
                     y,
@@ -175,7 +176,7 @@ Game.Screen.playScreen = {
         this._player = new Game.Entity(Game.PlayerTemplate);
         var map = new Game.Map(Game.getCitySize(), this._player);
 
-        // Once player has been created, the map generated and the 
+        // Once player has been created, the map generated and the
         // map assigned to the player (happens in map creation),
         // we can set the minimap to reflect the city overview.
         Game.setMiniMap(Game.Screen.overview, this._player);
@@ -221,22 +222,6 @@ Game.Screen.playScreen = {
         );
         display.drawText(0, screenHeight, stats);
     },
-    move: function(dX, dY, dZ) {
-        var newX = this._player.getX() + dX;
-        var newY = this._player.getY() + dY;
-        var newZ = this._player.getZ() + dZ;
-        this._player.tryMove(newX, newY, newZ, this._player.getMap());
-    },
-    swap: function(dX, dY, dZ) {
-        var newX = this._player.getX() + dX;
-        var newY = this._player.getY() + dY;
-        var newZ = this._player.getZ() + dZ;
-        var target = this._player.getMap().getEntityAt(newX, newY, newZ);
-        if(target)
-            this._player.swapPosition(target);
-        else
-            this._player.tryMove(newX, newY, newZ, this._player.getMap());
-    },
     handleInput: function(inputType, inputData) {
     	// If the game is over, enter will bring the user to the losing screen.
         if(this._gameEnded) {
@@ -260,120 +245,13 @@ Game.Screen.playScreen = {
                 return;
         }
 
-        // Otherwise, handle input normally for this screen
-        if (inputType === 'keydown') {
-	        if (inputData.keyCode === ROT.VK_LEFT) {
-                if(inputData.shiftKey)
-                    this.swap(-1, 0, 0);
-                else
-	               this.move(-1, 0, 0);
-	        } else if (inputData.keyCode === ROT.VK_RIGHT) {
-                if(inputData.shiftKey)
-                    this.swap(1, 0, 0);
-                else
-	               this.move(1, 0, 0);
-	        } else if (inputData.keyCode === ROT.VK_UP) {
-	            if(inputData.shiftKey)
-                    this.swap(0, -1, 0);
-                else
-                   this.move(0, -1, 0);
-	        } else if (inputData.keyCode === ROT.VK_DOWN) {
-                if(inputData.shiftKey)
-                    this.swap(0, 1, 0);
-                else
-                   this.move(0, 1, 0);
-            } else if (inputData.keyCode === ROT.VK_I) {
-                // Show the inventory screen
-                this.showItemsSubScreen(Game.Screen.inventoryScreen, this._player.getItems(), 'You are not carrying anything.');
-                return;
-            } else if (inputData.keyCode === ROT.VK_D) {
-                // Show the drop screen
-                this.showItemsSubScreen(Game.Screen.dropScreen, this._player.getItems(), 'You have nothing to drop.');
-                return;
-            } else if (inputData.keyCode === ROT.VK_E) {
-                // Show the drop screen
-                this.showItemsSubScreen(Game.Screen.eatScreen, this._player.getItems(), 'You have nothing to eat.');
-                return;
-            } else if (inputData.keyCode === ROT.VK_W) {
-                if (inputData.shiftKey) {
-                    // Show the wear screen
-                    this.showItemsSubScreen(Game.Screen.wearScreen, this._player.getItems(), 'You have nothing to wear.');
-                } else {
-                    // Show the wield screen
-                    this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(), 'You have nothing to wield.');
-                }
-            } else if(inputData.keyCode === ROT.VK_S) {
-                // Show the stats screen for spending xp
-                Game.Screen.gainStatScreen.setup(this._player);
-                this.setSubScreen(Game.Screen.gainStatScreen);
-                return;
-            } else if(inputData.keyCode === ROT.VK_J) {
-                this.setSubScreen(Game.Screen.justiceScreen);
-                return;
-            } else if (inputData.keyCode === ROT.VK_X) {
-                // Show the drop screen
-                this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(), 'You have nothing to examine.');
-                return;
-            } else if(inputData.keyCode === ROT.VK_T) {
-                this.showItemsSubScreen(Game.Screen.throwScreen, this._player.getItems(), 'You have nothing to throw.');
-                return;
-            } else if(inputData.keyCode === ROT.VK_SPACE) {
-                Game.Screen.actionMenu.setup(this._player);
-                this.setSubScreen(Game.Screen.actionMenu);
-            } else if (inputData.keyCode === ROT.VK_COMMA) {
-                var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
-                // If there is only one item, directly pick it up
-                if (items && items.length === 1) {
-                    var item = items[0];
-                    if (this._player.pickupItems([0])) {
-                        Game.sendMessage(this._player, "You pick up %s.", [item.describeA()]);
-                    }
-                } else {
-                    this.showItemsSubScreen(Game.Screen.pickupScreen, items, 'There is nothing here to pick up.');
-                } 
-            } else if(inputData.keyCode === ROT.VK_PERIOD) {
-                // Skip turn
-                this._player.getMap().getEngine().unlock();
-                // If you don't stop it here, then it will try to perform two actions for the player
-                return;
-            } else {
-                // Not a valid key
-                return;
-            }
-	        // Unlock the engine
+        var command = Game.Input.handleInput('playScreen', inputType, inputData);
+        var unlock  = command ? command(this._player) : false;
+
+        if(unlock)	// Unlock the engine
         	this._player.getMap().getEngine().unlock();
-        } else if (inputType === 'keypress') {
-        	var keyChar = String.fromCharCode(inputData.charCode);
-        	if(keyChar === '>') {
-        		this.move(0, 0, -1);
-        	} else if(keyChar === '<') {
-        		this.move(0, 0, 1);
-        	} else if (keyChar === ';') {
-                // Setup the look screen.
-                var offsets = this.getScreenOffsets();
-                Game.Screen.lookScreen.setup(
-                    this._player,
-                    this._player.getX(),
-                    this._player.getY(),
-                    offsets.x, 
-                    offsets.y
-                );
-                this.setSubScreen(Game.Screen.lookScreen);
-                return;
-            } else if (keyChar === '?') {
-                // Setup the look screen.
-                this.setSubScreen(Game.Screen.helpScreen);
-                return;
-            } else if(keyChar === '*') {
-                Game.watchName = prompt("Enter NPC name");
-                return;
-            } else {
-        		// Not a valid key
-        		return;
-        	}
-        	// Unlock the engine
-        	this._player.getMap().getEngine().unlock();
-        }
+    	else
+        	Game.refresh(this._player);
     },
     getScreenOffsets: function() {
         // Make sure we still have enough space to fit an entire game screen
@@ -400,13 +278,13 @@ Game.Screen.playScreen = {
         var visibleCells = {};
         // Store this._player.getMap() and player's z to prevent losing it in callbacks
         var map = this._player.getMap();
-        
+
         var currentDepth = this._player.getZ();
         // Find all visible cells and update the object
         map.getFov(currentDepth).compute(
-            this._player.getX(), 
-            this._player.getY(), 
-            this._player.getSightRadius(), 
+            this._player.getX(),
+            this._player.getY(),
+            this._player.getSightRadius(),
             function(x, y, radius, visibility) {
                 visibleCells[x + "," + y] = true;
                 // Mark cell as explored
@@ -450,17 +328,17 @@ Game.Screen.playScreen = {
                     } else {
                         // Not in our FOV, so just display the terrain
                         glyph = map.getTile(x, y, currentDepth);
-                        // Since the tile was previously explored but is not 
+                        // Since the tile was previously explored but is not
                         // visible, we want to change the foreground color to
                         // dark gray.
                         foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
                     }
-                    
+
                     display.draw(
                         x - topLeftX,
                         y - topLeftY,
-                        glyph.getChar(), 
-                        foreground, 
+                        glyph.getChar(),
+                        foreground,
                         glyph.getBackground()
                     );
                 }
@@ -469,6 +347,9 @@ Game.Screen.playScreen = {
     },
     setGameEnded: function(gameEnded) {
         this._gameEnded = gameEnded;
+    },
+    getSubScreen: function() {
+        return this._subScreen;
     },
     setSubScreen: function(subScreen) {
         this._subScreen = subScreen;
@@ -622,7 +503,7 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
                     colWidth
                 );
                 altRow++;
-            }  
+            }
         }
     }
 };
@@ -653,7 +534,7 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
         // enter without any items selected, simply cancel out
         if(inputData.keyCode === ROT.VK_ESCAPE ||
             (inputData.keyCode === ROT.VK_RETURN &&
-                (!this._canSelectItem || 
+                (!this._canSelectItem ||
                     (Object.keys(this._selectedIndices).length === 0 && Object.keys(this._altSelectedIndices).length === 0)))) {
             Game.Screen.playScreen.setSubScreen(undefined);
 
@@ -681,7 +562,7 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
             var shift = inputData.shiftKey ? 26 : 0;
             var index = inputData.keyCode - ROT.VK_A + shift;
 
-            // This works because of the way letters are added to each item. 
+            // This works because of the way letters are added to each item.
             // After all the items are rendered, we begin to render altItems
             // (if they exist), and continue to use the next letter in the sequence.
             // Thus, the index needs to be 'reset' like this when we begin checking
@@ -827,7 +708,7 @@ Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
             var details = item.details();
             if(details && details != "") {
                 description += " (%s).";
-                Game.sendMessage(this._player, description, 
+                Game.sendMessage(this._player, description,
                 [
                     item.describeA(false),
                     item.details()
@@ -835,7 +716,7 @@ Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
             } else {
                 Game.sendMessage(this._player, description, [item.describeA(false)]);
             }
-            
+
         }
         return true;
     }
@@ -896,7 +777,7 @@ Game.Screen.TargetBasedScreen = function(template) {
         var map = this._player.getMap();
         // If the tile is explored, we can give a better capton
         if(map.isExplored(x, y, z)) {
-            // If the tile isn't explored, we have to check if we can actually 
+            // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
             if(this._visibleCells[x + ',' + y]) {
                 var items = map.getItemsAt(x, y, z);
@@ -935,7 +816,7 @@ Game.Screen.TargetBasedScreen = function(template) {
         var map = this._player.getMap();
         // If the tile is explored, we can give a better capton
         if(map.isExplored(x, y, z)) {
-            // If the tile isn't explored, we have to check if we can actually 
+            // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
             if(this._visibleCells[x + ',' + y]) {
                 var items = map.getItemsAt(x, y, z);
@@ -973,8 +854,8 @@ Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY,
     // Cache the FOV
     var visibleCells = {};
     this._player.getMap().getFov(this._player.getZ()).compute(
-        this._player.getX(), this._player.getY(), 
-        this._player.getSightRadius(), 
+        this._player.getX(), this._player.getY(),
+        this._player.getSightRadius(),
         function(x, y, radius, visibility) {
             visibleCells[x + "," + y] = true;
         });
@@ -991,9 +872,9 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
         if(i == l - 1) {
             display.drawText(points[i].x, points[i].y, '%c{white}X');
         } else {
-            display.drawText(points[i].x, points[i].y, '%c{white}*');    
+            display.drawText(points[i].x, points[i].y, '%c{white}*');
         }
-        
+
     }
 
     // Render any overlay information
@@ -1022,28 +903,19 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
     // Render the description on the log display
     Game.getLog().clear();
     Game.getLog().drawText(
-        0, 
+        0,
         0,
         this._descriptionFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY)
     );
 };
 Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputData) {
-    // Move the cursor
-    if (inputType == 'keydown') {
-        if (inputData.keyCode === ROT.VK_LEFT)
-            this.moveCursor(-1, 0);
-        else if (inputData.keyCode === ROT.VK_RIGHT)
-            this.moveCursor(1, 0);
-        else if (inputData.keyCode === ROT.VK_UP)
-            this.moveCursor(0, -1);
-        else if (inputData.keyCode === ROT.VK_DOWN)
-            this.moveCursor(0, 1);
-        else if (inputData.keyCode === ROT.VK_ESCAPE)
-            Game.Screen.playScreen.setSubScreen(undefined);
-        else if (inputData.keyCode === ROT.VK_RETURN)
-            this.executeOkFunction();
-    }
-    Game.refresh();
+    var command = Game.Input.handleInput('TargetBasedScreen', inputType, inputData);
+    var unlock = command ? command(this._player) : false;
+
+    if(unlock)
+        this._player.getMap().getEngine().unlock();
+    else
+        Game.refresh(this._player);
 };
 Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
     // Make sure we stay within bounds.
@@ -1054,10 +926,12 @@ Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
 Game.Screen.TargetBasedScreen.prototype.executeOkFunction = function() {
     // Switch back to the play screen.
     Game.Screen.playScreen.setSubScreen(undefined);
+
     // Call the OK function and end the player's turn if it return true.
-    if (this._okFunction && this._okFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY)) {
-        this._player.getMap().getEngine().unlock();
-    }
+    if(this._okFunction)
+        return this._okFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY);
+    else
+        return false;
 };
 
 // Target-based screens
@@ -1083,7 +957,7 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
         var map = this._player.getMap();
         // If the tile is explored, we can give a better capton
         if (map.isExplored(x, y, z)) {
-            // If the tile isn't explored, we have to check if we can actually 
+            // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
             if (this._visibleCells[x + ',' + y]) {
                 var items = map.getItemsAt(x, y, z);
@@ -1122,6 +996,14 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
     okFunction: function(x, y) {
         this._player.throwItem(this._player.getThrowing(), x, y);
         return true;
+    }
+});
+
+Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
+    okFunction: function(x, y) {
+        debugger;
+        var target = this._player.getMap().getEntityAt(x, y, this._player.getZ());
+        return this._player.usePower(target);
     }
 });
 
@@ -1298,7 +1180,7 @@ Game.Screen.helpScreen = {
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
         display.drawText(0, y++, '%c{#585DF5}Arrow keys%c{} to move');
-        display.drawText(0, y++, '%c{#585DF5}Shift + Arrow keys%c{} to swap positions with NPC');
+        display.drawText(0, y++, '%c{#585DF5}Ctrl + Arrow keys%c{} to swap positions with NPC');
         display.drawText(0, y++, '[%c{#585DF5},%c{}] to pick up items');
         display.drawText(0, y++, '[%c{#585DF5}d%c{}] to drop items');
         display.drawText(0, y++, '[%c{#585DF5}w%c{}] to wield items');
@@ -1352,11 +1234,11 @@ Game.Screen.justiceScreen = {
     },
     /**
      * @display     The same ROT.Display object passed to the this.render()
-     * @startX 
-     * @startY 
+     * @startX
+     * @startY
      * @title       The text to put above the meter
      * @percentage  Amount the gauge should be filled. Percentage should be a decimal (0.54 for 54%)
-     * @inverse     If set && true, then the more empty the greener it should be. 
+     * @inverse     If set && true, then the more empty the greener it should be.
      *              Otherwise, the more full it is, the greener it should be
      **/
     _drawMeter: function(display, startX, startY, title, percentage, inverse) {
@@ -1396,24 +1278,35 @@ Game.Screen.gainStatScreen = {
         // Must be called before rendering.
         this._entity = entity;
         this._options = entity.getPointOptions();
+        this._powers = entity.getPowers();
+
+        // Screen controls
+        this._letters = 'abcdefghijklmnopqrstuvwxyz';
+        this._numbers = '0123456789';
     },
     render: function(display) {
-        var letters = 'abcdefghijklmnopqrstuvwxyz';
-        display.drawText(0, 0, 'Choose a stat to increase: ');
-        display.drawText(4, 2, 'CHAR  COST  VAL');
+        display.drawText(0, 0, 'Choose a stat or power to increase: ');
+        display.drawText(0, 1, `Remaining points: %c{${Game.Palette.green}}${this._entity.getSpendablePoints()}`);
+        display.drawText(4, 3, 'CHAR  COST  VAL');
 
         // Iterate through each of our options
-        for (var i = 0; i < this._options.length; i++) {
+        for(let i = 0; i < this._options.length; i++) {
             // When displaying and checking costs, strip out 'max' and 'mod' from name
             var charName = this._options[i][0].replace(/^max(\w+)/, "$1").replace(/(\w+)mod$/, "$1");
             var spacer1 = "".lpad(" ", 4 - charName.length + 3);
             var spacer2 = "".lpad(" ", 3 - String(Game.Cost.Characteristics[charName]).length + 2);
 
-            display.drawText(0, 3 + i, letters.substring(i, i + 1) + ' - %c{#585DF5}' + charName + '%c{}' + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + '%c{#585DF5}' + this._entity.getCharacteristic(charName, true, true));
+            display.drawText(0, 4 + i, this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + charName + '%c{}' + spacer1 + Game.Cost.Characteristics[charName] + spacer2 + '%c{#585DF5}' + this._entity.getCharacteristic(charName, true, true));
         }
 
-        // Render remaining stat points
-        display.drawText(0, 4 + this._options.length, "Remaining points: %c{#00ff78}" + this._entity.getSpendablePoints());
+        display.drawText(0, 3 + this._options.length + 2, 'Powers:')
+        for(let i = 0; i < this._powers.length; i++) {
+            let spacer = "".lpad(" ", 15 - this._powers[i].name.length + 3);
+            display.drawText(
+                0,
+                4 + this._options.length + i + 3,
+                `${this._numbers.substring(i, i + 1)} - %c{${Game.Palette.blue}}${this._powers[i].name} (${this._powers[i].points})%c{}${spacer}Cost: ${this._powers[i].cost}`)
+        }
     },
     handleInput: function(inputType, inputData) {
         // TODO: instead of pressing letters, use direction keys to highlight characteristics to increase
@@ -1421,30 +1314,48 @@ Game.Screen.gainStatScreen = {
         // characteristics are affected, and be able to move your spendible points around (without
         // selling back what the character has previously put points into). Up/down to hightlihg, left/right
         // to spend and take back points, enter to accept (making the purchase permanent).
-        if(inputType === 'keydown' && inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
-            // If a letter was pressed, check if it matches to a valid option.
-            if(this._entity.getSpendablePoints() > 0) {
-                // Check if it maps to a valid item by subtracting 'a' from the character
-                // to know what letter of the alphabet we used.
-                var index = inputData.keyCode - ROT.VK_A;
-                if (this._options[index]) {
-                    // When displaying and checking costs, strip out 'max' and 'mod' from name
-                    var charName = this._options[index][0].replace(/^max(\w+)/, "$1").replace(/(\w+)mod$/, "$1");
-                    // Call the stat increasing function with the name of the stat as an argument
-                    this._options[index][1].call(this._entity, this._options[index][0]);
-                    // Decrease stat points
-                    this._entity.subtractSpendablePoints(Game.Cost.Characteristics[charName]);
+        var command = Game.Input.handleInput("gainStatScreen", inputType, inputData);
+        var unlock = command ? command(this._entity) : false;
 
-                    Game.refresh(this._entity);
-                }
-            } else {
-                Game.sendMessage(this._entity, 'You have no more points to spend.');
-                Game.refresh(this._entity);
-                this._entity.clearMessages();
-            }
-        } else if(inputType === 'keydown' && (inputData.keyCode === ROT.VK_RETURN || inputData.keyCode === ROT.VK_ESCAPE)) {
-            Game.Screen.playScreen.setSubScreen(undefined);
+        if(unlock)
+            this._entity.getMap().getEngine().unlock();
+        else
+            Game.refresh(this._entity);
+    }
+};
+
+// Manage character powers screen
+Game.Screen.powersScreen = {
+    setup: function(entity) {
+        // Must be called before rendering.
+        this._entity = entity;
+        this._powers = entity.getPowers();
+        this._letters = 'abcdefghijklmnopqrstuvwxyz';
+    },
+    render: function(display) {
+        display.drawText(0, 0, 'Powers:');
+
+        // Iterate through each of our powers
+        for (var i = 0; i < this._powers.length; i++) {
+            var powerName = this._powers[i]['name'];
+            display.drawText(0, 3 + i, this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName);
         }
+    },
+    handleInput: function(inputType, inputData) {
+        var command = Game.Input.handleInput('powersScreen', inputType, inputData);
+        var unlock = command ? command(this._entity) : false;
+
+        if(unlock)
+            this._entity.getMap().getEngine().unlock();
+        else
+            Game.refresh(this._entity);
+    },
+    activatePower: function(letter) {
+        var showScreenCommand = Game.Commands.showTargettingScreenCommand(Game.Screen.powerTargetScreen, Game.Screen.playScreen);
+        var index = this._letters.indexOf(letter);
+        this._entity.setActivePower(index);
+
+        showScreenCommand(this._entity);
     }
 };
 
@@ -1466,7 +1377,7 @@ Game.Screen.winScreen = {
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
 			Game.Screen.playScreen.setSubScreen(undefined);
-		}   
+		}
     }
 };
 
@@ -1485,6 +1396,6 @@ Game.Screen.loseScreen = {
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
 			location.reload();
-		}     
+		}
     }
 };

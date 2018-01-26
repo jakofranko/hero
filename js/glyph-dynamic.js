@@ -42,7 +42,7 @@ Game.DynamicGlyph = function(properties) {
         }
         // Add all of our listeners
         if(mixins[i].listeners) {
-            var listeners = Object.keys(mixins[i].listeners)
+            var listeners = Object.keys(mixins[i].listeners);
             for(var k = 0; k < listeners.length; k++) {
                 var listener = listeners[k];
                 // If we don't already have a listener for this event in our listeners array, add it.
@@ -101,7 +101,7 @@ Game.DynamicGlyph.prototype.describe = function() {
         for(var i = 0, l = descriptionGroups.length; i < l; i++) {
             if(descriptionGroups[i]) {
                 for(var j = 0; j < descriptionGroups[i].length; j++) {
-                    descriptions.push(descriptionGroups[i][j]);          
+                    descriptions.push(descriptionGroups[i][j]);
                 }
             }
         }

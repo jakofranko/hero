@@ -29,7 +29,8 @@ Game.PlayerTemplate = {
     attackValue: 10,
     sightRadius: 20,
     inventorySlots: 22,
-    basePoints: 10,
+    basePoints: 100,
+    powers: ['energy bolt', 'throwing star', 'bo staff', 'stun fist', 'katana', 'light lance', 'pistol', 'lightning bolt', 'kevlar', 'phase skin'],
     mixins: [
         Game.EntityMixins.Characteristics,
         Game.EntityMixins.BasePoints,
@@ -42,6 +43,7 @@ Game.PlayerTemplate = {
         Game.EntityMixins.MemoryMaker,
         Game.EntityMixins.MoneyHolder,
         Game.EntityMixins.MessageRecipient,
+        Game.EntityMixins.PowerUser,
         Game.EntityMixins.PlayerStatGainer,
         Game.EntityMixins.Thrower,
         Game.EntityMixins.ExperienceGainer

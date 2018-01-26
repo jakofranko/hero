@@ -97,7 +97,7 @@ var Game = {
 	    this._overview = new ROT.Display({width: this._citySize, height: this._citySize});
 	    this._log = new ROT.Display({width: 30, height: 20});
 	    this._stats = new ROT.Display({width: 10, height: 5});
-	   
+
 	    // Create a helper function for binding to an event
 	    // and making it send it to the screen
 	    var game = this; // So that we don't lose this
@@ -118,10 +118,11 @@ var Game = {
 	            }
 	        });
 	    };
+
 	    // Bind keyboard input events
 	    bindEventToScreen('keydown');
 	    // bindEventToScreen('keyup');
-	    bindEventToScreen('keypress');
+	    // bindEventToScreen('keypress');
 	},
 	refresh: function(player) {
         // Clear the screen
@@ -130,10 +131,10 @@ var Game = {
         // Render the screen
         this._currentScreen.render(this._display);
         if(this._miniMap !== null) {
-        	this._miniMap.render(this._overview);	
+        	this._miniMap.render(this._overview);
         }
         if(this._characterStats !== null) {
-        	this._characterStats.render(this._stats);	
+        	this._characterStats.render(this._stats);
         }
 
         if(player)
@@ -157,7 +158,7 @@ var Game = {
 	        message = message.format.apply(this, args);
 	    }
 	    // Get the nearby entities
-	    entities = map.getEntitiesWithinRadius(centerX, centerY, centerZ, 5);
+	    var entities = map.getEntitiesWithinRadius(centerX, centerY, centerZ, 5);
 	    // Iterate through nearby entities, sending the message if
 	    // they can receive it.
 	    for(var i = 0; i < entities.length; i++) {
@@ -175,7 +176,7 @@ var Game = {
 	        for (var i = 0; i < messages.length; i++) {
 	            // Draw each message, adding the number of lines
 	            messageY += this._log.drawText(
-	                0, 
+	                0,
 	                messageY,
 	                '%c{white}%b{black}' + messages[i]
 	            );
@@ -214,19 +215,19 @@ var Game = {
 	resize: function(display, setSize, setFontSize, setScreenSize) {
 		var options = display.getOptions();
 		var parent = display.getContainer().parentElement;
-		
+
 		if(setSize) {
 			var size = display.computeSize(parent.clientWidth, parent.clientHeight);
-			display.setOptions({width: size[0], height: size[1]});	
+			display.setOptions({width: size[0], height: size[1]});
 			if(setScreenSize) {
 				this._screenWidth = size[0];
 				this._screenHeight = size[1];
 			}
 		}
-		
+
 		if(setFontSize) {
 			var fontSize = display.computeFontSize(parent.clientWidth, parent.clientHeight);
-			display.setOptions({fontSize:fontSize});	
+			display.setOptions({fontSize:fontSize});
 		}
 
 

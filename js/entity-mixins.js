@@ -14,7 +14,7 @@ Game.EntityMixins.Attacker = {
     },
     hthAttack: function(target) {
         // No matter what, some entity took a swing at another entity,
-        // so trigger the onAttack event. onHit on the otherhand...
+        // so trigger the onAttack event. onHit on the other hand...
         target.raiseEvent('onAttack', this);
 
         var hit = this._attackRoll(target);
@@ -98,7 +98,7 @@ Game.EntityMixins.Characteristics = {
         this._PRE = template['PRE'] || 10;
         this._COM = template['COM'] || 10;
 
-        // Figured characteristics. These will update as primary 
+        // Figured characteristics. These will update as primary
         // characteristics change, but cannot be added to.
         this._PD = template['PD'] || this._STR / 5;
         this._ED = template['ED'] || this._CON / 5;
@@ -120,7 +120,7 @@ Game.EntityMixins.Characteristics = {
         this._maxSTUNmod = 0;
 
         // It should be noted that BODY, STUN and END are tracked as the current values, whereas
-        // maxBODY, maxSTUN and maxEND is the upper limit that they can recover too, and 
+        // maxBODY, maxSTUN and maxEND is the upper limit that they can recover too, and
         // maxBODYmod, maxSTUNmod, and maxENDmod are what get incrememnted when spending XP
 
         // Combat values
@@ -130,6 +130,10 @@ Game.EntityMixins.Characteristics = {
         this._ECV = Math.round(this._EGO / 3);
         this._EOCVmod = 0;
         this._EDCVmod = 0;
+
+        // Resistant Defenses. Can only be updated by powers (armor, resistant defense)
+        this._rPD = 0;
+        this._rED = 0;
     },
     updateFiguredCharacteristics: function() {
         this._PD        = Math.round(this._STR / 5);
@@ -149,25 +153,27 @@ Game.EntityMixins.Characteristics = {
             return this[characteristic];
     },
     getSTR: function() {
-        return this._STR;    
+        return this._STR;
     },
     getDEX: function() {
-        return this._DEX;    
+        return this._DEX;
     },
     getCON: function() {
-        return this._CON;    
+        return this._CON;
     },
     getBODY: function() {
-        return this._BODY;    
+        return this._BODY;
     },
     takeBODY: function(attacker, BODY, type, killing) {
         var defense;
-        if(!type || type == 'physical') {
-            defense = this._PD;
-        } else if(type == 'energy') {
-            defense = this._ED;
+        if(killing) {
+            if(!type || type == 'physical') defense = this._rPD;
+            else if(type == 'energy')       defense = this._rED;
+            else                            defense = 0;
         } else {
-            defense = 0;
+            if(!type || type == 'physical') defense = this._PD;
+            else if(type == 'energy')       defense = this._ED;
+            else                            defense = 0;
         }
 
         // Make sure we don't take any less than zero damage
@@ -188,52 +194,52 @@ Game.EntityMixins.Characteristics = {
         return this._maxBODY;
     },
     getINT: function() {
-        return this._INT;    
+        return this._INT;
     },
     getEGO: function() {
-        return this._EGO;    
+        return this._EGO;
     },
     getPRE: function() {
-        return this._PRE;    
+        return this._PRE;
     },
     getCOM: function() {
-        return this._COM;    
+        return this._COM;
     },
     getPD: function() {
-        return this._PD;    
+        return this._PD;
     },
     getPDmod: function() {
-        return this._PDmod;    
+        return this._PDmod;
     },
     getED: function() {
-        return this._ED;    
+        return this._ED;
     },
     getEDmod: function() {
-        return this._EDmod;    
+        return this._EDmod;
     },
     getSPD: function() {
-        return this._SPD;    
+        return this._SPD;
     },
     getSPDmod: function() {
-        return this._SPDmod;    
+        return this._SPDmod;
     },
     getREC: function() {
-        return this._REC;    
+        return this._REC;
     },
     getRECmod: function() {
-        return this._RECmod;    
+        return this._RECmod;
     },
     getEND: function() {
-        return this._END;    
+        return this._END;
     },
     getMaxEND: function() {
         return this._maxEND;
     },
     getMaxENDmod: function() {
-        return this._maxENDmod;    
+        return this._maxENDmod;
     },
     getSTUN: function() {
-        return this._STUN;    
+        return this._STUN;
     },
     getMaxSTUN: function() {
         return this._maxSTUN;
@@ -243,12 +249,15 @@ Game.EntityMixins.Characteristics = {
     },
     takeSTUN: function(attacker, STUN, type, killing) {
         var defense;
-        if(!type || type == 'physical') {
-            defense = this._PD;
-        } else if(type == 'energy') {
-            defense = this._ED;
+        if(killing) {
+            // Page 410 of the 5th Ed. -- can apply normal defenses against killing STUN if they have resistant defenses
+            if(!type || type == 'physical') defense = this._rPD ? this._rPD + this._PD : 0;
+            else if(type == 'energy')       defense = this._rED ? this._rPD + this._ED : 0;
+            else                            defense = 0;
         } else {
-            defense = 0;
+            if(!type || type == 'physical') defense = this._PD;
+            else if(type == 'energy')       defense = this._ED;
+            else                            defense = 0;
         }
 
         // Make sure we don't take any less than zero damage
@@ -383,7 +392,7 @@ Game.EntityMixins.CorpseDropper = {
                         foreground: this._foreground
                     })
                 );
-            }    
+            }
         }
     }
 };
@@ -396,7 +405,7 @@ Game.EntityMixins.Destructible = {
     },
     getDefenseValue: function() {
         var modifier = 0;
-        // If we can equip items, then have to take into 
+        // If we can equip items, then have to take into
         // consideration weapon and armor
         if (this.hasMixin(Game.EntityMixins.Equipper)) {
             if (this.getWeapon()) {
@@ -426,7 +435,7 @@ Game.EntityMixins.Destructible = {
     },
     setHp: function(hp) {
         this._hp = hp;
-    },  
+    },
     increaseDefenseValue: function(value) {
         // If no value was passed, default to 2.
         value = value || 2;
@@ -578,39 +587,6 @@ Game.EntityMixins.FoodConsumer = {
         }
     }
 };
-Game.EntityMixins.FungusActor = {
-    name: 'FungusActor',
-    groupName: 'Actor',
-    init: function() {
-        this._growthsRemaining = 5;
-    },
-    act: function() {
-        if(this._growthsRemaining > 0) {
-            if(Math.random() <= 0.02) {
-                // Generate the coordinates of a random adjacent square by
-                // generating an offset between [-1, 0, 1] for both the x and
-                // y directions. To do this, we generate a number from 0-2 and then
-                // subtract 1.
-                var xOffset = Math.floor(Math.random() * 3) - 1;
-                var yOffset = Math.floor(Math.random() * 3) - 1;
-                // Make sure we aren't trying to spawn on the same tile as us
-                if (xOffset != 0 || yOffset != 0) {
-                    // Check if we can actually spawn at that location, and if so
-                    // then we grow!
-                    if (this.getMap().isEmptyFloor(this.getX() + xOffset, this.getY() + yOffset, this.getZ())) {
-                        var entity = Game.EntityRepository.create('fungus');
-                        entity.setPosition(this.getX() + xOffset, this.getY() + yOffset, this.getZ());
-                        this.getMap().addEntity(entity);
-                        this._growthsRemaining--;
-
-                        // Send a message nearby!
-                        Game.sendMessageNearby(this.getMap(), entity.getX(), entity.getY(), entity.getZ(), 'The fungus is spreading!');
-                    }
-                }
-            }
-        }
-    }
-};
 Game.EntityMixins.InventoryHolder = {
     name: 'InventoryHolder',
     init: function(template) {
@@ -650,7 +626,7 @@ Game.EntityMixins.InventoryHolder = {
             this._items[i].removeFromStack();
         else
             // Simply clear the inventory slot.
-            this._items[i] = null;    
+            this._items[i] = null;
     },
     canAddItem: function(item) {
         if(item.hasMixin("Fixture")) {
@@ -688,7 +664,7 @@ Game.EntityMixins.InventoryHolder = {
         var added = 0;
         // Iterate through all indices.
         for (var i = 0; i < indices.length; i++) {
-            // Try to add the item. If our inventory is not full, then splice the 
+            // Try to add the item. If our inventory is not full, then splice the
             // item out of the list of items. In order to fetch the right item, we
             // have to offset the number of items already added.
             if (this.addItem(mapItems[indices[i] - added])) {
@@ -710,7 +686,7 @@ Game.EntityMixins.InventoryHolder = {
             if (this._map) {
                 this._map.addItem(this.getX(), this.getY(), this.getZ(), this._items[i]);
             }
-            this.removeItem(i);      
+            this.removeItem(i);
         }
     }
 };
@@ -729,15 +705,15 @@ Game.EntityMixins.JobActor = {
     act: function() {
         if(Game.debug && Game.watchName == this.getName())
             debugger;
-        
-        if(!this.isConscious()) 
+
+        if(!this.isConscious())
             return;
 
         // If entity can react and is reacting right now,
         // do that instead of performing job.
         if(this.hasMixin('Reactor') && this.isReacting())
             return this.react();
-        
+
         // Re-prioritize every hour
         // TODO: give a unique time for re-prioritization (still once an hour, just a different minute/second perhaps) so that the NPCs don't all reprioritize and the same time and lag the system
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0)
@@ -1022,7 +998,7 @@ Game.EntityMixins.MemoryMaker = {
             this.remember('people', 'enemies', attacker.getName(), enemy);
             this.remember('events', false, 'attacked by ' + attacker.getName(), event);
 
-            if(attacker.hasMixin('MemoryMaker')) 
+            if(attacker.hasMixin('MemoryMaker'))
                 attacker.remember('people', 'victims', this.getName(), {entity: this});
         },
         details: function() {
@@ -1061,10 +1037,10 @@ Game.EntityMixins.MoneyHolder = {
                 Game.sendMessage(target, 'Someone just stole $%s from you!', [amount]);
             }
             if(this.hasMixin('MessageRecipient')) {
-                Game.sendMessage(this, 'You successfully stole $%s from %s', [amount, target.describeThe()]);   
+                Game.sendMessage(this, 'You successfully stole $%s from %s', [amount, target.describeThe()]);
             }
         } else if(this.hasMixin('MessageRecipient')) {
-            Game.sendMessage(this, '%s doesn\'t have any money', [target.describeThe()]);   
+            Game.sendMessage(this, '%s doesn\'t have any money', [target.describeThe()]);
         }
     },
     give: function(target, amount) {
@@ -1080,11 +1056,11 @@ Game.EntityMixins.MoneyHolder = {
                 Game.sendMessage(target, '%s just gave you $%s', [this.describeThe(), amount]);
             }
             if(this.hasMixin('MessageRecipient')) {
-                Game.sendMessage(this, 'You just gave $%s to %s', [amount, target.describeThe()]);   
+                Game.sendMessage(this, 'You just gave $%s to %s', [amount, target.describeThe()]);
             }
         } else if(this.hasMixin('MessageRecipient')) {
-            Game.sendMessage(this, '%s can\'t take money', [target.describeThe()]);   
-        
+            Game.sendMessage(this, '%s can\'t take money', [target.describeThe()]);
+
         }
     }
 };
@@ -1103,6 +1079,55 @@ Game.EntityMixins.MessageRecipient = {
         this._messages = [];
     }
 };
+Game.EntityMixins.PowerUser = {
+    init: function(template) {
+        this._powersList = template['powers'] || [];
+        this._powers = [];
+        this._activePower = null;
+        this._constantPowers = [];
+        this._persistentPowers = [];
+        this._inherentPowers = [];
+
+        // Initialize powers
+        if(this._powersList.length) {
+            this._powersList.forEach(power => this.addPower(power));
+        }
+    },
+    getPowers: function() {
+        return this._powers;
+    },
+    addPower: function(powerName) {
+        var newPower = Game.Powers.create(powerName);
+        newPower.setEntity(this);
+        this._powers.push(newPower);
+    },
+    getActivePower: function() {
+        return this._activePower;
+    },
+    setActivePower: function(i) {
+        this._activePower = this._powers[i];
+    },
+    usePower: function(target) {
+        var power = this._activePower;
+        if(!target) {
+            Game.sendMessage(this, "There's nothing there!");
+            return false; // don't end turn
+        }
+
+        // TODO: [POWERS] handle non-instant powers every turn
+        // TODO: Update entity mixins to support an 'onAct' or some such method (update pattern)
+        if(power['duration'] != 'instant') {
+            var queue = '_' + power['duration'] + 'Powers'; // e.g., '_constantPowers'
+            this[queue].push(power);
+            power.enqueue();
+        }
+
+        // TODO: Handle miss? True if hit, false if miss
+        power.effect(target);
+
+        return true;
+    }
+};
 Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
@@ -1111,7 +1136,7 @@ Game.EntityMixins.PlayerActor = {
             return;
         }
         this._acting = true;
-        
+
         // Detect if the game is over
         if(!this.isAlive()) {
             Game.Screen.playScreen.setGameEnded(true);
@@ -1235,14 +1260,14 @@ Game.EntityMixins.Reactor = {
                 this.setReaction(reaction);
 
                 if(this.hasMixin('Targeting'))
-                    this.setTarget(attacker);    
+                    this.setTarget(attacker);
             }
         },
         onForget: function(memoryName, memory) {
             if(this._reacting) {
                 if((memoryName.search(/mugged by/) !== -1 || memoryName.search(/attacked by/) !== -1) && memory.entity == this.getTarget())
                     this.setReaction(false);
-                
+
             }
         }
     }
@@ -1279,7 +1304,7 @@ Game.EntityMixins.Sight = {
         this.getMap().getFov(this.getZ()).compute(
             this.getX(),
             this.getY(),
-            this.getSightRadius(), 
+            this.getSightRadius(),
             function(x, y, radius, visibility) {
                 if (x === otherX && y === otherY)
                     found = true;
@@ -1325,7 +1350,7 @@ Game.EntityMixins.TaskActor = {
     groupName: 'Actor',
     init: function(template) {
         // Load tasks
-        this._tasks = template['tasks'] || ['wander']; 
+        this._tasks = template['tasks'] || ['wander'];
     },
     act: function() {
         // Iterate through all our tasks
@@ -1447,7 +1472,7 @@ Game.EntityMixins.Thrower = {
                 break;
             } else {
                 lastPoint = linePoints[i];
-            }   
+            }
         };
 
         // If nothing is in the way, the end point is targetX and targetY
@@ -1467,7 +1492,7 @@ Game.EntityMixins.Thrower = {
                 Game.sendMessage(entity, "%s throws %s at you!", [this.describeThe(), item.describeA()]);
                 entity.takeDamage(this, damage);
             }
-            
+
             var amount = 0;
             if(item.hasMixin('Stackable')) {
                 amount = Math.min(1, item.amount() - 1);
