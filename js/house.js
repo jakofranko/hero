@@ -106,102 +106,10 @@ Game.House.prototype.grammar = {
 	'closet': false
 };
 
-Game.House.prototype.Room = function(name) {
-	this.room = name;
-	this.x = 0;
-	this.y = 0;
-	this.z = 0;
-	this.width = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
-	this.height = Game.getRandomInRange(this.roomSizes[name][0], this.roomSizes[name][1]);
-	this.spawnDirection = null;
-	this.placed = true; // if this is skipped, set to false. Used in item placement
-	this.children = [];
-};
-// 'roomName': [min, max]
-Game.House.prototype.Room.prototype.roomSizes = {
-	'foyer': [3, 4],
-	'dining room': [8, 10],
-	'living room': [8, 10],
-	'kitchen': [8, 10],
-	'office': [7, 10],
-	'hall': [3, 5],
-	'bathroom': [5, 7],
-	'bedroom': [7, 11],
-	'closet': [3, 3],
-};
-Game.House.prototype.Room.prototype.getX = function() {
-	return this.x;
-};
-Game.House.prototype.Room.prototype.setX = function(x) {
-	this.x = x;
-};
-// @deprecated Use Game.House.adjustX() instead (gets the whole graph)
-// Game.House.prototype.Room.prototype.adjustX = function(amount) {
-// 	this.x += amount;
-// };
-Game.House.prototype.Room.prototype.getY = function(y) {
-	return this.y;
-};
-Game.House.prototype.Room.prototype.setY = function(y) {
-	this.y = y;
-};
-// @deprecated Use Game.House.adjustY() instead (gets the whole graph)
-// Game.House.prototype.Room.prototype.adjustY = function(amount) {
-// 	this.y += amount;
-// };
-Game.House.prototype.Room.prototype.getZ = function(z) {
-	return this.z;
-};
-Game.House.prototype.Room.prototype.setZ = function(z) {
-	this.z = z;
-	// All children should have this same z level
-	if(this.children.length > 0) {
-		for (var i = 0; i < this.children.length; i++) {
-			this.children[i].setZ(z);
-		}
-	}
-};
-Game.House.prototype.Room.prototype.getWidth = function(width) {
-	return this.width;
-};
-Game.House.prototype.Room.prototype.setWidth = function(width) {
-	this.width = width;
-};
-Game.House.prototype.Room.prototype.getHeight = function(height) {
-	return this.height;
-};
-Game.House.prototype.Room.prototype.setHeight = function(height) {
-	this.height = height;
-};
-Game.House.prototype.Room.prototype.getSpawnDirection = function() {
-	return this.spawnDirection;
-};
-Game.House.prototype.Room.prototype.setSpawnDirection = function(dir) {
-	this.spawnDirection = dir;
-};
-Game.House.prototype.Room.prototype.getPlaced = function() {
-	return this.placed;
-};
-Game.House.prototype.Room.prototype.setPlaced = function(placed) {
-	this.placed = placed;
-
-	// This state should cascade to each of it's chidren
-	if(this.children) {
-		for (var i = 0; i < this.children.length; i++) {
-			this.children[i].setPlaced(placed);
-		}
-	}
-
-};
-Game.House.prototype.Room.prototype.addChild = function(child) {
-	if(child !== false)
-		this.children.push(child);
-};
-
 // Recusively generate the graph, starting with the 'foyer'
 Game.House.prototype.generate = function(name) {
 	// Create a new room
-	var room = new this.Room(name);
+	var room = new Game.HouseRoom(name);
 
 	if(this.grammar[name] === false) {
 		return room;
