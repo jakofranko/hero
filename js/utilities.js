@@ -77,11 +77,12 @@ if(!String.prototype.camelCase) {
 Game.extend = function(src, dest) {
     // Create a copy of the source.
     var result = {};
-    for (var key in src) {
+    var key;
+    for(key in src) {
         result[key] = src[key];
     }
     // Copy over all keys from dest
-    for (var key in dest) {
+    for(key in dest) {
         result[key] = dest[key];
     }
     return result;
@@ -170,7 +171,7 @@ if (!Math.ceil10) {
 Game.listXY = function(startX, startY, width, height) {
     var list = [];
     for (var x = 0; x < width; x++, startX++) {
-        for(y = 0, initialY = startY; y < height; y++, initialY++) {
+        for(var y = 0, initialY = startY; y < height; y++, initialY++) {
             list.push(startX + "," + initialY);
         }
     }
