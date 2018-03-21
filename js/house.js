@@ -114,18 +114,18 @@ Game.House.prototype.generate = function(name) {
 	if(this.grammar[name] === false) {
 		return room;
 	} else {
-		// Pick a random number of connections up to 3 or the number 
+		// Pick a random number of connections up to 3 or the number
 		// of connections that room can have, whichever is less
 		var possibleChildren = this.grammar[name].length;
-		var numChildren = Math.min(3, possibleChildren);	
+		var numChildren = Math.min(3, possibleChildren);
 		for (var i = 0; i < numChildren; i++) {
 			var randomChild = this._getRandomChild(name, true);
 
 			// If the random child is under, or does not have a limit, add it
 			if(randomChild && (!this.maxRooms[randomChild] || this.roomNum[randomChild] < this.maxRooms[randomChild])) {
-				// this should be incremented first so that deeper in 
+				// this should be incremented first so that deeper in
 				// the recursion the current numbers of rooms are reflected
-				this.roomNum[randomChild]++; 
+				this.roomNum[randomChild]++;
 				room.addChild(this.generate(randomChild));
 			}
 		}
@@ -137,268 +137,206 @@ Game.House.prototype.generate = function(name) {
 
 // Because a room could be tacked on to the north, x,y coordinate 0,0 is going to change. Rooms to the south and east of their ancestor are not a problem; just stick the 'cursor' at a brand new x or y coordinate. But if it's to the north or west, the whole thing needs to be shifted down or to the right, and then the new room added to the new 0,y or x,0 coordinates.
 Game.House.prototype.render = function(direction) { // The direction specifies when way we branch from the root initially
-	// The array of tiles to be returned
-	var house = [];
+    // The array of tiles to be returned
+        let house = [];
 
-	// This will be an array of rooms to do next.
-	var queue = [this.graph];
+        // This will be an array of rooms to do next.
+        let queue = [this.graph];
 
-	// Process the queue until it's empty. Processing a room will consist of the following:
-	// 1. Draw the room starting at the designated x, y, and z
-	// 2. Loop through the room's children. For each child, pick a direction that the room will be added on to, and then detect whether a room already exists in that direction. If a room exists and adding a story would not exceed the maximum story limit of a house, add an up stairs and a down stairs in the current room and give the child room the same x,y coordinates of the parent room, set all of the child rooms chidren nodes to the new z level, and then add the child to the queue. If a room exists but you cannot add a story, skip the child.
-	// 3. If a room does not exist in the projected space, then assign the x,y start location to the child based on the current child's width and height, such that when starting at x,y and then rendering the room tiles, it will connect to the door placed in step 5 as well as share a wall with the parent node.
-	// 4. If the x or y values of the new room are negative, shift the x and y values of the child and the parent until they are no longer negative while simultaneously adding spaces onto the house in the appropriate direction.
-	// 5. After the new x and y values of the child and parent are known (and if they are on the same z level), it is possible to know what x and y coordinates they will share. This should be the shared wall. After getting a list of the coordinates they will share, eliminate the extreme x or y coordinates to avoid placing a door in a corner, and then randomly pick a coordinate for a door and replace the wall tile with a door tile.
-	// 6. Add the child (with assigned x, y, and z values) to the queue of rooms to render
-	while(queue.length > 0) {
-		var room = queue.shift();
-		var possibleDirections = this.possibleDirections[direction].randomize(); // For directions that have already been taken for child rooms
-		var x, y, z;
-		var existingRoom = false;
+        // Process queue til empty
+        while(queue.length > 0) {
+            let room = queue.shift();
+            let x, y, z;
+            let possibleDirections = this.possibleDirections[direction].randomize();
+            let existingRoom = false;
+            let currentDirection, exceedsMax, tryAbove;
 
-		// Render room tiles
-		var roomTiles = this._renderRoom(room, direction);
-		
-		// Add room tiles to our house tiles
-		x = room.getX();
-		y = room.getY();
-		z = room.getZ();
+            if(room.parent) {
+                // First, check that adding the new room does not exceed the maximum limits
+                tryAbove = room.z > room.parent.z;
+                exceedsMax = this._exceedsMax(room, tryAbove);
 
-		// Check to see if a room exists already. If it does, _roomCheck will try
-		// to return the coordinates of a floor tile so that stairs can be placed
-		// and the room spawned on the z level above. Otherwise, skip this room.
-		// Depending on the room spawn direction, shave off one side in order
-		// to skip the shared wall.
-		switch(room.getSpawnDirection()) {
-			case 'n':
-				existingRoom = this._roomCheck(x, y, room.width, room.height - 1, house[z]);
-				break;
-			case 'e':
-				existingRoom = this._roomCheck(x + 1, y, room.width, room.height, house[z]);
-				break;
-			case 's':
-				existingRoom = this._roomCheck(x, y + 1, room.width, room.height, house[z]);
-				break;
-			case 'w':
-				existingRoom = this._roomCheck(x, y, room.width - 1, room.height, house[z]);
-				break;
-			default:
-				break;
-		}
+                // If it does, try to put it on the z-level above, else, skip it
+                if(exceedsMax && room.z + 1 <= this.maxStories) {
+                    room.z++;
 
-		// A room was found, so skip this room
-		if(existingRoom === true) {
-			room.setPlaced(false);
-			continue;
-		}
+                    // Put it in the back of the queue
+                    queue.push(room);
+                    continue;
+                } else if(exceedsMax) {
+                    room.placed = false;
+                    continue;
+                }
 
-		// No room was found, so render on!
-		if(!house[z]) {
-			if(z === 0)
-				house[z] = new Array(roomTiles.length);
-			else
-				house[z] = new Array(house[z - 1].length); // Make the new z level the same length as the level beneathe it
-		}
-		for(var i = 0, roomX = x; i < roomTiles.length; i++, roomX++) {
-			if(!house[z][roomX])
-				house[z][roomX] = new Array(roomTiles[i].length);
+                if(tryAbove)
+                    possibleDirections.push("up");
 
-			// Since we iterate over the height of the room (y) everytime,
-			// we need to reset y back to it's starting value (roomY)
-			for(var j = 0, roomY = y; j < roomTiles[i].length; j++, roomY++) {
-				// Don't overwrite an existing room tile
-				if(!house[z][roomX][roomY] || house[z][roomX][roomY].getName() == 'grass' || house[z][roomX][roomY].getName() == 'air')
-					house[z][roomX][roomY] = roomTiles[i][j];
-			}
-		}
+                // TODO: support rooms being placed directly above their parent
+                // Find a good spawn direction, and shift tiles accordingly
+                while(possibleDirections.length) {
+                    currentDirection = possibleDirections.pop();
 
-		// Fill in missing spaces with grass
-		house = this._spaceFill(house);
-		
-		// Process the room's children if it has any
-		if(room.children.length > 0) {
-			// Pick direction to branch from
-			for (var k = 0; k < room.children.length; k++) {
-				// These might have changed since the last iteration. Make sure they 
-				// are up-to-date with the newest location of the current room
-				x = room.getX();
-				y = room.getY();
-				z = room.getZ();
+                    // Because a room could be tacked on to the north or west, x,y coordinate 0,0 can
+                    // change. Rooms to the south and east of their ancestor are not a problem; just
+                    // stick the 'cursor' at a brand new x or y coordinate. But if it's to the north
+                    // or west, the whole thing needs to be shifted down or to the right, and then
+                    // the new room added to the new 0,y or x,0 coordinates.
+                    switch(currentDirection) {
+                        case 'n':
+                            room.y -= room.height - 1; // plus one so the rooms will share a wall
 
-				// Get the current child and a random spawn direction
-				var child = room.children[k];
-				var dir = possibleDirections.pop();
-				child.setSpawnDirection(dir);
+                            if(room.y < 0) {
+                                if(this._exceedsTotalHeight(room.height, house)){
+                                    existingRoom = true;
+                                    break;
+                                } else {
+                                    house = this._shiftTilesSouth(room.height, house);
+                                    this.adjustY(room.height);
+                                }
+                            }
 
-				// Now that a child and the direction it will spawn have been chosen:
-				// 1) Check to see if adding this child will exceed the maxWidth or maxHeight properties
-				// 2) If it will, instead stack the room on top of its parent and place stairs 
-				// 3) Otherwise, shift the house tiles if necessary
-				// 4) Set the room and child x,y coordinates
-				// 5) Determine a place on the wall the rooms will share, and add a door
-				var exceedsMax = (
-					child.getWidth() + house[z].length > this.maxWidth || 
-					child.getHeight() + house[z][0].length > this.maxHeight
-				);
-				if(exceedsMax && z + 1 <= this.maxStories) {
-					// Set the child's x, y, and z levels...
-					child.setX(x);
-					child.setY(y);
-					child.setZ(z + 1);
-					
-					// And push it into the queue.
-					queue.push(child);
-					
-				} else if(!exceedsMax) {
-					switch(dir) {
-						// Shift whole house 'south' by using Array.prototype.unshift()
-						case 'n':
-							// Set x,y
-							child.setX(x);
-							child.setY(y - child.getHeight() + 1); // plus one so the rooms will share a wall
+                            existingRoom = this._roomCheck(room.x, room.y, room.width, room.height - 1, house[room.z]);
+                            break;
+                        case 'w':
+                            room.x -= room.width - 1; // plus one so the room.parents will share a wall
 
-							if(child.getY() < 0) {
-								// Loop through every column
-								for(var houseX = 0; houseX < house[z].length; houseX++) {
-									// unshift() a patch of grass/air to every row based on room height
-									for(var houseY = 0; houseY < child.height; houseY++) {
-										var tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+                            if(room.x < 0) {
+                                if(this._exceedsTotalWidth(room.width, house)) {
+                                    existingRoom = true;
+                                    break;
+                                } else {
+                                    house = this._shiftTilesEast(room.width, house);
+                                    this.adjustX(room.width);
+                                }
+                            }
 
-										house[z][houseX].unshift(tile);
+                            existingRoom = this._roomCheck(room.x, room.y, room.width - 1, room.height, house[room.z]);
+                            break;
+                        case 'e':
+                            room.x += room.parent.width - 1; // minus one so the room.parents will share a wall
 
-										// Adjust room and children y positions by child height
-										if(houseX === 0) // Ensures we do this once, instead of for every row
-											this.adjustY(1); // TODO: make sure this also updates the objects in the queue
+                            existingRoom = this._roomCheck(room.x + 1, room.y, room.width, room.height, house[room.z]);
+                            break;
+                        case 's':
+                            room.y += room.parent.height - 1; // minus one so the rooms will share a wall
 
-									}
-								}	
-							}
-							
-							break;
-						// Shift whole house 'east' by using Array.prototype.unshift()
-						case 'w':
-							// Set x,y
-							child.x = room.x - child.width + 1; // plus one so the rooms will share a wall
-							child.y = room.y || 0;
+                            existingRoom = this._roomCheck(room.x, room.y + 1, room.width, room.height, house[room.z]);
+                            break;
+                        case 'up':
+                            existingRoom = this._roomCheck(room.x, room.y, room.width, room.height, house[room.z]);
+                            break;
+                        default:
+                            throw new Error("There are no more possible directions. This should not be possible...heh heh.");
+                    }
 
-							if(child.x < 0) {
-								// unshift() a column of grass/air to every column based on room width
-								for (var houseX = 0; houseX < child.width; houseX++) {
-									house[z].unshift(new Array(house[z][0].length));
-									for (var houseY = 0; houseY < house[z][0].length; houseY++) {
-										var tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
-										// Always use index of 0 since we're adding the array to the beginning
-										house[z][0][houseY] = tile;
-									}
+                    // A room was found, so try another direction
+                    if(existingRoom === true) {
+                        // No longer trying to place room above, so re-check
+                        // to make sure adding the room will not exceed the max.
+                        // If it will, break out and skip this room.
+                        if(currentDirection == "up" && this._exceedsMax(room)) {
+                            room.placed = false;
+                            break;
+                        } else {
+                            room.x = room.parent.x;
+                            room.y = room.parent.y;
 
-									// Adjust room and children x positions by child width
-									this.adjustX(1);
-								}
-							}
-							break;
-						case 'e':
-							// Set x,y
-							child.x = room.x + room.width - 1; // minus one so the rooms will share a wall
-							child.y = room.y || 0;
-							break;
-						case 's':
-							// Set x,y
-							child.x = room.x || 0;
-							child.y = room.y + room.height - 1; // minus one so the rooms will share a wall
-							break;
-						default:
-							throw new Error("There are no more possible directions. This should not be possible...heh heh.");
-					}
+                            continue;
+                        }
+                    } else {
+                        room.spawnDirection = currentDirection;
+                        break;
+                    }
+                }
 
-					// Determine where to place the door
-					var roomXY = Game.listXY(room.getX(), room.getY(), room.getWidth(), room.getHeight());
-					var childXY = Game.listXY(child.getX(), child.getY(), child.getWidth(), child.getHeight());
-					var commonXY = [];
-					for (var l = 0; l < roomXY.length; l++)
-						if(childXY.indexOf(roomXY[l]) > -1)
-							commonXY.push(roomXY[l]);
-					
-					// Make sure door isn't placed in a corner by eliminating the least and greatest x or y coordinates, depending on spawn direction
-					if(dir == 'n' || dir == 's') {
-						var lowestX = commonXY.reduce(function(prev, curr) {
-							return Math.min(prev, curr.split(",")[0]);
-						}, commonXY[0].split(",")[0]);
-						var highestX = commonXY.reduce(function(prev, curr) {
-							return Math.max(prev, curr.split(",")[0]);
-						}, commonXY[0].split(",")[0]);
+                // If a place could not be found, increment the z level, and
+                // put it in the back of the queue. If attempting to place the
+                // room directly above its parent, it has failed so skip room.
+                // If the room will be more than 1 z-level above the parent,
+                // skip, since placing stairs will not be possible.
+                if(room.spawnDirection === undefined || room.spawnDirection === null) {
+                    if(currentDirection == 'up') {
+                        room.placed = false;
+                        continue;
+                    }
 
-						// Remove the extreme x tiles from the list
-						for (var m = 0; m < commonXY.length; m++) {
-							if(commonXY[m].split(",")[0] == lowestX || commonXY[m].split(",")[0] == highestX)
-								commonXY.splice(m, 1);
-						}
-					} else {
-						var lowestY = commonXY.reduce(function(prev, curr) {
-							return Math.min(prev, curr.split(",")[1]);
-						}, commonXY[0].split(",")[1]);
-						var highestY = commonXY.reduce(function(prev, curr) {
-							return Math.max(prev, curr.split(",")[1]);
-						}, commonXY[0].split(",")[1]);
-						// Remove the extreme y tiles from the list
-						for (var n = 0; n < commonXY.length; n++) {
-							if(commonXY[n].split(",")[1] == lowestY || commonXY[n].split(",")[1] == highestY)
-								commonXY.splice(n, 1);
-						}
-					}
+                    if(room.z > room.parent.z) {
+                        room.placed = false;
+                        continue;
+                    }
 
-					var doorXY = commonXY.random().split(",");
-					house[z][doorXY[0]][doorXY[1]] = Game.TileRepository.create("door");
+                    room.x = room.parent.x;
+                    room.y = room.parent.y;
+                    room.z++;
 
-					// Add the child room to the queue
-					queue.push(child);
-				} else {
-					// Adding the child would exceed maxWidth or maxHeight and it cannot be placed above the parent, so skip it
-					child.setPlaced(false);
-					continue;
-				}
-			}
-		}
-	}
+                    queue.push(room);
+                    continue;
+                }
+            }
 
-	// One last time, fill out any missing tiles with air or grass
-	house = this._spaceFill(house);
+            // Render room tiles
+            let roomTiles = this._renderRoom(room, direction);
+            x = room.x,
+            y = room.y,
+            z = room.z;
 
-	// If the house is more than one z level, place stairs where there is a valid floor tile on both z levels
-	for (var z = 0; z < house.length; z++) {
-		if(!house[z + 1])
-			break;
+            // Initialize the z-level, if not set already.
+            if(!house[z]) {
+                if(z === 0)
+                    house[z] = new Array(roomTiles.length);
+                else
+                    house[z] = new Array(house[z - 1].length); // Make the new z level the same length as the level beneathe it
+            }
 
-		var floorTiles = this._getFloorTiles(house[z]);
-		var randomFloor = false;
-		for(var o = 0; o < floorTiles.length; o++) {
-			var f = floorTiles[o].split(",");
-			if(!house[z + 1][f[0]])
-				debugger;
-			if(!house[z + 1][f[0]][f[1]])
-				continue;
-			if(house[z + 1][f[0]][f[1]].getName() == 'floor') {
-				randomFloor = {
-					x: f[0],
-					y: f[1]
-				};
-				break;
-			}
-		}
-		if(randomFloor !== false) {
-			house[z][randomFloor.x][randomFloor.y] = Game.TileRepository.create('stairsUp');
-			house[z + 1][randomFloor.x][randomFloor.y] = Game.TileRepository.create('stairsDown');
-		}
-	}
+            for(var i = 0, roomX = x; i < roomTiles.length; i++, roomX++) {
+                if(!house[z][roomX])
+                    house[z][roomX] = new Array(roomTiles[i].length);
 
-	// Now that the locations of all rooms have been set and adjusted, place items in each room
-	this._placeItems(this.graph);
+                for(var j = 0, roomY = y; j < roomTiles[i].length; j++, roomY++) {
+                    // Don't overwrite an existing room tile
+                    if(!house[z][roomX][roomY] || house[z][roomX][roomY].getName() == 'grass' || house[z][roomX][roomY].getName() == 'air')
+                        house[z][roomX][roomY] = roomTiles[i][j];
+                }
+            }
 
-	// for (var z = 0; z < house.length; z++) {
-	// 	console.log(z);
-	// 	Game._consoleLogGrid(house[z], '_char');
-	// }
-	// this._testZeroIndex(house, [room, house]);
-	return house;
+            // Fill in missing spaces with grass
+            house = this._spaceFill(house);
+
+            // Put room's children in the queue
+            if(room.children.length > 0) {
+                // Pick direction to branch from
+                for (var k = 0; k < room.children.length; k++) {
+                    // Set all children's coordinates to match their parent,
+                    // so that when a spawn direction is chosen, the child can
+                    // be placed relative to the parent.
+                    room.children[k].x = room.x;
+                    room.children[k].y = room.y;
+                    room.children[k].z = room.z;
+
+                    queue.push(room.children[k]);
+                }
+            }
+            Game._consoleLogGrid(house[room.z], '_char');
+        }
+
+        // One last time, fill out any missing tiles with air or grass
+        house = this._spaceFill(house);
+
+        // Place doors
+        house = this._placeDoors(house);
+
+        // Place stairs
+        house = this._placeStairs(house);
+
+        // Now that the locations of all rooms have been set and adjusted, place items in each room
+        // this._placeItems(this.graph);
+
+        // for (var z = 0; z < house.length; z++) {
+        //     console.log(z);
+        //     _consoleLogGrid(house[z], '_char');
+        // }
+        // this._testZeroIndex(house, [room, house]);
+        return house;
 };
 
 Game.House.prototype._renderRoom = function(room, direction) {
@@ -408,7 +346,7 @@ Game.House.prototype._renderRoom = function(room, direction) {
 	var verticalWall = Game.TileRepository.create('indoor wall-vertical');
 	var floor = Game.TileRepository.create('floor');
 	var tiles = new Array(w); // Initialize the x-length
-	
+
 	for (var x = 0; x < w; x++) {
 		// Initialize the y-length if it doesn't exist yet.
 		if(!tiles[x])
@@ -502,6 +440,121 @@ Game.House.prototype._spaceFill = function(grid) {
 		}
 	}
 	return grid;
+};
+
+Game.House.prototype._placeDoors = function(tiles) {
+    let rooms = [this.graph];
+    let room, roomXY, childXY, commonXY, lowestX, highestX, lowestY, highestY, doorXY;
+    function minMaxXY(m, c, prev, curr) {
+        return Math[m](prev, Number(curr.split(",")[c]));
+    }
+    const minX = minMaxXY.bind(this, 'min', 0);
+    const maxX = minMaxXY.bind(this, 'max', 0);
+    const minY = minMaxXY.bind(this, 'min', 1);
+    const maxY = minMaxXY.bind(this, 'max', 1);
+
+    while(rooms.length) {
+        room = rooms.shift();
+        roomXY = Game.listXY(room.x, room.y, room.width, room.height);
+
+        room.children.forEach(child => {
+            if(!child.placed) return;
+
+            // Don't try to place doors between rooms on different
+            // z-levels, but make sure they are added to the queue
+            if(room.z > child.z || room.z < child.z) {
+                rooms.push(child);
+                return;
+            }
+
+            commonXY = []; // Remove any previous coords
+
+            childXY = Game.listXY(child.x, child.y, child.width, child.height);
+            for(let i = 0; i < roomXY.length; i++) {
+                if(childXY.indexOf(roomXY[i]) > -1)
+                    commonXY.push(roomXY[i]);
+            }
+
+            // Make sure door isn't placed in a corner by eliminating the least and greatest x or y coordinates, depending on spawn direction
+            if(child.spawnDirection == 'n' || child.spawnDirection == 's') {
+                lowestX = commonXY.reduce(minX, commonXY[0].split(",")[0]);
+                highestX = commonXY.reduce(maxX, commonXY[0].split(",")[0]);
+
+                // Remove the extreme x tiles from the list
+                for(let i = 0; i < commonXY.length; i++) {
+                    if(commonXY[i].split(",")[0] == lowestX || commonXY[i].split(",")[0] == highestX)
+                        commonXY.splice(i, 1);
+                }
+            } else {
+                lowestY = commonXY.reduce(minY, commonXY[0].split(",")[1]);
+                highestY = commonXY.reduce(maxY, commonXY[0].split(",")[1]);
+
+                // Remove the extreme y tiles from the list
+                for (let i = 0; i < commonXY.length; i++) {
+                    if(commonXY[i].split(",")[1] == lowestY || commonXY[i].split(",")[1] == highestY)
+                        commonXY.splice(i, 1);
+                }
+            }
+
+            doorXY = commonXY.random().split(",");
+            tiles[room.z][doorXY[0]][doorXY[1]] = Game.TileRepository.create("door");
+
+            rooms.push(child);
+            // consoleLogGrid(tiles[room.z], '_char');
+        });
+    }
+
+    return tiles;
+}
+
+Game.House.prototype._placeStairs = function(tiles) {
+    let queue = [this.graph];
+    let room, roomXY, childXY, commonXY, parts, x, y;
+
+    while(queue.length) {
+        room = queue.shift();
+        roomXY = Game.listXY(room.x, room.y, room.width, room.height);
+        room.children.forEach(child => {
+            commonXY = [];
+
+            if(!child.placed) return;
+
+            if(child.z > room.z) {
+                childXY = Game.listXY(child.x, child.y, child.width, child.height);
+                childXY.forEach(coord => {
+                    if(roomXY.indexOf(coord) > -1)
+                        commonXY.push(coord);
+                });
+
+                commonXY.some(coord => {
+                    parts = coord.split(",");
+                    x = parts[0];
+                    y = parts[1];
+
+                    if(!tiles[room.z + 1]) debugger;
+                    if(tiles[room.z][x][y].isWalkable() && tiles[room.z + 1][x][y].isWalkable()) {
+                        if(tiles[room.z][x][y].getName() == 'stairsDown')
+                            tiles[room.z][x][y] = Game.TileRepository.create('stairsUpDown');
+                        else
+                            tiles[room.z][x][y] = Game.TileRepository.create('stairsUp');
+
+                        if(tiles[room.z + 1][x][y].getName() == 'stairsUp')
+                            tiles[room.z + 1][x][y] = Game.TileRepository.create('stairsUpDown');
+                        else
+                            tiles[room.z + 1][x][y] = Game.TileRepository.create('stairsDown');
+
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+            }
+
+            queue.push(child);
+        });
+    }
+
+    return tiles;
 };
 
 Game.House.prototype._placeItems = function(room) {
