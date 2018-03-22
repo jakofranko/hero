@@ -8,130 +8,130 @@
 
 // TODO: If there is no more room to add a room's children on the current z-level, the code will try to place all the children directly above the room, resulting in only one being able to be placed (since the other's would not pass the _roomCheck being placed in the same x, y coordinates). Fix this somehow?
 Game.House = function(options) {
-	this.maxRooms = options['maxRooms'] || {
-		// Max number of rooms
-		"kitchen": 1,
-		"dining room": 1,
-		"living room": 1,
-		"bedroom": 3,
-		"bathroom": 2,
-		"office": 1,
-		"hall": 3 // If halls aren't limited, they will just spawn an infinite number of halls and closets
-	};
-	this.maxStories = options['maxStories'] || 1;
-	this.maxWidth = options['maxWidth'] || 10;
-	this.maxHeight = options['maxHeight'] || 10;
+    this.maxRooms = options['maxRooms'] || {
+        // Max number of rooms
+        "kitchen": 1,
+        "dining room": 1,
+        "living room": 1,
+        "bedroom": 3,
+        "bathroom": 2,
+        "office": 1,
+        "hall": 3 // If halls aren't limited, they will just spawn an infinite number of halls and closets
+    };
+    this.maxStories = options['maxStories'] || 1;
+    this.maxWidth = options['maxWidth'] || 10;
+    this.maxHeight = options['maxHeight'] || 10;
 
-	// Set initial number of rooms, to be incremented as they are added
-	this.roomNum = [];
-	for (var i = 0; i < this.rooms.length; i++) {
-		this.roomNum[this.rooms[i]] = 0;
-	}
+    // Set initial number of rooms, to be incremented as they are added
+    this.roomNum = [];
+    for (var i = 0; i < this.rooms.length; i++) {
+        this.roomNum[this.rooms[i]] = 0;
+    }
 
-	this.livingLocations = [];
-	this.items = {}; // This is set during the render() phase above
+    this.livingLocations = [];
+    this.items = {}; // This is set during the render() phase above
 
-	this.graph = this.generate('foyer');
-	this.tiles = this.render(['n', 'e', 's', 'w'].random());
+    this.graph = this.generate('foyer');
+    this.tiles = this.render(['n', 'e', 's', 'w'].random());
 
-	return this;
+    return this;
 };
 Game.House.prototype.getTiles = function() {
-	return this.tiles;
+    return this.tiles;
 };
 Game.House.prototype.getItems = function() {
-	return this.items;
+    return this.items;
 };
 Game.House.prototype.getItemsAt = function(x, y, z) {
     return this.items[x + ',' + y + ',' + z];
 };
 Game.House.prototype.adjustX = function(amount, room) {
-	var r = room || this.graph; // specific room or start with the foyer
-	r.x += amount;
-	if(r.children)
-		for (var i = 0; i < r.children.length; i++)
-			this.adjustX(amount, r.children[i]);
+    var r = room || this.graph; // specific room or start with the foyer
+    r.x += amount;
+    if(r.children)
+        for (var i = 0; i < r.children.length; i++)
+            this.adjustX(amount, r.children[i]);
 
 };
 Game.House.prototype.adjustY = function(amount, room) {
-	var r = room || this.graph; // specific room or start with the foyer
-	r.y += amount;
-	if(r.children)
-		for (var i = 0; i < r.children.length; i++)
-			this.adjustY(amount, r.children[i]);
+    var r = room || this.graph; // specific room or start with the foyer
+    r.y += amount;
+    if(r.children)
+        for (var i = 0; i < r.children.length; i++)
+            this.adjustY(amount, r.children[i]);
 
 };
 Game.House.prototype.addItem = function(x, y, z, item) {
-	var key = x + "," + y + "," + z;
-	if(key in this.items === false)
-		this.items[key] = [];
-	this.items[key].push(item);
+    var key = x + "," + y + "," + z;
+    if(key in this.items === false)
+        this.items[key] = [];
+    this.items[key].push(item);
 };
 Game.House.prototype.getLivingLocations = function() {
-	return this.livingLocations;
+    return this.livingLocations;
 };
 Game.House.prototype.addLivingLocation = function(location) {
-	if(this.livingLocations.indexOf(location) < 0)
-		this.livingLocations.push(location);
+    if(this.livingLocations.indexOf(location) < 0)
+        this.livingLocations.push(location);
 };
 Game.House.prototype.rooms = [
-	'foyer',		// 0
-	'dining room',	// 1
-	'living room',	// 2
-	'kitchen',		// 3
-	'office',		// 4
-	'hall',			// 5
-	'bathroom',		// 6
-	'bedroom',		// 7
-	'closet',		// 8
+    'foyer',        // 0
+    'dining room',    // 1
+    'living room',    // 2
+    'kitchen',        // 3
+    'office',        // 4
+    'hall',            // 5
+    'bathroom',        // 6
+    'bedroom',        // 7
+    'closet',        // 8
 ];
 Game.House.prototype.possibleDirections = {
-	// Depending on which way a house is facing, it may only branch in any 3 given directions
-	'n': ['s', 'e', 'w'],
-	's': ['n', 'e', 'w'],
-	'e': ['n', 's', 'w'],
-	'w': ['n', 's', 'e']
+    // Depending on which way a house is facing, it may only branch in any 3 given directions
+    'n': ['s', 'e', 'w'],
+    's': ['n', 'e', 'w'],
+    'e': ['n', 's', 'w'],
+    'w': ['n', 's', 'e']
 };
 
 // Closets and offices are terminal nodes; no rooms will spawn a foyer, as that is the origin
 Game.House.prototype.grammar = {
-	'foyer': [1, 2, 3, 4, 5],
-	'dining room': [2, 3, 5],
-	'living room': [1, 3, 4, 5],
-	'kitchen': [1, 2, 5],
-	'office': [8],
-	'hall': [1, 2, 3, 4, 5, 6, 7, 8],
-	'bathroom': [8],
-	'bedroom': [8],
-	'closet': false
+    'foyer': [1, 2, 3, 4, 5],
+    'dining room': [2, 3, 5],
+    'living room': [1, 3, 4, 5],
+    'kitchen': [1, 2, 5],
+    'office': [8],
+    'hall': [1, 2, 3, 4, 5, 6, 7, 8],
+    'bathroom': [8],
+    'bedroom': [8],
+    'closet': false
 };
 
 // Recusively generate the graph, starting with the 'foyer'
 Game.House.prototype.generate = function(name) {
-	// Create a new room
-	var room = new Game.HouseRoom(name);
+    // Create a new room
+    var room = new Game.HouseRoom(name);
 
-	if(this.grammar[name] === false) {
-		return room;
-	} else {
-		// Pick a random number of connections up to 3 or the number
-		// of connections that room can have, whichever is less
-		var possibleChildren = this.grammar[name].length;
-		var numChildren = Math.min(3, possibleChildren);
-		for (var i = 0; i < numChildren; i++) {
-			var randomChild = this._getRandomChild(name, true);
+    if(this.grammar[name] === false) {
+        return room;
+    } else {
+        // Pick a random number of connections up to 3 or the number
+        // of connections that room can have, whichever is less
+        var possibleChildren = this.grammar[name].length;
+        var numChildren = Math.min(3, possibleChildren);
+        for (var i = 0; i < numChildren; i++) {
+            var randomChild = this._getRandomChild(name, true);
 
-			// If the random child is under, or does not have a limit, add it
-			if(randomChild && (!this.maxRooms[randomChild] || this.roomNum[randomChild] < this.maxRooms[randomChild])) {
-				// this should be incremented first so that deeper in
-				// the recursion the current numbers of rooms are reflected
-				this.roomNum[randomChild]++;
-				room.addChild(this.generate(randomChild));
-			}
-		}
+            // If the random child is under, or does not have a limit, add it
+            if(randomChild && (!this.maxRooms[randomChild] || this.roomNum[randomChild] < this.maxRooms[randomChild])) {
+                // this should be incremented first so that deeper in
+                // the recursion the current numbers of rooms are reflected
+                this.roomNum[randomChild]++;
+                room.addChild(this.generate(randomChild));
+            }
+        }
 
-		return room;
-	}
+        return room;
+    }
 };
 
 
@@ -383,106 +383,106 @@ Game.House.prototype._shiftTilesEast = function(amount, tiles) {
 };
 
 Game.House.prototype._renderRoom = function(room, direction) {
-	var w = room.width;
-	var h = room.height;
-	var horizontalWall = Game.TileRepository.create('indoor wall-horizontal');
-	var verticalWall = Game.TileRepository.create('indoor wall-vertical');
-	var floor = Game.TileRepository.create('floor');
-	var tiles = new Array(w); // Initialize the x-length
+    var w = room.width;
+    var h = room.height;
+    var horizontalWall = Game.TileRepository.create('indoor wall-horizontal');
+    var verticalWall = Game.TileRepository.create('indoor wall-vertical');
+    var floor = Game.TileRepository.create('floor');
+    var tiles = new Array(w); // Initialize the x-length
 
-	for (var x = 0; x < w; x++) {
-		// Initialize the y-length if it doesn't exist yet.
-		if(!tiles[x])
-				tiles[x] = new Array(h);
+    for (var x = 0; x < w; x++) {
+        // Initialize the y-length if it doesn't exist yet.
+        if(!tiles[x])
+                tiles[x] = new Array(h);
 
-		for (var y = 0; y < h; y++) {
-			if(y === 0 || y === h - 1)
-				tiles[x][y] = horizontalWall;
-			else if(x === 0 || x === w - 1)
-				tiles[x][y] = verticalWall;
-			else
-				tiles[x][y] = floor;
-		}
-	}
+        for (var y = 0; y < h; y++) {
+            if(y === 0 || y === h - 1)
+                tiles[x][y] = horizontalWall;
+            else if(x === 0 || x === w - 1)
+                tiles[x][y] = verticalWall;
+            else
+                tiles[x][y] = floor;
+        }
+    }
 
-	// If it's the foyer, place the front door
-	if(room.name == 'foyer') {
-		var doorX, doorY;
-		switch(direction) {
-			case 'n': // Rooms will be spawning south, so put the door at the north
-				doorX = Game.getRandomInRange(room.x + 1, room.width - 2);
-				doorY = room.y;
-				break;
-			case 'e': // Rooms will be spawning west, so put door at the east
-				doorX = room.width - 1;
-				doorY = Game.getRandomInRange(room.y + 1, room.height - 2);
-				break;
-			case 's':
-				doorX = Game.getRandomInRange(room.x + 1, room.width - 2);
-				doorY = room.height - 1;
-				break;
-			case 'w':
-				doorX = room.x;
-				doorY = Game.getRandomInRange(room.y + 1, room.height - 2);
-				break;
-			default:
-				break;
-		}
-		tiles[doorX][doorY] = Game.TileRepository.create('door');
-	}
+    // If it's the foyer, place the front door
+    if(room.name == 'foyer') {
+        var doorX, doorY;
+        switch(direction) {
+            case 'n': // Rooms will be spawning south, so put the door at the north
+                doorX = Game.getRandomInRange(room.x + 1, room.width - 2);
+                doorY = room.y;
+                break;
+            case 'e': // Rooms will be spawning west, so put door at the east
+                doorX = room.width - 1;
+                doorY = Game.getRandomInRange(room.y + 1, room.height - 2);
+                break;
+            case 's':
+                doorX = Game.getRandomInRange(room.x + 1, room.width - 2);
+                doorY = room.height - 1;
+                break;
+            case 'w':
+                doorX = room.x;
+                doorY = Game.getRandomInRange(room.y + 1, room.height - 2);
+                break;
+            default:
+                break;
+        }
+        tiles[doorX][doorY] = Game.TileRepository.create('door');
+    }
 
-	// TODO: populate the room with items (may need to be done after the whole house has been generated)
+    // TODO: populate the room with items (may need to be done after the whole house has been generated)
 
-	return tiles;
+    return tiles;
 };
 
 Game.House.prototype._getRandomChild = function(room, returnWord) {
-	// Get a new array from the possible room children based on what rooms
-	// aren't at their max
-	var selection = [];
-	this.grammar[room].forEach(function(val) {
-		var roomName = this.rooms[val];
-		if(!this.maxRooms[roomName] || this.roomNum[roomName] < this.maxRooms[roomName])
-			selection.push(val);
-	}, this);
+    // Get a new array from the possible room children based on what rooms
+    // aren't at their max
+    var selection = [];
+    this.grammar[room].forEach(function(val) {
+        var roomName = this.rooms[val];
+        if(!this.maxRooms[roomName] || this.roomNum[roomName] < this.maxRooms[roomName])
+            selection.push(val);
+    }, this);
 
-	var child;
-	if(selection.length > 0)
-		child = selection.random();
-	else
-		child = false;
+    var child;
+    if(selection.length > 0)
+        child = selection.random();
+    else
+        child = false;
 
-	if(child === false)
-		return false;
-	else if(returnWord)
-		return this.rooms[child];
-	else
-		return child;
+    if(child === false)
+        return false;
+    else if(returnWord)
+        return this.rooms[child];
+    else
+        return child;
 };
 
 // For every z-level, based on the length of the first grid array, fill in the rest of the grid with grass tiles.
 // Note: this will not work if the first element is shorter than other elements in the array
 Game.House.prototype._spaceFill = function(grid) {
-	for (var z = 0; z < grid.length; z++) {
-		// If there are varying heights, find the highest column
-		var height = grid[z].reduce(function(prev, curr) {
-			if(typeof prev === 'object') prev = prev.length;
-			if(typeof curr === 'object') curr = curr.length;
-			return Math.max(prev, curr);
-		}, 0);
-		for (var x = 0; x < grid[z].length; x++) { // grid[z].length == width
-			if(!grid[z][x])
-				grid[z][x] = new Array(height);
+    for (var z = 0; z < grid.length; z++) {
+        // If there are varying heights, find the highest column
+        var height = grid[z].reduce(function(prev, curr) {
+            if(typeof prev === 'object') prev = prev.length;
+            if(typeof curr === 'object') curr = curr.length;
+            return Math.max(prev, curr);
+        }, 0);
+        for (var x = 0; x < grid[z].length; x++) { // grid[z].length == width
+            if(!grid[z][x])
+                grid[z][x] = new Array(height);
 
-			for (var y = 0; y < height; y++) {
-				if(!grid[z][x][y]) {
-					var tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
-					grid[z][x][y] = tile;
-				}
-			}
-		}
-	}
-	return grid;
+            for (var y = 0; y < height; y++) {
+                if(!grid[z][x][y]) {
+                    var tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+                    grid[z][x][y] = tile;
+                }
+            }
+        }
+    }
+    return grid;
 };
 
 Game.House.prototype._placeDoors = function(tiles) {
@@ -601,66 +601,66 @@ Game.House.prototype._placeStairs = function(tiles) {
 };
 
 Game.House.prototype._placeItems = function(room) {
-	if(room.name !== 'foyer' && room.name !== 'hall' && room.name !== 'closet' && room.placed === true) {
-		var roomX = room.x,
-			roomY = room.y,
-			roomZ = room.z;
-		var itemsTemplate = Game.TemplateRepository.create(room.name); // Assumes that the room name is also the name of the template
-		var spawnDir = room.spawnDirection;
-		var options = {};
-		switch(spawnDir) {
-			case 's':
-				options.rotate = '180deg';
-				break;
-			case 'e':
-				options.rotate = '270deg';
-				break;
-			case 'w':
-			options.rotate = '90deg';
-				break;
-			case 'n':
-			default:
-				break;
-		}
-		var itemMap = itemsTemplate.getProcessedTemplate(options);
-		for(var key in itemMap) {
-			var repo = itemMap[key].repository,
-				name = itemMap[key].name,
-				itemX = Number(key.split(",")[0]),
-				itemY = Number(key.split(",")[1]),
-				x = itemX + roomX + 1, // + 1 so that they are not placed on the walls
-				y = itemY + roomY + 1;
+    if(room.name !== 'foyer' && room.name !== 'hall' && room.name !== 'closet' && room.placed === true) {
+        var roomX = room.x,
+            roomY = room.y,
+            roomZ = room.z;
+        var itemsTemplate = Game.TemplateRepository.create(room.name); // Assumes that the room name is also the name of the template
+        var spawnDir = room.spawnDirection;
+        var options = {};
+        switch(spawnDir) {
+            case 's':
+                options.rotate = '180deg';
+                break;
+            case 'e':
+                options.rotate = '270deg';
+                break;
+            case 'w':
+            options.rotate = '90deg';
+                break;
+            case 'n':
+            default:
+                break;
+        }
+        var itemMap = itemsTemplate.getProcessedTemplate(options);
+        for(var key in itemMap) {
+            var repo = itemMap[key].repository,
+                name = itemMap[key].name,
+                itemX = Number(key.split(",")[0]),
+                itemY = Number(key.split(",")[1]),
+                x = itemX + roomX + 1, // + 1 so that they are not placed on the walls
+                y = itemY + roomY + 1;
 
-			this.addItem(x, y, roomZ, Game[repo].create(name));
+            this.addItem(x, y, roomZ, Game[repo].create(name));
 
-			// Add living location
-			if(name === 'bed')
-				this.addLivingLocation(x + "," + y + "," + roomZ);
-		}
-	}
+            // Add living location
+            if(name === 'bed')
+                this.addLivingLocation(x + "," + y + "," + roomZ);
+        }
+    }
 
-	if(room.children.length > 0) {
-		for (var i = 0; i < room.children.length; i++) {
-			this._placeItems(room.children[i]);
-		}
-	}
+    if(room.children.length > 0) {
+        for (var i = 0; i < room.children.length; i++) {
+            this._placeItems(room.children[i]);
+        }
+    }
 
 };
 
 // For testing
 Game.House.prototype._testZeroIndex = function(grid, info) {
-	for (var z = 0; z < grid.length; z++) {
-		for (var x = 0; x < grid[z].length; x++) {
-			if(!grid[z][x]) {
-				console.log(info);
-				throw new Error("What the...?");
-			} else if(!grid[z][x][0]) {
-				console.log(info);
-				throw new Error("Some how this array didn't start with 0...");
-			}
-		}
-	}
-	return true;
+    for (var z = 0; z < grid.length; z++) {
+        for (var x = 0; x < grid[z].length; x++) {
+            if(!grid[z][x]) {
+                console.log(info);
+                throw new Error("What the...?");
+            } else if(!grid[z][x][0]) {
+                console.log(info);
+                throw new Error("Some how this array didn't start with 0...");
+            }
+        }
+    }
+    return true;
 };
 
 // NOTE: THIS IS DESIGNED TO ONLY COVER X AN Y, SO PASS IN THE APPROPRIATE Z LEVEL WHEN CALLING THIS FUNCTION
@@ -668,25 +668,25 @@ Game.House.prototype._testZeroIndex = function(grid, info) {
 // Otherwise, return true if room is found, false if no room is found.
 // (meaning, that the given grid contains only empty space or grass)
 Game.House.prototype._roomCheck = function(startX, startY, width, height, tiles) {
-	var roomFound = false;
-	// z level doesn't exist yet, so obvs, no room
-	if(!tiles)
-		return roomFound;
-	for (var x = 0, tilesX = startX; x < width; x++, tilesX++) {
-		for (var y = 0, tilesY = startY; y < height; y++, tilesY++) {
-			if(!tiles[tilesX])
-				continue;
+    var roomFound = false;
+    // z level doesn't exist yet, so obvs, no room
+    if(!tiles)
+        return roomFound;
+    for (var x = 0, tilesX = startX; x < width; x++, tilesX++) {
+        for (var y = 0, tilesY = startY; y < height; y++, tilesY++) {
+            if(!tiles[tilesX])
+                continue;
 
-			if(tiles[tilesX][tilesY] && tiles[tilesX][tilesY].getName() != 'grass' && tiles[tilesX][tilesY].getName() != 'air') {
-					roomFound = true;
-					break;
-			}
-		}
-		if(roomFound)
-			break;
-	}
+            if(tiles[tilesX][tilesY] && tiles[tilesX][tilesY].getName() != 'grass' && tiles[tilesX][tilesY].getName() != 'air') {
+                    roomFound = true;
+                    break;
+            }
+        }
+        if(roomFound)
+            break;
+    }
 
-	return roomFound;
+    return roomFound;
 };
 
 Game.House.prototype._exceedsMax = function(room, onlyAbove = false) {
@@ -722,16 +722,16 @@ Game.House.prototype._exceedsTotalHeight = function(height, tiles) {
 }
 
 Game.House.prototype._getFloorTiles = function(tiles) {
-	var floorTiles = [];
-	for (var x = 0; x < tiles.length; x++) {
-		if(!tiles[x])
-			continue;
-		for (var y = 0; y < tiles[x].length; y++) {
-			if(tiles[x][y] && tiles[x][y].getName() == 'floor')
-				floorTiles.push(x + "," + y);
-		}
+    var floorTiles = [];
+    for (var x = 0; x < tiles.length; x++) {
+        if(!tiles[x])
+            continue;
+        for (var y = 0; y < tiles[x].length; y++) {
+            if(tiles[x][y] && tiles[x][y].getName() == 'floor')
+                floorTiles.push(x + "," + y);
+        }
 
-	}
+    }
 
-	return floorTiles;
+    return floorTiles;
 };
