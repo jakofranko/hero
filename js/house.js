@@ -329,7 +329,7 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
         house = this._placeStairs(house);
 
         // Now that the locations of all rooms have been set and adjusted, place items in each room
-        // this._placeItems(this.graph);
+        this._placeItems(this.graph);
 
         // for (var z = 0; z < house.length; z++) {
         //     console.log(z);
