@@ -406,24 +406,24 @@ Game.House.prototype._renderRoom = function(room, direction) {
 	}
 
 	// If it's the foyer, place the front door
-	if(room.room == 'foyer') {
+	if(room.name == 'foyer') {
 		var doorX, doorY;
 		switch(direction) {
 			case 'n': // Rooms will be spawning south, so put the door at the north
-				doorX = Game.getRandomInRange(room.getX() + 1, room.getWidth() - 2);
-				doorY = room.getY();
+				doorX = Game.getRandomInRange(room.x + 1, room.width - 2);
+				doorY = room.y;
 				break;
 			case 'e': // Rooms will be spawning west, so put door at the east
-				doorX = room.getWidth() - 1;
-				doorY = Game.getRandomInRange(room.getY() + 1, room.getHeight() - 2);
+				doorX = room.width - 1;
+				doorY = Game.getRandomInRange(room.y + 1, room.height - 2);
 				break;
 			case 's':
-				doorX = Game.getRandomInRange(room.getX() + 1, room.getWidth() - 2);
-				doorY = room.getHeight() - 1;
+				doorX = Game.getRandomInRange(room.x + 1, room.width - 2);
+				doorY = room.height - 1;
 				break;
 			case 'w':
-				doorX = room.getX();
-				doorY = Game.getRandomInRange(room.getY() + 1, room.getHeight() - 2);
+				doorX = room.x;
+				doorY = Game.getRandomInRange(room.y + 1, room.height - 2);
 				break;
 			default:
 				break;
@@ -601,12 +601,12 @@ Game.House.prototype._placeStairs = function(tiles) {
 };
 
 Game.House.prototype._placeItems = function(room) {
-	if(room.room !== 'foyer' && room.room !== 'hall' && room.room !== 'closet' && room.getPlaced() === true) {
-		var roomX = room.getX(),
-			roomY = room.getY(),
-			roomZ = room.getZ();
-		var itemsTemplate = Game.TemplateRepository.create(room.room); // Assumes that the room name is also the name of the template
-		var spawnDir = room.getSpawnDirection();
+	if(room.name !== 'foyer' && room.name !== 'hall' && room.name !== 'closet' && room.placed === true) {
+		var roomX = room.x,
+			roomY = room.y,
+			roomZ = room.z;
+		var itemsTemplate = Game.TemplateRepository.create(room.name); // Assumes that the room name is also the name of the template
+		var spawnDir = room.spawnDirection;
 		var options = {};
 		switch(spawnDir) {
 			case 's':
