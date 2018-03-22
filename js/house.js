@@ -440,7 +440,7 @@ Game.House.prototype._getRandomChild = function(room, returnWord) {
 	// Get a new array from the possible room children based on what rooms
 	// aren't at their max
 	var selection = [];
-	this.grammar[room].forEach(function(val, index) {
+	this.grammar[room].forEach(function(val) {
 		var roomName = this.rooms[val];
 		if(!this.maxRooms[roomName] || this.roomNum[roomName] < this.maxRooms[roomName])
 			selection.push(val);
