@@ -339,6 +339,49 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
         return house;
 };
 
+Game.House.prototype._shiftTilesSouth = function(amount, tiles) {
+    let tile;
+
+    // If tiles doesn't exist, no need to shift
+    if(!tiles)
+        return tiles;
+
+    for(let z = 0; z < tiles.length; z++) {
+        if(!tiles[z][0]) debugger;
+        for(let x = 0; x < tiles[z].length; x++) {
+            for(let y = 0; y < amount; y++) {
+                tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+                tiles[z][x].unshift(tile);
+            }
+        }
+    }
+
+    return tiles;
+};
+
+Game.House.prototype._shiftTilesEast = function(amount, tiles) {
+    let tile;
+
+    // If tiles doesn't exist, no need to shift
+    if(!tiles)
+        return tiles;
+
+    for(let z = 0; z < tiles.length; z++) {
+        if(!tiles[z][0]) debugger;
+        for(let x = 0; x < amount; x++) {
+            tiles[z].unshift(new Array(tiles[z][0].length));
+
+            for(let y = 0; y < tiles[z][0].length; y++) {
+                tile = (z === 0) ? Game.TileRepository.create('grass') : Game.TileRepository.create('air');
+                // Always use index of 0 since we're adding the array to the beginning
+                tiles[z][0][y] = tile;
+            }
+        }
+    }
+
+    return tiles;
+};
+
 Game.House.prototype._renderRoom = function(room, direction) {
 	var w = room.width;
 	var h = room.height;
@@ -645,6 +688,38 @@ Game.House.prototype._roomCheck = function(startX, startY, width, height, tiles)
 
 	return roomFound;
 };
+
+Game.House.prototype._exceedsMax = function(room, onlyAbove = false) {
+    if(onlyAbove) {
+        return (
+            room.z > this.maxStories ||
+            room.x + room.width > this.maxWidth ||
+            room.y + room.height > this.maxHeight
+        )
+    } else {
+        return (
+            room.z > this.maxStories ||
+            room.x + room.parent.width + room.width > this.maxWidth ||
+            room.y + room.parent.height + room.height > this.maxHeight
+        );
+    }
+};
+
+Game.House.prototype._exceedsTotalWidth = function(width, tiles) {
+    for(let z = 0; z < tiles.length; z++) {
+        if(width + tiles[z].length > this.maxWidth)
+            return true;
+    }
+}
+
+Game.House.prototype._exceedsTotalHeight = function(height, tiles) {
+    for(let z = 0; z < tiles.length; z++) {
+        for(let x = 0; x < tiles[z].length; x++) {
+            if(height + tiles[z][x].length > this.maxHeight)
+                return true;
+        }
+    }
+}
 
 Game.House.prototype._getFloorTiles = function(tiles) {
 	var floorTiles = [];
