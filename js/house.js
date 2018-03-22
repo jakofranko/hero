@@ -548,7 +548,7 @@ Game.House.prototype._placeDoors = function(tiles) {
     }
 
     return tiles;
-}
+};
 
 Game.House.prototype._placeStairs = function(tiles) {
     let queue = [this.graph];
@@ -710,7 +710,7 @@ Game.House.prototype._exceedsTotalWidth = function(width, tiles) {
         if(width + tiles[z].length > this.maxWidth)
             return true;
     }
-}
+};
 
 Game.House.prototype._exceedsTotalHeight = function(height, tiles) {
     for(let z = 0; z < tiles.length; z++) {
@@ -719,7 +719,7 @@ Game.House.prototype._exceedsTotalHeight = function(height, tiles) {
                 return true;
         }
     }
-}
+};
 
 Game.House.prototype._getFloorTiles = function(tiles) {
     var floorTiles = [];
