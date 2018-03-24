@@ -12,3 +12,5 @@ As I have been developing Justice, I pretty consistently start out to work on a 
 * Better captioning for menus (namely the action menu for putting things in containers)
 * Work jobs that give the NPC money
 * Convert all instances of `Math.random()` to `ROT.RNG.getUniform()`
+* A more complex NPC generator that will build out super villains and/or event NPCs
+* 'Event source' entity mixin that allows NPCs to spawn events as long as they are alive
