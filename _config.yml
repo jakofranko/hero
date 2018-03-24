@@ -15,3 +15,11 @@ github_username:  jakofranko
 
 # Build settings
 markdown: kramdown
+
+defaults:
+    -
+        scope:
+            path: "" # All files
+            type: "posts"
+        values:
+            layout: "post"
