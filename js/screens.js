@@ -8,10 +8,10 @@ Game.Screen = {};
 
 // Define start screen
 Game.Screen.startScreen = {
-	enter: function() { Game.resize(Game.getDisplay(), true, false, true); },
-	exit: function() { console.log('Exited the start screen'); },
-	render: function(display) {
-		// Render prompt to the screen
+    enter: function() { Game.resize(Game.getDisplay(), true, false, true); },
+    exit: function() { console.log('Exited the start screen'); },
+    render: function(display) {
+        // Render prompt to the screen
         var w = Game.getScreenWidth();
         var h = Game.getScreenHeight();
         var text = "%c{#585DF5}Justice%c{}: A Superhero Roguelike";
@@ -79,13 +79,13 @@ Game.Screen.startScreen = {
         var version = "v0.5";
         display.drawText((w / 2) - (version.length / 2), scalesASCII.length + 8, version);
 
-	},
-	handleInput: function(inputType, inputData) {
-		// When [Enter] is pressed, go to the play screen
-		if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			Game.switchScreen(Game.Screen.loadScreen);
-		}
-	}
+    },
+    handleInput: function(inputType, inputData) {
+        // When [Enter] is pressed, go to the play screen
+        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
+            Game.switchScreen(Game.Screen.loadScreen);
+        }
+    }
 };
 
 Game.Screen.loadScreen = {
@@ -275,10 +275,10 @@ Game.Screen.stats = {
 
 // Define our playing screen
 Game.Screen.playScreen = {
-	_player: null,
+    _player: null,
     _map: null,
     _time: null,
-	_gameEnded: false,
+    _gameEnded: false,
     _subScreen: null,
     enter: function(player, map) {
         this._player = player;
@@ -309,8 +309,8 @@ Game.Screen.playScreen = {
         }
 
         // Otherwise, procede as usual...
-    	var screenWidth = Game.getScreenWidth();
-    	var screenHeight = Game.getScreenHeight();
+        var screenWidth = Game.getScreenWidth();
+        var screenHeight = Game.getScreenHeight();
 
         // Render the tiles
         this.renderTiles(display);
@@ -331,7 +331,7 @@ Game.Screen.playScreen = {
         display.drawText(0, screenHeight, stats);
     },
     handleInput: function(inputType, inputData) {
-    	// If the game is over, enter will bring the user to the losing screen.
+        // If the game is over, enter will bring the user to the losing screen.
         if(this._gameEnded) {
             if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
                 Game.switchScreen(Game.Screen.loseScreen);
@@ -356,10 +356,10 @@ Game.Screen.playScreen = {
         var command = Game.Input.handleInput('playScreen', inputType, inputData);
         var unlock  = command ? command(this._player) : false;
 
-        if(unlock)	// Unlock the engine
-        	this._player.getMap().getEngine().unlock();
-    	else
-        	Game.refresh(this._player);
+        if(unlock)    // Unlock the engine
+            this._player.getMap().getEngine().unlock();
+        else
+            Game.refresh(this._player);
     },
     getScreenOffsets: function() {
         // Make sure we still have enough space to fit an entire game screen
@@ -1484,8 +1484,8 @@ Game.Screen.winScreen = {
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			Game.Screen.playScreen.setSubScreen(undefined);
-		}
+            Game.Screen.playScreen.setSubScreen(undefined);
+        }
     }
 };
 
@@ -1503,7 +1503,7 @@ Game.Screen.loseScreen = {
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			location.reload();
-		}
+            location.reload();
+        }
     }
 };
