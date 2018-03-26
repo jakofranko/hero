@@ -83,9 +83,117 @@ Game.Screen.startScreen = {
 	handleInput: function(inputType, inputData) {
 		// When [Enter] is pressed, go to the play screen
 		if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			Game.switchScreen(Game.Screen.playScreen);
+			Game.switchScreen(Game.Screen.loadScreen);
 		}
 	}
+};
+
+Game.Screen.loadScreen = {
+    _loader: null,
+    _player: null,
+    _map: null,
+    enter: function() {
+        this._loader = new Game.Loader();
+
+        // Register test modules
+        this._loader.registerModule('Map');
+        this._loader.registerModule('Map', 'Lava');
+        this._loader.registerModule('Map', 'Water');
+        this._loader.registerModule('Map', 'Gold');
+        this._loader.registerModule('Monsters');
+        this._loader.registerModule('Items');
+
+        // TODO: Move player generation into player creation screen
+        // TODO: Player chooses size of city?
+        this._player = new Game.Entity(Game.PlayerTemplate);
+        this._map = new Game.Map(Game.getCitySize(), this._player);
+    },
+    exit: function() {},
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var h = Game.getScreenHeight();
+        var progress = this._loader.getProgress();
+
+        // 100 being the max progress number
+        var barWidthMax = (w - 2) / 100; // -2 to account for end brackets
+
+        // Due to an anomaly with l and rpad, 0 will add a pad, 1 will not (since
+        // it gets the diff) so, if barWidth or barDiff are 0, then default to 1.
+        var barWidth = progress * barWidthMax || 1;
+        if(barWidth === 100 * barWidthMax)
+            barWidth -= 1; // So as to account for the cap char
+        var barDiff = (100 * barWidthMax) - barWidth || 1;
+        var bar = "[".rpad("=", barWidth);
+        var end = "]".lpad(" ", barDiff);
+        var progressBar = bar + end; // The length of this string should always be 78 (or w - 2)
+
+        // Render prompt to the screen
+        display.drawText((w/2) - 5, 5, "%c{yellow}Loading...");
+        display.drawText((w/2) - (progressBar.length / 2), 7, progressBar);
+        if(progress < 1)
+            display.drawText((w/2) - 15, 9, "Press [Enter] to begin loading!");
+        if(progress >= 100)
+            display.drawText((w/2) - 24, 9, "Press [Enter] to play or [Escape] to load again!");
+    },
+    handleInput: function(inputType, inputData) {
+        // Purely as a demo, not functionally loading anything
+        var numModules = 5,
+            iterations = numModules * 10,
+            currIteration = 1;
+
+        this._loader.startModule('Map');
+        function loadModules() {
+            switch(currIteration % numModules) {
+                case 0:
+                    this._loader.startSubmodule('Map', 'Lava');
+                    this._loader.updateSubmodule('Map', 'Lava', currIteration * 2);
+                    break;
+                case 1:
+                    this._loader.startSubmodule('Map', 'Water');
+                    this._loader.updateSubmodule('Map', 'Water', currIteration * 2);
+                    break;
+                case 2:
+                    this._loader.startSubmodule('Map', 'Gold');
+                    this._loader.updateSubmodule('Map', 'Gold', currIteration * 2);
+                    break;
+                case 3:
+                    this._loader.startModule('Monsters');
+                    this._loader.updateModule('Monsters', currIteration * 2);
+                    break;
+                case 4:
+                    this._loader.startModule('Items');
+                    this._loader.updateModule('Items', currIteration * 2);
+                    break;
+                default:
+                    break;
+            }
+
+            if(currIteration === iterations) {
+                this._loader.finishModule('Map');
+                this._loader.finishModule('Monsters');
+                this._loader.finishModule('Items');
+                clearInterval(window.intervalID);
+            } else {
+                currIteration++;
+            }
+
+            Game.refresh();
+        }
+
+        if(inputType == 'keydown') {
+            if(this._loader.getProgress() < 100) {
+                if(inputData.keyCode === ROT.VK_RETURN)
+                    window.intervalID = setInterval(loadModules.bind(this), 50);
+                else if(inputData.keyCode === ROT.VK_ESCAPE)
+                    clearInterval(window.intervalID);
+            } else {
+                if(inputData.keyCode === ROT.VK_RETURN)
+                    Game.switchScreen(Game.Screen.playScreen, [this._player, this._map]);
+                else if(inputData.keyCode === ROT.VK_ESCAPE)
+                    window.intervalID = setInterval(loadModules.bind(this), 50);
+            }
+        }
+    }
 };
 
 Game.Screen.overview = {
@@ -168,13 +276,13 @@ Game.Screen.stats = {
 // Define our playing screen
 Game.Screen.playScreen = {
 	_player: null,
+    _map: null,
     _time: null,
 	_gameEnded: false,
     _subScreen: null,
-    enter: function() {
-        // TODO: Player chooses size of city?
-        this._player = new Game.Entity(Game.PlayerTemplate);
-        var map = new Game.Map(Game.getCitySize(), this._player);
+    enter: function(player, map) {
+        this._player = player;
+        this._map = map;
 
         // Once player has been created, the map generated and the
         // map assigned to the player (happens in map creation),
@@ -185,7 +293,7 @@ Game.Screen.playScreen = {
         Game.setCharacterStats(Game.Screen.stats, this._player);
 
         // Start the map's engine
-        map.getEngine().start();
+        this._map.getEngine().start();
 
         // The first thing that should happen is when the game starts is to
         // assign starting points
