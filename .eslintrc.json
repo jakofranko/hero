@@ -7,7 +7,8 @@
         "sourceType": "module"
     },
     "globals": {
-        "Game": true
+        "Game": true,
+        "ROT": true
     },
     "extends": "eslint:recommended",
     "rules": {
