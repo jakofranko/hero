@@ -5,7 +5,7 @@ Game.Loader = function(modules) {
 	this.modules = {};
     if(!modules)
         modules = [];
-        
+
 	for (var i = 0; i < modules.length; i++) {
 		this.modules[modules[i]] = {
 			submodules: {},
@@ -47,7 +47,7 @@ Game.Loader.prototype.finishModule = function(module) {
 	// Make progress 100
 	this.modules[module].progress = 100;
 
-	// Remove item from currently loading list
+    // Remove item from currently loading list
 	var index = this.currentlyLoading.indexOf(module);
 	this.currentlyLoading.splice(index, 1);
 

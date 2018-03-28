@@ -2,14 +2,22 @@
 // TODO: Add utilities to handle activeEvent queue
 // TODO: Add utilities to fetch event sources from the city and then schedule them
 Game.Map = function(size, player) {
+    var loader = Game.getLoader();
+    loader.startModule('Map');
+
+    loader.startSubmodule('Map', 'City');
     this._city = new Game.City(size);
     this._city.init();
+    loader.finishSubmodule('Map', 'City');
 
     // Justice System for this city
+    loader.startSubmodule('Map', 'Justice');
     this._justice = new Game.Justice();
+    loader.finishSubmodule('Map', 'Justice');
 
     // Used for drawing to various displays
     // TODO: Get item creation out of tile creation
+    loader.startSubmodule('Map', 'Tiles');
     this._tiles = this._city.tilesFromLots();
 
     // Cache dimensions
@@ -23,6 +31,7 @@ Game.Map = function(size, player) {
 
     this._availableLivingLocations = this._city.getLivingLocations();
     this._occupiedLivingLocations = [];
+    loader.finishSubmodule('Map', 'Tiles');
 
     // Setup the field of visions
     this._fov = [];
@@ -51,8 +60,10 @@ Game.Map = function(size, player) {
     this._setupExploredArray();
 
     // Create a table which will hold the entities
+    loader.startSubmodule('Map', 'Entities');
     this._entities = {};
     this._generateEntities();
+    loader.finishSubmodule('Map', 'Entities');
 
     // Add the Player
     this._player = player;
@@ -65,6 +76,7 @@ Game.Map = function(size, player) {
     // this.addItem(Number(playerLoc[0]) + 1, Number(playerLoc[1]), 0, Game.ItemRepository.create('safe'));
     // this.addItem(Number(playerLoc[0]) + 2, Number(playerLoc[1]), 0, Game.ItemRepository.create('vault door'));
     // this.addItem(Number(playerLoc[0]), Number(playerLoc[1]) + 1, 0, Game.ItemRepository.create('cash register'));
+    Game.getLoader().finishModule('Map');
 };
 
 // Standard getters
@@ -179,7 +191,7 @@ Game.Map.prototype.addEntityAtRandomPosition = function(entity, z) {
 	this.addEntity(entity);
 };
 Game.Map.prototype.getEntityAt = function(x, y, z) {
-	// Get the entity based on position key 
+	// Get the entity based on position key
     return this._entities[x + ',' + y + ',' + z];
 };
 Game.Map.prototype.getEntitiesWithinRadius = function(centerX, centerY, centerZ, radius) {
@@ -191,9 +203,9 @@ Game.Map.prototype.getEntitiesWithinRadius = function(centerX, centerY, centerZ,
 	var bottomY = centerY + radius;
 	for (var key in this._entities) {
 		var entity = this._entities[key];
-		if (entity.getX() >= leftX && 
-			entity.getX() <= rightX && 
-			entity.getY() >= topY && 
+		if (entity.getX() >= leftX &&
+			entity.getX() <= rightX &&
+			entity.getY() >= topY &&
 			entity.getY() <= bottomY &&
 			entity.getZ() == centerZ) {
 			results.push(entity);
@@ -348,7 +360,7 @@ Game.Map.prototype.getRandomFloorPosition = function(z) {
 // Tiles
 // Gets the tile for a given coordinate set
 Game.Map.prototype.getTile = function(x, y, z) {
-    // Make sure we are inside the bounds. 
+    // Make sure we are inside the bounds.
     // If we aren't, return null tile.
     if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth)
         return Game.TileRepository.create('null');
@@ -556,7 +568,7 @@ Game.Map.prototype.getItemsInRadius = function(x, y, z, radius, name) {
             var mapItems = this._items[`${mapX},${mapY},${z}`];
             if(mapItems && mapItems.length) {
                 if(name) {
-                    mapItems.forEach(item => { 
+                    mapItems.forEach(item => {
                         if(item.getName() == name || name.indexOf(item.getName()) > -1)
                             items.push(item);
                     });

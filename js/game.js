@@ -64,6 +64,9 @@ var Game = {
     getLotSize: function() {
         return this._lotSize;
     },
+    getLoader: function() {
+        return Game.Screen.loadScreen.loader;
+    },
     getStartTime: function() {
         return this._startTime;
     },

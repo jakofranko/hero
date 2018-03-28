@@ -89,30 +89,48 @@ Game.Screen.startScreen = {
 };
 
 Game.Screen.loadScreen = {
-    _loader: null,
+    loader: null,
     _player: null,
     _map: null,
+    _startedLoading: false,
     enter: function() {
-        this._loader = new Game.Loader();
+        this.loader = new Game.Loader();
 
         // Register test modules
-        this._loader.registerModule('Map');
-        this._loader.registerModule('Map', 'Lava');
-        this._loader.registerModule('Map', 'Water');
-        this._loader.registerModule('Map', 'Gold');
-        this._loader.registerModule('Monsters');
-        this._loader.registerModule('Items');
+        this.loader.registerModule('Map');
+        this.loader.registerModule('Map', 'City');
+        this.loader.registerModule('Map', 'Justice');
+        this.loader.registerModule('Map', 'Tiles');
+        this.loader.registerModule('Map', 'Entities');
 
         // TODO: Move player generation into player creation screen
         // TODO: Player chooses size of city?
         this._player = new Game.Entity(Game.PlayerTemplate);
-        this._map = new Game.Map(Game.getCitySize(), this._player);
+
+        // Begin load loop
+        function checkAndRenderLoader() {
+            if(this.loader.getProgress() === 100)
+                Game.switchScreen(Game.Screen.playScreen, [this._player, this._map]);
+            else
+                Game.refresh();
+
+            if(!this._startedLoading) {
+                this._startedLoading = true;
+                // Begin loading the map
+                try {
+                    this._map = new Game.Map(Game.getCitySize(), this._player);
+                } catch(e) {
+                    Game.switchScreen(Game.Screen.errorScreen, [e]);
+                }
+            }
+        }
+        this._intID = setInterval(checkAndRenderLoader.bind(this), 50);
     },
-    exit: function() {},
     render: function(display) {
         var w = Game.getScreenWidth();
         var h = Game.getScreenHeight();
-        var progress = this._loader.getProgress();
+        var progress = this.loader.getProgress();
+        var loadListY = 10;
 
         // 100 being the max progress number
         var barWidthMax = (w - 2) / 100; // -2 to account for end brackets
@@ -130,69 +148,14 @@ Game.Screen.loadScreen = {
         // Render prompt to the screen
         display.drawText((w/2) - 5, 5, "%c{yellow}Loading...");
         display.drawText((w/2) - (progressBar.length / 2), 7, progressBar);
-        if(progress < 1)
-            display.drawText((w/2) - 15, 9, "Press [Enter] to begin loading!");
-        if(progress >= 100)
-            display.drawText((w/2) - 24, 9, "Press [Enter] to play or [Escape] to load again!");
+        display.drawText(0, 8, "Currently loading:");
+        this.loader.currentlyLoading.forEach(function(item) {
+            display.drawText(0, loadListY++, item);
+        }, this);
     },
-    handleInput: function(inputType, inputData) {
-        // Purely as a demo, not functionally loading anything
-        var numModules = 5,
-            iterations = numModules * 10,
-            currIteration = 1;
-
-        this._loader.startModule('Map');
-        function loadModules() {
-            switch(currIteration % numModules) {
-                case 0:
-                    this._loader.startSubmodule('Map', 'Lava');
-                    this._loader.updateSubmodule('Map', 'Lava', currIteration * 2);
-                    break;
-                case 1:
-                    this._loader.startSubmodule('Map', 'Water');
-                    this._loader.updateSubmodule('Map', 'Water', currIteration * 2);
-                    break;
-                case 2:
-                    this._loader.startSubmodule('Map', 'Gold');
-                    this._loader.updateSubmodule('Map', 'Gold', currIteration * 2);
-                    break;
-                case 3:
-                    this._loader.startModule('Monsters');
-                    this._loader.updateModule('Monsters', currIteration * 2);
-                    break;
-                case 4:
-                    this._loader.startModule('Items');
-                    this._loader.updateModule('Items', currIteration * 2);
-                    break;
-                default:
-                    break;
-            }
-
-            if(currIteration === iterations) {
-                this._loader.finishModule('Map');
-                this._loader.finishModule('Monsters');
-                this._loader.finishModule('Items');
-                clearInterval(window.intervalID);
-            } else {
-                currIteration++;
-            }
-
-            Game.refresh();
-        }
-
-        if(inputType == 'keydown') {
-            if(this._loader.getProgress() < 100) {
-                if(inputData.keyCode === ROT.VK_RETURN)
-                    window.intervalID = setInterval(loadModules.bind(this), 50);
-                else if(inputData.keyCode === ROT.VK_ESCAPE)
-                    clearInterval(window.intervalID);
-            } else {
-                if(inputData.keyCode === ROT.VK_RETURN)
-                    Game.switchScreen(Game.Screen.playScreen, [this._player, this._map]);
-                else if(inputData.keyCode === ROT.VK_ESCAPE)
-                    window.intervalID = setInterval(loadModules.bind(this), 50);
-            }
-        }
+    handleInput: function(inputType, inputData) {},
+    exit: function() {
+        clearInterval(this._intID);
     }
 };
 
@@ -1464,6 +1427,30 @@ Game.Screen.powersScreen = {
         this._entity.setActivePower(index);
 
         showScreenCommand(this._entity);
+    }
+};
+
+Game.Screen.errorScreen = {
+    enter: function(error) {
+        this._error = error;
+        console.log(error);
+    },
+    exit: function() {  console.log("Exited error screen."); },
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var text = "Uh oh :(";
+        display.drawText((w/2) - (text.length / 2), 2, text);
+
+        text = "Looks like there was an error:" + this._error;
+        display.drawText((w/2) - 40, 4, text, 80);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to start over";
+        display.drawText((w/2) - (text.length / 2), 8, text);
+    },
+    handleInput: function(inputType, inputData) {
+        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
+            Game.Screen.playScreen.setSubScreen(undefined);
+        }
     }
 };
 
