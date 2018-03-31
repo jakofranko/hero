@@ -100,10 +100,23 @@ Game.Loader.prototype.updateSubmodule = function(module, submodule, amount) {
 Game.Loader.prototype._updateProgress = function() {
 	var numModules = Object.keys(this.modules).length,
 		maxProgress = numModules * 100,
-		currentProgress = 0;
+		currentProgress = 0,
+        submodules, moduleMaxProgress, moduleProgress;
 
-	for(var module in this.modules)
-		currentProgress += this.modules[module].progress;
+	for(var module in this.modules) {
+        submodules = Object.keys(this.modules[module].submodules);
+        moduleMaxProgress = submodules.length * 100;
+        moduleProgress = 0;
+        if(submodules.length) {
+            for(var submodule in this.modules[module].submodules) {
+                moduleProgress +=  this.modules[module].submodules[submodule].progress
+            }
+
+            this.modules[module].progress = (moduleProgress / moduleMaxProgress) * 100;
+        }
+
+        currentProgress += this.modules[module].progress;
+    }
 
 	this.totalProgress = (currentProgress / maxProgress) * 100;
 };
