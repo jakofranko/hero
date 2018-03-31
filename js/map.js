@@ -5,19 +5,14 @@ Game.Map = function(size, player) {
     var loader = Game.getLoader();
     loader.startModule('Map');
 
-    loader.startSubmodule('Map', 'City');
     this._city = new Game.City(size);
     this._city.init();
-    loader.finishSubmodule('Map', 'City');
 
     // Justice System for this city
-    loader.startSubmodule('Map', 'Justice');
     this._justice = new Game.Justice();
-    loader.finishSubmodule('Map', 'Justice');
 
     // Used for drawing to various displays
     // TODO: Get item creation out of tile creation
-    loader.startSubmodule('Map', 'Tiles');
     this._tiles = this._city.tilesFromLots();
 
     // Cache dimensions
@@ -31,7 +26,6 @@ Game.Map = function(size, player) {
 
     this._availableLivingLocations = this._city.getLivingLocations();
     this._occupiedLivingLocations = [];
-    loader.finishSubmodule('Map', 'Tiles');
 
     // Setup the field of visions
     this._fov = [];
@@ -60,10 +54,8 @@ Game.Map = function(size, player) {
     this._setupExploredArray();
 
     // Create a table which will hold the entities
-    loader.startSubmodule('Map', 'Entities');
     this._entities = {};
     this._generateEntities();
-    loader.finishSubmodule('Map', 'Entities');
 
     // Add the Player
     this._player = player;
@@ -76,7 +68,6 @@ Game.Map = function(size, player) {
     // this.addItem(Number(playerLoc[0]) + 1, Number(playerLoc[1]), 0, Game.ItemRepository.create('safe'));
     // this.addItem(Number(playerLoc[0]) + 2, Number(playerLoc[1]), 0, Game.ItemRepository.create('vault door'));
     // this.addItem(Number(playerLoc[0]), Number(playerLoc[1]) + 1, 0, Game.ItemRepository.create('cash register'));
-    Game.getLoader().finishModule('Map');
 };
 
 // Standard getters

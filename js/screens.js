@@ -94,6 +94,7 @@ Game.Screen.loadScreen = {
     _map: null,
     _startedLoading: false,
     enter: function() {
+        var screen = this;
         this.loader = new Game.Loader();
 
         // Register test modules
@@ -109,7 +110,7 @@ Game.Screen.loadScreen = {
 
         // Begin load loop
         function checkAndRenderLoader() {
-            if(this.loader.getProgress() === 100)
+            if(this.loader.getProgress() === 100 && this._map)
                 Game.switchScreen(Game.Screen.playScreen, [this._player, this._map]);
             else
                 Game.refresh();
@@ -118,7 +119,31 @@ Game.Screen.loadScreen = {
                 this._startedLoading = true;
                 // Begin loading the map
                 try {
-                    this._map = new Game.Map(Game.getCitySize(), this._player);
+                    this.loader.startModule('Map');
+                    this.loader.startSubmodule('Map', 'City');
+                    this.loader.startSubmodule('Map', 'Justice');
+                    this.loader.startSubmodule('Map', 'Tiles');
+                    this.loader.startSubmodule('Map', 'Entities');
+
+                    setTimeout(function() {
+                        screen._map = new Game.Map(Game.getCitySize(), screen._player)
+                    }, 1000);
+
+                    setTimeout(function() {
+                        screen.loader.finishSubmodule('Map', 'City');
+                    }, 250);
+                    setTimeout(function() {
+                        screen.loader.finishSubmodule('Map', 'Justice');
+                    }, 500);
+                    setTimeout(function() {
+                        screen.loader.finishSubmodule('Map', 'Tiles');
+                    }, 750);
+                    setTimeout(function() {
+                        screen.loader.finishSubmodule('Map', 'Entities');
+                    }, 1000);
+                    setTimeout(function() {
+                        screen.loader.finishModule('Map');
+                    }, 1250);
                 } catch(e) {
                     Game.switchScreen(Game.Screen.errorScreen, [e]);
                 }
