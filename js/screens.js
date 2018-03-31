@@ -171,7 +171,7 @@ Game.Screen.loadScreen = {
         var progressBar = bar + end; // The length of this string should always be 78 (or w - 2)
 
         // Render prompt to the screen
-        display.drawText((w/2) - 5, 5, "%c{yellow}Loading...");
+        display.drawText((w/2) - 5, 5, "%c{" + Game.Palette.yellow + "}Loading...");
         display.drawText((w/2) - (progressBar.length / 2), 7, progressBar);
         display.drawText(0, 8, "Currently loading:");
         this.loader.currentlyLoading.forEach(function(item) {
