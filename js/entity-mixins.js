@@ -1084,6 +1084,8 @@ Game.EntityMixins.PowerUser = {
         this._powersList = template['powers'] || [];
         this._powers = [];
         this._activePower = null;
+        this._primaryRanged = null;
+        this._primaryMelee = null;
         this._constantPowers = [];
         this._persistentPowers = [];
         this._inherentPowers = [];
@@ -1106,6 +1108,18 @@ Game.EntityMixins.PowerUser = {
     },
     setActivePower: function(i) {
         this._activePower = this._powers[i];
+    },
+    getPrimaryRanged: function() {
+        return this._primaryRanged;
+    },
+    setPrimaryRanged: function(i) {
+        this._primaryRanged = this._powers[i];
+    },
+    getPrimaryMelee: function() {
+        return this._primaryMelee;
+    },
+    setPrimaryMelee: function(i) {
+        this._primaryMelee = this._powers[i];
     },
     usePower: function(target) {
         var power = this._activePower;
