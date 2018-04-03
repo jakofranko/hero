@@ -1094,7 +1094,6 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
         return true;
     }
 });
-
 Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
     okFunction: function(x, y) {
         debugger;
@@ -1429,12 +1428,28 @@ Game.Screen.powersScreen = {
         this._letters = 'abcdefghijklmnopqrstuvwxyz';
     },
     render: function(display) {
-        display.drawText(0, 0, 'Powers:');
+        var y = 0;
+        var text;
+
+        text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + k%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.';
+        display.drawText(0, y++, text);
+
+        text = 'Press [%c{' + Game.Palette.blue + '}Esc%c{}] or [%c{' + Game.Palette.blue + '}Enter%c{}] to leave this screen.'
+        display.drawText(0, y++, text);
+        
+        y++;
+        display.drawText(0, y++, 'Powers:');
 
         // Iterate through each of our powers
         for (var i = 0; i < this._powers.length; i++) {
             var powerName = this._powers[i]['name'];
-            display.drawText(0, 3 + i, this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName);
+            text = this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName;
+            if(this._powers[i] == this._entity.getPrimaryMelee())
+                text += ' %c{}| %c{' + Game.Palette.lightBlue + '}Primary Melee';
+            if(this._powers[i] == this._entity.getPrimaryRanged())
+                text += ' %c{}| %c{' + Game.Palette.lightBlue + '}Primary Ranged';
+
+            display.drawText(0, y++, text);
         }
     },
     handleInput: function(inputType, inputData) {
@@ -1452,6 +1467,14 @@ Game.Screen.powersScreen = {
         this._entity.setActivePower(index);
 
         showScreenCommand(this._entity);
+    },
+    setPrimaryMelee: function(letter) {
+        var index = this._letters.indexOf(letter.toLowerCase());
+        this._entity.setPrimaryMelee(index);
+    },
+    setPrimaryRanged: function(letter) {
+        var index = this._letters.indexOf(letter.toLowerCase());
+        this._entity.setPrimaryRanged(index);
     }
 };
 

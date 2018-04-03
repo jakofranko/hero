@@ -152,9 +152,22 @@ Game.Commands.MenuScreenOkCommand = function(mainScreen) {
 };
 
 Game.Commands.activatePowerCommand = function(mainScreen, letter) {
-    return function(entity) {
+    return function() {
         var powerScreen = mainScreen.getSubScreen();
         return powerScreen.activatePower(letter);
+    };
+};
+
+Game.Commands.makePrimaryMeleeCommand = function(mainScreen, letter) {
+    return function() {
+        var powerScreen = mainScreen.getSubScreen();
+        return powerScreen.setPrimaryMelee(letter);
+    };
+};
+Game.Commands.makePrimaryRangedCommand = function(mainScreen, letter) {
+    return function() {
+        var powerScreen = mainScreen.getSubScreen();
+        return powerScreen.setPrimaryRanged(letter);
     };
 };
 
@@ -197,7 +210,7 @@ Game.Commands.incrementPowerCommand = function(mainScreen, character) {
             if(statScreen._powers[index])
                 // Call the power's upgrade function (handles entity points)
                 statScreen._powers[index].upgradePower();
-        
+
         } else {
             Game.sendMessage(entity, 'You have no more points to spend.');
         }
