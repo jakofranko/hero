@@ -4,7 +4,7 @@ Game.EntityMixins = {};
 Game.EntityMixins.Attacker = {
     name: 'Attacker',
     groupName: 'Attacker',
-    init: function(template) {
+    init: function() {
         if(!this.hasMixin('Characteristics')) {
             throw new Error('Entity needs the "Characteristics" mixin in order to use this mixin');
         }
@@ -379,7 +379,7 @@ Game.EntityMixins.CorpseDropper = {
         this._corpseDropRate = template['corpseDropRate'] || 100;
     },
     listeners: {
-        onDeath: function(attacker) {
+        onDeath: function() {
             // Check if we should drop a corpse.
             if (Math.round(Math.random() * 100) <= this._corpseDropRate) {
                 // Create a new corpse item and drop it.
@@ -466,7 +466,7 @@ Game.EntityMixins.Destructible = {
 };
 Game.EntityMixins.Equipper = {
     name: 'Equipper',
-    init: function(template) {
+    init: function() {
         this._weapon = null;
         this._armor = null;
     },
@@ -846,7 +846,7 @@ Game.EntityMixins.JobActor = {
 };
 Game.EntityMixins.MemoryMaker = {
     name: 'MemoryMaker',
-    init: function(template) {
+    init: function() {
         // Each memory in a given category should have a unique key.
         // Additionally, each memory may have sub-categories
         this._memory = {
@@ -1066,7 +1066,7 @@ Game.EntityMixins.MoneyHolder = {
 };
 Game.EntityMixins.MessageRecipient = {
     name: 'MessageRecipient',
-    init: function(template) {
+    init: function() {
         this._messages = [];
     },
     receiveMessage: function(message) {

@@ -1431,7 +1431,7 @@ Game.Screen.powersScreen = {
         var y = 0;
         var text;
 
-        text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + k%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.';
+        text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + key%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.';
         display.drawText(0, y++, text);
 
         text = 'Press [%c{' + Game.Palette.blue + '}Esc%c{}] or [%c{' + Game.Palette.blue + '}Enter%c{}] to leave this screen.'
