@@ -1080,6 +1080,7 @@ Game.EntityMixins.MessageRecipient = {
     }
 };
 Game.EntityMixins.PowerUser = {
+    name: 'PowerUser',
     init: function(template) {
         this._powersList = template['powers'] || [];
         this._powers = [];
@@ -1094,6 +1095,9 @@ Game.EntityMixins.PowerUser = {
         if(this._powersList.length) {
             this._powersList.forEach(power => this.addPower(power));
         }
+    },
+    getPower: function(i) {
+        return this._powers[i];
     },
     getPowers: function() {
         return this._powers;
@@ -1113,16 +1117,24 @@ Game.EntityMixins.PowerUser = {
         return this._primaryRanged;
     },
     setPrimaryRanged: function(i) {
-        this._primaryRanged = this._powers[i];
+        if(!i)
+            this._primaryRanged = null;
+        else
+            this._primaryRanged = this._powers[i];
     },
     getPrimaryMelee: function() {
         return this._primaryMelee;
     },
     setPrimaryMelee: function(i) {
-        this._primaryMelee = this._powers[i];
+        if(!i)
+            this._primaryMelee = null;
+        else
+            this._primaryMelee = this._powers[i];
     },
-    usePower: function(target) {
-        var power = this._activePower;
+    usePower: function(target, power) {
+        if(!power)
+            power = this._activePower;
+
         if(!target) {
             Game.sendMessage(this, "There's nothing there!");
             return false; // don't end turn

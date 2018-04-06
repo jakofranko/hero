@@ -110,7 +110,11 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
         : false;
 
 	if(canAttack) {
-        this.hthAttack(target);
+        if(this.hasMixin('PowerUser') && this.getPrimaryMelee())
+            this.usePower(target, this.getPrimaryMelee());
+        else
+            this.hthAttack(target);
+
         return true;
     } else if(target) {
         // There is a target at x,y,z, but the entity can't attack, so swap positions with them

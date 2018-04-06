@@ -1436,7 +1436,7 @@ Game.Screen.powersScreen = {
 
         text = 'Press [%c{' + Game.Palette.blue + '}Esc%c{}] or [%c{' + Game.Palette.blue + '}Enter%c{}] to leave this screen.'
         display.drawText(0, y++, text);
-        
+
         y++;
         display.drawText(0, y++, 'Powers:');
 
@@ -1469,12 +1469,22 @@ Game.Screen.powersScreen = {
         showScreenCommand(this._entity);
     },
     setPrimaryMelee: function(letter) {
+        var currentPrimary = this._entity.getPrimaryMelee();
         var index = this._letters.indexOf(letter.toLowerCase());
-        this._entity.setPrimaryMelee(index);
+
+        if(currentPrimary && this._entity.getPower(index) == currentPrimary)
+            this._entity.setPrimaryMelee(null);
+        else
+            this._entity.setPrimaryMelee(index);
     },
     setPrimaryRanged: function(letter) {
+        var currentPrimary = this._entity.getPrimaryRanged();
         var index = this._letters.indexOf(letter.toLowerCase());
-        this._entity.setPrimaryRanged(index);
+
+        if(currentPrimary && this._entity.getPower(index) == currentPrimary)
+            this._entity.setPrimaryRanged(null);
+        else
+            this._entity.setPrimaryRanged(index);
     }
 };
 

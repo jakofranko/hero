@@ -110,6 +110,7 @@ var Game = {
         });
         var bindEventToScreen = function(event) {
             window.addEventListener(event, function(e) {
+                e.preventDefault();
                 // When an event is received, send it to the
                 // screen if there is one
                 if (game._currentScreen !== null) {
