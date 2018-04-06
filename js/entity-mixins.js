@@ -1287,14 +1287,14 @@ Game.EntityMixins.Reactor = {
     }
 };
 Game.EntityMixins.Sight = {
-	name: 'Sight',
-	groupName: 'Sight',
-	init: function(template) {
-		this._sightRadius = template['sightRadius'] || 5;
-	},
-	getSightRadius: function() {
-		return this._sightRadius;
-	},
+    name: 'Sight',
+    groupName: 'Sight',
+    init: function(template) {
+        this._sightRadius = template['sightRadius'] || 5;
+    },
+    getSightRadius: function() {
+        return this._sightRadius;
+    },
     canSee: function(entity) {
         // If not on the same map or on different floors, then exit early
         if (!entity || this._map !== entity.getMap() || this._z !== entity.getZ()) {
