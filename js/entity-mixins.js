@@ -284,7 +284,7 @@ Game.EntityMixins.Characteristics = {
     },
     recoverSTUN: function(STUN) {
         if(!STUN) {
-            var STUN = this._REC;
+            STUN = this._REC;
         }
         if(this._STUN + STUN > this._maxSTUN)
             this._STUN = this._maxSTUN;
@@ -1329,7 +1329,8 @@ Game.EntityMixins.Sight = {
     getEntitiesInSight: function(type) { // type can be a string or array
         debugger;
         var entities = this.getMap().getEntitiesWithinRadius(this._sightRadius),
-            seen = [];
+            seen = [],
+            isType;
         entities.forEach(entity => {
             // If we are looking for a specific type then only add entities
             // that can be seen and are of a certain type, otherwise just seen
@@ -1467,7 +1468,7 @@ Game.EntityMixins.Thrower = {
         this._throwing = i;
     },
     increaseThrowingSkill: function(value) {
-        var value = value || 2;
+        if(!value) value = 2;
         this._throwingSkill += 2;
         Game.sendMessage(this, "You feel better at throwing things!");
     },
@@ -1487,7 +1488,7 @@ Game.EntityMixins.Thrower = {
             } else {
                 lastPoint = linePoints[i];
             }
-        };
+        }
 
         // If nothing is in the way, the end point is targetX and targetY
         if(!end) {
