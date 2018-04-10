@@ -952,7 +952,7 @@ Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY,
     this._player.getMap().getFov(this._player.getZ()).compute(
         this._player.getX(), this._player.getY(),
         this._player.getSightRadius(),
-        function(x, y, radius, visibility) {
+        function(x, y) {
             visibleCells[x + "," + y] = true;
         });
     this._visibleCells = visibleCells;
@@ -1037,7 +1037,7 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
         var map = this._player.getMap();
         // If the tile is explored, we can give a better capton
         if(Game.debug) {
-            var items = map.getItemsAt(x, y, z);
+            // var items = map.getItemsAt(x, y, z);
             // If we have items, we want to render the top most item
             if(map.getEntityAt(x, y, z)) {
                 var entity = map.getEntityAt(x, y, z);
