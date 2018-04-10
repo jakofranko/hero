@@ -23,6 +23,7 @@ Game.Input.controlMaps.playScreen = {
         'p':            Game.Commands.showScreenCommand.bind(this, Game.Screen.powersScreen, Game.Screen.playScreen),
         'i':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.inventoryScreen, Game.Screen.playScreen, 'You are not carrying anything.'),
         'j':            Game.Commands.showScreenCommand.bind(this, Game.Screen.justiceScreen, Game.Screen.playScreen),
+        'l':            Game.Commands.showTargettingScreenCommand.bind(this, Game.Screen.lookScreen, Game.Screen.playScreen),
         'd':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.dropScreen, Game.Screen.playScreen, 'You have nothing to drop.'),
         'e':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.eatScreen, Game.Screen.playScreen, 'You have nothing to eat.'),
         'w':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.wieldScreen, Game.Screen.playScreen, 'You have nothing to wield.'),
@@ -90,6 +91,7 @@ Game.Input.controlMaps.TargetBasedScreen = {
         "ArrowUp": Game.Commands.moveCursorCommand.bind(this, Game.Screen.playScreen, 0, -1),
         "ArrowDown": Game.Commands.moveCursorCommand.bind(this, Game.Screen.playScreen, 0, 1),
         "Enter": Game.Commands.TargetBasedScreenOkCommand.bind(this, Game.Screen.playScreen),
+        "f": Game.Commands.TargetBasedScreenOkCommand.bind(this, Game.Screen.playScreen),
         "Escape": Game.Commands.removeSubScreenCommand.bind(this, Game.Screen.playScreen)
     }
 };
