@@ -30,6 +30,7 @@ Game.Input.controlMaps.playScreen = {
         's':            Game.Commands.showScreenCommand.bind(this, Game.Screen.gainStatScreen, Game.Screen.playScreen),
         'x':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.examineScreen, Game.Screen.playScreen, 'You have nothing to examine.'),
         't':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.throwScreen, Game.Screen.playScreen, 'You have nothing to throw.'),
+        'f':            Game.Commands.useRangedPowerCommand.bind(this, Game.Screen.powerTargetScreen, Game.Screen.playScreen),
         ',':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.pickupScreen, Game.Screen.playScreen, 'There is nothing here to pick up.',  function(entity) {
             return entity.getMap().getItemsAt(entity.getX(), entity.getY(), entity.getZ());
         }),

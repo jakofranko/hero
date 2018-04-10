@@ -137,6 +137,18 @@ Game.Commands.TargetBasedScreenOkCommand = function(mainScreen) {
     };
 };
 
+Game.Commands.useRangedPowerCommand = function(targettingScreen, mainScreen) {
+    return function(entity) {
+        if(!entity.getPrimaryRanged()) {
+            Game.sendMessage(entity, "You have no active power to use! Try setting a Primary Ranged Power in the power menu [%c{" + Game.Palette.blue + "}p%c{}]");
+            return false;
+        } else {
+            entity.setActivePower(entity.getPrimaryRanged());
+            Game.Commands.showTargettingScreenCommand(targettingScreen, mainScreen)(entity);
+        }
+    }
+}
+
 Game.Commands.moveMenuIndexCommand = function(mainScreen, amount) {
     return function() {
         var subScreen = mainScreen.getSubScreen();
