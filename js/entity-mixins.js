@@ -1111,13 +1111,16 @@ Game.EntityMixins.PowerUser = {
         return this._activePower;
     },
     setActivePower: function(i) {
-        this._activePower = this._powers[i];
+        if(typeof i === 'number')
+            this._activePower = this._powers[i];
+        else
+            this._activePower = i;
     },
     getPrimaryRanged: function() {
         return this._primaryRanged;
     },
     setPrimaryRanged: function(i) {
-        if(!i)
+        if(i === false || i === null || i === undefined)
             this._primaryRanged = null;
         else
             this._primaryRanged = this._powers[i];
@@ -1126,19 +1129,24 @@ Game.EntityMixins.PowerUser = {
         return this._primaryMelee;
     },
     setPrimaryMelee: function(i) {
-        if(!i)
+        if(i === false || i === null || i === undefined)
             this._primaryMelee = null;
         else
             this._primaryMelee = this._powers[i];
     },
     usePower: function(target, power) {
-        if(!power)
-            power = this._activePower;
+        if(!power && !this._activePower) {
+            Game.sendMessage(this, "You have no power to use!");
+            return false;
+        }
 
         if(!target) {
             Game.sendMessage(this, "There's nothing there!");
             return false; // don't end turn
         }
+
+        if(!power)
+            power = this._activePower;
 
         // TODO: [POWERS] handle non-instant powers every turn
         // TODO: Update entity mixins to support an 'onAct' or some such method (update pattern)
