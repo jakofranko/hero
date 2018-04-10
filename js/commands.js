@@ -113,11 +113,11 @@ Game.Commands.showTargettingScreenCommand = function(targettingScreen, mainScree
         // Make sure the x-axis doesn't go above the top bound
         var topLeftX = Math.max(0, entity.getX() - (Game.getScreenWidth() / 2));
         // Make sure we still have enough space to fit an entire game screen
-        var offsetX = Math.min(topLeftX, entity.getMap().getWidth() - Game.getScreenWidth());
+        var offsetX = Math.min(Math.round(topLeftX), entity.getMap().getWidth() - Game.getScreenWidth());
         // Make sure the y-axis doesn't go above the top bound
         var topLeftY = Math.max(0, entity.getY() - (Game.getScreenHeight() / 2));
         // Make sure we still have enough space to fit an entire game screen
-        var offsetY = Math.min(topLeftY, entity.getMap().getHeight() - Game.getScreenHeight());
+        var offsetY = Math.min(Math.round(topLeftY), entity.getMap().getHeight() - Game.getScreenHeight());
 
         targettingScreen.setup(entity, entity.getX(), entity.getY(), offsetX, offsetY);
         mainScreen.setSubScreen(targettingScreen);
