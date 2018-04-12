@@ -862,8 +862,11 @@ Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
 // Targetting Screen
 Game.Screen.TargetBasedScreen = function(template) {
     template = template || {};
+
+    this._targetNearest = template['targetNearest'] || false;
+
     // By default, our ok return does nothing and does not consume a turn.
-    this._okFunction = template['okFunction'] || function(x, y) {
+    this._okFunction = template['okFunction'] || function() {
         return false;
     };
     this._overlayFunction = template['overlayFunction'] || function(){};
@@ -941,9 +944,53 @@ Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY,
     // always have to remove it.
     this._startX = startX - offsetX;
     this._startY = startY - offsetY;
+
     // Store current cursor position
-    this._cursorX = this._startX;
-    this._cursorY = this._startY;
+    if(this._targetNearest) {
+        var visible = [],
+            nearest;
+
+        // Get entities in sight radius
+        var nearestEntities = this._player
+            .getMap()
+            .getEntitiesWithinRadius(
+                this._player.getX(),
+                this._player.getY(),
+                this._player.getZ(),
+                this._player.getSightRadius()
+            );
+
+        // Remove player from list
+        nearestEntities.splice(nearestEntities.indexOf(this._player), 1);
+
+        // Filter out invisible entities
+        visible = nearestEntities.reduce(function(vis, entity) {
+            if(this._player.canSee(entity))
+                vis.push(entity);
+
+            return vis;
+        }.bind(this), visible);
+
+        // Find nearest entity
+        visible.reduce(function(shortest, entity) {
+            var distance = Game.Geometry.distance(this._player.getX(), this._player.getY(), entity.getX(), entity.getY());
+            if(entity != this._player && distance <= shortest)
+                nearest = entity;
+
+            return Math.min(distance, shortest);
+        }.bind(this), Game.Geometry.distance(this._player.getX(), this._player.getY(), visible[0].getX(), visible[0].getY()));
+
+        if(nearest) {
+            this._cursorX = nearest.getX() - offsetX;
+            this._cursorY = nearest.getY() - offsetY;
+        } else {
+            this._cursorX = this._startX;
+            this._cursorY = this._startY;
+        }
+    } else {
+        this._cursorX = this._startX;
+        this._cursorY = this._startY;
+    }
     // Store map offsets
     this._offsetX = offsetX;
     this._offsetY = offsetY;
@@ -1095,6 +1142,7 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
     }
 });
 Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
+    targetNearest: true,
     okFunction: function(x, y) {
         var target = this._player.getMap().getEntityAt(x, y, this._player.getZ());
         return this._player.usePower(target);
