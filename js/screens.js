@@ -178,7 +178,7 @@ Game.Screen.loadScreen = {
             display.drawText(0, loadListY++, item);
         }, this);
     },
-    handleInput: function(inputType, inputData) {},
+    handleInput: function() {},
     exit: function() {
         clearInterval(this._intID);
     }
@@ -234,7 +234,7 @@ Game.Screen.overview = {
             }
         }
     },
-    handleInput: function(inputType, inputData) {}
+    handleInput: function() {}
 };
 
 Game.Screen.stats = {
@@ -258,7 +258,7 @@ Game.Screen.stats = {
         display.drawText(0, y++, HTH);
         display.drawText(0, y++, XP);
     },
-    handleInput: function(inputType, inputData) {}
+    handleInput: function() {}
 };
 
 // Define our playing screen
@@ -1096,7 +1096,6 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
 });
 Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
     okFunction: function(x, y) {
-        debugger;
         var target = this._player.getMap().getEntityAt(x, y, this._player.getZ());
         return this._player.usePower(target);
     }
