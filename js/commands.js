@@ -137,6 +137,20 @@ Game.Commands.TargetBasedScreenOkCommand = function(mainScreen) {
     };
 };
 
+Game.Commands.TargetBasedScreenNextEntityCommand = function(mainScreen) {
+    var targetScreen = mainScreen.getSubScreen();
+    return function() {
+        return targetScreen.nextEntity();
+    }
+};
+
+Game.Commands.TargetBasedScreenPrevEntityCommand = function(mainScreen) {
+    var targetScreen = mainScreen.getSubScreen();
+    return function() {
+        return targetScreen.prevEntity();
+    }
+};
+
 Game.Commands.useRangedPowerCommand = function(targettingScreen, mainScreen) {
     return function(entity) {
         if(!entity.getPrimaryRanged()) {

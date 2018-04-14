@@ -864,6 +864,8 @@ Game.Screen.TargetBasedScreen = function(template) {
     template = template || {};
 
     this._targetNearest = template['targetNearest'] || false;
+    this._visibleEntities = [];
+    this._targetedEntity = 0;
 
     // By default, our ok return does nothing and does not consume a turn.
     this._okFunction = template['okFunction'] || function() {
@@ -940,6 +942,9 @@ Game.Screen.TargetBasedScreen = function(template) {
 };
 Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
     this._player = player;
+    this._visibleEntities = [];
+    this._targetedEntity = 0;
+    
     // Store original position. Subtract the offset to make life easy so we don't
     // always have to remove it.
     this._startX = startX - offsetX;
@@ -965,22 +970,27 @@ Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY,
 
         // Filter out invisible entities
         visible = nearestEntities.reduce(function(vis, entity) {
-            if(this._player.canSee(entity))
+            if(this._player.canSee(entity)) {
                 vis.push(entity);
+                this._visibleEntities.push(entity); // Add to cached list of entities
+            }
 
             return vis;
         }.bind(this), visible);
 
-        // Find nearest entity
-        visible.reduce(function(shortest, entity) {
-            var distance = Game.Geometry.distance(this._player.getX(), this._player.getY(), entity.getX(), entity.getY());
-            if(entity != this._player && distance <= shortest)
-                nearest = entity;
+        if(visible.length) {
+            // Find nearest entity
+            visible.reduce(function(shortest, entity) {
+                var distance = Game.Geometry.distance(this._player.getX(), this._player.getY(), entity.getX(), entity.getY());
+                if(entity != this._player && distance <= shortest)
+                    nearest = entity;
 
-            return Math.min(distance, shortest);
-        }.bind(this), Game.Geometry.distance(this._player.getX(), this._player.getY(), visible[0].getX(), visible[0].getY()));
+                return Math.min(distance, shortest);
+            }.bind(this), Game.Geometry.distance(this._player.getX(), this._player.getY(), visible[0].getX(), visible[0].getY()));
+        }
 
         if(nearest) {
+            this._targetedEntity = this._visibleEntities.indexOf(nearest);
             this._cursorX = nearest.getX() - offsetX;
             this._cursorY = nearest.getY() - offsetY;
         } else {
@@ -991,9 +1001,11 @@ Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY,
         this._cursorX = this._startX;
         this._cursorY = this._startY;
     }
+
     // Store map offsets
     this._offsetX = offsetX;
     this._offsetY = offsetY;
+
     // Cache the FOV
     var visibleCells = {};
     this._player.getMap().getFov(this._player.getZ()).compute(
@@ -1012,12 +1024,10 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
 
     // Render stars along the line.
     for (var i = 1, l = points.length; i < l; i++) {
-        if(i == l - 1) {
+        if(i == l - 1)
             display.drawText(points[i].x, points[i].y, '%c{white}X');
-        } else {
+        else
             display.drawText(points[i].x, points[i].y, '%c{white}*');
-        }
-
     }
 
     // Render any overlay information
@@ -1075,6 +1085,28 @@ Game.Screen.TargetBasedScreen.prototype.executeOkFunction = function() {
         return this._okFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY);
     else
         return false;
+};
+Game.Screen.TargetBasedScreen.prototype.nextEntity = function () {
+    if(this._visibleEntities.length) {
+        var entity;
+        this._targetedEntity++;
+        entity = this._visibleEntities[Math.abs(this._targetedEntity) % this._visibleEntities.length];
+        this._cursorX = entity.getX() - this._offsetX;
+        this._cursorY = entity.getY() - this._offsetY;
+    }
+
+    return false;
+};
+Game.Screen.TargetBasedScreen.prototype.prevEntity = function () {
+    if(this._visibleEntities.length) {
+        var entity;
+        this._targetedEntity--;
+        entity = this._visibleEntities[Math.abs(this._targetedEntity) % this._visibleEntities.length];
+        this._cursorX = entity.getX() - this._offsetX;
+        this._cursorY = entity.getY() - this._offsetY;
+    }
+
+    return false;
 };
 
 // Target-based screens

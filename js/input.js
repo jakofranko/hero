@@ -86,12 +86,14 @@ Game.Input.controlMaps.ItemListScreen = {
 
 Game.Input.controlMaps.TargetBasedScreen = {
     keydown: {
+        "f": Game.Commands.TargetBasedScreenOkCommand.bind(this, Game.Screen.playScreen),
+        "n": Game.Commands.TargetBasedScreenNextEntityCommand.bind(this, Game.Screen.playScreen),
+        "N": Game.Commands.TargetBasedScreenPrevEntityCommand.bind(this, Game.Screen.playScreen),
         "ArrowRight": Game.Commands.moveCursorCommand.bind(this, Game.Screen.playScreen, 1, 0),
         "ArrowLeft": Game.Commands.moveCursorCommand.bind(this, Game.Screen.playScreen, -1, 0),
         "ArrowUp": Game.Commands.moveCursorCommand.bind(this, Game.Screen.playScreen, 0, -1),
         "ArrowDown": Game.Commands.moveCursorCommand.bind(this, Game.Screen.playScreen, 0, 1),
         "Enter": Game.Commands.TargetBasedScreenOkCommand.bind(this, Game.Screen.playScreen),
-        "f": Game.Commands.TargetBasedScreenOkCommand.bind(this, Game.Screen.playScreen),
         "Escape": Game.Commands.removeSubScreenCommand.bind(this, Game.Screen.playScreen)
     }
 };
