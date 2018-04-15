@@ -13,15 +13,12 @@ Game.Screen.startScreen = {
     render: function(display) {
         // Render prompt to the screen
         var w = Game.getScreenWidth();
-        var h = Game.getScreenHeight();
         var text = "%c{#585DF5}Justice%c{}: A Superhero Roguelike";
         display.drawText((w/2) - (30 / 2), 2, text);
 
         text = "Press [%c{#585DF5}Enter%c{}] to start!";
         display.drawText((w/2) - (23 / 2), 3, text);
-        // The widest point of the scale is 74 characters, so, use that to pad the rest
-        var widestPoint = "'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'";
-        // var padLeft = Math.round(widestPoint.length / 2);
+
         var scalesASCII = [
                         ",ggg,                   gg                   ,ggg,",
                        "d8P^^8b                ,d88b,                d8^^Y8b",
@@ -153,7 +150,6 @@ Game.Screen.loadScreen = {
     },
     render: function(display) {
         var w = Game.getScreenWidth();
-        var h = Game.getScreenHeight();
         var progress = this.loader.getProgress();
         var loadListY = 10;
 
@@ -876,26 +872,31 @@ Game.Screen.TargetBasedScreen = function(template) {
     this._captionFunction = template['captionFunction'] || function(x, y) {
         var z = this._player.getZ();
         var map = this._player.getMap();
+        var entity, item, items, details;
+
         // If the tile is explored, we can give a better capton
         if(map.isExplored(x, y, z)) {
             // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
             if(this._visibleCells[x + ',' + y]) {
-                var items = map.getItemsAt(x, y, z);
+                items = map.getItemsAt(x, y, z);
                 // If we have items, we want to render the top most item
                 if(map.getEntityAt(x, y, z)) {
-                    var entity = map.getEntityAt(x, y, z);
-                    return String.format('%s - %s (%s)',
+                    entity = map.getEntityAt(x, y, z);
+                    details = entity.details();
+                    return String.format('%s - %s %s',
                         entity.getRepresentation(),
                         entity.describeA(true),
-                        entity.details());
+                        details == '' ? '' : "(" + details + ")"
+                    );
                 } else if(items) {
-                    var item = items[items.length - 1];
-                    return String.format('%s - %s (%s)',
+                    item = items[items.length - 1];
+                    details = item.details();
+                    return String.format('%s - %s %s',
                         item.getRepresentation(),
                         item.describeA(true),
-                        item.details());
-                // Else check if there's an entity
+                        details == '' ? '' : "(" + details + ")"
+                    );
                 }
             }
             // If there was no entity/item or the tile wasn't visible, then use
@@ -915,36 +916,33 @@ Game.Screen.TargetBasedScreen = function(template) {
     this._descriptionFunction = template['descriptionFunction'] || function(x, y) {
         var z = this._player.getZ();
         var map = this._player.getMap();
+        var items, entity, item;
+
         // If the tile is explored, we can give a better capton
-        if(map.isExplored(x, y, z)) {
+        if(map.isExplored(x, y, z) && this._visibleCells[x + ',' + y]) {
             // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
-            if(this._visibleCells[x + ',' + y]) {
-                var items = map.getItemsAt(x, y, z);
-                // If we have items, we want to render the top most item
-                if(map.getEntityAt(x, y, z)) {
-                    var entity = map.getEntityAt(x, y, z);
-                    return String.format('%s %s', entity.getDescription(), entity.describe());
-                } else if(items) {
-                    var item = items[items.length - 1];
-                    return String.format('%s %s', item.getDescription(), item.describe());
-                // Else check if there's an entity
-                } else {
-                    return '';
-                }
-            } else {
-                return '';
+
+            items = map.getItemsAt(x, y, z);
+            // If we have items, we want to render the top most item
+            if(map.getEntityAt(x, y, z)) {
+                entity = map.getEntityAt(x, y, z);
+                return String.format('%s %s', entity.getDescription(), entity.describe());
+            } else if(items) {
+                item = items[items.length - 1];
+                return String.format('%s %s', item.getDescription(), item.describe());
             }
-        } else {
-            return '';
         }
+
+        // Return blank string if item or entity not found
+        return '';
     };
 };
 Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
     this._player = player;
     this._visibleEntities = [];
     this._targetedEntity = 0;
-    
+
     // Store original position. Subtract the offset to make life easy so we don't
     // always have to remove it.
     this._startX = startX - offsetX;
@@ -1114,57 +1112,11 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
     overlayFunction: function(x, y) {
         var z = this._player.getZ();
         var map = this._player.getMap();
-        // If the tile is explored, we can give a better capton
-        if(Game.debug) {
-            // var items = map.getItemsAt(x, y, z);
-            // If we have items, we want to render the top most item
-            if(map.getEntityAt(x, y, z)) {
-                var entity = map.getEntityAt(x, y, z);
-                var overlay = entity.raiseEvent('overlay');
-                return overlay;
-            }
-            // TODO: Support for items?
-            // TODO: Default action?
-        }
-    },
-    captionFunction: function(x, y) {
-        var z = this._player.getZ();
-        var map = this._player.getMap();
-        // If the tile is explored, we can give a better capton
-        if (map.isExplored(x, y, z)) {
-            // If the tile isn't explored, we have to check if we can actually
-            // see it before testing if there's an entity or item.
-            if (this._visibleCells[x + ',' + y]) {
-                var items = map.getItemsAt(x, y, z);
-                // If we have items, we want to render the top most item
-                if (map.getEntityAt(x, y, z)) {
-                    var entity = map.getEntityAt(x, y, z);
-                    return String.format('%s - %s (%s)',
-                        entity.getRepresentation(),
-                        entity.describeA(true) + ' ('+ entity.getName() + ')',
-                        entity.details());
-                } else if (items) {
-                    var item = items[items.length - 1];
-                    return String.format('%s - %s (%s)',
-                        item.getRepresentation(),
-                        item.describeA(true),
-                        item.details());
-                // Else check if there's an entity
-                }
-            }
-            // If there was no entity/item or the tile wasn't visible, then use
-            // the tile information.
-            return String.format('%s - %s',
-                map.getTile(x, y, z).getRepresentation(),
-                map.getTile(x, y, z).getDescription());
 
-        } else {
-            var nullTile = Game.TileRepository.create('null');
-            // If the tile is not explored, show the null tile description.
-            return String.format('%s - %s',
-                nullTile.getRepresentation(),
-                nullTile.getDescription());
-        }
+        // TODO: Support for items?
+        // TODO: Default action?
+        if(Game.debug && map.getEntityAt(x, y, z))
+            return map.getEntityAt(x, y, z).raiseEvent('overlay');
     }
 });
 Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
@@ -1369,7 +1321,7 @@ Game.Screen.helpScreen = {
         text = '--- press any key to continue ---';
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
     },
-    handleInput: function(inputType, inputData) {
+    handleInput: function() {
         Game.Screen.playScreen.setSubScreen(null);
     }
 };
