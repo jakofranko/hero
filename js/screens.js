@@ -1066,7 +1066,7 @@ Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputD
     if(unlock)
         this._player.getMap().getEngine().unlock();
     else
-        Game.refresh(this._player);
+        Game.refresh();
 };
 Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
     // Make sure we stay within bounds.
