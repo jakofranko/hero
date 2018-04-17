@@ -293,7 +293,6 @@ Game.Screen.playScreen = {
         }
 
         // Otherwise, procede as usual...
-        var screenWidth = Game.getScreenWidth();
         var screenHeight = Game.getScreenHeight();
 
         // Render the tiles
@@ -377,7 +376,7 @@ Game.Screen.playScreen = {
             this._player.getX(),
             this._player.getY(),
             this._player.getSightRadius(),
-            function(x, y, radius, visibility) {
+            function(x, y) {
                 visibleCells[x + "," + y] = true;
                 // Mark cell as explored
                 map.setExplored(x, y, currentDepth, true);
@@ -789,7 +788,7 @@ Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to examine',
     canSelect: true,
     canSelectMultipleItems: false,
-    isAcceptable: function(item) {
+    isAcceptable: function() {
         return true;
     },
     ok: function(selectedItems) {
