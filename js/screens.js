@@ -1311,10 +1311,12 @@ Game.Screen.helpScreen = {
         display.drawText(0, y++, '[%c{#585DF5}w%c{}] to wield items');
         display.drawText(0, y++, '[%c{#585DF5}W%c{}] to wield items');
         display.drawText(0, y++, '[%c{#585DF5}x%c{}] to examine items');
+        display.drawText(0, y++, '[%c{#585DF5}p%c{}] to use powers');
         display.drawText(0, y++, '[%c{#585DF5};%c{}] to look around you');
         display.drawText(0, y++, '[%c{#585DF5}.%c{}] to wait');
         display.drawText(0, y++, '[%c{#585DF5}j%c{}] to show city statistics');
         display.drawText(0, y++, '[%c{#585DF5}s%c{}] to spend experience points');
+        display.drawText(0, y++, '[%c{#585DF5}Space%c{}] to use/interact with nearby items and entities');
         display.drawText(0, y++, '[%c{#585DF5}?%c{}] to show this help screen');
         y += 3;
         text = '--- press any key to continue ---';
