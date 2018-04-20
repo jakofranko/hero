@@ -469,9 +469,9 @@ Game.Screen.ItemListScreen = function(template) {
     this._altItems = null;
 
     // Set up based on the template
-    this._caption = template['caption'];
+    this._caption = template['caption'] || '';
+    this._altCaption = template['altCaption'] || '';
     this._okFunction = template['ok'];
-    // By default, we use the identity function
     this._isAcceptableFunction = template['isAcceptable'] || function(x) {
         return x;
     };
@@ -491,13 +491,19 @@ Game.Screen.ItemListScreen.prototype.setup = function(player, items, altEntity, 
 
     this._player = player;
     this._altEntity = altEntity;
+
+    if(this._player && this._caption === '')
+        this._caption = this._player.getName() + " inventory";
+    if(this._altEntity && this._altCaption === '')
+        this._altCaption = this._altEntity.getName() + " inventory";
+
     // Should be called before switching to the screen.
     var count = 0;
     // Iterate over each item, keeping only the aceptable ones and counting the number of acceptable items.
     var that = this;
     this._items = items.map(function(item) {
         // Transform the item into null if it's not acceptable
-        if (that._isAcceptableFunction(item)) {
+        if(that._isAcceptableFunction(item)) {
             count++;
             return item;
         } else {
@@ -508,7 +514,7 @@ Game.Screen.ItemListScreen.prototype.setup = function(player, items, altEntity, 
     if(altItems) {
         this._altItems = altItems.map(function(item) {
             // Transform the item into null if it's not acceptable
-            if (that._isAcceptableFunction(item)) {
+            if(that._isAcceptableFunction(item)) {
                 count++;
                 return item;
             } else {
@@ -531,12 +537,13 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
     var midPoint = Math.round(screenWidth / 2);
     var colWidth, separatorHeight;
 
+    // Render the caption in the top row
+    display.drawText(1, 1, this._caption);
+    display.drawText(screenWidth / 2 + 2, 1, this._altCaption);
+
     // Render the no item row if enabled
     if (this._hasNoItemOption)
-        display.drawText(0, 1, '0 - no item');
-
-    // Render the caption in the top row
-    display.drawText(0, 0, this._caption);
+    display.drawText(0, 2, '0 - no item');
 
     if(this._altItems && this._altItems.length > 0) {
         colWidth = midPoint - 1;
@@ -562,8 +569,8 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
 
             // Render at the correct row and add 2
             display.drawText(
-                0,
-                2 + row,
+                1,
+                3 + row,
                 letter + ' ' + selectionState + ' ' + this._items[i].getName() + stack,
                 colWidth
             );
@@ -588,8 +595,8 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
                 ) ? '+' : '-';
                 var altStack = this._altItems[k].hasMixin('Stackable') ? ' (' + this._altItems[k].amount() + ')' : '';
                 display.drawText(
-                    midPoint + 1,
-                    2 + altRow,
+                    midPoint + 2,
+                    3 + altRow,
                     altLetter + ' ' + altSelectionState + ' ' + this._altItems[k].getName() + altStack,
                     colWidth
                 );
@@ -835,11 +842,9 @@ Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
     }
 });
 Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
-    caption: 'Container',
     canSelect: true,
     canSelectMultipleItems: true,
     ok: function(selectedItems, altSelectedItems) {
-        debugger;
         for(var itemKey in selectedItems) {
             if(this._altEntity.hasMixin('Container')) {
                 this._altEntity.addItem(this._player, itemKey);
