@@ -80,10 +80,76 @@ Game.Screen.startScreen = {
     handleInput: function(inputType, inputData) {
         // When [Enter] is pressed, go to the play screen
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-            Game.switchScreen(Game.Screen.loadScreen);
+            Game.switchScreen(Game.Screen.characterSelectScreen);
         }
     }
 };
+
+// Character creation/selectin screen
+Game.Screen.characterSelectScreen = {
+    enter: function() {
+        this._descriptionWidth = 60;
+        this._index = 0;
+        this._options = {
+            "Brick": "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
+            "Energy Projector": "These heroes tend to fly around, loose bolts of lightning from their fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
+            "Martial Artist": "What they lack in super-powers they make up for with super-moves. Martial artists tend to be hard to hit, and focus on physical melee and ranged attacks.",
+            "Mentalist": "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
+            "Vigilante": "Vengence and Justice are the same, and the only important thing is that they are final. These 'heroes' don't have powers, they have guns and kevlar, and intend to get the job done by any means necessary."
+        };
+    },
+    render: function(display) {
+        var caption = "Select Archtype";
+        var archtypes = Object.keys(this._options);
+        var w = Game.getScreenWidth();
+        var y = 1;
+
+        display.drawText(Math.round(w / 2) - Math.round(caption.length / 2), y++, caption);
+        y += 2;
+
+        // Align archtypes with description text
+        archtypes.forEach(function(archtype, i) {
+            if(i === this._index) archtype = "%c{" + Game.Palette.blue + "}" + archtype;
+            display.drawText(Math.round(w / 2) - Math.round(this._descriptionWidth / 2), y++, archtype);
+        }, this);
+
+        y++;
+        display.drawText(
+            Math.round(w / 2) - Math.round(this._descriptionWidth / 2),
+            y,
+            this._options[archtypes[this._index]],
+            this._descriptionWidth
+        );
+    },
+    handleInput: function(inputData, inputType) {
+        switch(inputType.key) {
+            case 'Enter':
+                Game.switchScreen(Game.Screen.loadScreen);
+                break;
+            case 'ArrowDown':
+                this.incrementIndex();
+                break;
+            case 'ArrowUp':
+                this.decrementIndex();
+                break;
+            default:
+                break;
+        }
+
+        Game.refresh();
+    },
+    incrementIndex: function() {
+        if(this._index + 1 < Object.keys(this._options).length)
+            this._index++;
+        return false;
+    },
+    decrementIndex: function() {
+        if(this._index - 1 >= 0)
+            this._index--;
+        return false;
+    },
+    exit: function() {}
+}
 
 Game.Screen.loadScreen = {
     loader: null,
