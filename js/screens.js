@@ -91,11 +91,42 @@ Game.Screen.characterSelectScreen = {
         this._descriptionWidth = 60;
         this._index = 0;
         this._options = {
-            "Brick": "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
-            "Energy Projector": "These heroes tend to fly around, loose bolts of lightning from their fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
-            "Martial Artist": "What they lack in super-powers they make up for with super-moves. Martial artists tend to be hard to hit, and focus on physical melee and ranged attacks.",
-            "Mentalist": "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
-            "Vigilante": "Vengence and Justice are the same, and the only important thing is that they are final. These 'heroes' don't have powers, they have guns and kevlar, and intend to get the job done by any means necessary."
+            "Brick": {
+                description: "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
+                // powers: ['tough skin', 'flight', 'sonic boom'],
+                STR: 50,
+                DEX: 8,
+                INT: 8,
+                CON: 25,
+                BODY: 25
+            },
+            "Energy Projector": {
+                description: "You tend to fly around, loose bolts of lightning from your fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
+                // powers: ['energy blast', 'force field', 'flight', 'teleport'],
+                CON: 6,
+                BODY: 8
+            },
+            "Martial Artist": {
+                description: "What you lack in super-powers you make up for with super-moves. Martial artists tend to be hard to hit, and focus on physical melee and ranged attacks.",
+                // powers: ['bo staff', 'throwing star', 'deflect projectile'],
+                STR: 15,
+                DEX: 25,
+                CON: 20,
+                BODY: 20
+            },
+            "Mentalist": {
+                description: "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
+                // powers: ['mind spike', 'telepathy', 'force field', 'flight'],
+                STR: 8,
+                DEX: 15,
+                EGO: 50,
+                CON: 8,
+                BODY: 8
+            },
+            "Vigilante": {
+                description: "Vengence and Justice are the same, and the only important thing is that they are final. These 'heroes' don't have powers, they have guns and kevlar, and intend to get the job done by any means necessary.",
+                // powers: ['assault rifle', 'pistol', 'katana', 'kevlar']
+            }
         };
     },
     render: function(display) {
@@ -117,7 +148,7 @@ Game.Screen.characterSelectScreen = {
         display.drawText(
             Math.round(w / 2) - Math.round(this._descriptionWidth / 2),
             y,
-            this._options[archtypes[this._index]],
+            this._options[archtypes[this._index]].description,
             this._descriptionWidth
         );
     },
