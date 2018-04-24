@@ -111,13 +111,13 @@ Game.EntityMixins.Characteristics = {
 
         // Figured characteristic modifiers. These are seperate from the values of the figured characteristics,
         // but can be individually subtracted and added to seperately from the figured characteristics
-        this._PDmod = 0;
-        this._EDmod = 0;
-        this._SPDmod = 0;
-        this._RECmod = 0;
-        this._maxENDmod = 0;
-        this._STUNmod = 0;
-        this._maxSTUNmod = 0;
+        this._PDmod = template['PDmod'] || 0;
+        this._EDmod = template['EDmod'] || 0;
+        this._SPDmod = template['SPDmod'] || 0;
+        this._RECmod = template['RECmod'] || 0;
+        this._maxENDmod = template['maxENDmod'] || 0;
+        this._STUNmod = template['STUNmod'] || 0;
+        this._maxSTUNmod = template['maxSTUNmod'] || 0;
 
         // It should be noted that BODY, STUN and END are tracked as the current values, whereas
         // maxBODY, maxSTUN and maxEND is the upper limit that they can recover too, and
@@ -125,11 +125,11 @@ Game.EntityMixins.Characteristics = {
 
         // Combat values
         this._CV = Math.round(this._DEX / 3);
-        this._OCVmod = 0;
-        this._DCVmod = 0;
+        this._OCVmod = template['OCVmod'] ||  0;
+        this._DCVmod = template['DCVmod'] ||  0;
         this._ECV = Math.round(this._EGO / 3);
-        this._EOCVmod = 0;
-        this._EDCVmod = 0;
+        this._EOCVmod = template['EOCVmod'] ||  0;
+        this._EDCVmod = template['EDCVmod'] ||  0;
 
         // Resistant Defenses. Can only be updated by powers (armor, resistant defense)
         this._rPD = 0;
