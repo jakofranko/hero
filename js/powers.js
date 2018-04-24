@@ -104,6 +104,13 @@ Game.Powers.ArmorPowerRepository.define('kevlar', {
     missMessage: "You take off your kevlar body armor.",
 });
 
+Game.Powers.ArmorPowerRepository.define('tough skin', {
+    name: 'Tough Skin',
+    damageType: 'physical',
+    hitMessage: "You focus, and you feel your skin tingle.",
+    missMessage: "You relax, and know your skin will not be so resistant now.",
+});
+
 Game.Powers.ArmorPowerRepository.define('phase skin', {
     name: 'Phase Skin',
     damageType: 'energy',
