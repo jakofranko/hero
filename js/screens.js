@@ -153,9 +153,11 @@ Game.Screen.characterSelectScreen = {
         );
     },
     handleInput: function(inputData, inputType) {
+        var archtypes = Object.keys(this._options);
+        var archtype = archtypes[this._index];
         switch(inputType.key) {
             case 'Enter':
-                Game.switchScreen(Game.Screen.loadScreen);
+                Game.switchScreen(Game.Screen.loadScreen, [this._options[archtype]]);
                 break;
             case 'ArrowDown':
                 this.incrementIndex();
@@ -187,8 +189,10 @@ Game.Screen.loadScreen = {
     _player: null,
     _map: null,
     _startedLoading: false,
-    enter: function() {
+    enter: function(archtypeTemplate) {
         var screen = this;
+        var playerTemplate;
+
         this.loader = new Game.Loader();
 
         // Register test modules
@@ -200,7 +204,8 @@ Game.Screen.loadScreen = {
 
         // TODO: Move player generation into player creation screen
         // TODO: Player chooses size of city?
-        this._player = new Game.Entity(Game.PlayerTemplate);
+        playerTemplate = Object.assign(Game.PlayerTemplate, archtypeTemplate);
+        this._player = new Game.Entity(playerTemplate);
 
         // Begin load loop
         function checkAndRenderLoader() {
