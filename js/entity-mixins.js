@@ -1183,6 +1183,19 @@ Game.EntityMixins.PlayerActor = {
         } else if(!this.isConscious()) {
             Game.sendMessage(this, 'You\'re unconscious. Press [Enter] to continue!');
         }
+
+        // If they can use powers, process the non-instant powers that are activated
+        ['constant', 'persistent'].forEach(function(duration) {
+            debugger;
+            var queue = '_' + duration + 'Powers';
+
+            // Now that we have the right queue, process all of the powers in this queue
+            this[queue].forEach(function(power) {
+                if(power[duration])
+                    power[duration]();
+            }, this);
+        }, this);
+
         // Re-render the screen
         Game.refresh(this);
         // Lock the engine and wait asynchronously
