@@ -332,3 +332,58 @@ Game.BasePowers.armor = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.armor.extend(Game.BasePower);
+
+Game.BasePowers.forceField = function(options) {
+    var properties = {
+        name: 'Force Field',
+        type: 'Defence',
+        cost: 1,
+        duration: 'constant',
+        pointsMin: 1,
+        points: 0,
+        range: 'self',
+        hitTargetMessage: '',
+        hitMessage: "You activate your force field.",
+        missTargetMessage: '',
+        missMessage: 'You deactivate your force field',
+        active: false, // special property for non-instant powers
+        constant: function() {
+            // Subtract END
+            this.entity.adjustMod('END', Math.min(-1, -Math.round(this.points / 10)));
+        },
+        effect: function(target) {
+            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                if(this.active)
+                    Game.sendMessage(this.entity, this.hitMessage);
+                else
+                    Game.sendMessage(this.entity, this.missMessage);
+            } else {
+                Game.sendMessage(this.entity, "Out of range.");
+                return false;
+            }
+        },
+        enqueue: function() {
+            if(!this.active) {
+                if(this.damageType === 'physical')
+                    this.entity._rPD += this.points;
+                else if(this.damageType === 'energy')
+                    this.entity._rED += this.points;
+
+                this.active = true;
+            }
+        },
+        dequeue: function() {
+            if(this.active) {
+                if(this.damageType === 'physical')
+                    this.entity._rPD -= this.points;
+                else if(this.damageType === 'energy')
+                    this.entity._rED -= this.points;
+
+                this.active = false;
+            }
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.forceField.extend(Game.BasePower);
