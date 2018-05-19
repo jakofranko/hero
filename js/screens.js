@@ -103,6 +103,7 @@ Game.Screen.characterSelectScreen = {
             "Energy Projector": {
                 description: "You tend to fly around, loose bolts of lightning from your fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
                 // powers: ['energy blast', 'force field', 'flight', 'teleport'],
+                powers: ['energy blast', 'force field (physical damage)', 'force field (energy damage)'],
                 CON: 6,
                 BODY: 8
             },
