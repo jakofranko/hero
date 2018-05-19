@@ -117,3 +117,16 @@ Game.Powers.ArmorPowerRepository.define('phase skin', {
     hitMessage: "You activate your energy-resistant phase skin.",
     missMessage: "You deactivate your phase skin.",
 });
+
+// Force Fields
+Game.Powers.ForceFieldPowerRepository = new Game.Repository('force field powers', Game.BasePowers.forceField);
+
+Game.Powers.ForceFieldPowerRepository.define('force field (physical damage)', {
+    name: 'Force Field (Physical Damage)',
+    damageType: 'physical'
+});
+
+Game.Powers.ForceFieldPowerRepository.define('force field (energy damage)', {
+    name: 'Force Field (Energy Damage)',
+    damageType: 'energy'
+});
