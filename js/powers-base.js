@@ -279,9 +279,6 @@ Game.BasePowers.rangedKillingAttack.extend(Game.BasePower);
 
 // Every 3 points of armor is 2 points of resistant defense
 Game.BasePowers.armor = function(options) {
-    if(!('damageType' in options))
-        throw new Error('An rangedKillingAttack must specify a damage type');
-
     var properties = {
         name: 'Armor',
         type: 'Attack',

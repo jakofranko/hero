@@ -1170,9 +1170,9 @@ Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
     act: function() {
-        if(this._acting) {
+        if(this._acting)
             return;
-        }
+
         this._acting = true;
 
         // Detect if the game is over
