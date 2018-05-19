@@ -30,6 +30,14 @@ Game.Powers.EnergyBlastPowerRepository.define('throwing star', {
     missTargetMessage: "%s's throwing star whizzes past, missing you!",
     missMessage: "Your throwing star misses!",
 });
+Game.Powers.EnergyBlastPowerRepository.define('energy blast', {
+    name: 'Energy Blast',
+    damageType: 'energy',
+    hitTargetMessage: "%s fries you with a blast of pure energy, doing %s STUN and %s BODY!",
+    hitMessage: "You let loose a sizzling blast of energy, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s misses you with their energy blast!",
+    missMessage: "Your energy blast goes wide!",
+});
 
 // Hand-to-Hand Attacks
 Game.Powers.HandToHandAttackPowerRepository = new Game.Repository('hand-to-hand attack powers', Game.BasePowers.handToHandAttack);
