@@ -1563,6 +1563,8 @@ Game.Screen.gainStatScreen = {
 };
 
 // Manage character powers screen
+// TODO: Highlight powers that are currently activated
+// TODO: Allow activated powers to be deactivated
 Game.Screen.powersScreen = {
     setup: function(entity) {
         // Must be called before rendering.
