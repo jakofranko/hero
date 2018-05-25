@@ -51,6 +51,9 @@ Game.Power =  function(properties) {
     this.missTargetMessage = properties['missTargetMessage'] || '';
     this.active            = properties['active'] || false;
 
+    // If the power's duration is anything other than 'instant', assign the duration's function
+    this[properties['duration']] = properties[properties['duration']];
+
     // Depending on the type of range, assign a different function to the range property
     this.inRange = function() { console.error(`${this.name} does not have the inRange() method defined`); };
     switch(properties['range']) {
