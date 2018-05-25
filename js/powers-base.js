@@ -346,7 +346,7 @@ Game.BasePowers.forceField = function(options) {
         active: false, // special property for non-instant powers
         constant: function() {
             // Subtract END
-            this.entity.adjustMod('END', Math.min(-1, -Math.round(this.points / 10)));
+            this.entity.adjustEND(-this.END());
         },
         effect: function(target) {
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {

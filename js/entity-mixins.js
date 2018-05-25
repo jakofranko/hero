@@ -144,9 +144,6 @@ Game.EntityMixins.Characteristics = {
         this._maxEND    = Math.round(this._CON * 2);
         this._maxSTUN   = Math.round(this._BODY + (this._STR / 2) + (this._CON / 2));
     },
-    adjustMod: function(char, amount) {
-        this[char + 'mod'] += amount;
-    },
     getCharacteristic: function(CHAR, total, max, mod) {
         var prefix = (max && (CHAR == 'BODY' || CHAR == 'STUN' || CHAR == 'END')) ? 'max' : '';
         var suffix = mod ? 'mod' : '';
@@ -232,6 +229,9 @@ Game.EntityMixins.Characteristics = {
     },
     getRECmod: function() {
         return this._RECmod;
+    },
+    adjustEND: function(amount) {
+        this._END += amount;
     },
     getEND: function() {
         return this._END;
