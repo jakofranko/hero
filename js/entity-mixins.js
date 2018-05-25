@@ -287,11 +287,12 @@ Game.EntityMixins.Characteristics = {
         this.updateFiguredCharacteristics();
     },
     recoverSTUN: function(STUN) {
-        if(!STUN) {
+        var max = this._maxSTUN + this._maxSTUNmod;
+        if(!STUN)
             STUN = this._REC;
-        }
-        if(this._STUN + STUN > this._maxSTUN)
-            this._STUN = this._maxSTUN;
+
+        if(this._STUN + STUN > max)
+            this._STUN = max;
         else
             this._STUN += STUN;
 
@@ -299,6 +300,16 @@ Game.EntityMixins.Characteristics = {
             this.regainConsciousness();
             this.raiseEvent('onRegainConsciousness');
         }
+    },
+    recoverEND: function(END) {
+        var max = this._maxEND + this._maxENDmod;
+        if(!END)
+            END = this._REC;
+
+        if(this._END + END > max)
+            this._END = max;
+        else
+            this._END += END;
     },
     getOCV: function() {
         return this._CV + this._OCVmod;
@@ -319,6 +330,7 @@ Game.EntityMixins.Characteristics = {
     listeners: {
         post12Recovery: function() {
             this.recoverSTUN();
+            this.recoverEND();
         }
     }
 };
@@ -1186,7 +1198,6 @@ Game.EntityMixins.PlayerActor = {
 
         // If they can use powers, process the non-instant powers that are activated
         ['constant', 'persistent'].forEach(function(duration) {
-            debugger;
             var queue = '_' + duration + 'Powers';
 
             // Now that we have the right queue, process all of the powers in this queue
