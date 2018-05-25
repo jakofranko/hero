@@ -345,8 +345,10 @@ Game.Screen.stats = {
         var red = Game.Palette.red;
         var blue = Game.Palette.blue;
         var yellow = Game.Palette.yellow;
+        var green = Game.Palette.green;
         var BODY = "BODY: %c{" + red + "}" + String(this._player.getBODY()) + "/" + String(this._player.getMaxBODY());
-        var STUN = "STUN: %c{" + blue + "}" + String(this._player.getSTUN()) + "/" + String(this._player.getMaxSTUN());
+        var STUN = "STUN: %c{" + blue + "}" + String(this._player.getSTUN()) + "/" + String(this._player.getCharacteristic('STUN', true, true));
+        var END = "END: %c{" + green + "}" + String(this._player.getEND()) + "/" + String(this._player.getCharacteristic('END', true, true));
         var HTH = "HTH: %c{" + '' + "}" + this._player.getHTH();
         var XP = "XP: %c{" + yellow + "}" + this._player.getSpendablePoints();
         var y = 1;
@@ -354,6 +356,7 @@ Game.Screen.stats = {
         display.clear();
         display.drawText(0, y++, BODY);
         display.drawText(0, y++, STUN);
+        display.drawText(0, y++, END);
         display.drawText(0, y++, HTH);
         display.drawText(0, y++, XP);
     },
