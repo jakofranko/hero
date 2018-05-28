@@ -4,7 +4,7 @@ Game.EntityMixins = {};
 Game.EntityMixins.Attacker = {
     name: 'Attacker',
     groupName: 'Attacker',
-    init: function(template) {
+    init: function() {
         if(!this.hasMixin('Characteristics')) {
             throw new Error('Entity needs the "Characteristics" mixin in order to use this mixin');
         }
@@ -111,13 +111,14 @@ Game.EntityMixins.Characteristics = {
 
         // Figured characteristic modifiers. These are seperate from the values of the figured characteristics,
         // but can be individually subtracted and added to seperately from the figured characteristics
-        this._PDmod = 0;
-        this._EDmod = 0;
-        this._SPDmod = 0;
-        this._RECmod = 0;
-        this._maxENDmod = 0;
-        this._STUNmod = 0;
-        this._maxSTUNmod = 0;
+        this._PDmod = template['PDmod'] || 0;
+        this._EDmod = template['EDmod'] || 0;
+        this._SPDmod = template['SPDmod'] || 0;
+        this._ENDmod = template['ENDmod'] || 0;
+        this._RECmod = template['RECmod'] || 0;
+        this._maxENDmod = template['maxENDmod'] || 0;
+        this._STUNmod = template['STUNmod'] || 0;
+        this._maxSTUNmod = template['maxSTUNmod'] || 0;
 
         // It should be noted that BODY, STUN and END are tracked as the current values, whereas
         // maxBODY, maxSTUN and maxEND is the upper limit that they can recover too, and
@@ -125,11 +126,11 @@ Game.EntityMixins.Characteristics = {
 
         // Combat values
         this._CV = Math.round(this._DEX / 3);
-        this._OCVmod = 0;
-        this._DCVmod = 0;
+        this._OCVmod = template['OCVmod'] ||  0;
+        this._DCVmod = template['DCVmod'] ||  0;
         this._ECV = Math.round(this._EGO / 3);
-        this._EOCVmod = 0;
-        this._EDCVmod = 0;
+        this._EOCVmod = template['EOCVmod'] ||  0;
+        this._EDCVmod = template['EDCVmod'] ||  0;
 
         // Resistant Defenses. Can only be updated by powers (armor, resistant defense)
         this._rPD = 0;
@@ -229,6 +230,9 @@ Game.EntityMixins.Characteristics = {
     getRECmod: function() {
         return this._RECmod;
     },
+    adjustEND: function(amount) {
+        this._END += amount;
+    },
     getEND: function() {
         return this._END;
     },
@@ -283,11 +287,12 @@ Game.EntityMixins.Characteristics = {
         this.updateFiguredCharacteristics();
     },
     recoverSTUN: function(STUN) {
-        if(!STUN) {
-            var STUN = this._REC;
-        }
-        if(this._STUN + STUN > this._maxSTUN)
-            this._STUN = this._maxSTUN;
+        var max = this._maxSTUN + this._maxSTUNmod;
+        if(!STUN)
+            STUN = this._REC;
+
+        if(this._STUN + STUN > max)
+            this._STUN = max;
         else
             this._STUN += STUN;
 
@@ -295,6 +300,16 @@ Game.EntityMixins.Characteristics = {
             this.regainConsciousness();
             this.raiseEvent('onRegainConsciousness');
         }
+    },
+    recoverEND: function(END) {
+        var max = this._maxEND + this._maxENDmod;
+        if(!END)
+            END = this._REC;
+
+        if(this._END + END > max)
+            this._END = max;
+        else
+            this._END += END;
     },
     getOCV: function() {
         return this._CV + this._OCVmod;
@@ -315,6 +330,7 @@ Game.EntityMixins.Characteristics = {
     listeners: {
         post12Recovery: function() {
             this.recoverSTUN();
+            this.recoverEND();
         }
     }
 };
@@ -379,7 +395,7 @@ Game.EntityMixins.CorpseDropper = {
         this._corpseDropRate = template['corpseDropRate'] || 100;
     },
     listeners: {
-        onDeath: function(attacker) {
+        onDeath: function() {
             // Check if we should drop a corpse.
             if (Math.round(Math.random() * 100) <= this._corpseDropRate) {
                 // Create a new corpse item and drop it.
@@ -466,7 +482,7 @@ Game.EntityMixins.Destructible = {
 };
 Game.EntityMixins.Equipper = {
     name: 'Equipper',
-    init: function(template) {
+    init: function() {
         this._weapon = null;
         this._armor = null;
     },
@@ -623,7 +639,7 @@ Game.EntityMixins.InventoryHolder = {
 
         // If the item is in a stack, decrement the stack amount
         if(this._items[i].hasMixin('Stackable') && this._items[i].amount() > 1)
-            this._items[i].removeFromStack();
+            this._items[i].removeFromStack(amount);
         else
             // Simply clear the inventory slot.
             this._items[i] = null;
@@ -846,7 +862,7 @@ Game.EntityMixins.JobActor = {
 };
 Game.EntityMixins.MemoryMaker = {
     name: 'MemoryMaker',
-    init: function(template) {
+    init: function() {
         // Each memory in a given category should have a unique key.
         // Additionally, each memory may have sub-categories
         this._memory = {
@@ -1066,7 +1082,7 @@ Game.EntityMixins.MoneyHolder = {
 };
 Game.EntityMixins.MessageRecipient = {
     name: 'MessageRecipient',
-    init: function(template) {
+    init: function() {
         this._messages = [];
     },
     receiveMessage: function(message) {
@@ -1080,10 +1096,13 @@ Game.EntityMixins.MessageRecipient = {
     }
 };
 Game.EntityMixins.PowerUser = {
+    name: 'PowerUser',
     init: function(template) {
         this._powersList = template['powers'] || [];
         this._powers = [];
         this._activePower = null;
+        this._primaryRanged = null;
+        this._primaryMelee = null;
         this._constantPowers = [];
         this._persistentPowers = [];
         this._inherentPowers = [];
@@ -1092,6 +1111,9 @@ Game.EntityMixins.PowerUser = {
         if(this._powersList.length) {
             this._powersList.forEach(power => this.addPower(power));
         }
+    },
+    getPower: function(i) {
+        return this._powers[i];
     },
     getPowers: function() {
         return this._powers;
@@ -1105,14 +1127,42 @@ Game.EntityMixins.PowerUser = {
         return this._activePower;
     },
     setActivePower: function(i) {
-        this._activePower = this._powers[i];
+        if(typeof i === 'number')
+            this._activePower = this._powers[i];
+        else
+            this._activePower = i;
     },
-    usePower: function(target) {
-        var power = this._activePower;
+    getPrimaryRanged: function() {
+        return this._primaryRanged;
+    },
+    setPrimaryRanged: function(i) {
+        if(i === false || i === null || i === undefined)
+            this._primaryRanged = null;
+        else
+            this._primaryRanged = this._powers[i];
+    },
+    getPrimaryMelee: function() {
+        return this._primaryMelee;
+    },
+    setPrimaryMelee: function(i) {
+        if(i === false || i === null || i === undefined)
+            this._primaryMelee = null;
+        else
+            this._primaryMelee = this._powers[i];
+    },
+    usePower: function(target, power) {
+        if(!power && !this._activePower) {
+            Game.sendMessage(this, "You have no power to use!");
+            return false;
+        }
+
         if(!target) {
             Game.sendMessage(this, "There's nothing there!");
             return false; // don't end turn
         }
+
+        if(!power)
+            power = this._activePower;
 
         // TODO: [POWERS] handle non-instant powers every turn
         // TODO: Update entity mixins to support an 'onAct' or some such method (update pattern)
@@ -1132,9 +1182,9 @@ Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
     act: function() {
-        if(this._acting) {
+        if(this._acting)
             return;
-        }
+
         this._acting = true;
 
         // Detect if the game is over
@@ -1145,6 +1195,18 @@ Game.EntityMixins.PlayerActor = {
         } else if(!this.isConscious()) {
             Game.sendMessage(this, 'You\'re unconscious. Press [Enter] to continue!');
         }
+
+        // If they can use powers, process the non-instant powers that are activated
+        ['constant', 'persistent'].forEach(function(duration) {
+            var queue = '_' + duration + 'Powers';
+
+            // Now that we have the right queue, process all of the powers in this queue
+            this[queue].forEach(function(power) {
+                if(power[duration])
+                    power[duration]();
+            }, this);
+        }, this);
+
         // Re-render the screen
         Game.refresh(this);
         // Lock the engine and wait asynchronously
@@ -1273,14 +1335,14 @@ Game.EntityMixins.Reactor = {
     }
 };
 Game.EntityMixins.Sight = {
-	name: 'Sight',
-	groupName: 'Sight',
-	init: function(template) {
-		this._sightRadius = template['sightRadius'] || 5;
-	},
-	getSightRadius: function() {
-		return this._sightRadius;
-	},
+    name: 'Sight',
+    groupName: 'Sight',
+    init: function(template) {
+        this._sightRadius = template['sightRadius'] || 5;
+    },
+    getSightRadius: function() {
+        return this._sightRadius;
+    },
     canSee: function(entity) {
         // If not on the same map or on different floors, then exit early
         if (!entity || this._map !== entity.getMap() || this._z !== entity.getZ()) {
@@ -1305,7 +1367,7 @@ Game.EntityMixins.Sight = {
             this.getX(),
             this.getY(),
             this.getSightRadius(),
-            function(x, y, radius, visibility) {
+            function(x, y) {
                 if (x === otherX && y === otherY)
                     found = true;
             }
@@ -1315,7 +1377,8 @@ Game.EntityMixins.Sight = {
     getEntitiesInSight: function(type) { // type can be a string or array
         debugger;
         var entities = this.getMap().getEntitiesWithinRadius(this._sightRadius),
-            seen = [];
+            seen = [],
+            isType;
         entities.forEach(entity => {
             // If we are looking for a specific type then only add entities
             // that can be seen and are of a certain type, otherwise just seen
@@ -1453,7 +1516,7 @@ Game.EntityMixins.Thrower = {
         this._throwing = i;
     },
     increaseThrowingSkill: function(value) {
-        var value = value || 2;
+        if(!value) value = 2;
         this._throwingSkill += 2;
         Game.sendMessage(this, "You feel better at throwing things!");
     },
@@ -1473,7 +1536,7 @@ Game.EntityMixins.Thrower = {
             } else {
                 lastPoint = linePoints[i];
             }
-        };
+        }
 
         // If nothing is in the way, the end point is targetX and targetY
         if(!end) {
@@ -1503,58 +1566,3 @@ Game.EntityMixins.Thrower = {
         }
     }
 };
-
-// For some reason, Game.extend has to be called after Game.EntityMixins.TaskActor is defined, since that's the thing it's trying to extend.
-Game.EntityMixins.GiantZombieActor = Game.extend(Game.EntityMixins.TaskActor, {
-    init: function(template) {
-        // Call the task actor init with the right tasks.
-        Game.EntityMixins.TaskActor.init.call(this, Game.extend(template, {
-            'tasks' : ['growArm', 'spawnSlime', 'hunt', 'wander']
-        }));
-        // We only want to grow the arm once.
-        this._hasGrownArm = false;
-    },
-    canDoTask: function(task) {
-        // If we haven't already grown arm and HP <= 20, then we can grow.
-        if (task === 'growArm') {
-            return this.getHp() <= 20 && !this._hasGrownArm;
-        // Spawn a slime only a 10% of turns.
-        } else if (task === 'spawnSlime') {
-            return Math.round(Math.random() * 100) <= 10;
-        // Call parent canDoTask
-        } else {
-            return Game.EntityMixins.TaskActor.canDoTask.call(this, task);
-        }
-    },
-    growArm: function() {
-        this._hasGrownArm = true;
-        this.increaseAttackValue(5);
-        // Send a message saying the zombie grew an arm.
-        Game.sendMessageNearby(this.getMap(),
-            this.getX(), this.getY(), this.getZ(),
-            'An extra arm appears on the giant zombie!');
-    },
-    spawnSlime: function() {
-        // Generate a random position nearby.
-        var xOffset = Math.floor(Math.random() * 3) - 1;
-        var yOffset = Math.floor(Math.random() * 3) - 1;
-
-        // Check if we can spawn an entity at that position.
-        if (!this.getMap().isEmptyFloor(this.getX() + xOffset, this.getY() + yOffset, this.getZ())) {
-            // If we cant, do nothing
-            return;
-        }
-        // Create the entity
-        var slime = Game.EntityRepository.create('slime');
-        slime.setX(this.getX() + xOffset);
-        slime.setY(this.getY() + yOffset);
-        slime.setZ(this.getZ());
-        this.getMap().addEntity(slime);
-    },
-    listeners: {
-        onDeath: function(attacker) {
-            // Switch to win screen when killed!
-            Game.switchScreen(Game.Screen.winScreen);
-        }
-    }
-});

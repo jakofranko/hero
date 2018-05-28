@@ -316,7 +316,6 @@ Game.House.prototype.render = function(direction) { // The direction specifies w
                     queue.push(room.children[k]);
                 }
             }
-            Game._consoleLogGrid(house[room.z], '_char');
         }
 
         // One last time, fill out any missing tiles with air or grass
@@ -543,7 +542,6 @@ Game.House.prototype._placeDoors = function(tiles) {
             tiles[room.z][doorXY[0]][doorXY[1]] = Game.TileRepository.create("door");
 
             rooms.push(child);
-            // consoleLogGrid(tiles[room.z], '_char');
         });
     }
 

@@ -113,11 +113,11 @@ Game.Commands.showTargettingScreenCommand = function(targettingScreen, mainScree
         // Make sure the x-axis doesn't go above the top bound
         var topLeftX = Math.max(0, entity.getX() - (Game.getScreenWidth() / 2));
         // Make sure we still have enough space to fit an entire game screen
-        var offsetX = Math.min(topLeftX, entity.getMap().getWidth() - Game.getScreenWidth());
+        var offsetX = Math.min(Math.round(topLeftX), entity.getMap().getWidth() - Game.getScreenWidth());
         // Make sure the y-axis doesn't go above the top bound
         var topLeftY = Math.max(0, entity.getY() - (Game.getScreenHeight() / 2));
         // Make sure we still have enough space to fit an entire game screen
-        var offsetY = Math.min(topLeftY, entity.getMap().getHeight() - Game.getScreenHeight());
+        var offsetY = Math.min(Math.round(topLeftY), entity.getMap().getHeight() - Game.getScreenHeight());
 
         targettingScreen.setup(entity, entity.getX(), entity.getY(), offsetX, offsetY);
         mainScreen.setSubScreen(targettingScreen);
@@ -137,6 +137,32 @@ Game.Commands.TargetBasedScreenOkCommand = function(mainScreen) {
     };
 };
 
+Game.Commands.TargetBasedScreenNextEntityCommand = function(mainScreen) {
+    var targetScreen = mainScreen.getSubScreen();
+    return function() {
+        return targetScreen.nextEntity();
+    }
+};
+
+Game.Commands.TargetBasedScreenPrevEntityCommand = function(mainScreen) {
+    var targetScreen = mainScreen.getSubScreen();
+    return function() {
+        return targetScreen.prevEntity();
+    }
+};
+
+Game.Commands.useRangedPowerCommand = function(targettingScreen, mainScreen) {
+    return function(entity) {
+        if(!entity.getPrimaryRanged()) {
+            Game.sendMessage(entity, "You have no active power to use! Try setting a Primary Ranged Power in the power menu [%c{" + Game.Palette.blue + "}p%c{}]");
+            return false;
+        } else {
+            entity.setActivePower(entity.getPrimaryRanged());
+            Game.Commands.showTargettingScreenCommand(targettingScreen, mainScreen)(entity);
+        }
+    }
+}
+
 Game.Commands.moveMenuIndexCommand = function(mainScreen, amount) {
     return function() {
         var subScreen = mainScreen.getSubScreen();
@@ -152,9 +178,22 @@ Game.Commands.MenuScreenOkCommand = function(mainScreen) {
 };
 
 Game.Commands.activatePowerCommand = function(mainScreen, letter) {
-    return function(entity) {
+    return function() {
         var powerScreen = mainScreen.getSubScreen();
         return powerScreen.activatePower(letter);
+    };
+};
+
+Game.Commands.makePrimaryMeleeCommand = function(mainScreen, letter) {
+    return function() {
+        var powerScreen = mainScreen.getSubScreen();
+        return powerScreen.setPrimaryMelee(letter);
+    };
+};
+Game.Commands.makePrimaryRangedCommand = function(mainScreen, letter) {
+    return function() {
+        var powerScreen = mainScreen.getSubScreen();
+        return powerScreen.setPrimaryRanged(letter);
     };
 };
 
@@ -197,7 +236,7 @@ Game.Commands.incrementPowerCommand = function(mainScreen, character) {
             if(statScreen._powers[index])
                 // Call the power's upgrade function (handles entity points)
                 statScreen._powers[index].upgradePower();
-        
+
         } else {
             Game.sendMessage(entity, 'You have no more points to spend.');
         }

@@ -279,9 +279,6 @@ Game.BasePowers.rangedKillingAttack.extend(Game.BasePower);
 
 // Every 3 points of armor is 2 points of resistant defense
 Game.BasePowers.armor = function(options) {
-    if(!('damageType' in options))
-        throw new Error('An rangedKillingAttack must specify a damage type');
-
     var properties = {
         name: 'Armor',
         type: 'Attack',
@@ -332,3 +329,58 @@ Game.BasePowers.armor = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.armor.extend(Game.BasePower);
+
+Game.BasePowers.forceField = function(options) {
+    var properties = {
+        name: 'Force Field',
+        type: 'Defence',
+        cost: 1,
+        duration: 'constant',
+        pointsMin: 1,
+        points: 0,
+        range: 'self',
+        hitTargetMessage: '',
+        hitMessage: "You activate your force field.",
+        missTargetMessage: '',
+        missMessage: 'You deactivate your force field',
+        active: false, // special property for non-instant powers
+        constant: function() {
+            // Subtract END
+            this.entity.adjustEND(-this.END());
+        },
+        effect: function(target) {
+            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                if(this.active)
+                    Game.sendMessage(this.entity, this.hitMessage);
+                else
+                    Game.sendMessage(this.entity, this.missMessage);
+            } else {
+                Game.sendMessage(this.entity, "Out of range.");
+                return false;
+            }
+        },
+        enqueue: function() {
+            if(!this.active) {
+                if(this.damageType === 'physical')
+                    this.entity._rPD += this.points;
+                else if(this.damageType === 'energy')
+                    this.entity._rED += this.points;
+
+                this.active = true;
+            }
+        },
+        dequeue: function() {
+            if(this.active) {
+                if(this.damageType === 'physical')
+                    this.entity._rPD -= this.points;
+                else if(this.damageType === 'energy')
+                    this.entity._rED -= this.points;
+
+                this.active = false;
+            }
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.forceField.extend(Game.BasePower);

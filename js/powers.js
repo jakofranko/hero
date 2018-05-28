@@ -30,6 +30,14 @@ Game.Powers.EnergyBlastPowerRepository.define('throwing star', {
     missTargetMessage: "%s's throwing star whizzes past, missing you!",
     missMessage: "Your throwing star misses!",
 });
+Game.Powers.EnergyBlastPowerRepository.define('energy blast', {
+    name: 'Energy Blast',
+    damageType: 'energy',
+    hitTargetMessage: "%s fries you with a blast of pure energy, doing %s STUN and %s BODY!",
+    hitMessage: "You let loose a sizzling blast of energy, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s misses you with their energy blast!",
+    missMessage: "Your energy blast goes wide!",
+});
 
 // Hand-to-Hand Attacks
 Game.Powers.HandToHandAttackPowerRepository = new Game.Repository('hand-to-hand attack powers', Game.BasePowers.handToHandAttack);
@@ -104,9 +112,29 @@ Game.Powers.ArmorPowerRepository.define('kevlar', {
     missMessage: "You take off your kevlar body armor.",
 });
 
+Game.Powers.ArmorPowerRepository.define('tough skin', {
+    name: 'Tough Skin',
+    damageType: 'physical',
+    hitMessage: "You focus, and you feel your skin tingle.",
+    missMessage: "You relax, and know your skin will not be so resistant now.",
+});
+
 Game.Powers.ArmorPowerRepository.define('phase skin', {
     name: 'Phase Skin',
     damageType: 'energy',
     hitMessage: "You activate your energy-resistant phase skin.",
     missMessage: "You deactivate your phase skin.",
+});
+
+// Force Fields
+Game.Powers.ForceFieldPowerRepository = new Game.Repository('force field powers', Game.BasePowers.forceField);
+
+Game.Powers.ForceFieldPowerRepository.define('force field (physical damage)', {
+    name: 'Force Field (Physical Damage)',
+    damageType: 'physical'
+});
+
+Game.Powers.ForceFieldPowerRepository.define('force field (energy damage)', {
+    name: 'Force Field (Energy Damage)',
+    damageType: 'energy'
 });

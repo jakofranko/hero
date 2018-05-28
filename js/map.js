@@ -2,6 +2,9 @@
 // TODO: Add utilities to handle activeEvent queue
 // TODO: Add utilities to fetch event sources from the city and then schedule them
 Game.Map = function(size, player) {
+    var loader = Game.getLoader();
+    loader.startModule('Map');
+
     this._city = new Game.City(size);
     this._city.init();
 
@@ -81,10 +84,10 @@ Game.Map.prototype.getScheduler = function() {
     return this._scheduler;
 };
 Game.Map.prototype.getEngine = function() {
-	return this._engine;
+    return this._engine;
 };
 Game.Map.prototype.getEntities = function() {
-	return this._entities;
+    return this._entities;
 };
 Game.Map.prototype.getPlayer = function() {
     return this._player;
@@ -139,16 +142,16 @@ Game.Map.prototype.schedule = function(actor) {
 
 // Entities
 Game.Map.prototype.addEntity = function(entity) {
-	// Set the entity's map
-	entity.setMap(this);
+    // Set the entity's map
+    entity.setMap(this);
 
-	// Add the entity to the map's list of entities
-	this.updateEntityPosition(entity);
+    // Add the entity to the map's list of entities
+    this.updateEntityPosition(entity);
 
-	// Check to see if the entity is an actor
-	// If so, add them to the scheduler
-	if(entity.hasMixin('Actor'))
-		this._scheduler.add(entity, true);
+    // Check to see if the entity is an actor
+    // If so, add them to the scheduler
+    if(entity.hasMixin('Actor'))
+        this._scheduler.add(entity, true);
 
     // If the entity is a criminal, update the city's justice system
     if(entity.hasMixin('JobActor')) {
@@ -172,41 +175,43 @@ Game.Map.prototype.addEntityAt = function(entity, x, y, z) {
     this.addEntity(entity);
 };
 Game.Map.prototype.addEntityAtRandomPosition = function(entity, z) {
-	var position = this.getRandomFloorPosition(z);
-	entity.setX(position.x);
-	entity.setY(position.y);
-	entity.setZ(position.z);
-	this.addEntity(entity);
+    var position = this.getRandomFloorPosition(z);
+    entity.setX(position.x);
+    entity.setY(position.y);
+    entity.setZ(position.z);
+    this.addEntity(entity);
 };
 Game.Map.prototype.getEntityAt = function(x, y, z) {
-	// Get the entity based on position key 
+    // Get the entity based on position key
     return this._entities[x + ',' + y + ',' + z];
 };
 Game.Map.prototype.getEntitiesWithinRadius = function(centerX, centerY, centerZ, radius) {
-	var results = [];
-	// Determine the bounds...
-	var leftX = centerX - radius;
-	var rightX = centerX + radius;
-	var topY = centerY - radius;
-	var bottomY = centerY + radius;
-	for (var key in this._entities) {
-		var entity = this._entities[key];
-		if (entity.getX() >= leftX && 
-			entity.getX() <= rightX && 
-			entity.getY() >= topY && 
-			entity.getY() <= bottomY &&
-			entity.getZ() == centerZ) {
-			results.push(entity);
-		}
-	}
-	return results;
+    var results = [];
+    var entity;
+
+    // Determine the bounds...
+    var leftX = centerX - radius;
+    var rightX = centerX + radius;
+    var topY = centerY - radius;
+    var bottomY = centerY + radius;
+    for (var key in this._entities) {
+        entity = this._entities[key];
+        if (entity.getX() >= leftX &&
+            entity.getX() <= rightX &&
+            entity.getY() >= topY &&
+            entity.getY() <= bottomY &&
+            entity.getZ() == centerZ) {
+            results.push(entity);
+        }
+    }
+    return results;
 };
 Game.Map.prototype.removeEntity = function(entity) {
-	// Find the entity in the list of entities if it is present
+    // Find the entity in the list of entities if it is present
     var key = entity.getX() + ',' + entity.getY() + ',' + entity.getZ();
 
     if(this._entities[key] == entity)
-    	delete this._entities[key];
+        delete this._entities[key];
 
     // If the entity is an actor, remove them from the scheduler
     if(entity.hasMixin('Actor'))
@@ -235,25 +240,25 @@ Game.Map.prototype.removeEntity = function(entity) {
         this._player = undefined;
 };
 Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
-	// Delete the old key if it is the same entity and we have old positons
-	if(oldX !== undefined) {
-		var oldKey = oldX + "," + oldY + "," + oldZ;
-		if(this._entities[oldKey] == entity) {
-			delete this._entities[oldKey];
-		}
-	}
+    // Delete the old key if it is the same entity and we have old positons
+    if(oldX !== undefined) {
+        var oldKey = oldX + "," + oldY + "," + oldZ;
+        if(this._entities[oldKey] == entity) {
+            delete this._entities[oldKey];
+        }
+    }
 
-	// Make sure the entity's position is within bounds
-	if (entity.getX() < 0 || entity.getX() >= this._width ||
-		entity.getY() < 0 || entity.getY() >= this._height ||
-		entity.getZ() < 0 || entity.getZ() >= this._depth) {
+    // Make sure the entity's position is within bounds
+    if (entity.getX() < 0 || entity.getX() >= this._width ||
+        entity.getY() < 0 || entity.getY() >= this._height ||
+        entity.getZ() < 0 || entity.getZ() >= this._depth) {
         console.log(entity);
-		throw new Error("Entity's position is out of bounds.");
-	}
+        throw new Error("Entity's position is out of bounds.");
+    }
 
-	// Sanity check to make sure there is no entity at the new position
-	var key = entity.getX() + "," + entity.getY() + "," + entity.getZ();
-	if (this._entities[key]) {
+    // Sanity check to make sure there is no entity at the new position
+    var key = entity.getX() + "," + entity.getY() + "," + entity.getZ();
+    if (this._entities[key]) {
         console.log(entity);
         console.log(this._entities[key]);
         console.log(entity == this._entities[key]);
@@ -337,18 +342,18 @@ Game.Map.prototype.isEmptyFloor = function(x, y, z) {
     return tile.getName() == 'floor' && !this.getEntityAt(x, y, z);
 };
 Game.Map.prototype.getRandomFloorPosition = function(z) {
-	var x, y;
-	do {
-		x = Math.floor(Math.random() * (this._width - 1));
-		y = Math.floor(Math.random() * (this._height - 1));
-	} while(!this.isEmptyFloor(x, y, z));
-	return {x: x, y: y, z: z};
+    var x, y;
+    do {
+        x = Math.floor(Math.random() * (this._width - 1));
+        y = Math.floor(Math.random() * (this._height - 1));
+    } while(!this.isEmptyFloor(x, y, z));
+    return {x: x, y: y, z: z};
 };
 
 // Tiles
 // Gets the tile for a given coordinate set
 Game.Map.prototype.getTile = function(x, y, z) {
-    // Make sure we are inside the bounds. 
+    // Make sure we are inside the bounds.
     // If we aren't, return null tile.
     if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth)
         return Game.TileRepository.create('null');
@@ -556,7 +561,7 @@ Game.Map.prototype.getItemsInRadius = function(x, y, z, radius, name) {
             var mapItems = this._items[`${mapX},${mapY},${z}`];
             if(mapItems && mapItems.length) {
                 if(name) {
-                    mapItems.forEach(item => { 
+                    mapItems.forEach(item => {
                         if(item.getName() == name || name.indexOf(item.getName()) > -1)
                             items.push(item);
                     });

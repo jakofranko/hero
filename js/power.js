@@ -43,13 +43,16 @@ Game.Power =  function(properties) {
     this.pointsMax         = properties['pointsMax'] || Infinity;
     this.points            = properties['points'] || 0;
     this.entity            = properties['entity'] || undefined;
-    this.END               = properties['END'] || function() { return Math.max(1, Math.round(points / 10)); };
+    this.END               = properties['END'] || function() { return Math.max(1, Math.round(this.points / 10)); };
     this.damageType        = properties['damageType'];
     this.hitMessage        = properties['hitMessage'] || '';
     this.hitTargetMessage  = properties['hitTargetMessage'] || '';
     this.missMessage       = properties['missMessage'] || '';
     this.missTargetMessage = properties['missTargetMessage'] || '';
     this.active            = properties['active'] || false;
+
+    // If the power's duration is anything other than 'instant', assign the duration's function
+    this[properties['duration']] = properties[properties['duration']];
 
     // Depending on the type of range, assign a different function to the range property
     this.inRange = function() { console.error(`${this.name} does not have the inRange() method defined`); };

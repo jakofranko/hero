@@ -30,6 +30,7 @@ Game.Input.controlMaps.playScreen = {
         's':            Game.Commands.showScreenCommand.bind(this, Game.Screen.gainStatScreen, Game.Screen.playScreen),
         'x':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.examineScreen, Game.Screen.playScreen, 'You have nothing to examine.'),
         't':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.throwScreen, Game.Screen.playScreen, 'You have nothing to throw.'),
+        'f':            Game.Commands.useRangedPowerCommand.bind(this, Game.Screen.powerTargetScreen, Game.Screen.playScreen),
         ',':            Game.Commands.showItemScreenCommand.bind(this, Game.Screen.pickupScreen, Game.Screen.playScreen, 'There is nothing here to pick up.',  function(entity) {
             return entity.getMap().getItemsAt(entity.getX(), entity.getY(), entity.getZ());
         }),
@@ -84,6 +85,9 @@ Game.Input.controlMaps.ItemListScreen = {
 
 Game.Input.controlMaps.TargetBasedScreen = {
     keydown: {
+        "f": Game.Commands.TargetBasedScreenOkCommand.bind(this, Game.Screen.playScreen),
+        "n": Game.Commands.TargetBasedScreenNextEntityCommand.bind(this, Game.Screen.playScreen),
+        "N": Game.Commands.TargetBasedScreenPrevEntityCommand.bind(this, Game.Screen.playScreen),
         "ArrowRight": Game.Commands.moveCursorCommand.bind(this, Game.Screen.playScreen, 1, 0),
         "ArrowLeft": Game.Commands.moveCursorCommand.bind(this, Game.Screen.playScreen, -1, 0),
         "ArrowUp": Game.Commands.moveCursorCommand.bind(this, Game.Screen.playScreen, 0, -1),
@@ -105,6 +109,8 @@ Game.Input.controlMaps.MenuScreen = {
 
 Game.Input.controlMaps.powersScreen = {
     keydown: {
+        'Enter': Game.Commands.removeSubScreenCommand.bind(this, Game.Screen.playScreen),
+        'Escape': Game.Commands.removeSubScreenCommand.bind(this, Game.Screen.playScreen),
         "a": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "a"),
         "b": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "b"),
         "c": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "c"),
@@ -116,7 +122,35 @@ Game.Input.controlMaps.powersScreen = {
         "i": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "i"),
         "j": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "j"),
         "k": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "k"),
-        "l": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "l")
+        "l": Game.Commands.activatePowerCommand.bind(this, Game.Screen.playScreen, "l"),
+        "A": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "A"),
+        "B": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "B"),
+        "C": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "C"),
+        "D": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "D"),
+        "E": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "E"),
+        "F": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "F"),
+        "G": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "G"),
+        "H": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "H"),
+        "I": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "I"),
+        "J": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "J"),
+        "K": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "K"),
+        "L": Game.Commands.makePrimaryMeleeCommand.bind(this, Game.Screen.playScreen, "L")
+    },
+    ctrl: {
+        keydown: {
+            "a": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "a"),
+            "b": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "b"),
+            "c": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "c"),
+            "d": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "d"),
+            "e": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "e"),
+            "f": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "f"),
+            "g": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "g"),
+            "h": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "h"),
+            "i": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "i"),
+            "j": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "j"),
+            "k": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "k"),
+            "l": Game.Commands.makePrimaryRangedCommand.bind(this, Game.Screen.playScreen, "l"),
+        }
     }
 }
 

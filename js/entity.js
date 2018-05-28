@@ -66,7 +66,7 @@ Game.Entity.prototype.getSpeed = function() {
     } else {
         return 1;
     }
-    
+
 };
 Game.Entity.prototype.getX = function() {
     return this._x;
@@ -90,9 +90,9 @@ Game.Entity.prototype.getType = function() {
     return this._type;
 };
 Game.Entity.prototype.tryMove = function(x, y, z, map) {
-	if(!map) {
+	if(!map)
 		map = this.getMap();
-	}
+
 	// Must use starting z
 	var tile = map.getTile(x, y, this.getZ());
 	var target = map.getEntityAt(x, y, z);
@@ -101,16 +101,20 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
     if(target === this)
         target = false;
 
-    // An entity can only attack if the entity has the Attacker 
+    // An entity can only attack if the entity has the Attacker
     // mixin and either the entity or the target is the player.
-    var canAttack = target ? 
-        (this.hasMixin('Characteristics') && 
-            (this.hasMixin(Game.EntityMixins.PlayerActor) || 
+    var canAttack = target ?
+        (this.hasMixin('Characteristics') &&
+            (this.hasMixin(Game.EntityMixins.PlayerActor) ||
             target.hasMixin(Game.EntityMixins.PlayerActor)))
         : false;
-    
+
 	if(canAttack) {
-        this.hthAttack(target);
+        if(this.hasMixin('PowerUser') && this.getPrimaryMelee())
+            this.usePower(target, this.getPrimaryMelee());
+        else
+            this.hthAttack(target);
+
         return true;
     } else if(target) {
         // There is a target at x,y,z, but the entity can't attack, so swap positions with them
@@ -144,7 +148,7 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
             }
         }
 		return true;
-	} 
+	}
 	return false;
 };
 Game.Entity.prototype.isAlive = function() {

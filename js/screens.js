@@ -8,20 +8,17 @@ Game.Screen = {};
 
 // Define start screen
 Game.Screen.startScreen = {
-	enter: function() { Game.resize(Game.getDisplay(), true, false, true); },
-	exit: function() { console.log('Exited the start screen'); },
-	render: function(display) {
-		// Render prompt to the screen
+    enter: function() { Game.resize(Game.getDisplay(), true, false, true); },
+    exit: function() { console.log('Exited the start screen'); },
+    render: function(display) {
+        // Render prompt to the screen
         var w = Game.getScreenWidth();
-        var h = Game.getScreenHeight();
         var text = "%c{#585DF5}Justice%c{}: A Superhero Roguelike";
         display.drawText((w/2) - (30 / 2), 2, text);
 
         text = "Press [%c{#585DF5}Enter%c{}] to start!";
         display.drawText((w/2) - (23 / 2), 3, text);
-        // The widest point of the scale is 74 characters, so, use that to pad the rest
-        var widestPoint = "'Y88888888888888888888888P'       i8888i       'Y88888888888888888888888P'";
-        // var padLeft = Math.round(widestPoint.length / 2);
+
         var scalesASCII = [
                         ",ggg,                   gg                   ,ggg,",
                        "d8P^^8b                ,d88b,                d8^^Y8b",
@@ -79,13 +76,211 @@ Game.Screen.startScreen = {
         var version = "v0.5";
         display.drawText((w / 2) - (version.length / 2), scalesASCII.length + 8, version);
 
-	},
-	handleInput: function(inputType, inputData) {
-		// When [Enter] is pressed, go to the play screen
-		if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			Game.switchScreen(Game.Screen.playScreen);
-		}
-	}
+    },
+    handleInput: function(inputType, inputData) {
+        // When [Enter] is pressed, go to the play screen
+        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
+            Game.switchScreen(Game.Screen.characterSelectScreen);
+        }
+    }
+};
+
+// Character creation/selectin screen
+Game.Screen.characterSelectScreen = {
+    enter: function() {
+        this._descriptionWidth = 60;
+        this._index = 0;
+        this._options = {
+            "Brick": {
+                description: "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
+                // powers: ['tough skin', 'flight', 'sonic boom'],
+                STR: 50,
+                DEX: 8,
+                INT: 8,
+                CON: 25,
+                BODY: 25
+            },
+            "Energy Projector": {
+                description: "You tend to fly around, loose bolts of lightning from your fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
+                // powers: ['energy blast', 'force field', 'flight', 'teleport'],
+                powers: ['energy blast', 'force field (physical damage)', 'force field (energy damage)'],
+                CON: 6,
+                BODY: 8
+            },
+            "Martial Artist": {
+                description: "What you lack in super-powers you make up for with super-moves. Martial artists tend to be hard to hit, and focus on physical melee and ranged attacks.",
+                // powers: ['bo staff', 'throwing star', 'deflect projectile'],
+                STR: 15,
+                DEX: 25,
+                CON: 20,
+                BODY: 20
+            },
+            "Mentalist": {
+                description: "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
+                // powers: ['mind spike', 'telepathy', 'force field', 'flight'],
+                STR: 8,
+                DEX: 15,
+                EGO: 50,
+                CON: 8,
+                BODY: 8
+            },
+            "Vigilante": {
+                description: "Vengence and Justice are the same, and the only important thing is that they are final. These 'heroes' don't have powers, they have guns and kevlar, and intend to get the job done by any means necessary.",
+                // powers: ['assault rifle', 'pistol', 'katana', 'kevlar']
+            }
+        };
+    },
+    render: function(display) {
+        var caption = "Select Archtype";
+        var archtypes = Object.keys(this._options);
+        var w = Game.getScreenWidth();
+        var y = 1;
+
+        display.drawText(Math.round(w / 2) - Math.round(caption.length / 2), y++, caption);
+        y += 2;
+
+        // Align archtypes with description text
+        archtypes.forEach(function(archtype, i) {
+            if(i === this._index) archtype = "%c{" + Game.Palette.blue + "}" + archtype;
+            display.drawText(Math.round(w / 2) - Math.round(this._descriptionWidth / 2), y++, archtype);
+        }, this);
+
+        y++;
+        display.drawText(
+            Math.round(w / 2) - Math.round(this._descriptionWidth / 2),
+            y,
+            this._options[archtypes[this._index]].description,
+            this._descriptionWidth
+        );
+    },
+    handleInput: function(inputData, inputType) {
+        var archtypes = Object.keys(this._options);
+        var archtype = archtypes[this._index];
+        switch(inputType.key) {
+            case 'Enter':
+                Game.switchScreen(Game.Screen.loadScreen, [this._options[archtype]]);
+                break;
+            case 'ArrowDown':
+                this.incrementIndex();
+                break;
+            case 'ArrowUp':
+                this.decrementIndex();
+                break;
+            default:
+                break;
+        }
+
+        Game.refresh();
+    },
+    incrementIndex: function() {
+        if(this._index + 1 < Object.keys(this._options).length)
+            this._index++;
+        return false;
+    },
+    decrementIndex: function() {
+        if(this._index - 1 >= 0)
+            this._index--;
+        return false;
+    },
+    exit: function() {}
+}
+
+Game.Screen.loadScreen = {
+    loader: null,
+    _player: null,
+    _map: null,
+    _startedLoading: false,
+    enter: function(archtypeTemplate) {
+        var screen = this;
+        var playerTemplate;
+
+        this.loader = new Game.Loader();
+
+        // Register test modules
+        this.loader.registerModule('Map');
+        this.loader.registerModule('Map', 'City');
+        this.loader.registerModule('Map', 'Justice');
+        this.loader.registerModule('Map', 'Tiles');
+        this.loader.registerModule('Map', 'Entities');
+
+        // TODO: Move player generation into player creation screen
+        // TODO: Player chooses size of city?
+        playerTemplate = Object.assign(Game.PlayerTemplate, archtypeTemplate);
+        this._player = new Game.Entity(playerTemplate);
+
+        // Begin load loop
+        function checkAndRenderLoader() {
+            if(this.loader.getProgress() === 100 && this._map)
+                Game.switchScreen(Game.Screen.playScreen, [this._player, this._map]);
+            else
+                Game.refresh();
+
+            if(!this._startedLoading) {
+                this._startedLoading = true;
+                // Begin loading the map
+                try {
+                    this.loader.startModule('Map');
+                    this.loader.startSubmodule('Map', 'City');
+                    this.loader.startSubmodule('Map', 'Justice');
+                    this.loader.startSubmodule('Map', 'Tiles');
+                    this.loader.startSubmodule('Map', 'Entities');
+
+                    setTimeout(function() {
+                        screen._map = new Game.Map(Game.getCitySize(), screen._player)
+                    }, 1000);
+
+                    setTimeout(function() {
+                        screen.loader.finishSubmodule('Map', 'City');
+                    }, 250);
+                    setTimeout(function() {
+                        screen.loader.finishSubmodule('Map', 'Justice');
+                    }, 500);
+                    setTimeout(function() {
+                        screen.loader.finishSubmodule('Map', 'Tiles');
+                    }, 750);
+                    setTimeout(function() {
+                        screen.loader.finishSubmodule('Map', 'Entities');
+                    }, 1000);
+                    setTimeout(function() {
+                        screen.loader.finishModule('Map');
+                    }, 1250);
+                } catch(e) {
+                    Game.switchScreen(Game.Screen.errorScreen, [e]);
+                }
+            }
+        }
+        this._intID = setInterval(checkAndRenderLoader.bind(this), 50);
+    },
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var progress = this.loader.getProgress();
+        var loadListY = 10;
+
+        // 100 being the max progress number
+        var barWidthMax = (w - 2) / 100; // -2 to account for end brackets
+
+        // Due to an anomaly with l and rpad, 0 will add a pad, 1 will not (since
+        // it gets the diff) so, if barWidth or barDiff are 0, then default to 1.
+        var barWidth = progress * barWidthMax || 1;
+        if(barWidth === 100 * barWidthMax)
+            barWidth -= 1; // So as to account for the cap char
+        var barDiff = (100 * barWidthMax) - barWidth || 1;
+        var bar = "[".rpad("=", barWidth);
+        var end = "]".lpad(" ", barDiff);
+        var progressBar = bar + end; // The length of this string should always be 78 (or w - 2)
+
+        // Render prompt to the screen
+        display.drawText((w/2) - 5, 5, "%c{" + Game.Palette.yellow + "}Loading...");
+        display.drawText((w/2) - (progressBar.length / 2), 7, progressBar);
+        display.drawText(0, 8, "Currently loading:");
+        this.loader.currentlyLoading.forEach(function(item) {
+            display.drawText(0, loadListY++, item);
+        }, this);
+    },
+    handleInput: function() {},
+    exit: function() {
+        clearInterval(this._intID);
+    }
 };
 
 Game.Screen.overview = {
@@ -138,7 +333,7 @@ Game.Screen.overview = {
             }
         }
     },
-    handleInput: function(inputType, inputData) {}
+    handleInput: function() {}
 };
 
 Game.Screen.stats = {
@@ -150,8 +345,10 @@ Game.Screen.stats = {
         var red = Game.Palette.red;
         var blue = Game.Palette.blue;
         var yellow = Game.Palette.yellow;
+        var green = Game.Palette.green;
         var BODY = "BODY: %c{" + red + "}" + String(this._player.getBODY()) + "/" + String(this._player.getMaxBODY());
-        var STUN = "STUN: %c{" + blue + "}" + String(this._player.getSTUN()) + "/" + String(this._player.getMaxSTUN());
+        var STUN = "STUN: %c{" + blue + "}" + String(this._player.getSTUN()) + "/" + String(this._player.getCharacteristic('STUN', true, true));
+        var END = "END: %c{" + green + "}" + String(this._player.getEND()) + "/" + String(this._player.getCharacteristic('END', true, true));
         var HTH = "HTH: %c{" + '' + "}" + this._player.getHTH();
         var XP = "XP: %c{" + yellow + "}" + this._player.getSpendablePoints();
         var y = 1;
@@ -159,22 +356,23 @@ Game.Screen.stats = {
         display.clear();
         display.drawText(0, y++, BODY);
         display.drawText(0, y++, STUN);
+        display.drawText(0, y++, END);
         display.drawText(0, y++, HTH);
         display.drawText(0, y++, XP);
     },
-    handleInput: function(inputType, inputData) {}
+    handleInput: function() {}
 };
 
 // Define our playing screen
 Game.Screen.playScreen = {
-	_player: null,
+    _player: null,
+    _map: null,
     _time: null,
-	_gameEnded: false,
+    _gameEnded: false,
     _subScreen: null,
-    enter: function() {
-        // TODO: Player chooses size of city?
-        this._player = new Game.Entity(Game.PlayerTemplate);
-        var map = new Game.Map(Game.getCitySize(), this._player);
+    enter: function(player, map) {
+        this._player = player;
+        this._map = map;
 
         // Once player has been created, the map generated and the
         // map assigned to the player (happens in map creation),
@@ -185,7 +383,7 @@ Game.Screen.playScreen = {
         Game.setCharacterStats(Game.Screen.stats, this._player);
 
         // Start the map's engine
-        map.getEngine().start();
+        this._map.getEngine().start();
 
         // The first thing that should happen is when the game starts is to
         // assign starting points
@@ -201,8 +399,7 @@ Game.Screen.playScreen = {
         }
 
         // Otherwise, procede as usual...
-    	var screenWidth = Game.getScreenWidth();
-    	var screenHeight = Game.getScreenHeight();
+        var screenHeight = Game.getScreenHeight();
 
         // Render the tiles
         this.renderTiles(display);
@@ -223,7 +420,7 @@ Game.Screen.playScreen = {
         display.drawText(0, screenHeight, stats);
     },
     handleInput: function(inputType, inputData) {
-    	// If the game is over, enter will bring the user to the losing screen.
+        // If the game is over, enter will bring the user to the losing screen.
         if(this._gameEnded) {
             if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
                 Game.switchScreen(Game.Screen.loseScreen);
@@ -248,10 +445,10 @@ Game.Screen.playScreen = {
         var command = Game.Input.handleInput('playScreen', inputType, inputData);
         var unlock  = command ? command(this._player) : false;
 
-        if(unlock)	// Unlock the engine
-        	this._player.getMap().getEngine().unlock();
-    	else
-        	Game.refresh(this._player);
+        if(unlock)    // Unlock the engine
+            this._player.getMap().getEngine().unlock();
+        else
+            Game.refresh(this._player);
     },
     getScreenOffsets: function() {
         // Make sure we still have enough space to fit an entire game screen
@@ -285,7 +482,7 @@ Game.Screen.playScreen = {
             this._player.getX(),
             this._player.getY(),
             this._player.getSightRadius(),
-            function(x, y, radius, visibility) {
+            function(x, y) {
                 visibleCells[x + "," + y] = true;
                 // Mark cell as explored
                 map.setExplored(x, y, currentDepth, true);
@@ -378,9 +575,9 @@ Game.Screen.ItemListScreen = function(template) {
     this._altItems = null;
 
     // Set up based on the template
-    this._caption = template['caption'];
+    this._caption = template['caption'] || '';
+    this._altCaption = template['altCaption'] || '';
     this._okFunction = template['ok'];
-    // By default, we use the identity function
     this._isAcceptableFunction = template['isAcceptable'] || function(x) {
         return x;
     };
@@ -400,13 +597,19 @@ Game.Screen.ItemListScreen.prototype.setup = function(player, items, altEntity, 
 
     this._player = player;
     this._altEntity = altEntity;
+
+    if(this._player && this._caption === '')
+        this._caption = this._player.getName() + " inventory";
+    if(this._altEntity && this._altCaption === '')
+        this._altCaption = this._altEntity.getName() + " inventory";
+
     // Should be called before switching to the screen.
     var count = 0;
     // Iterate over each item, keeping only the aceptable ones and counting the number of acceptable items.
     var that = this;
     this._items = items.map(function(item) {
         // Transform the item into null if it's not acceptable
-        if (that._isAcceptableFunction(item)) {
+        if(that._isAcceptableFunction(item)) {
             count++;
             return item;
         } else {
@@ -417,7 +620,7 @@ Game.Screen.ItemListScreen.prototype.setup = function(player, items, altEntity, 
     if(altItems) {
         this._altItems = altItems.map(function(item) {
             // Transform the item into null if it's not acceptable
-            if (that._isAcceptableFunction(item)) {
+            if(that._isAcceptableFunction(item)) {
                 count++;
                 return item;
             } else {
@@ -440,12 +643,13 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
     var midPoint = Math.round(screenWidth / 2);
     var colWidth, separatorHeight;
 
+    // Render the caption in the top row
+    display.drawText(1, 1, this._caption);
+    display.drawText(screenWidth / 2 + 2, 1, this._altCaption);
+
     // Render the no item row if enabled
     if (this._hasNoItemOption)
-        display.drawText(0, 1, '0 - no item');
-
-    // Render the caption in the top row
-    display.drawText(0, 0, this._caption);
+    display.drawText(0, 2, '0 - no item');
 
     if(this._altItems && this._altItems.length > 0) {
         colWidth = midPoint - 1;
@@ -471,8 +675,8 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
 
             // Render at the correct row and add 2
             display.drawText(
-                0,
-                2 + row,
+                1,
+                3 + row,
                 letter + ' ' + selectionState + ' ' + this._items[i].getName() + stack,
                 colWidth
             );
@@ -497,8 +701,8 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
                 ) ? '+' : '-';
                 var altStack = this._altItems[k].hasMixin('Stackable') ? ' (' + this._altItems[k].amount() + ')' : '';
                 display.drawText(
-                    midPoint + 1,
-                    2 + altRow,
+                    midPoint + 2,
+                    3 + altRow,
                     altLetter + ' ' + altSelectionState + ' ' + this._altItems[k].getName() + altStack,
                     colWidth
                 );
@@ -697,7 +901,7 @@ Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to examine',
     canSelect: true,
     canSelectMultipleItems: false,
-    isAcceptable: function(item) {
+    isAcceptable: function() {
         return true;
     },
     ok: function(selectedItems) {
@@ -744,11 +948,9 @@ Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
     }
 });
 Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
-    caption: 'Container',
     canSelect: true,
     canSelectMultipleItems: true,
     ok: function(selectedItems, altSelectedItems) {
-        debugger;
         for(var itemKey in selectedItems) {
             if(this._altEntity.hasMixin('Container')) {
                 this._altEntity.addItem(this._player, itemKey);
@@ -766,8 +968,13 @@ Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
 // Targetting Screen
 Game.Screen.TargetBasedScreen = function(template) {
     template = template || {};
+
+    this._targetNearest = template['targetNearest'] || false;
+    this._visibleEntities = [];
+    this._targetedEntity = 0;
+
     // By default, our ok return does nothing and does not consume a turn.
-    this._okFunction = template['okFunction'] || function(x, y) {
+    this._okFunction = template['okFunction'] || function() {
         return false;
     };
     this._overlayFunction = template['overlayFunction'] || function(){};
@@ -775,26 +982,31 @@ Game.Screen.TargetBasedScreen = function(template) {
     this._captionFunction = template['captionFunction'] || function(x, y) {
         var z = this._player.getZ();
         var map = this._player.getMap();
+        var entity, item, items, details;
+
         // If the tile is explored, we can give a better capton
         if(map.isExplored(x, y, z)) {
             // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
             if(this._visibleCells[x + ',' + y]) {
-                var items = map.getItemsAt(x, y, z);
+                items = map.getItemsAt(x, y, z);
                 // If we have items, we want to render the top most item
                 if(map.getEntityAt(x, y, z)) {
-                    var entity = map.getEntityAt(x, y, z);
-                    return String.format('%s - %s (%s)',
+                    entity = map.getEntityAt(x, y, z);
+                    details = entity.details();
+                    return String.format('%s - %s %s',
                         entity.getRepresentation(),
                         entity.describeA(true),
-                        entity.details());
+                        details == '' ? '' : "(" + details + ")"
+                    );
                 } else if(items) {
-                    var item = items[items.length - 1];
-                    return String.format('%s - %s (%s)',
+                    item = items[items.length - 1];
+                    details = item.details();
+                    return String.format('%s - %s %s',
                         item.getRepresentation(),
                         item.describeA(true),
-                        item.details());
-                // Else check if there's an entity
+                        details == '' ? '' : "(" + details + ")"
+                    );
                 }
             }
             // If there was no entity/item or the tile wasn't visible, then use
@@ -814,49 +1026,100 @@ Game.Screen.TargetBasedScreen = function(template) {
     this._descriptionFunction = template['descriptionFunction'] || function(x, y) {
         var z = this._player.getZ();
         var map = this._player.getMap();
+        var items, entity, item;
+
         // If the tile is explored, we can give a better capton
-        if(map.isExplored(x, y, z)) {
+        if(map.isExplored(x, y, z) && this._visibleCells[x + ',' + y]) {
             // If the tile isn't explored, we have to check if we can actually
             // see it before testing if there's an entity or item.
-            if(this._visibleCells[x + ',' + y]) {
-                var items = map.getItemsAt(x, y, z);
-                // If we have items, we want to render the top most item
-                if(map.getEntityAt(x, y, z)) {
-                    var entity = map.getEntityAt(x, y, z);
-                    return String.format('%s %s', entity.getDescription(), entity.describe());
-                } else if(items) {
-                    var item = items[items.length - 1];
-                    return String.format('%s %s', item.getDescription(), item.describe());
-                // Else check if there's an entity
-                } else {
-                    return '';
-                }
-            } else {
-                return '';
+
+            items = map.getItemsAt(x, y, z);
+            // If we have items, we want to render the top most item
+            if(map.getEntityAt(x, y, z)) {
+                entity = map.getEntityAt(x, y, z);
+                return String.format('%s %s', entity.getDescription(), entity.describe());
+            } else if(items) {
+                item = items[items.length - 1];
+                return String.format('%s %s', item.getDescription(), item.describe());
             }
-        } else {
-            return '';
         }
+
+        // Return blank string if item or entity not found
+        return '';
     };
 };
 Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
     this._player = player;
+    this._visibleEntities = [];
+    this._targetedEntity = 0;
+
     // Store original position. Subtract the offset to make life easy so we don't
     // always have to remove it.
     this._startX = startX - offsetX;
     this._startY = startY - offsetY;
+
     // Store current cursor position
-    this._cursorX = this._startX;
-    this._cursorY = this._startY;
+    if(this._targetNearest) {
+        var visible = [],
+            nearest;
+
+        // Get entities in sight radius
+        var nearestEntities = this._player
+            .getMap()
+            .getEntitiesWithinRadius(
+                this._player.getX(),
+                this._player.getY(),
+                this._player.getZ(),
+                this._player.getSightRadius()
+            );
+
+        // Remove player from list
+        nearestEntities.splice(nearestEntities.indexOf(this._player), 1);
+
+        // Filter out invisible entities
+        visible = nearestEntities.reduce(function(vis, entity) {
+            if(this._player.canSee(entity)) {
+                vis.push(entity);
+                this._visibleEntities.push(entity); // Add to cached list of entities
+            }
+
+            return vis;
+        }.bind(this), visible);
+
+        if(visible.length) {
+            // Find nearest entity
+            visible.reduce(function(shortest, entity) {
+                var distance = Game.Geometry.distance(this._player.getX(), this._player.getY(), entity.getX(), entity.getY());
+                if(entity != this._player && distance <= shortest)
+                    nearest = entity;
+
+                return Math.min(distance, shortest);
+            }.bind(this), Game.Geometry.distance(this._player.getX(), this._player.getY(), visible[0].getX(), visible[0].getY()));
+        }
+
+        if(nearest) {
+            this._targetedEntity = this._visibleEntities.indexOf(nearest);
+            this._cursorX = nearest.getX() - offsetX;
+            this._cursorY = nearest.getY() - offsetY;
+        } else {
+            this._cursorX = this._startX;
+            this._cursorY = this._startY;
+        }
+    } else {
+        this._cursorX = this._startX;
+        this._cursorY = this._startY;
+    }
+
     // Store map offsets
     this._offsetX = offsetX;
     this._offsetY = offsetY;
+
     // Cache the FOV
     var visibleCells = {};
     this._player.getMap().getFov(this._player.getZ()).compute(
         this._player.getX(), this._player.getY(),
         this._player.getSightRadius(),
-        function(x, y, radius, visibility) {
+        function(x, y) {
             visibleCells[x + "," + y] = true;
         });
     this._visibleCells = visibleCells;
@@ -869,12 +1132,10 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
 
     // Render stars along the line.
     for (var i = 1, l = points.length; i < l; i++) {
-        if(i == l - 1) {
+        if(i == l - 1)
             display.drawText(points[i].x, points[i].y, '%c{white}X');
-        } else {
+        else
             display.drawText(points[i].x, points[i].y, '%c{white}*');
-        }
-
     }
 
     // Render any overlay information
@@ -915,7 +1176,7 @@ Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputD
     if(unlock)
         this._player.getMap().getEngine().unlock();
     else
-        Game.refresh(this._player);
+        Game.refresh();
 };
 Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
     // Make sure we stay within bounds.
@@ -933,63 +1194,39 @@ Game.Screen.TargetBasedScreen.prototype.executeOkFunction = function() {
     else
         return false;
 };
+Game.Screen.TargetBasedScreen.prototype.nextEntity = function () {
+    if(this._visibleEntities.length) {
+        var entity;
+        this._targetedEntity++;
+        entity = this._visibleEntities[Math.abs(this._targetedEntity) % this._visibleEntities.length];
+        this._cursorX = entity.getX() - this._offsetX;
+        this._cursorY = entity.getY() - this._offsetY;
+    }
+
+    return false;
+};
+Game.Screen.TargetBasedScreen.prototype.prevEntity = function () {
+    if(this._visibleEntities.length) {
+        var entity;
+        this._targetedEntity--;
+        entity = this._visibleEntities[Math.abs(this._targetedEntity) % this._visibleEntities.length];
+        this._cursorX = entity.getX() - this._offsetX;
+        this._cursorY = entity.getY() - this._offsetY;
+    }
+
+    return false;
+};
 
 // Target-based screens
 Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
     overlayFunction: function(x, y) {
         var z = this._player.getZ();
         var map = this._player.getMap();
-        // If the tile is explored, we can give a better capton
-        if(Game.debug) {
-            var items = map.getItemsAt(x, y, z);
-            // If we have items, we want to render the top most item
-            if(map.getEntityAt(x, y, z)) {
-                var entity = map.getEntityAt(x, y, z);
-                var overlay = entity.raiseEvent('overlay');
-                return overlay;
-            }
-            // TODO: Support for items?
-            // TODO: Default action?
-        }
-    },
-    captionFunction: function(x, y) {
-        var z = this._player.getZ();
-        var map = this._player.getMap();
-        // If the tile is explored, we can give a better capton
-        if (map.isExplored(x, y, z)) {
-            // If the tile isn't explored, we have to check if we can actually
-            // see it before testing if there's an entity or item.
-            if (this._visibleCells[x + ',' + y]) {
-                var items = map.getItemsAt(x, y, z);
-                // If we have items, we want to render the top most item
-                if (map.getEntityAt(x, y, z)) {
-                    var entity = map.getEntityAt(x, y, z);
-                    return String.format('%s - %s (%s)',
-                        entity.getRepresentation(),
-                        entity.describeA(true) + ' ('+ entity.getName() + ')',
-                        entity.details());
-                } else if (items) {
-                    var item = items[items.length - 1];
-                    return String.format('%s - %s (%s)',
-                        item.getRepresentation(),
-                        item.describeA(true),
-                        item.details());
-                // Else check if there's an entity
-                }
-            }
-            // If there was no entity/item or the tile wasn't visible, then use
-            // the tile information.
-            return String.format('%s - %s',
-                map.getTile(x, y, z).getRepresentation(),
-                map.getTile(x, y, z).getDescription());
 
-        } else {
-            var nullTile = Game.TileRepository.create('null');
-            // If the tile is not explored, show the null tile description.
-            return String.format('%s - %s',
-                nullTile.getRepresentation(),
-                nullTile.getDescription());
-        }
+        // TODO: Support for items?
+        // TODO: Default action?
+        if(Game.debug && map.getEntityAt(x, y, z))
+            return map.getEntityAt(x, y, z).raiseEvent('overlay');
     }
 });
 Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
@@ -998,10 +1235,9 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
         return true;
     }
 });
-
 Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
+    targetNearest: true,
     okFunction: function(x, y) {
-        debugger;
         var target = this._player.getMap().getEntityAt(x, y, this._player.getZ());
         return this._player.usePower(target);
     }
@@ -1186,16 +1422,18 @@ Game.Screen.helpScreen = {
         display.drawText(0, y++, '[%c{#585DF5}w%c{}] to wield items');
         display.drawText(0, y++, '[%c{#585DF5}W%c{}] to wield items');
         display.drawText(0, y++, '[%c{#585DF5}x%c{}] to examine items');
+        display.drawText(0, y++, '[%c{#585DF5}p%c{}] to use powers');
         display.drawText(0, y++, '[%c{#585DF5};%c{}] to look around you');
         display.drawText(0, y++, '[%c{#585DF5}.%c{}] to wait');
         display.drawText(0, y++, '[%c{#585DF5}j%c{}] to show city statistics');
         display.drawText(0, y++, '[%c{#585DF5}s%c{}] to spend experience points');
+        display.drawText(0, y++, '[%c{#585DF5}Space%c{}] to use/interact with nearby items and entities');
         display.drawText(0, y++, '[%c{#585DF5}?%c{}] to show this help screen');
         y += 3;
         text = '--- press any key to continue ---';
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
     },
-    handleInput: function(inputType, inputData) {
+    handleInput: function() {
         Game.Screen.playScreen.setSubScreen(null);
     }
 };
@@ -1325,6 +1563,8 @@ Game.Screen.gainStatScreen = {
 };
 
 // Manage character powers screen
+// TODO: Highlight powers that are currently activated
+// TODO: Allow activated powers to be deactivated
 Game.Screen.powersScreen = {
     setup: function(entity) {
         // Must be called before rendering.
@@ -1333,12 +1573,28 @@ Game.Screen.powersScreen = {
         this._letters = 'abcdefghijklmnopqrstuvwxyz';
     },
     render: function(display) {
-        display.drawText(0, 0, 'Powers:');
+        var y = 0;
+        var text;
+
+        text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + key%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.';
+        display.drawText(0, y++, text);
+
+        text = 'Press [%c{' + Game.Palette.blue + '}Esc%c{}] or [%c{' + Game.Palette.blue + '}Enter%c{}] to leave this screen.'
+        display.drawText(0, y++, text);
+
+        y++;
+        display.drawText(0, y++, 'Powers:');
 
         // Iterate through each of our powers
         for (var i = 0; i < this._powers.length; i++) {
             var powerName = this._powers[i]['name'];
-            display.drawText(0, 3 + i, this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName);
+            text = this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName;
+            if(this._powers[i] == this._entity.getPrimaryMelee())
+                text += ' %c{}| %c{' + Game.Palette.lightBlue + '}Primary Melee';
+            if(this._powers[i] == this._entity.getPrimaryRanged())
+                text += ' %c{}| %c{' + Game.Palette.lightBlue + '}Primary Ranged';
+
+            display.drawText(0, y++, text);
         }
     },
     handleInput: function(inputType, inputData) {
@@ -1356,6 +1612,48 @@ Game.Screen.powersScreen = {
         this._entity.setActivePower(index);
 
         showScreenCommand(this._entity);
+    },
+    setPrimaryMelee: function(letter) {
+        var currentPrimary = this._entity.getPrimaryMelee();
+        var index = this._letters.indexOf(letter.toLowerCase());
+
+        if(currentPrimary && this._entity.getPower(index) == currentPrimary)
+            this._entity.setPrimaryMelee(null);
+        else
+            this._entity.setPrimaryMelee(index);
+    },
+    setPrimaryRanged: function(letter) {
+        var currentPrimary = this._entity.getPrimaryRanged();
+        var index = this._letters.indexOf(letter.toLowerCase());
+
+        if(currentPrimary && this._entity.getPower(index) == currentPrimary)
+            this._entity.setPrimaryRanged(null);
+        else
+            this._entity.setPrimaryRanged(index);
+    }
+};
+
+Game.Screen.errorScreen = {
+    enter: function(error) {
+        this._error = error;
+        console.log(error);
+    },
+    exit: function() {  console.log("Exited error screen."); },
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var text = "Uh oh :(";
+        display.drawText((w/2) - (text.length / 2), 2, text);
+
+        text = "Looks like there was an error:" + this._error;
+        display.drawText((w/2) - 40, 4, text, 80);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to start over";
+        display.drawText((w/2) - (text.length / 2), 8, text);
+    },
+    handleInput: function(inputType, inputData) {
+        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
+            Game.Screen.playScreen.setSubScreen(undefined);
+        }
     }
 };
 
@@ -1376,8 +1674,8 @@ Game.Screen.winScreen = {
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			Game.Screen.playScreen.setSubScreen(undefined);
-		}
+            Game.Screen.playScreen.setSubScreen(undefined);
+        }
     }
 };
 
@@ -1395,7 +1693,7 @@ Game.Screen.loseScreen = {
     },
     handleInput: function(inputType, inputData) {
         if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-			location.reload();
-		}
+            location.reload();
+        }
     }
 };
