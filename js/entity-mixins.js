@@ -1173,8 +1173,14 @@ Game.EntityMixins.PowerUser = {
         // TODO: Update entity mixins to support an 'onAct' or some such method (update pattern)
         if(power['duration'] != 'instant') {
             var queue = '_' + power['duration'] + 'Powers'; // e.g., '_constantPowers'
-            this[queue].push(power);
-            power.enqueue();
+
+            if(power.active) {
+                this[queue].splice(this[queue].indexOf(power), 1);
+                power.dequeue();
+            } else {
+                this[queue].push(power);
+                power.enqueue();
+            }
         }
 
         // TODO: Handle miss? True if hit, false if miss
