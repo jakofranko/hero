@@ -295,7 +295,7 @@ Game.EntityMixins.Characteristics = {
     recoverSTUN: function(STUN) {
         var max = this._maxSTUN + this._maxSTUNmod;
         if(!STUN)
-            STUN = this._REC;
+            STUN = this.getCharacteristic('REC', true);
 
         if(this._STUN + STUN > max)
             this._STUN = max;
@@ -310,7 +310,7 @@ Game.EntityMixins.Characteristics = {
     recoverEND: function(END) {
         var max = this._maxEND + this._maxENDmod;
         if(!END)
-            END = this._REC;
+            END = this.getCharacteristic('REC', true);
 
         if(this._END + END > max)
             this._END = max;
