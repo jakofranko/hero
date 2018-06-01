@@ -88,8 +88,12 @@ Game.Power =  function(properties) {
     // of active powers.
     this.effect = properties['effect'] || function() { console.error(`${this.name} needs to have an effect function defined.`); };
 
-    this.enqueue = properties['enqueue'] || function() {};
-    this.dequeue = properties['dequeue'] || function() {};
+    this.enqueue = properties['enqueue'] || function() {
+        this.active = true;
+    };
+    this.dequeue = properties['dequeue'] || function() {
+        this.active = false;
+    };
 };
 Game.Power.prototype.setEntity = function(entity) {
     this.entity = entity;
