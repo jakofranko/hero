@@ -347,9 +347,9 @@ Game.Screen.stats = {
         var blue = Game.Palette.blue;
         var yellow = Game.Palette.yellow;
         var green = Game.Palette.green;
-        var BODY = "BODY: %c{" + red + "}" + String(this._player.getBODY()) + "/" + String(this._player.getMaxBODY());
-        var STUN = "STUN: %c{" + blue + "}" + String(this._player.getSTUN()) + "/" + String(this._player.getCharacteristic('STUN', true, true));
-        var END = "END: %c{" + green + "}" + String(this._player.getEND()) + "/" + String(this._player.getCharacteristic('END', true, true));
+        var BODY = "BODY: %c{" + red + "}" + String(Math.round(this._player.getBODY())) + "/" + String(this._player.getMaxBODY());
+        var STUN = "STUN: %c{" + blue + "}" + String(Math.round(this._player.getSTUN())) + "/" + String(this._player.getCharacteristic('STUN', true, true));
+        var END = "END: %c{" + green + "}" + String(Math.round(this._player.getEND())) + "/" + String(this._player.getCharacteristic('END', true, true));
         var HTH = "HTH: %c{" + '' + "}" + this._player.getHTH();
         var XP = "XP: %c{" + yellow + "}" + this._player.getSpendablePoints();
         var y = 1;
@@ -1519,6 +1519,11 @@ Game.Screen.gainStatScreen = {
         this._options = entity.getPointOptions();
         this._powers = entity.getPowers();
 
+        // Rendering constants
+        this._powersSpacer = this._powers.reduce(function(max, power) {
+            return Math.max(max, power.name.length);
+        }, 0)
+
         // Screen controls
         this._letters = 'abcdefghijklmnopqrstuvwxyz';
         this._numbers = '0123456789';
@@ -1540,11 +1545,12 @@ Game.Screen.gainStatScreen = {
 
         display.drawText(0, 3 + this._options.length + 2, 'Powers:')
         for(let i = 0; i < this._powers.length; i++) {
-            let spacer = "".lpad(" ", 15 - this._powers[i].name.length + 3);
+            let spacer = "".lpad(" ", this._powersSpacer - this._powers[i].name.length + 3);
             display.drawText(
                 0,
                 4 + this._options.length + i + 3,
-                `${this._numbers.substring(i, i + 1)} - %c{${Game.Palette.blue}}${this._powers[i].name} (${this._powers[i].points})%c{}${spacer}Cost: ${this._powers[i].cost}`)
+                `${this._numbers.substring(i, i + 1)} - %c{${Game.Palette.blue}}${this._powers[i].name} (${this._powers[i].points})%c{}${spacer}Cost: ${this._powers[i].cost}`
+            );
         }
     },
     handleInput: function(inputType, inputData) {
@@ -1575,7 +1581,7 @@ Game.Screen.powersScreen = {
     },
     render: function(display) {
         var y = 0;
-        var text;
+        var text, powerName, active;
 
         text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + key%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.';
         display.drawText(0, y++, text);
@@ -1588,8 +1594,11 @@ Game.Screen.powersScreen = {
 
         // Iterate through each of our powers
         for (var i = 0; i < this._powers.length; i++) {
-            var powerName = this._powers[i]['name'];
-            text = this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName;
+            powerName = this._powers[i].name;
+            active = this._powers[i].active ? '(active) ' : '';
+
+            text = this._letters.substring(i, i + 1) + ' - ' + active + '%c{#585DF5}' + powerName;
+
             if(this._powers[i] == this._entity.getPrimaryMelee())
                 text += ' %c{}| %c{' + Game.Palette.lightBlue + '}Primary Melee';
             if(this._powers[i] == this._entity.getPrimaryRanged())
