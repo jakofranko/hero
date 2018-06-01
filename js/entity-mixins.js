@@ -212,11 +212,17 @@ Game.EntityMixins.Characteristics = {
     getPDmod: function() {
         return this._PDmod;
     },
+    getRPD: function() {
+        return this._rPD;
+    },
     getED: function() {
         return this._ED;
     },
     getEDmod: function() {
         return this._EDmod;
+    },
+    getRED: function() {
+        return this._rED;
     },
     getSPD: function() {
         return this._SPD;
