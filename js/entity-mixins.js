@@ -1170,7 +1170,6 @@ Game.EntityMixins.PowerUser = {
         if(!power)
             power = this._activePower;
 
-        // TODO: [POWERS] handle non-instant powers every turn
         // TODO: Update entity mixins to support an 'onAct' or some such method (update pattern)
         if(power['duration'] != 'instant') {
             var queue = '_' + power['duration'] + 'Powers'; // e.g., '_constantPowers'
