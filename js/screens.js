@@ -346,9 +346,13 @@ Game.Screen.stats = {
         var blue = Game.Palette.blue;
         var yellow = Game.Palette.yellow;
         var green = Game.Palette.green;
-        var BODY = "BODY: %c{" + red + "}" + String(Math.round(this._player.getBODY())) + "/" + String(this._player.getMaxBODY());
-        var STUN = "STUN: %c{" + blue + "}" + String(Math.round(this._player.getSTUN())) + "/" + String(this._player.getCharacteristic('STUN', true, true));
-        var END = "END: %c{" + green + "}" + String(Math.round(this._player.getEND())) + "/" + String(this._player.getCharacteristic('END', true, true));
+        var BODY = "BODY: %c{" + red + "}" + Math.round(this._player.getBODY()) + "/" + this._player.getMaxBODY();
+        var STUN = "STUN: %c{" + blue + "}" + Math.round(this._player.getSTUN()) + "/" + this._player.getCharacteristic('STUN', true, true);
+        var END = "END: %c{" + green + "}" + Math.round(this._player.getEND()) + "/" + this._player.getCharacteristic('END', true, true);
+        var PD = "Total PD: %c{" + green + "}" + (this._player.getCharacteristic("PD", true) + this._player.getRPD());
+        var ED = "Total ED: %c{" + green + "}" + (this._player.getCharacteristic("ED", true) + this._player.getRED());
+        var rPD = "rPD: %c{" + green + "}" + this._player.getRPD();
+        var rED = "rED: %c{" + green + "}" + this._player.getRED();
         var HTH = "HTH: %c{" + '' + "}" + this._player.getHTH();
         var XP = "XP: %c{" + yellow + "}" + this._player.getSpendablePoints();
         var y = 1;
@@ -358,6 +362,10 @@ Game.Screen.stats = {
         display.drawText(0, y++, BODY);
         display.drawText(0, y++, STUN);
         display.drawText(0, y++, END);
+        display.drawText(0, y++, PD);
+        display.drawText(0, y++, ED);
+        display.drawText(0, y++, rPD);
+        display.drawText(0, y++, rED);
         display.drawText(0, y++, HTH);
         display.drawText(0, y++, XP);
     },
