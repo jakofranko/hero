@@ -51,10 +51,9 @@ Game.BuildingRepository.define('bank', {
 	stories: 1,
 	roomNumber: 5,
 	placeItems: function() {
-		var regions = this.getRoomRegions();
 		var safe = Game.ItemRepository.create('safe');
-		var safeCoord = this.getRandomRegionTile(4, 0) || this.getRandomRegionTile(3, 0) || this.getRandomRegionTile(2, 0),
-			x, y, z;
+		var safeCoord = this.getRandomRegionTile(4, 0) || this.getRandomRegionTile(3, 0) || this.getRandomRegionTile(2, 0);
+        
 		if(safeCoord) {
 			var coord = safeCoord.split(",");
 			this.addItem(coord[0], coord[1], coord[2], safe);
