@@ -342,7 +342,6 @@ Game.Screen.stats = {
     },
     exit: function() { console.log('Exited the stats screen'); },
     render: function(display) {
-        // TODO: Display other relavante stats (P/ED and rP/ED)
         var red = Game.Palette.red;
         var blue = Game.Palette.blue;
         var yellow = Game.Palette.yellow;
@@ -354,6 +353,7 @@ Game.Screen.stats = {
         var XP = "XP: %c{" + yellow + "}" + this._player.getSpendablePoints();
         var y = 1;
 
+        // TODO: tidy up alignment
         display.clear();
         display.drawText(0, y++, BODY);
         display.drawText(0, y++, STUN);
