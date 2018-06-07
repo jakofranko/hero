@@ -124,10 +124,22 @@ Game.Power.prototype.subtractPoints = function(amount) {
     this.entity.addSpendablePoints(amount);
 };
 Game.Power.prototype.upgradePower = function() {
+    let wasActive;
+    // If the power is active, dequeue and then re-queue it in order
+    // to avoid bugs with dequeuing powers that are stronger than when
+    // they were last queued.
+    if(this.active) {
+        this.dequeue();
+        wasActive = true;
+    }
+
     try {
         this.addPoints(this.cost);
     } catch(e) {
         console.error(e);
+    } finally {
+        if(wasActive)
+            this.enqueue();
     }
 
     return false; // Don't end turn, refresh screen
