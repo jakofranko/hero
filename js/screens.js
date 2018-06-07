@@ -1625,11 +1625,17 @@ Game.Screen.powersScreen = {
             Game.refresh(this._entity);
     },
     activatePower: function(letter) {
-        var showScreenCommand = Game.Commands.showTargettingScreenCommand(Game.Screen.powerTargetScreen, Game.Screen.playScreen);
+        var showScreenCommand;
         var index = this._letters.indexOf(letter);
+
         this._entity.setActivePower(index);
 
-        showScreenCommand(this._entity);
+        if(this._entity.getActivePower().range === 'self') {
+            return this._entity.usePower(this._entity);
+        } else {
+            showScreenCommand = Game.Commands.showTargettingScreenCommand(Game.Screen.powerTargetScreen, Game.Screen.playScreen);
+            showScreenCommand(this._entity);
+        }
     },
     setPrimaryMelee: function(letter) {
         var currentPrimary = this._entity.getPrimaryMelee();
