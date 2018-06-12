@@ -94,6 +94,7 @@ Game.Screen.characterSelectScreen = {
             "Brick": {
                 description: "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
                 // powers: ['tough skin', 'flight', 'sonic boom'],
+                powers: ['tough skin'],
                 STR: 50,
                 DEX: 8,
                 INT: 8,
@@ -110,14 +111,15 @@ Game.Screen.characterSelectScreen = {
             "Martial Artist": {
                 description: "What you lack in super-powers you make up for with super-moves. Martial artists tend to be hard to hit, and focus on physical melee and ranged attacks.",
                 // powers: ['bo staff', 'throwing star', 'deflect projectile'],
+                powers: ['bo staff', 'throwing star'],
                 STR: 15,
                 DEX: 25,
-                CON: 20,
-                BODY: 20
+                CON: 20
             },
             "Mentalist": {
                 description: "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
                 // powers: ['mind spike', 'telepathy', 'force field', 'flight'],
+                powers: ['force field (physical damage)'],
                 STR: 8,
                 DEX: 15,
                 EGO: 50,
@@ -127,6 +129,7 @@ Game.Screen.characterSelectScreen = {
             "Vigilante": {
                 description: "Vengence and Justice are the same, and the only important thing is that they are final. These 'heroes' don't have powers, they have guns and kevlar, and intend to get the job done by any means necessary.",
                 // powers: ['assault rifle', 'pistol', 'katana', 'kevlar']
+                powers: ['pistol', 'katana', 'kevlar']
             }
         };
     },
