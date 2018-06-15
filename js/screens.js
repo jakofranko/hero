@@ -1251,7 +1251,7 @@ Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
     targetNearest: true,
     okFunction: function(x, y) {
         var target = this._player.getMap().getEntityAt(x, y, this._player.getZ());
-        return this._player.usePower(target);
+        return this._player.usePower(target, null, {x: x, y: y, z: this._player.getZ()});
     }
 });
 

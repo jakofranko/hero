@@ -1156,7 +1156,7 @@ Game.EntityMixins.PowerUser = {
         else
             this._primaryMelee = this._powers[i];
     },
-    usePower: function(target, power) {
+    usePower: function(target, power, coords) {
         if(!power && !this._activePower) {
             Game.sendMessage(this, "You have no power to use!");
             return false;
@@ -1179,7 +1179,7 @@ Game.EntityMixins.PowerUser = {
         }
 
         // TODO: Handle miss? True if hit, false if miss
-        power.effect(target);
+        power.effect(target, coords);
 
         return true;
     }
