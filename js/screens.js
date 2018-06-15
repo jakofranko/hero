@@ -448,10 +448,12 @@ Game.Screen.playScreen = {
 
         // If the player is unconscious, all they can do is skip their turn
         if(!this._player.isConscious()) {
-            if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN)
+            if(inputData.keyCode === ROT.VK_RETURN) {
                 this._player.getMap().getEngine().unlock();
-            else
                 return;
+             } else {
+                return;
+             }
         }
 
         var command = Game.Input.handleInput('playScreen', inputType, inputData);
