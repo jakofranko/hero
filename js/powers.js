@@ -138,3 +138,10 @@ Game.Powers.ForceFieldPowerRepository.define('force field (energy damage)', {
     name: 'Force Field (Energy Damage)',
     damageType: 'energy'
 });
+
+// Movement Powers
+Game.Powers.TeleportationPowerRepository = new Game.Repository('teleportation powers', Game.BasePowers.teleportation);
+
+Game.Powers.TeleportationPowerRepository.define('teleport', {
+    name: 'Teleport'
+})

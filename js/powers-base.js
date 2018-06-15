@@ -416,3 +416,46 @@ Game.BasePowers.forceField = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.forceField.extend(Game.BasePower);
+
+Game.BasePowers.teleportation = function(options) {
+    var properties = {
+        name: 'Teleportation',
+        type: 'Movement',
+        cost: 2,
+        duration: 'instant',
+        pointsMin: 1,
+        points: 0,
+        range: 'standard',
+        hitTargetMessage: '',
+        hitMessage: "You instantly appear somewhere else.",
+        missTargetMessage: 'Somebody just tried to teleport into you, ourch that hurt!!!',
+        missMessage: 'You instantly appear in something else, ouch that hurts!!! And then you\'re back where you came from',
+        effect: function(target, coords) {
+            let tile, numD6, damage;
+
+            this.entity.adjustEND(-this.END());
+
+            if(this.inRange(this.entity.getX(), this.entity.getY(), coords.x, coords.y)) {
+                tile = this.entity.getMap().getTile(coords.x, coords.y, coords.z);
+
+                if(tile.isWalkable() && !target) {
+                    this.entity.tryMove(coords.x, coords.y, coords.z);
+                } else {
+                    Game.sendMessage(this.entity, this.missMessage);
+                    numD6 = Game.rollDice('2d6');
+                    damage = Game.rollDice('' + numD6 + 'd6');
+                    this.entity.takeSTUN(this.entity, damage);
+                    if(target) target.takeSTUN(this.entity, damage);
+                }
+
+                return true;
+            } else {
+                Game.sendMessage(this.entity, 'Out of range.');
+                return false;
+            }
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.teleportation.extend(Game.BasePower);
