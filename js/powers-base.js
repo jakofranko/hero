@@ -68,6 +68,9 @@ Game.BasePowers.energyBlast = function(options) {
                 Game.sendMessage(this.entity, "There's nothing there!");
                 return false; // don't end turn
             }
+
+            this.entity.adjustEND(-this.END());
+
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this.entity);
 
@@ -132,6 +135,9 @@ Game.BasePowers.handToHandAttack = function(options) {
                 Game.sendMessage(this, "There's nothing there!");
                 return false; // don't end turn
             }
+
+            this.entity.adjustEND(-this.END());
+
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this.entity);
 
@@ -196,6 +202,9 @@ Game.BasePowers.handToHandKillingAttack = function(options) {
                 Game.sendMessage(this, "There's nothing there!");
                 return false; // don't end turn
             }
+
+            this.entity.adjustEND(-this.END());
+
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this.entity);
 
@@ -255,6 +264,9 @@ Game.BasePowers.rangedKillingAttack = function(options) {
                 Game.sendMessage(this, "There's nothing there!");
                 return false; // don't end turn
             }
+
+            this.entity.adjustEND(-this.END());
+
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this.entity);
 
