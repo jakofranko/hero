@@ -64,6 +64,10 @@ Game.BasePowers.energyBlast = function(options) {
         missTargetMessage: "%s misses you!",
         missMessage: "You miss!",
         effect: function(target) {
+            if(!target) {
+                Game.sendMessage(this.entity, "There's nothing there!");
+                return false; // don't end turn
+            }
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this.entity);
 
@@ -124,6 +128,10 @@ Game.BasePowers.handToHandAttack = function(options) {
         missTargetMessage: "%s misses you!",
         missMessage: "You miss!",
         effect: function(target) {
+            if(!target) {
+                Game.sendMessage(this, "There's nothing there!");
+                return false; // don't end turn
+            }
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this.entity);
 
@@ -184,6 +192,10 @@ Game.BasePowers.handToHandKillingAttack = function(options) {
         missTargetMessage: "%s misses you!",
         missMessage: "You miss!",
         effect: function(target) {
+            if(!target) {
+                Game.sendMessage(this, "There's nothing there!");
+                return false; // don't end turn
+            }
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this.entity);
 
@@ -239,6 +251,10 @@ Game.BasePowers.rangedKillingAttack = function(options) {
         missTargetMessage: "%s misses you!",
         missMessage: "You miss!",
         effect: function(target) {
+            if(!target) {
+                Game.sendMessage(this, "There's nothing there!");
+                return false; // don't end turn
+            }
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 target.raiseEvent('onAttack', this.entity);
 
@@ -349,6 +365,11 @@ Game.BasePowers.forceField = function(options) {
             this.entity.adjustEND(-this.END());
         },
         effect: function(target) {
+            if(!target) {
+                Game.sendMessage(this.entity, "There's nothing there!");
+                return false; // don't end turn
+            }
+
             if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                 if(this.active)
                     Game.sendMessage(this.entity, this.hitMessage);

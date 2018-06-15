@@ -1162,11 +1162,6 @@ Game.EntityMixins.PowerUser = {
             return false;
         }
 
-        if(!target) {
-            Game.sendMessage(this, "There's nothing there!");
-            return false; // don't end turn
-        }
-
         if(!power)
             power = this._activePower;
 
