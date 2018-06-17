@@ -459,3 +459,37 @@ Game.BasePowers.teleportation = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.teleportation.extend(Game.BasePower);
+
+Game.BasePowers.flight = function(options) {
+    var properties = {
+        name: 'Flight',
+        type: 'Movement',
+        cost: 10,
+        duration: 'constant',
+        pointsMin: 10,
+        pointsMax: 10,
+        points: 0,
+        range: 'self',
+        hitTargetMessage: '',
+        hitMessage: "You take flight.",
+        missTargetMessage: '',
+        missMessage: 'You land.',
+        constant: function() {
+            this.entity.adjustEND(-this.END());
+        },
+        effect: function() {
+            return true;
+        },
+        enqueue: function() {
+            Game.sendMessage(this.entity, this.hitMessage);
+            this.active = true;
+        },
+        dequeue: function() {
+            Game.sendMessage(this.entity, this.missMessage);
+            this.active = false;
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.flight.extend(Game.BasePower);

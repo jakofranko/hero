@@ -94,7 +94,7 @@ Game.Screen.characterSelectScreen = {
             "Brick": {
                 description: "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
                 // powers: ['tough skin', 'flight', 'sonic boom'],
-                powers: ['tough skin'],
+                powers: ['tough skin', 'flight'],
                 STR: 50,
                 DEX: 8,
                 INT: 8,
@@ -104,7 +104,7 @@ Game.Screen.characterSelectScreen = {
             "Energy Projector": {
                 description: "You tend to fly around, loose bolts of lightning from your fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
                 // powers: ['energy blast', 'force field', 'flight', 'teleport'],
-                powers: ['energy blast', 'force field (physical damage)', 'force field (energy damage)', 'teleport'],
+                powers: ['energy blast', 'force field (physical damage)', 'force field (energy damage)', 'teleport', 'flight'],
                 CON: 6,
                 BODY: 8
             },
@@ -119,7 +119,7 @@ Game.Screen.characterSelectScreen = {
             "Mentalist": {
                 description: "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
                 // powers: ['mind spike', 'telepathy', 'force field', 'flight'],
-                powers: ['force field (physical damage)'],
+                powers: ['force field (physical damage)', 'flight'],
                 STR: 8,
                 DEX: 15,
                 EGO: 50,

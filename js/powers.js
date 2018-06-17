@@ -144,4 +144,10 @@ Game.Powers.TeleportationPowerRepository = new Game.Repository('teleportation po
 
 Game.Powers.TeleportationPowerRepository.define('teleport', {
     name: 'Teleport'
-})
+});
+
+Game.Powers.FlightPowerRepository = new Game.Repository('flight powers', Game.BasePowers.flight);
+
+Game.Powers.FlightPowerRepository.define('flight', {
+    name: 'Flight'
+});

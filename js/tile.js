@@ -7,6 +7,7 @@ Game.Tile = function(properties) {
     // Set up the properties. We use false by default.
     this._name = properties['name'] || false;
     this._walkable = properties['walkable'] || false;
+    this._flyable = properties['flyable'] || false;
     this._diggable = properties['diggable'] || false;
     this._blocksLight = properties['blocksLight'] || false;
     this._outerWall = properties['outerWall'] || false;
@@ -19,6 +20,9 @@ Game.Tile.extend(Game.Glyph);
 // Standard getters
 Game.Tile.prototype.isWalkable = function() {
     return this._walkable;
+};
+Game.Tile.prototype.isFlyable = function() {
+    return this._flyable;
 };
 Game.Tile.prototype.isDiggable = function() {
     return this._diggable;
