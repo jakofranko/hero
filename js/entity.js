@@ -90,24 +90,26 @@ Game.Entity.prototype.getType = function() {
     return this._type;
 };
 Game.Entity.prototype.tryMove = function(x, y, z, map) {
+    var tile, target, canMoveResults,canAttackResults, canMove, canAttack, items;
+
+    function isTrue(result) {
+        return result;
+    }
+
 	if(!map)
 		map = this.getMap();
 
-	// Must use starting z
-	var tile = map.getTile(x, y, this.getZ());
-	var target = map.getEntityAt(x, y, z);
+	tile = map.getTile(x, y, z);
+	target = map.getEntityAt(x, y, z);
 
     // Target shouldn't be itself
     if(target === this)
         target = false;
 
-    // An entity can only attack if the entity has the Attacker
-    // mixin and either the entity or the target is the player.
-    var canAttack = target ?
-        (this.hasMixin('Characteristics') &&
-            (this.hasMixin(Game.EntityMixins.PlayerActor) ||
-            target.hasMixin(Game.EntityMixins.PlayerActor)))
-        : false;
+    canMoveResults = this.raiseEvent('canMove', { x: x, y: y, z: z, tile: tile });
+    canMove = canMoveResults.length && canMoveResults.some(isTrue);
+    canAttackResults = this.raiseEvent('canAttack', target);
+    canAttack = target && canAttackResults.length && canAttackResults.some(isTrue);
 
 	if(canAttack) {
         if(this.hasMixin('PowerUser') && this.getPrimaryMelee())
@@ -120,35 +122,19 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
         // There is a target at x,y,z, but the entity can't attack, so swap positions with them
         this.swapPosition(target);
         return true;
-    } else if(z < this.getZ()) { // If our z level changed, check if we are on stair
-		if (tile.getName() != 'stairsDown') {
-            Game.sendMessage(this, "You can't go down here!");
-            return false;
-        } else {
-            this.setPosition(x, y, z);
-            Game.sendMessage(this, "You descend to level %s!", [z + 1]);
-        }
-	} else if(z > this.getZ()) {
-        if(tile.getName() != 'stairsUp') {
-            Game.sendMessage(this, "You can't go up here!");
-            return false;
-        } else {
-            Game.sendMessage(this, "You ascend to level %s!", [z + 1]);
-            this.setPosition(x, y, z);
-        }
-    } else if(tile.isWalkable()) {
-		this.setPosition(x, y, z);
-		// Notify the entity that there are items at this position
-        var items = this.getMap().getItemsAt(x, y, z);
+    } else if(canMove) {
+        items = this.getMap().getItemsAt(x, y, z);
+        this.setPosition(x, y, z);
         if (items) {
-            if (items.length === 1) {
+            if (items.length === 1)
                 Game.sendMessage(this, "You see %s.", [items[0].describeA()]);
-            } else {
+            else
                 Game.sendMessage(this, "There are several objects here.");
-            }
         }
+
 		return true;
-	}
+    }
+
 	return false;
 };
 Game.Entity.prototype.isAlive = function() {

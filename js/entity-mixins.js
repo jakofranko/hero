@@ -337,6 +337,9 @@ Game.EntityMixins.Characteristics = {
         post12Recovery: function() {
             this.recoverSTUN();
             this.recoverEND();
+        },
+        canAttack: function(target) {
+            return target && (this.hasMixin(Game.EntityMixins.PlayerActor) || target.hasMixin(Game.EntityMixins.PlayerActor));
         }
     }
 };
@@ -1182,6 +1185,19 @@ Game.EntityMixins.PowerUser = {
         power.effect(target, coords);
 
         return true;
+    },
+    listeners: {
+        canMove: function(pos) {
+            var canFly;
+            if(this._constantPowers.length) {
+                canFly = this._constantPowers.filter(function(power) {
+                    return power.name === 'Flight';
+                }).length;
+            }
+
+            if(pos.tile.isFlyable() && canFly)
+                return true;
+        }
     }
 };
 Game.EntityMixins.PlayerActor = {
@@ -1572,3 +1588,11 @@ Game.EntityMixins.Thrower = {
         }
     }
 };
+Game.EntityMixins.Walker = {
+    name: 'Walker',
+    listeners: {
+        canMove: function(pos) {
+            return pos.tile.isWalkable();
+        }
+    }
+}
