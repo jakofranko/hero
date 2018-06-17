@@ -46,7 +46,8 @@ Game.PlayerTemplate = {
         Game.EntityMixins.PowerUser,
         Game.EntityMixins.PlayerStatGainer,
         Game.EntityMixins.Thrower,
-        Game.EntityMixins.ExperienceGainer
+        Game.EntityMixins.ExperienceGainer,
+        Game.EntityMixins.Walker
     ]
 };
 
@@ -79,7 +80,8 @@ Game.EntityRepository.define('person', {
         Game.EntityMixins.Sight,
         Game.EntityMixins.Targeting,
         Game.EntityMixins.RandomStatGainer,
-        Game.EntityMixins.Reactor
+        Game.EntityMixins.Reactor,
+        Game.EntityMixins.Walker
     ]
 });
 
@@ -119,6 +121,7 @@ Game.EntityRepository.define('robber', {
         Game.EntityMixins.Sight,
         Game.EntityMixins.Targeting,
         Game.EntityMixins.RandomStatGainer,
-        Game.EntityMixins.Reactor
+        Game.EntityMixins.Reactor,
+        Game.EntityMixins.Walker
     ]
 });
