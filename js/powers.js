@@ -38,6 +38,15 @@ Game.Powers.EnergyBlastPowerRepository.define('energy blast', {
     missTargetMessage: "%s misses you with their energy blast!",
     missMessage: "Your energy blast goes wide!",
 });
+Game.Powers.EnergyBlastPowerRepository.define('sonic boom', {
+    name: 'Sonic Boom',
+    damageType: 'energy',
+    advantages: ['AOE_Blast_5'],
+    hitTargetMessage: "%s oscillates your organs with a sonic boom, doing %s STUN and %s BODY!",
+    hitMessage: "You clap your hands creating a deafening sonic boom, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s a sonic wave ripples past you, missing you!",
+    missMessage: "Your sonic boom misses your target!",
+});
 
 // Hand-to-Hand Attacks
 Game.Powers.HandToHandAttackPowerRepository = new Game.Repository('hand-to-hand attack powers', Game.BasePowers.handToHandAttack);

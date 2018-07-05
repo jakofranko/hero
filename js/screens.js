@@ -93,8 +93,7 @@ Game.Screen.characterSelectScreen = {
         this._options = {
             "Brick": {
                 description: "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
-                // powers: ['tough skin', 'flight', 'sonic boom'],
-                powers: ['tough skin', 'flight'],
+                powers: ['tough skin', 'flight', 'sonic boom'],
                 STR: 50,
                 DEX: 8,
                 INT: 8,
