@@ -50,8 +50,14 @@ Game.Power =  function(properties) {
     this.missMessage       = properties['missMessage'] || '';
     this.missTargetMessage = properties['missTargetMessage'] || '';
     this.active            = properties['active'] || false;
+    this.advantages        = Array.isArray(properties['advantages'])
+        ? properties['advantages'].map(function(advantage) {
+            return Game.PowerAdvantages[advantage];
+        })
+        : [];
 
     // If the power's duration is anything other than 'instant', assign the duration's function
+    // e.g., this.constant = properties['constant']; (a function)
     this[properties['duration']] = properties[properties['duration']];
 
     // Depending on the type of range, assign a different function to the range property
@@ -87,6 +93,24 @@ Game.Power =  function(properties) {
     // effect should be to spend the entities endurance, and then add the power to the character's list
     // of active powers.
     this.effect = properties['effect'] || function() { console.error(`${this.name} needs to have an effect function defined.`); };
+
+    this.getTargets = properties['getTargets'] || function(x, y, z) {
+        var targets = null;
+        this.advantages.forEach(function(advantage) {
+            debugger;
+            if(advantage.getTargets) {
+                if(targets === null) targets = [];
+                advantage.getTargets(x, y, z, this.entity.getMap()).forEach(function(target) {
+                    targets.push(target);
+                }, this);
+            }
+        }, this);
+
+        if(targets === null)
+            targets = [this.entity.getMap().getEntityAt(x, y, z)];
+
+        return targets;
+    }
 
     this.enqueue = properties['enqueue'] || function() {
         this.active = true;

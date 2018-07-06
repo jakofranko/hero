@@ -102,7 +102,6 @@ Game.Screen.characterSelectScreen = {
             },
             "Energy Projector": {
                 description: "You tend to fly around, loose bolts of lightning from your fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
-                // powers: ['energy blast', 'force field', 'flight', 'teleport'],
                 powers: ['energy blast', 'force field (physical damage)', 'force field (energy damage)', 'teleport', 'flight'],
                 CON: 6,
                 BODY: 8
@@ -1251,8 +1250,8 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
 Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
     targetNearest: true,
     okFunction: function(x, y) {
-        var target = this._player.getMap().getEntityAt(x, y, this._player.getZ());
-        return this._player.usePower(target, null, {x: x, y: y, z: this._player.getZ()});
+        var targets = this._player.getActivePower().getTargets(x, y, this._player.getZ());
+        return this._player.usePower(targets, null, {x: x, y: y, z: this._player.getZ()});
     }
 });
 
@@ -1634,8 +1633,8 @@ Game.Screen.powersScreen = {
 
         this._entity.setActivePower(index);
 
-        if(this._entity.getActivePower().range === 'self') {
-            return this._entity.usePower(this._entity);
+        if(this._entity.getActivePower() && this._entity.getActivePower().range === 'self') {
+            return this._entity.usePower([this._entity]);
         } else {
             showScreenCommand = Game.Commands.showTargettingScreenCommand(Game.Screen.powerTargetScreen, Game.Screen.playScreen);
             showScreenCommand(this._entity);
