@@ -239,6 +239,10 @@ Game.EntityMixins.Characteristics = {
     },
     adjustEND: function(amount) {
         this._END += amount;
+        if (this._END < 0) {
+            this.takeSTUN(this, Math.abs(this._END));
+            this._END = 0;
+        }
     },
     getEND: function() {
         return this._END;
@@ -1201,6 +1205,10 @@ Game.EntityMixins.PowerUser = {
             else if (canFly)
                 Game.sendMessage(this, "You can't fly there, something is blocking you.");
         },
+        onKO: function() {
+            this._constantPowers.forEach(function(power) {
+                this.usePower([], power);
+            }, this);
         }
     }
 };
