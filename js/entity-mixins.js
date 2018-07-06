@@ -1,4 +1,3 @@
-// From http://www.codingcookies.com/2013/04/20/building-a-roguelike-in-javascript-part-4/
 Game.EntityMixins = {};
 
 Game.EntityMixins.Attacker = {
@@ -190,6 +189,8 @@ Game.EntityMixins.Characteristics = {
                 this.getMap().getJustice().removeCriminals(1);
             }
         }
+
+        this.raiseEvent('onAttack', attacker);
     },
     getMaxBODY: function() {
         return this._maxBODY;
@@ -262,7 +263,7 @@ Game.EntityMixins.Characteristics = {
         if(killing) {
             // Page 410 of the 5th Ed. -- can apply normal defenses against killing STUN if they have resistant defenses
             if(!type || type == 'physical') defense = this._rPD ? this._rPD + this._PD : 0;
-            else if(type == 'energy')       defense = this._rED ? this._rPD + this._ED : 0;
+            else if(type == 'energy')       defense = this._rED ? this._rED + this._ED : 0;
             else                            defense = 0;
         } else {
             if(!type || type == 'physical') defense = this._PD;
@@ -275,12 +276,10 @@ Game.EntityMixins.Characteristics = {
         if(this._STUN <= 0) {
             Game.sendMessage(attacker, "You knocked %s unconscious", [this.getName()]);
             this.ko();
-        } else {
-            if(this.hasMixin('Reactor')) {
-                var reaction = this.getReactionTypes().random();
-                this.setReaction(reaction);
-            }
+            this.raiseEvent('onKO');
         }
+
+        this.raiseEvent('onAttack', attacker);
     },
     increaseChar: function(CHAR) {
         var characteristic = "_" + CHAR;
@@ -1197,6 +1196,11 @@ Game.EntityMixins.PowerUser = {
 
             if(pos.tile.isFlyable() && canFly)
                 return true;
+            else if (this.getMap().getTile(this.getX(), this.getY(), this.getZ()).isFlyable() && pos.z === 0)
+                return true;
+            else if (canFly)
+                Game.sendMessage(this, "You can't fly there, something is blocking you.");
+        },
         }
     }
 };
@@ -1342,6 +1346,9 @@ Game.EntityMixins.Reactor = {
             if(!this._reacting) {
                 var reaction = this._reactionTypes.random();
                 this.setReaction(reaction);
+
+                if(this.hasMixin('JobActor'))
+                    this.setPath(); // clear out current path if any
 
                 if(this.hasMixin('Targeting'))
                     this.setTarget(attacker);
