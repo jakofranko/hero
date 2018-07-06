@@ -38,6 +38,7 @@ Game.TileRepository.define('stairsUp', {
     foreground: 'white',
     walkable: true,
     flyable: true,
+    descendable: true,
     blocksLight: false,
     description: 'A staircase leading upwards'
 });
@@ -47,6 +48,7 @@ Game.TileRepository.define('stairsDown', {
     foreground: 'white',
     walkable: true,
     flyable: true,
+    ascendable: true,
     blocksLight: false,
     description: 'A staircase leading downwards'
 });

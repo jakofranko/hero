@@ -1607,6 +1607,11 @@ Game.EntityMixins.Walker = {
     name: 'Walker',
     listeners: {
         canMove: function(pos) {
+            if (pos.z > this.getZ() && !pos.tile.isAscendable())
+                return false;
+            if (pos.z < this.getZ() && !pos.tile.isDescendable())
+                return false;
+
             return pos.tile.isWalkable();
         }
     }

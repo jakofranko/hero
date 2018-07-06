@@ -8,6 +8,8 @@ Game.Tile = function(properties) {
     this._name = properties['name'] || false;
     this._walkable = properties['walkable'] || false;
     this._flyable = properties['flyable'] || false;
+    this._ascendable = properties['ascendable'] || false;
+    this._descendable = properties['descendable'] || false;
     this._diggable = properties['diggable'] || false;
     this._blocksLight = properties['blocksLight'] || false;
     this._outerWall = properties['outerWall'] || false;
@@ -23,6 +25,12 @@ Game.Tile.prototype.isWalkable = function() {
 };
 Game.Tile.prototype.isFlyable = function() {
     return this._flyable;
+};
+Game.Tile.prototype.isAscendable = function() {
+    return this._ascendable;
+};
+Game.Tile.prototype.isDescendable = function() {
+    return this._descendable;
 };
 Game.Tile.prototype.isDiggable = function() {
     return this._diggable;
