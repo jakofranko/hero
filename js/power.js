@@ -97,7 +97,6 @@ Game.Power =  function(properties) {
     this.getTargets = properties['getTargets'] || function(x, y, z) {
         var targets = null;
         this.advantages.forEach(function(advantage) {
-            debugger;
             if(advantage.getTargets) {
                 if(targets === null) targets = [];
                 advantage.getTargets(x, y, z, this.entity.getMap()).forEach(function(target) {
@@ -110,7 +109,24 @@ Game.Power =  function(properties) {
             targets = [this.entity.getMap().getEntityAt(x, y, z)];
 
         return targets;
-    }
+    };
+
+    this.getAOE = properties['getAOE'] || function(x, y) {
+        var points = []; // array of coords e.g., [x, y]
+        this.advantages.forEach(function(advantage) {
+            if(advantage.getAOE) {
+                advantage.getAOE(x, y, this.entity.getMap()).forEach(function(point) {
+                    if (points.indexOf(point) < 0)
+                        points.push(point);
+                }, this);
+            }
+        }, this);
+
+        if(points.length === 0)
+            points = [[x, y]];
+
+        return points;
+    };
 
     this.enqueue = properties['enqueue'] || function() {
         this.active = true;

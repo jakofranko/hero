@@ -1252,6 +1252,16 @@ Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
     okFunction: function(x, y) {
         var targets = this._player.getActivePower().getTargets(x, y, this._player.getZ());
         return this._player.usePower(targets, null, {x: x, y: y, z: this._player.getZ()});
+    },
+    overlayFunction: function(x, y) {
+        var points = this._player.getActivePower().getAOE(x, y);
+        return [
+            [{
+                points: points,
+                char: "#",
+                color: Game.Palette.red
+            }]
+        ];
     }
 });
 
