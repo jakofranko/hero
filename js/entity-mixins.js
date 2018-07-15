@@ -1070,8 +1070,10 @@ Game.EntityMixins.PowerUser = {
     setPrimaryRanged: function(i) {
         if(i === false || i === null || i === undefined)
             this._primaryRanged = null;
-        else
+        else if (typeof i === 'number')
             this._primaryRanged = this._powers[i];
+        else
+            this._primaryRanged = i;
     },
     getPrimaryMelee: function() {
         return this._primaryMelee;
@@ -1079,8 +1081,10 @@ Game.EntityMixins.PowerUser = {
     setPrimaryMelee: function(i) {
         if(i === false || i === null || i === undefined)
             this._primaryMelee = null;
-        else
+        else if (typeof i === 'number')
             this._primaryMelee = this._powers[i];
+        else
+            this._primaryMelee = i;
     },
     usePower: function(target, power, coords) {
         if(!power && !this._activePower) {

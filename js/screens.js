@@ -49,7 +49,7 @@ Game.Screen.startScreen = {
         ];
 
         for (var i = 0; i < scalesASCII.length; i++) {
-            display.drawText((w / 2) - (scalesASCII[i].length / 2), i + 7, "%c{#F5F058}" + scalesASCII[i]);
+            display.drawText((w / 2) - (scalesASCII[i].length / 2), i + 8, "%c{#F5F058}" + scalesASCII[i]);
         }
 
         //             ,ggg,                   gg                   ,ggg,
@@ -1532,7 +1532,9 @@ Game.Screen.powersScreen = {
     setup: function(entity) {
         // Must be called before rendering.
         this._entity = entity;
-        this._powers = entity.getPowers();
+        this._powers = entity.getPowers().filter(function(power) {
+            return power.points;
+        });
         this._letters = 'abcdefghijklmnopqrstuvwxyz';
     },
     render: function(display) {
@@ -1546,21 +1548,25 @@ Game.Screen.powersScreen = {
         display.drawText(0, y++, text);
 
         y++;
-        display.drawText(0, y++, 'Powers:');
+        if(this._powers.length) {
+            display.drawText(0, y++, 'Powers:');
 
-        // Iterate through each of our powers
-        for (var i = 0; i < this._powers.length; i++) {
-            powerName = this._powers[i].name;
-            active = this._powers[i].active ? '(active) ' : '';
+            // Iterate through each of our powers
+            for (var i = 0; i < this._powers.length; i++) {
+                powerName = this._powers[i].name;
+                active = this._powers[i].active ? '(active) ' : '';
 
-            text = this._letters.substring(i, i + 1) + ' - ' + active + '%c{#585DF5}' + powerName;
+                text = this._letters.substring(i, i + 1) + ' - ' + active + '%c{#585DF5}' + powerName;
 
-            if(this._powers[i] == this._entity.getPrimaryMelee())
+                if(this._powers[i] == this._entity.getPrimaryMelee())
                 text += ' %c{}| %c{' + Game.Palette.lightBlue + '}Primary Melee';
-            if(this._powers[i] == this._entity.getPrimaryRanged())
+                if(this._powers[i] == this._entity.getPrimaryRanged())
                 text += ' %c{}| %c{' + Game.Palette.lightBlue + '}Primary Ranged';
 
-            display.drawText(0, y++, text);
+                display.drawText(0, y++, text);
+            }
+        } else {
+            display.drawText(0, y++, 'You have no powers! Purchase powers by pressing [%c{' + Game.Palette.blue + '}s%c{}] on the play screen.')
         }
     },
     handleInput: function(inputType, inputData) {
@@ -1576,13 +1582,15 @@ Game.Screen.powersScreen = {
         var showScreenCommand;
         var index = this._letters.indexOf(letter);
 
-        this._entity.setActivePower(index);
+        if (this._powers[index]) {
+            this._entity.setActivePower(this._powers[index]);
 
-        if(this._entity.getActivePower() && this._entity.getActivePower().range === 'self') {
-            return this._entity.usePower([this._entity]);
-        } else {
-            showScreenCommand = Game.Commands.showTargettingScreenCommand(Game.Screen.powerTargetScreen, Game.Screen.playScreen);
-            showScreenCommand(this._entity);
+            if(this._entity.getActivePower() && this._entity.getActivePower().range === 'self') {
+                return this._entity.usePower([this._entity]);
+            } else {
+                showScreenCommand = Game.Commands.showTargettingScreenCommand(Game.Screen.powerTargetScreen, Game.Screen.playScreen);
+                showScreenCommand(this._entity);
+            }
         }
     },
     setPrimaryMelee: function(letter) {
@@ -1592,7 +1600,7 @@ Game.Screen.powersScreen = {
         if(currentPrimary && this._entity.getPower(index) == currentPrimary)
             this._entity.setPrimaryMelee(null);
         else
-            this._entity.setPrimaryMelee(index);
+            this._entity.setPrimaryMelee(this._powers[index]);
     },
     setPrimaryRanged: function(letter) {
         var currentPrimary = this._entity.getPrimaryRanged();
@@ -1601,7 +1609,7 @@ Game.Screen.powersScreen = {
         if(currentPrimary && this._entity.getPower(index) == currentPrimary)
             this._entity.setPrimaryRanged(null);
         else
-            this._entity.setPrimaryRanged(index);
+            this._entity.setPrimaryRanged(this._powers[index]);
     }
 };
 
