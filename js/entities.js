@@ -37,7 +37,6 @@ Game.PlayerTemplate = {
         Game.EntityMixins.Sight,
         Game.EntityMixins.PlayerActor,
         Game.EntityMixins.Destructible,
-        Game.EntityMixins.Equipper,
         Game.EntityMixins.Attacker,
         Game.EntityMixins.InventoryHolder,
         Game.EntityMixins.MemoryMaker,

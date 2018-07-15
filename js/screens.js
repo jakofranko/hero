@@ -845,73 +845,6 @@ Game.Screen.dropScreen = new Game.Screen.ItemListScreen({
         return true;
     }
 });
-Game.Screen.eatScreen = new Game.Screen.ItemListScreen({
-    caption: 'Choose the item you wish to eat',
-    canSelect: true,
-    canSelectMultipleItems: false,
-    isAcceptable: function(item) {
-        return item && item.hasMixin('Edible') && item !== this._player._armor && item !== this._player._weapon;
-    },
-    ok: function(selectedItems) {
-        // Eat the item, removing it if there are no consumptions remaining.
-        var key = Object.keys(selectedItems)[0];
-        var item = selectedItems[key];
-        Game.sendMessage(this._player, "You eat %s.", [item.describeThe()]);
-        item.eat(this._player);
-        if (!item.hasRemainingConsumptions()) {
-            this._player.removeItem(key);
-        }
-        return true;
-    }
-});
-Game.Screen.wieldScreen = new Game.Screen.ItemListScreen({
-    caption: 'Choose the item you wish to wield',
-    canSelect: true,
-    canSelectMultipleItems: false,
-    hasNoItemOption: true,
-    isAcceptable: function(item) {
-        return item && item.hasMixin('Equippable') && item.isWieldable();
-    },
-    ok: function(selectedItems) {
-        // Check if we selected 'no item'
-        var keys = Object.keys(selectedItems);
-        if (keys.length === 0) {
-            this._player.unwield();
-            Game.sendMessage(this._player, "You are empty handed.")
-        } else {
-            // Make sure to unequip the item first in case it is the armor.
-            var item = selectedItems[keys[0]];
-            this._player.unequip(item);
-            this._player.wield(item);
-            Game.sendMessage(this._player, "You are wielding %s.", [item.describeA()]);
-        }
-        return true;
-    }
-});
-Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
-    caption: 'Choose the item you wish to wear',
-    canSelect: true,
-    canSelectMultipleItems: false,
-    hasNoItemOption: true,
-    isAcceptable: function(item) {
-        return item && item.hasMixin('Equippable') && item.isWearable();
-    },
-    ok: function(selectedItems) {
-        // Check if we selected 'no item'
-        var keys = Object.keys(selectedItems);
-        if (keys.length === 0) {
-            this._player.unwield();
-            Game.sendMessage(this._player, "You are not wearing anthing.");
-        } else {
-            // Make sure to unequip the item first in case it is the weapon.
-            var item = selectedItems[keys[0]];
-            this._player.unequip(item);
-            this._player.wear(item);
-            Game.sendMessage(this._player, "You are wearing %s.", [item.describeA()]);
-        }
-        return true;
-    }
-});
 Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to examine',
     canSelect: true,
@@ -1437,23 +1370,22 @@ Game.Screen.helpScreen = {
     render: function(display) {
         var text = 'Help / Command List';
         var border = '-------------------';
-        var y = 0;
+        var padding = 2;
+        var y = padding;
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
-        display.drawText(0, y++, '%c{#585DF5}Arrow keys%c{} to move');
-        display.drawText(0, y++, '%c{#585DF5}Ctrl + Arrow keys%c{} to swap positions with NPC');
-        display.drawText(0, y++, '[%c{#585DF5},%c{}] to pick up items');
-        display.drawText(0, y++, '[%c{#585DF5}d%c{}] to drop items');
-        display.drawText(0, y++, '[%c{#585DF5}w%c{}] to wield items');
-        display.drawText(0, y++, '[%c{#585DF5}W%c{}] to wield items');
-        display.drawText(0, y++, '[%c{#585DF5}x%c{}] to examine items');
-        display.drawText(0, y++, '[%c{#585DF5}p%c{}] to use powers');
-        display.drawText(0, y++, '[%c{#585DF5};%c{}] to look around you');
-        display.drawText(0, y++, '[%c{#585DF5}.%c{}] to wait');
-        display.drawText(0, y++, '[%c{#585DF5}j%c{}] to show city statistics');
-        display.drawText(0, y++, '[%c{#585DF5}s%c{}] to spend experience points');
-        display.drawText(0, y++, '[%c{#585DF5}Space%c{}] to use/interact with nearby items and entities');
-        display.drawText(0, y++, '[%c{#585DF5}?%c{}] to show this help screen');
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Arrow keys%c{} to move');
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Ctrl + Arrow keys%c{} to swap positions with NPC');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '},%c{}] to pick up items');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}d%c{}] to drop items');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}x%c{}] to examine items');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}p%c{}] to use powers');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '};%c{}] to look around you');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}.%c{}] to wait');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}j%c{}] to show city statistics');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}s%c{}] to spend experience points');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}Space%c{}] to use/interact with nearby items and entities');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}?%c{}] to show this help screen');
         y += 3;
         text = '--- press any key to continue ---';
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
