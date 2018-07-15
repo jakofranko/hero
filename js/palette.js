@@ -2,6 +2,7 @@ Game.Palette = {
 	// Cool colors
 	blue: "#585DF5",
 	lightBlue: "#B8DBFF",
+    skyBlue: "#84c0ff",
 	teal: "teal",
 	green: "#00ff78",
 

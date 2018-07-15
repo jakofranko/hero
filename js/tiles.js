@@ -7,6 +7,8 @@ Game.TileRepository.define('null', {
 Game.TileRepository.define('air', {
     name: 'air',
     description: 'Empty space',
+    character: ' ',
+    background: Game.Palette.skyBlue,
     flyable: true
 });
 Game.TileRepository.define('floor', {

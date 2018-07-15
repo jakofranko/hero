@@ -13,11 +13,14 @@ Game.Screen.startScreen = {
     render: function(display) {
         // Render prompt to the screen
         var w = Game.getScreenWidth();
-        var text = "%c{#585DF5}Justice%c{}: A Superhero Roguelike";
+        var text = "%c{" + Game.Palette.blue + "}Justice%c{}: A Superhero Roguelike";
         display.drawText((w/2) - (30 / 2), 2, text);
 
-        text = "Press [%c{#585DF5}Enter%c{}] to start!";
-        display.drawText((w/2) - (23 / 2), 3, text);
+        text = "Press [%c{" + Game.Palette.blue + "}Enter%c{}] to start!";
+        display.drawText((w/2) - (23 / 2), 4, text);
+
+        text = "Press [%c{" + Game.Palette.blue + "}?%c{}] any time in game for help";
+        display.drawText((w/2) - (35 / 2), 5, text);
 
         var scalesASCII = [
                         ",ggg,                   gg                   ,ggg,",

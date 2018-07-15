@@ -90,7 +90,7 @@ Game.EntityRepository.define('robber', {
     name: 'robber', // Randomized with createEntity
     character: 'm', // Randomized with createEntity
     type: 'Event NPC - Robber',
-    foreground: 'white',
+    foreground: Game.Palette.red,
     maxHp: 10,
     basePoints: 8,
     STR: 8,
