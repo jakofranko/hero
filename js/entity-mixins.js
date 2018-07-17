@@ -81,6 +81,10 @@ Game.EntityMixins.Attacker = {
     _attackRoll: function(target) {
         var roll = Game.rollDice("3d6");
         return roll <= 11 + this.getOCV() - target.getDCV();
+    },
+    _egoAttackRoll: function(target) {
+        var roll = Game.rollDice("3d6");
+        return roll <= 11 + this.getEOCV() - target.getEDCV();
     }
 };
 Game.EntityMixins.Characteristics = {
@@ -325,6 +329,12 @@ Game.EntityMixins.Characteristics = {
     },
     getDCV: function() {
         return this._CV + this._DCVmod;
+    },
+    getEOCV: function() {
+        return this._ECV + this._EOCVmod;
+    },
+    getEDCV: function() {
+        return this._ECV + this._EDCVmod;
     },
     charRoll: function(chr) {
         var roll = Game.rollDice("3d6");

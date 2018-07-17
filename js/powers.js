@@ -160,3 +160,15 @@ Game.Powers.FlightPowerRepository = new Game.Repository('flight powers', Game.Ba
 Game.Powers.FlightPowerRepository.define('flight', {
     name: 'Flight'
 });
+
+// EGO Powers
+Game.Powers.EgoAttackPowerRepository = new Game.Repository('ego attack powers', Game.BasePowers.egoAttack);
+
+Game.Powers.EgoAttackPowerRepository.define('mind spike', {
+    name: 'Mind Spike',
+    damageType: 'energy',
+    hitTargetMessage: "%s pierces your mind with excruciating pain, doing %s STUN!",
+    hitMessage: "You lance your targets mind, doing %s!",
+    missTargetMessage: "Your mind tingles as %s misses you with some psionic attack...",
+    missMessage: "Your target's mind elludes your mind spike!",
+});

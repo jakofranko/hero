@@ -120,7 +120,7 @@ Game.Screen.characterSelectScreen = {
             "Mentalist": {
                 description: "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
                 // powers: ['mind spike', 'telepathy', 'force field', 'flight'],
-                powers: ['force field (physical damage)', 'flight'],
+                powers: ['mind spike', 'force field (physical damage)', 'flight'],
                 STR: 8,
                 DEX: 15,
                 EGO: 50,
@@ -513,6 +513,7 @@ Game.Screen.playScreen = {
                     // If we are at a cell that is in the field of vision, we need
                     // to check if there are items or entities.
                     if (visibleCells[x + ',' + y]) {
+                        // TODO: Refactor this stuff out...decouple logic from rendering
                         // Check if we have an entity at the position
                         var entity = map.getEntityAt(x, y, currentDepth);
                         var items = map.getItemsAt(x, y, currentDepth);

@@ -501,3 +501,60 @@ Game.BasePowers.flight = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.flight.extend(Game.BasePower);
+
+Game.BasePowers.egoAttack = function(options) {
+    if(!('damageType' in options))
+        throw new Error('An energyBlast must specify a damage type');
+
+    var properties = {
+        name: 'Ego Attack',
+        type: 'Attack',
+        cost: 5,
+        duration: 'instant',
+        pointsMin: 5,
+        points: 0,
+        range: 'LOS',
+        hitTargetMessage: "%s does %s STUN to you!",
+        hitMessage: "You do %s STUN to %s!",
+        missTargetMessage: "%s misses you!",
+        missMessage: "You miss!",
+        effect: function(targets) {
+            if(!targets || targets.length === 0) {
+                Game.sendMessage(this.entity, "There's nothing there!");
+                return false; // don't end turn
+            }
+
+            this.entity.adjustEND(-this.END());
+
+            targets.forEach(function(target) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                    target.raiseEvent('onAttack', this.entity);
+
+                    var hit = this.entity._egoAttackRoll(target);
+                    if(hit) {
+                        var dice = Math.floor(this.points / this.cost);
+                        var STUN = 0;
+
+                        for(var i = 0; i < dice; i++) {
+                            STUN += Game.rollDice("1d6");
+                        }
+
+                        target.takeSTUN(this.entity, STUN, this.damageType);
+                        Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN]);
+                        Game.sendMessage(this.entity, this.hitMessage, [STUN, target.describeThe()]);
+                    } else {
+                        Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
+                        Game.sendMessage(this.entity, this.missMessage);
+                    }
+                } else {
+                    Game.sendMessage(this.entity, "% is out of range.", [target.getName()]);
+                }
+            }, this);
+
+            return true;
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.egoAttack.extend(Game.BasePower);
