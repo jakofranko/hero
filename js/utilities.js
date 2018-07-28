@@ -28,6 +28,21 @@ Array.prototype.randomize = function() {
     return result;
 };
 
+if (!Array.prototype.flatten) {
+    Array.prototype.flatten = function() {
+        var flatArr = [];
+        this.forEach(function(arr) {
+            if (arr instanceof Array) {
+                arr.forEach(function(el) {
+                    flatArr.push(el);
+                }, arr);
+            }
+        }, this);
+
+        return flatArr;
+    }
+}
+
 if(!Object.prototype.randomKey) {
     /**
      * {JSDoc}
