@@ -411,11 +411,60 @@ Game.Screen.playScreen = {
             return;
         }
 
-        // Otherwise, procede as usual...
         var screenHeight = Game.getScreenHeight();
+        var screenWidth = Game.getScreenWidth();
+        var offsets = this.getScreenOffsets();
+        var topLeftX = offsets.x;
+        var topLeftY = offsets.y;
+        var map = this._player.getMap();
+        var currentDepth = this._player.getZ();
 
-        // Render the tiles
-        this.renderTiles(display);
+        // Will cause items previously in the map to be overwritten.
+        // If rendering bugs occur, investigate here. May need to pass
+        // in a function as a first argument that will allow smart filtering.
+        function mapFromArray(map, arrayItem) {
+            var keys = Object.keys(arrayItem);
+            keys.forEach(function(key) {
+                map[key] = arrayItem[key];
+            });
+
+            return map;
+        }
+        var visibleTiles = this._player.raiseEvent('getVisibleTiles').reduce(mapFromArray, {});
+        var visibleEntities = this._player.raiseEvent('getVisibleEntities', visibleTiles).reduce(mapFromArray, {});
+        var visibleItems = this._player.raiseEvent('getVisibleItems', visibleTiles).reduce(mapFromArray, {});
+
+        // Combine the render map, overwriting duplicate entries
+        // e.g., entities standing on top of items or tiles, or items resting on top of a tile
+        var render = Object.assign(visibleTiles, visibleItems, visibleEntities);
+        var glyph, foreground;
+
+        // Iterate through visible map cells
+        for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
+            for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
+                if (map.isExplored(x, y, currentDepth)) {
+                    glyph = render[x + ',' + y];
+                    if (!glyph) {
+                        // Not in our FOV, so just display the terrain
+                        glyph = map.getTile(x, y, currentDepth);
+                        // Since the tile was previously explored but is not
+                        // visible, we want to change the foreground color to
+                        // dark gray.
+                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
+                    } else {
+                        foreground = glyph.getForeground();
+                    }
+
+                    display.draw(
+                        x - topLeftX,
+                        y - topLeftY,
+                        glyph.getChar(),
+                        foreground,
+                        glyph.getBackground()
+                    );
+                }
+            }
+        }
 
         // Render player stats and time
         var stats = '%c{white}%b{black}';
@@ -478,85 +527,6 @@ Game.Screen.playScreen = {
             x: topLeftX,
             y: topLeftY
         };
-    },
-    renderTiles: function(display) {
-        var screenWidth = Game.getScreenWidth();
-        var screenHeight = Game.getScreenHeight();
-
-        var offsets = this.getScreenOffsets();
-        var topLeftX = offsets.x;
-        var topLeftY = offsets.y;
-        // This object will keep track of all visible map cells
-        var visibleCells = {};
-        // Store this._player.getMap() and player's z to prevent losing it in callbacks
-        var map = this._player.getMap();
-
-        var currentDepth = this._player.getZ();
-        // Find all visible cells and update the object
-        map.getFov(currentDepth).compute(
-            this._player.getX(),
-            this._player.getY(),
-            this._player.getSightRadius(),
-            function(x, y) {
-                visibleCells[x + "," + y] = true;
-                // Mark cell as explored
-                map.setExplored(x, y, currentDepth, true);
-            });
-        // Iterate through visible map cells
-        for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
-            for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
-                if (map.isExplored(x, y, currentDepth)) {
-                    // Fetch the glyph for the tile and render it to the screen
-                    // at the offset position.
-                    var glyph,
-                        foreground;
-                    // If we are at a cell that is in the field of vision, we need
-                    // to check if there are items or entities.
-                    if (visibleCells[x + ',' + y]) {
-                        // TODO: Refactor this stuff out...decouple logic from rendering
-                        // Check if we have an entity at the position
-                        var entity = map.getEntityAt(x, y, currentDepth);
-                        var items = map.getItemsAt(x, y, currentDepth);
-                        if (entity) {
-                            glyph = map.getEntityAt(x, y, currentDepth);
-                            var criminals = this._player.getMemory().people.criminals;
-                            // Change foreground based on character's memory
-                            if(Object.keys(criminals).length > 0) {
-                                var name = glyph.getName();
-                                if(criminals[name]) {
-                                    foreground = Game.Palette.red;
-                                } else {
-                                    foreground = glyph.getForeground();
-                                }
-                            } else {
-                                foreground = glyph.getForeground();
-                            }
-                        } else if(items) {
-                            glyph = items[items.length - 1];
-                            foreground = glyph.getForeground();
-                        } else {
-                            glyph = map.getTile(x, y, currentDepth);
-                            foreground = glyph.getForeground();
-                        }
-                    } else {
-                        // Not in our FOV, so just display the terrain
-                        glyph = map.getTile(x, y, currentDepth);
-                        // Since the tile was previously explored but is not
-                        // visible, we want to change the foreground color to
-                        // dark gray.
-                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
-                    }
-
-                    display.draw(
-                        x - topLeftX,
-                        y - topLeftY,
-                        glyph.getChar(),
-                        foreground,
-                        glyph.getBackground()
-                    );
-                }
-            }
-        }
     },
     setGameEnded: function(gameEnded) {
         this._gameEnded = gameEnded;

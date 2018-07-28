@@ -1376,6 +1376,75 @@ Game.EntityMixins.Sight = {
             if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
                 this.forget('people', 'criminals', entity.getName());
             }
+        },
+        getVisibleTiles: function() {
+            var visibleTiles = {};
+            var map = this.getMap();
+            var z = this.getZ();
+
+            map.getFov(z).compute(
+                this.getX(),
+                this.getY(),
+                this._sightRadius,
+                function(x, y) {
+                    visibleTiles[x + "," + y] = map.getTile(x, y, z);
+                    map.setExplored(x, y, z, true);
+                }
+            );
+
+            return visibleTiles;
+        },
+        getVisibleEntities: function(visibleTiles) {
+            var coords = Object.keys(visibleTiles);
+            var map = this.getMap();
+            var z = this.getZ();
+            var visibleEntities = {};
+
+            coords.forEach(function(coord) {
+                var x = coord.split(",")[0];
+                var y = coord.split(",")[1];
+                var entity = map.getEntityAt(x, y, z);
+
+                if (entity)
+                    visibleEntities[x + "," + y] = entity;
+            }, this);
+
+            // Recolor criminals
+            if (this.hasMixin('MemoryMaker')) {
+                var criminals = this.getMemory().people.criminals;
+
+                // Change foreground based on character's memory
+                if(Object.keys(criminals).length > 0) {
+                    for(var key in visibleEntities) {
+                        if (visibleEntities.hasOwnProperty(visibleEntities[key])) {
+                            var entity = visibleEntities[key];
+                            var name = entity.getName();
+                            if(criminals[name]) {
+                                entity._foreground = Game.Palette.red;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return visibleEntities;
+        },
+        getVisibleItems: function(visibleTiles) {
+            var coords = Object.keys(visibleTiles);
+            var map = this.getMap();
+            var z = this.getZ();
+            var visibleItems = {};
+
+            coords.forEach(function(coord) {
+                var x = coord.split(",")[0];
+                var y = coord.split(",")[1];
+                var items = map.getItemsAt(x, y, z);
+
+                if (items)
+                    visibleItems[x + "," + y] = items.random(); // render a random item from a pile
+            }, this);
+
+            return visibleItems;
         }
     }
 };
