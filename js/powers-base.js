@@ -558,3 +558,35 @@ Game.BasePowers.egoAttack = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.egoAttack.extend(Game.BasePower);
+
+Game.BasePowers.telepathy = function(options) {
+    var properties = {
+        name: 'Telepathy',
+        type: 'Sense',
+        cost: 20,
+        duration: 'inherent',
+        pointsMin: 20,
+        pointsMax: 20,
+        points: 0,
+        range: 'self',
+        hitTargetMessage: '',
+        hitMessage: "You can sense the minds of others.",
+        missTargetMessage: '',
+        missMessage: 'You stop sensing the minds of others.',
+        inherent: function() {}, // inherent powers do not cost END
+        effect: function() {
+            return true;
+        },
+        enqueue: function() {
+            Game.sendMessage(this.entity, this.hitMessage);
+            this.active = true;
+        },
+        dequeue: function() {
+            Game.sendMessage(this.entity, this.missMessage);
+            this.active = false;
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.telepathy.extend(Game.BasePower);

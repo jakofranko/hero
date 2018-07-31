@@ -1139,6 +1139,29 @@ Game.EntityMixins.PowerUser = {
             else if (canFly)
                 Game.sendMessage(this, "You can't fly there, something is blocking you.");
         },
+        getVisibleEntities: function() {
+            var visibleEntities = {};
+            var hasTelepathy = false;
+            var z = this.getZ();
+            var entities, splitCoords;
+
+            if (this._inherentPowers.length) {
+                hasTelepathy = this._inherentPowers.filter(function(power) {
+                    return power.name === 'Telepathy';
+                }).length;
+            }
+
+            if (hasTelepathy) {
+                entities = this.getMap().getEntities();
+                for (var coords in entities) {
+                    splitCoords = coords.split(",");
+                    if (+splitCoords[2] === +z)
+                        visibleEntities[splitCoords[0] + "," + splitCoords[1]] = entities[coords];
+                }
+            }
+
+            return visibleEntities;
+        },
         onKO: function() {
             this._constantPowers.forEach(function(power) {
                 this.usePower([], power);

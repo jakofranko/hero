@@ -119,8 +119,7 @@ Game.Screen.characterSelectScreen = {
             },
             "Mentalist": {
                 description: "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
-                // powers: ['mind spike', 'telepathy', 'force field', 'flight'],
-                powers: ['mind spike', 'force field (physical damage)', 'flight'],
+                powers: ['mind spike', 'force field (physical damage)', 'flight', 'telepathy'],
                 STR: 8,
                 DEX: 15,
                 EGO: 50,
@@ -404,9 +403,9 @@ Game.Screen.playScreen = {
         this.setSubScreen(Game.Screen.gainStatScreen);
     },
     exit: function() { console.log("Exited play screen."); },
-    render: function(display) {
+    render: function(display, noSubScreen) {
         // Render subscreen if there is one
-        if (this._subScreen) {
+        if (this._subScreen && !noSubScreen) {
             this._subScreen.render(display);
             return;
         }
@@ -442,19 +441,19 @@ Game.Screen.playScreen = {
         // Iterate through visible map cells
         for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
             for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
-                if (map.isExplored(x, y, currentDepth)) {
-                    glyph = render[x + ',' + y];
-                    if (!glyph) {
-                        // Not in our FOV, so just display the terrain
-                        glyph = map.getTile(x, y, currentDepth);
-                        // Since the tile was previously explored but is not
-                        // visible, we want to change the foreground color to
-                        // dark gray.
-                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
-                    } else {
-                        foreground = glyph.getForeground();
-                    }
+                glyph = render[x + ',' + y];
+                if (!glyph && map.isExplored(x, y, currentDepth)) {
+                    // Not in our FOV, so just display the terrain
+                    glyph = map.getTile(x, y, currentDepth);
+                    // Since the tile was previously explored but is not
+                    // visible, we want to change the foreground color to
+                    // dark gray.
+                    foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
+                } else {
+                    foreground = glyph.getForeground();
+                }
 
+                if (glyph) { // don't draw unexplored terrain
                     display.draw(
                         x - topLeftX,
                         y - topLeftY,
@@ -1044,7 +1043,7 @@ Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY,
     this._visibleCells = visibleCells;
 };
 Game.Screen.TargetBasedScreen.prototype.render = function(display) {
-    Game.Screen.playScreen.renderTiles.call(Game.Screen.playScreen, display);
+    Game.Screen.playScreen.render.call(Game.Screen.playScreen, display, true);
 
     // Draw a line from the start to the cursor.
     var points = Game.Geometry.getLine(this._startX, this._startY, this._cursorX, this._cursorY);

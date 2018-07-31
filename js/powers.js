@@ -172,3 +172,9 @@ Game.Powers.EgoAttackPowerRepository.define('mind spike', {
     missTargetMessage: "Your mind tingles as %s misses you with some psionic attack...",
     missMessage: "Your target's mind elludes your mind spike!",
 });
+
+Game.Powers.TelepathyPowerRepository = new Game.Repository('telpathy powers', Game.BasePowers.telepathy);
+
+Game.Powers.TelepathyPowerRepository.define('telepathy', {
+    name: 'Telepathy'
+});
