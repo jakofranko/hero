@@ -42,8 +42,11 @@ layout: page
   * More intelligent reactions (or a better reaction system) depending on events happening around NPCs
   * Various bug fixes:
     * Alignment issue with the power targeting screen
-* v0.7 - Locations
+* v0.7 - Locations and More Events
   * More lot types and building types for things like Banks, Restaurants, Grocery Stores, Pharmacies, Warehouses etc. Basically one-story locations that could be the target of robberies, or the 'hangout' of villains
+  * More event types. A couple ideas I've had: 1) "gang war" event, where two groups of bad guys will spawn and attempt to take one another out at different locations on the map. The player will have the opportunity to take both groups out, or pre-empt by taking out the aggressors first. 2) "assassination" event where the hero gets ambushed by a bunch of bad guys. I'd love to have some "get the cat out of the tree" type events too, but may have to do a bit more work before that's possible.
+  * Bug fixes/improvements:
+    * Messages should persist instead of disappearing after one turn
 * v0.8 - Animations
   * A component of an action during an entity's turn. Should be able to add Animation objects to an array if the player would be able to see any part of the animation, and then animate them sequentially on the player's turn.
   * Add animations for things like gun shots, super-powers things like that.
