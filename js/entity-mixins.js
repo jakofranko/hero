@@ -1,4 +1,3 @@
-// From http://www.codingcookies.com/2013/04/20/building-a-roguelike-in-javascript-part-4/
 Game.EntityMixins = {};
 
 Game.EntityMixins.Attacker = {
@@ -82,6 +81,10 @@ Game.EntityMixins.Attacker = {
     _attackRoll: function(target) {
         var roll = Game.rollDice("3d6");
         return roll <= 11 + this.getOCV() - target.getDCV();
+    },
+    _egoAttackRoll: function(target) {
+        var roll = Game.rollDice("3d6");
+        return roll <= 11 + this.getEOCV() - target.getEDCV();
     }
 };
 Game.EntityMixins.Characteristics = {
@@ -190,6 +193,8 @@ Game.EntityMixins.Characteristics = {
                 this.getMap().getJustice().removeCriminals(1);
             }
         }
+
+        this.raiseEvent('onAttack', attacker);
     },
     getMaxBODY: function() {
         return this._maxBODY;
@@ -212,11 +217,17 @@ Game.EntityMixins.Characteristics = {
     getPDmod: function() {
         return this._PDmod;
     },
+    getRPD: function() {
+        return this._rPD;
+    },
     getED: function() {
         return this._ED;
     },
     getEDmod: function() {
         return this._EDmod;
+    },
+    getRED: function() {
+        return this._rED;
     },
     getSPD: function() {
         return this._SPD;
@@ -232,6 +243,10 @@ Game.EntityMixins.Characteristics = {
     },
     adjustEND: function(amount) {
         this._END += amount;
+        if (this._END < 0) {
+            this.takeSTUN(this, Math.abs(this._END));
+            this._END = 0;
+        }
     },
     getEND: function() {
         return this._END;
@@ -256,7 +271,7 @@ Game.EntityMixins.Characteristics = {
         if(killing) {
             // Page 410 of the 5th Ed. -- can apply normal defenses against killing STUN if they have resistant defenses
             if(!type || type == 'physical') defense = this._rPD ? this._rPD + this._PD : 0;
-            else if(type == 'energy')       defense = this._rED ? this._rPD + this._ED : 0;
+            else if(type == 'energy')       defense = this._rED ? this._rED + this._ED : 0;
             else                            defense = 0;
         } else {
             if(!type || type == 'physical') defense = this._PD;
@@ -269,12 +284,10 @@ Game.EntityMixins.Characteristics = {
         if(this._STUN <= 0) {
             Game.sendMessage(attacker, "You knocked %s unconscious", [this.getName()]);
             this.ko();
-        } else {
-            if(this.hasMixin('Reactor')) {
-                var reaction = this.getReactionTypes().random();
-                this.setReaction(reaction);
-            }
+            this.raiseEvent('onKO');
         }
+
+        this.raiseEvent('onAttack', attacker);
     },
     increaseChar: function(CHAR) {
         var characteristic = "_" + CHAR;
@@ -289,7 +302,7 @@ Game.EntityMixins.Characteristics = {
     recoverSTUN: function(STUN) {
         var max = this._maxSTUN + this._maxSTUNmod;
         if(!STUN)
-            STUN = this._REC;
+            STUN = this.getCharacteristic('REC', true);
 
         if(this._STUN + STUN > max)
             this._STUN = max;
@@ -304,7 +317,7 @@ Game.EntityMixins.Characteristics = {
     recoverEND: function(END) {
         var max = this._maxEND + this._maxENDmod;
         if(!END)
-            END = this._REC;
+            END = this.getCharacteristic('REC', true);
 
         if(this._END + END > max)
             this._END = max;
@@ -316,6 +329,12 @@ Game.EntityMixins.Characteristics = {
     },
     getDCV: function() {
         return this._CV + this._DCVmod;
+    },
+    getEOCV: function() {
+        return this._ECV + this._EOCVmod;
+    },
+    getEDCV: function() {
+        return this._ECV + this._EDCVmod;
     },
     charRoll: function(chr) {
         var roll = Game.rollDice("3d6");
@@ -331,6 +350,9 @@ Game.EntityMixins.Characteristics = {
         post12Recovery: function() {
             this.recoverSTUN();
             this.recoverEND();
+        },
+        canAttack: function(target) {
+            return target && (this.hasMixin(Game.EntityMixins.PlayerActor) || target.hasMixin(Game.EntityMixins.PlayerActor));
         }
     }
 };
@@ -480,44 +502,6 @@ Game.EntityMixins.Destructible = {
         }
     }
 };
-Game.EntityMixins.Equipper = {
-    name: 'Equipper',
-    init: function() {
-        this._weapon = null;
-        this._armor = null;
-    },
-    wield: function(item) {
-        this._weapon = item;
-        item.wield();
-    },
-    unwield: function() {
-        this._weapon.unwield();
-        this._weapon = null;
-    },
-    wear: function(item) {
-        this._armor = item;
-        item.wear();
-    },
-    takeOff: function() {
-        this._armor.takeOff();
-        this._armor = null;
-    },
-    getWeapon: function() {
-        return this._weapon;
-    },
-    getArmor: function() {
-        return this._armor;
-    },
-    unequip: function(item) {
-        // Helper function to be called before getting rid of an item.
-        if (this._weapon === item) {
-            this.unwield();
-        }
-        if (this._armor === item) {
-            this.takeOff();
-        }
-    }
-};
 Game.EntityMixins.EventParticipant = {
     name: 'EventParticipant',
     groupName: 'Event',
@@ -558,48 +542,6 @@ Game.EntityMixins.ExperienceGainer = {
             if (xp > 0) {
                 this.giveExperiencePoints(xp);
             }
-        }
-    }
-};
-Game.EntityMixins.FoodConsumer = {
-    name: 'FoodConsumer',
-    init: function(template) {
-        this._maxFullness = template['maxFullness'] || 1000;
-        // Start halfway to max fullness if no default value
-        this._fullness = template['fullness'] || (this._maxFullness / 2);
-        // Number of points to decrease fullness by every turn.
-        this._fullnessDepletionRate = template['fullnessDepletionRate'] || 1;
-    },
-    addTurnHunger: function() {
-        // Remove the standard depletion points
-        this.modifyFullnessBy(-this._fullnessDepletionRate);
-    },
-    modifyFullnessBy: function(points) {
-        this._fullness = this._fullness + points;
-        if (this._fullness <= 0) {
-            this.kill("You have died of starvation!");
-        } else if (this._fullness > this._maxFullness) {
-            this.kill("You choke and die!");
-        }
-    },
-    getHungerState: function() {
-        // Fullness points per percent of max fullness
-        var perPercent = this._maxFullness / 100;
-        // 5% of max fullness or less = starving
-        if(this._fullness <= perPercent * 5) {
-            return 'Starving';
-        // 25% of max fullness or less = hungry
-        } else if (this._fullness <= perPercent * 25) {
-            return 'Hungry';
-        // 95% of max fullness or more = oversatiated
-        } else if (this._fullness >= perPercent * 95) {
-            return 'Oversatiated';
-        // 75% of max fullness or more = full
-        } else if (this._fullness >= perPercent * 75) {
-            return 'Full';
-        // Anything else = not hungry
-        } else {
-            return 'Not Hungry';
         }
     }
 };
@@ -1138,8 +1080,10 @@ Game.EntityMixins.PowerUser = {
     setPrimaryRanged: function(i) {
         if(i === false || i === null || i === undefined)
             this._primaryRanged = null;
-        else
+        else if (typeof i === 'number')
             this._primaryRanged = this._powers[i];
+        else
+            this._primaryRanged = i;
     },
     getPrimaryMelee: function() {
         return this._primaryMelee;
@@ -1147,35 +1091,82 @@ Game.EntityMixins.PowerUser = {
     setPrimaryMelee: function(i) {
         if(i === false || i === null || i === undefined)
             this._primaryMelee = null;
-        else
+        else if (typeof i === 'number')
             this._primaryMelee = this._powers[i];
+        else
+            this._primaryMelee = i;
     },
-    usePower: function(target, power) {
+    usePower: function(target, power, coords) {
         if(!power && !this._activePower) {
             Game.sendMessage(this, "You have no power to use!");
             return false;
         }
 
-        if(!target) {
-            Game.sendMessage(this, "There's nothing there!");
-            return false; // don't end turn
-        }
-
         if(!power)
             power = this._activePower;
 
-        // TODO: [POWERS] handle non-instant powers every turn
         // TODO: Update entity mixins to support an 'onAct' or some such method (update pattern)
         if(power['duration'] != 'instant') {
             var queue = '_' + power['duration'] + 'Powers'; // e.g., '_constantPowers'
-            this[queue].push(power);
-            power.enqueue();
+
+            if(power.active) {
+                this[queue].splice(this[queue].indexOf(power), 1);
+                power.dequeue();
+            } else {
+                this[queue].push(power);
+                power.enqueue();
+            }
         }
 
         // TODO: Handle miss? True if hit, false if miss
-        power.effect(target);
+        power.effect(target, coords);
 
         return true;
+    },
+    listeners: {
+        canMove: function(pos) {
+            var canFly;
+            if(this._constantPowers.length) {
+                canFly = this._constantPowers.filter(function(power) {
+                    return power.name === 'Flight';
+                }).length;
+            }
+
+            if(pos.tile.isFlyable() && canFly)
+                return true;
+            else if (this.getMap().getTile(this.getX(), this.getY(), this.getZ()).isFlyable() && pos.z === 0)
+                return true;
+            else if (canFly)
+                Game.sendMessage(this, "You can't fly there, something is blocking you.");
+        },
+        getVisibleEntities: function() {
+            var visibleEntities = {};
+            var hasTelepathy = false;
+            var z = this.getZ();
+            var entities, splitCoords;
+
+            if (this._inherentPowers.length) {
+                hasTelepathy = this._inherentPowers.filter(function(power) {
+                    return power.name === 'Telepathy';
+                }).length;
+            }
+
+            if (hasTelepathy) {
+                entities = this.getMap().getEntities();
+                for (var coords in entities) {
+                    splitCoords = coords.split(",");
+                    if (+splitCoords[2] === +z)
+                        visibleEntities[splitCoords[0] + "," + splitCoords[1]] = entities[coords];
+                }
+            }
+
+            return visibleEntities;
+        },
+        onKO: function() {
+            this._constantPowers.forEach(function(power) {
+                this.usePower([], power);
+            }, this);
+        }
     }
 };
 Game.EntityMixins.PlayerActor = {
@@ -1321,6 +1312,9 @@ Game.EntityMixins.Reactor = {
                 var reaction = this._reactionTypes.random();
                 this.setReaction(reaction);
 
+                if(this.hasMixin('JobActor'))
+                    this.setPath(); // clear out current path if any
+
                 if(this.hasMixin('Targeting'))
                     this.setTarget(attacker);
             }
@@ -1405,6 +1399,75 @@ Game.EntityMixins.Sight = {
             if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
                 this.forget('people', 'criminals', entity.getName());
             }
+        },
+        getVisibleTiles: function() {
+            var visibleTiles = {};
+            var map = this.getMap();
+            var z = this.getZ();
+
+            map.getFov(z).compute(
+                this.getX(),
+                this.getY(),
+                this._sightRadius,
+                function(x, y) {
+                    visibleTiles[x + "," + y] = map.getTile(x, y, z);
+                    map.setExplored(x, y, z, true);
+                }
+            );
+
+            return visibleTiles;
+        },
+        getVisibleEntities: function(visibleTiles) {
+            var coords = Object.keys(visibleTiles);
+            var map = this.getMap();
+            var z = this.getZ();
+            var visibleEntities = {};
+
+            coords.forEach(function(coord) {
+                var x = coord.split(",")[0];
+                var y = coord.split(",")[1];
+                var entity = map.getEntityAt(x, y, z);
+
+                if (entity)
+                    visibleEntities[x + "," + y] = entity;
+            }, this);
+
+            // Recolor criminals
+            if (this.hasMixin('MemoryMaker')) {
+                var criminals = this.getMemory().people.criminals;
+
+                // Change foreground based on character's memory
+                if(Object.keys(criminals).length > 0) {
+                    for(var key in visibleEntities) {
+                        if (visibleEntities.hasOwnProperty(visibleEntities[key])) {
+                            var entity = visibleEntities[key];
+                            var name = entity.getName();
+                            if(criminals[name]) {
+                                entity._foreground = Game.Palette.red;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return visibleEntities;
+        },
+        getVisibleItems: function(visibleTiles) {
+            var coords = Object.keys(visibleTiles);
+            var map = this.getMap();
+            var z = this.getZ();
+            var visibleItems = {};
+
+            coords.forEach(function(coord) {
+                var x = coord.split(",")[0];
+                var y = coord.split(",")[1];
+                var items = map.getItemsAt(x, y, z);
+
+                if (items)
+                    visibleItems[x + "," + y] = items.random(); // render a random item from a pile
+            }, this);
+
+            return visibleItems;
         }
     }
 };
@@ -1566,3 +1629,16 @@ Game.EntityMixins.Thrower = {
         }
     }
 };
+Game.EntityMixins.Walker = {
+    name: 'Walker',
+    listeners: {
+        canMove: function(pos) {
+            if (pos.z > this.getZ() && !pos.tile.isAscendable())
+                return false;
+            if (pos.z < this.getZ() && !pos.tile.isDescendable())
+                return false;
+
+            return pos.tile.isWalkable();
+        }
+    }
+}

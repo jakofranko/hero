@@ -13,11 +13,14 @@ Game.Screen.startScreen = {
     render: function(display) {
         // Render prompt to the screen
         var w = Game.getScreenWidth();
-        var text = "%c{#585DF5}Justice%c{}: A Superhero Roguelike";
+        var text = "%c{" + Game.Palette.blue + "}Justice%c{}: A Superhero Roguelike";
         display.drawText((w/2) - (30 / 2), 2, text);
 
-        text = "Press [%c{#585DF5}Enter%c{}] to start!";
-        display.drawText((w/2) - (23 / 2), 3, text);
+        text = "Press [%c{" + Game.Palette.blue + "}Enter%c{}] to start!";
+        display.drawText((w/2) - (23 / 2), 4, text);
+
+        text = "Press [%c{" + Game.Palette.blue + "}?%c{}] any time in game for help";
+        display.drawText((w/2) - (35 / 2), 5, text);
 
         var scalesASCII = [
                         ",ggg,                   gg                   ,ggg,",
@@ -46,7 +49,7 @@ Game.Screen.startScreen = {
         ];
 
         for (var i = 0; i < scalesASCII.length; i++) {
-            display.drawText((w / 2) - (scalesASCII[i].length / 2), i + 7, "%c{#F5F058}" + scalesASCII[i]);
+            display.drawText((w / 2) - (scalesASCII[i].length / 2), i + 8, "%c{#F5F058}" + scalesASCII[i]);
         }
 
         //             ,ggg,                   gg                   ,ggg,
@@ -73,7 +76,7 @@ Game.Screen.startScreen = {
         //                     __,,aaaadd888888888888888bbaaaa,,__
         //                   d8888888888888888888888888888888888888b
 
-        var version = "v0.5.1";
+        var version = "v0.6";
         display.drawText((w / 2) - (version.length / 2), scalesASCII.length + 8, version);
 
     },
@@ -93,7 +96,7 @@ Game.Screen.characterSelectScreen = {
         this._options = {
             "Brick": {
                 description: "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
-                // powers: ['tough skin', 'flight', 'sonic boom'],
+                powers: ['tough skin', 'flight', 'sonic boom'],
                 STR: 50,
                 DEX: 8,
                 INT: 8,
@@ -102,22 +105,21 @@ Game.Screen.characterSelectScreen = {
             },
             "Energy Projector": {
                 description: "You tend to fly around, loose bolts of lightning from your fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
-                // powers: ['energy blast', 'force field', 'flight', 'teleport'],
-                powers: ['energy blast', 'force field (physical damage)', 'force field (energy damage)'],
+                powers: ['energy blast', 'force field (physical damage)', 'force field (energy damage)', 'teleport', 'flight'],
                 CON: 6,
                 BODY: 8
             },
             "Martial Artist": {
                 description: "What you lack in super-powers you make up for with super-moves. Martial artists tend to be hard to hit, and focus on physical melee and ranged attacks.",
                 // powers: ['bo staff', 'throwing star', 'deflect projectile'],
+                powers: ['bo staff', 'throwing star'],
                 STR: 15,
                 DEX: 25,
-                CON: 20,
-                BODY: 20
+                CON: 20
             },
             "Mentalist": {
                 description: "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
-                // powers: ['mind spike', 'telepathy', 'force field', 'flight'],
+                powers: ['mind spike', 'force field (physical damage)', 'flight', 'telepathy'],
                 STR: 8,
                 DEX: 15,
                 EGO: 50,
@@ -127,6 +129,7 @@ Game.Screen.characterSelectScreen = {
             "Vigilante": {
                 description: "Vengence and Justice are the same, and the only important thing is that they are final. These 'heroes' don't have powers, they have guns and kevlar, and intend to get the job done by any means necessary.",
                 // powers: ['assault rifle', 'pistol', 'katana', 'kevlar']
+                powers: ['pistol', 'katana', 'kevlar']
             }
         };
     },
@@ -346,17 +349,26 @@ Game.Screen.stats = {
         var blue = Game.Palette.blue;
         var yellow = Game.Palette.yellow;
         var green = Game.Palette.green;
-        var BODY = "BODY: %c{" + red + "}" + String(this._player.getBODY()) + "/" + String(this._player.getMaxBODY());
-        var STUN = "STUN: %c{" + blue + "}" + String(this._player.getSTUN()) + "/" + String(this._player.getCharacteristic('STUN', true, true));
-        var END = "END: %c{" + green + "}" + String(this._player.getEND()) + "/" + String(this._player.getCharacteristic('END', true, true));
+        var BODY = "BODY: %c{" + red + "}" + Math.round(this._player.getBODY()) + "/" + this._player.getMaxBODY();
+        var STUN = "STUN: %c{" + blue + "}" + Math.round(this._player.getSTUN()) + "/" + this._player.getCharacteristic('STUN', true, true);
+        var END = "END: %c{" + green + "}" + Math.round(this._player.getEND()) + "/" + this._player.getCharacteristic('END', true, true);
+        var PD = "Total PD: %c{" + green + "}" + (this._player.getCharacteristic("PD", true) + this._player.getRPD());
+        var ED = "Total ED: %c{" + green + "}" + (this._player.getCharacteristic("ED", true) + this._player.getRED());
+        var rPD = "rPD: %c{" + green + "}" + this._player.getRPD();
+        var rED = "rED: %c{" + green + "}" + this._player.getRED();
         var HTH = "HTH: %c{" + '' + "}" + this._player.getHTH();
         var XP = "XP: %c{" + yellow + "}" + this._player.getSpendablePoints();
         var y = 1;
 
+        // TODO: tidy up alignment
         display.clear();
         display.drawText(0, y++, BODY);
         display.drawText(0, y++, STUN);
         display.drawText(0, y++, END);
+        display.drawText(0, y++, PD);
+        display.drawText(0, y++, ED);
+        display.drawText(0, y++, rPD);
+        display.drawText(0, y++, rED);
         display.drawText(0, y++, HTH);
         display.drawText(0, y++, XP);
     },
@@ -391,18 +403,67 @@ Game.Screen.playScreen = {
         this.setSubScreen(Game.Screen.gainStatScreen);
     },
     exit: function() { console.log("Exited play screen."); },
-    render: function(display) {
+    render: function(display, noSubScreen) {
         // Render subscreen if there is one
-        if (this._subScreen) {
+        if (this._subScreen && !noSubScreen) {
             this._subScreen.render(display);
             return;
         }
 
-        // Otherwise, procede as usual...
         var screenHeight = Game.getScreenHeight();
+        var screenWidth = Game.getScreenWidth();
+        var offsets = this.getScreenOffsets();
+        var topLeftX = offsets.x;
+        var topLeftY = offsets.y;
+        var map = this._player.getMap();
+        var currentDepth = this._player.getZ();
 
-        // Render the tiles
-        this.renderTiles(display);
+        // Will cause items previously in the map to be overwritten.
+        // If rendering bugs occur, investigate here. May need to pass
+        // in a function as a first argument that will allow smart filtering.
+        function mapFromArray(map, arrayItem) {
+            var keys = Object.keys(arrayItem);
+            keys.forEach(function(key) {
+                map[key] = arrayItem[key];
+            });
+
+            return map;
+        }
+        var visibleTiles = this._player.raiseEvent('getVisibleTiles').reduce(mapFromArray, {});
+        var visibleEntities = this._player.raiseEvent('getVisibleEntities', visibleTiles).reduce(mapFromArray, {});
+        var visibleItems = this._player.raiseEvent('getVisibleItems', visibleTiles).reduce(mapFromArray, {});
+
+        // Combine the render map, overwriting duplicate entries
+        // e.g., entities standing on top of items or tiles, or items resting on top of a tile
+        var render = Object.assign(visibleTiles, visibleItems, visibleEntities);
+        var glyph, foreground;
+
+        // Iterate through visible map cells
+        for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
+            for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
+                glyph = render[x + ',' + y];
+                if (!glyph && map.isExplored(x, y, currentDepth)) {
+                    // Not in our FOV, so just display the terrain
+                    glyph = map.getTile(x, y, currentDepth);
+                    // Since the tile was previously explored but is not
+                    // visible, we want to change the foreground color to
+                    // dark gray.
+                    foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
+                } else if(glyph) {
+                    foreground = glyph.getForeground();
+                }
+
+                if (glyph) { // don't draw unexplored terrain
+                    display.draw(
+                        x - topLeftX,
+                        y - topLeftY,
+                        glyph.getChar(),
+                        foreground,
+                        glyph.getBackground()
+                    );
+                }
+            }
+        }
 
         // Render player stats and time
         var stats = '%c{white}%b{black}';
@@ -436,10 +497,12 @@ Game.Screen.playScreen = {
 
         // If the player is unconscious, all they can do is skip their turn
         if(!this._player.isConscious()) {
-            if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN)
+            if(inputData.keyCode === ROT.VK_RETURN) {
                 this._player.getMap().getEngine().unlock();
-            else
                 return;
+             } else {
+                return;
+             }
         }
 
         var command = Game.Input.handleInput('playScreen', inputType, inputData);
@@ -463,84 +526,6 @@ Game.Screen.playScreen = {
             x: topLeftX,
             y: topLeftY
         };
-    },
-    renderTiles: function(display) {
-        var screenWidth = Game.getScreenWidth();
-        var screenHeight = Game.getScreenHeight();
-
-        var offsets = this.getScreenOffsets();
-        var topLeftX = offsets.x;
-        var topLeftY = offsets.y;
-        // This object will keep track of all visible map cells
-        var visibleCells = {};
-        // Store this._player.getMap() and player's z to prevent losing it in callbacks
-        var map = this._player.getMap();
-
-        var currentDepth = this._player.getZ();
-        // Find all visible cells and update the object
-        map.getFov(currentDepth).compute(
-            this._player.getX(),
-            this._player.getY(),
-            this._player.getSightRadius(),
-            function(x, y) {
-                visibleCells[x + "," + y] = true;
-                // Mark cell as explored
-                map.setExplored(x, y, currentDepth, true);
-            });
-        // Iterate through visible map cells
-        for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
-            for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
-                if (map.isExplored(x, y, currentDepth)) {
-                    // Fetch the glyph for the tile and render it to the screen
-                    // at the offset position.
-                    var glyph,
-                        foreground;
-                    // If we are at a cell that is in the field of vision, we need
-                    // to check if there are items or entities.
-                    if (visibleCells[x + ',' + y]) {
-                        // Check if we have an entity at the position
-                        var entity = map.getEntityAt(x, y, currentDepth);
-                        var items = map.getItemsAt(x, y, currentDepth);
-                        if (entity) {
-                            glyph = map.getEntityAt(x, y, currentDepth);
-                            var criminals = this._player.getMemory().people.criminals;
-                            // Change foreground based on character's memory
-                            if(Object.keys(criminals).length > 0) {
-                                var name = glyph.getName();
-                                if(criminals[name]) {
-                                    foreground = Game.Palette.red;
-                                } else {
-                                    foreground = glyph.getForeground();
-                                }
-                            } else {
-                                foreground = glyph.getForeground();
-                            }
-                        } else if(items) {
-                            glyph = items[items.length - 1];
-                            foreground = glyph.getForeground();
-                        } else {
-                            glyph = map.getTile(x, y, currentDepth);
-                            foreground = glyph.getForeground();
-                        }
-                    } else {
-                        // Not in our FOV, so just display the terrain
-                        glyph = map.getTile(x, y, currentDepth);
-                        // Since the tile was previously explored but is not
-                        // visible, we want to change the foreground color to
-                        // dark gray.
-                        foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
-                    }
-
-                    display.draw(
-                        x - topLeftX,
-                        y - topLeftY,
-                        glyph.getChar(),
-                        foreground,
-                        glyph.getBackground()
-                    );
-                }
-            }
-        }
     },
     setGameEnded: function(gameEnded) {
         this._gameEnded = gameEnded;
@@ -830,73 +815,6 @@ Game.Screen.dropScreen = new Game.Screen.ItemListScreen({
         return true;
     }
 });
-Game.Screen.eatScreen = new Game.Screen.ItemListScreen({
-    caption: 'Choose the item you wish to eat',
-    canSelect: true,
-    canSelectMultipleItems: false,
-    isAcceptable: function(item) {
-        return item && item.hasMixin('Edible') && item !== this._player._armor && item !== this._player._weapon;
-    },
-    ok: function(selectedItems) {
-        // Eat the item, removing it if there are no consumptions remaining.
-        var key = Object.keys(selectedItems)[0];
-        var item = selectedItems[key];
-        Game.sendMessage(this._player, "You eat %s.", [item.describeThe()]);
-        item.eat(this._player);
-        if (!item.hasRemainingConsumptions()) {
-            this._player.removeItem(key);
-        }
-        return true;
-    }
-});
-Game.Screen.wieldScreen = new Game.Screen.ItemListScreen({
-    caption: 'Choose the item you wish to wield',
-    canSelect: true,
-    canSelectMultipleItems: false,
-    hasNoItemOption: true,
-    isAcceptable: function(item) {
-        return item && item.hasMixin('Equippable') && item.isWieldable();
-    },
-    ok: function(selectedItems) {
-        // Check if we selected 'no item'
-        var keys = Object.keys(selectedItems);
-        if (keys.length === 0) {
-            this._player.unwield();
-            Game.sendMessage(this._player, "You are empty handed.")
-        } else {
-            // Make sure to unequip the item first in case it is the armor.
-            var item = selectedItems[keys[0]];
-            this._player.unequip(item);
-            this._player.wield(item);
-            Game.sendMessage(this._player, "You are wielding %s.", [item.describeA()]);
-        }
-        return true;
-    }
-});
-Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
-    caption: 'Choose the item you wish to wear',
-    canSelect: true,
-    canSelectMultipleItems: false,
-    hasNoItemOption: true,
-    isAcceptable: function(item) {
-        return item && item.hasMixin('Equippable') && item.isWearable();
-    },
-    ok: function(selectedItems) {
-        // Check if we selected 'no item'
-        var keys = Object.keys(selectedItems);
-        if (keys.length === 0) {
-            this._player.unwield();
-            Game.sendMessage(this._player, "You are not wearing anthing.");
-        } else {
-            // Make sure to unequip the item first in case it is the weapon.
-            var item = selectedItems[keys[0]];
-            this._player.unequip(item);
-            this._player.wear(item);
-            Game.sendMessage(this._player, "You are wearing %s.", [item.describeA()]);
-        }
-        return true;
-    }
-});
 Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to examine',
     canSelect: true,
@@ -1125,7 +1043,7 @@ Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY,
     this._visibleCells = visibleCells;
 };
 Game.Screen.TargetBasedScreen.prototype.render = function(display) {
-    Game.Screen.playScreen.renderTiles.call(Game.Screen.playScreen, display);
+    Game.Screen.playScreen.render.call(Game.Screen.playScreen, display, true);
 
     // Draw a line from the start to the cursor.
     var points = Game.Geometry.getLine(this._startX, this._startY, this._cursorX, this._cursorY);
@@ -1238,8 +1156,18 @@ Game.Screen.throwTargetScreen = new Game.Screen.TargetBasedScreen({
 Game.Screen.powerTargetScreen = new Game.Screen.TargetBasedScreen({
     targetNearest: true,
     okFunction: function(x, y) {
-        var target = this._player.getMap().getEntityAt(x, y, this._player.getZ());
-        return this._player.usePower(target);
+        var targets = this._player.getActivePower().getTargets(x, y, this._player.getZ());
+        return this._player.usePower(targets, null, {x: x, y: y, z: this._player.getZ()});
+    },
+    overlayFunction: function(x, y) {
+        var points = this._player.getActivePower().getAOE(x, y);
+        return [
+            [{
+                points: points,
+                char: "#",
+                color: Game.Palette.red
+            }]
+        ];
     }
 });
 
@@ -1412,23 +1340,22 @@ Game.Screen.helpScreen = {
     render: function(display) {
         var text = 'Help / Command List';
         var border = '-------------------';
-        var y = 0;
+        var padding = 2;
+        var y = padding;
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
-        display.drawText(0, y++, '%c{#585DF5}Arrow keys%c{} to move');
-        display.drawText(0, y++, '%c{#585DF5}Ctrl + Arrow keys%c{} to swap positions with NPC');
-        display.drawText(0, y++, '[%c{#585DF5},%c{}] to pick up items');
-        display.drawText(0, y++, '[%c{#585DF5}d%c{}] to drop items');
-        display.drawText(0, y++, '[%c{#585DF5}w%c{}] to wield items');
-        display.drawText(0, y++, '[%c{#585DF5}W%c{}] to wield items');
-        display.drawText(0, y++, '[%c{#585DF5}x%c{}] to examine items');
-        display.drawText(0, y++, '[%c{#585DF5}p%c{}] to use powers');
-        display.drawText(0, y++, '[%c{#585DF5};%c{}] to look around you');
-        display.drawText(0, y++, '[%c{#585DF5}.%c{}] to wait');
-        display.drawText(0, y++, '[%c{#585DF5}j%c{}] to show city statistics');
-        display.drawText(0, y++, '[%c{#585DF5}s%c{}] to spend experience points');
-        display.drawText(0, y++, '[%c{#585DF5}Space%c{}] to use/interact with nearby items and entities');
-        display.drawText(0, y++, '[%c{#585DF5}?%c{}] to show this help screen');
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Arrow keys%c{} to move');
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Ctrl + Arrow keys%c{} to swap positions with NPC');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '},%c{}] to pick up items');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}d%c{}] to drop items');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}x%c{}] to examine items');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}p%c{}] to use powers');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '};%c{}] to look around you');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}.%c{}] to wait');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}j%c{}] to show city statistics');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}s%c{}] to spend experience points');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}Space%c{}] to use/interact with nearby items and entities');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}?%c{}] to show this help screen');
         y += 3;
         text = '--- press any key to continue ---';
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
@@ -1518,6 +1445,11 @@ Game.Screen.gainStatScreen = {
         this._options = entity.getPointOptions();
         this._powers = entity.getPowers();
 
+        // Rendering constants
+        this._powersSpacer = this._powers.reduce(function(max, power) {
+            return Math.max(max, power.name.length);
+        }, 0)
+
         // Screen controls
         this._letters = 'abcdefghijklmnopqrstuvwxyz';
         this._numbers = '0123456789';
@@ -1539,11 +1471,12 @@ Game.Screen.gainStatScreen = {
 
         display.drawText(0, 3 + this._options.length + 2, 'Powers:')
         for(let i = 0; i < this._powers.length; i++) {
-            let spacer = "".lpad(" ", 15 - this._powers[i].name.length + 3);
+            let spacer = "".lpad(" ", this._powersSpacer - this._powers[i].name.length + 3);
             display.drawText(
                 0,
                 4 + this._options.length + i + 3,
-                `${this._numbers.substring(i, i + 1)} - %c{${Game.Palette.blue}}${this._powers[i].name} (${this._powers[i].points})%c{}${spacer}Cost: ${this._powers[i].cost}`)
+                `${this._numbers.substring(i, i + 1)} - %c{${Game.Palette.blue}}${this._powers[i].name} (${this._powers[i].points})%c{}${spacer}Cost: ${this._powers[i].cost}`
+            );
         }
     },
     handleInput: function(inputType, inputData) {
@@ -1569,12 +1502,14 @@ Game.Screen.powersScreen = {
     setup: function(entity) {
         // Must be called before rendering.
         this._entity = entity;
-        this._powers = entity.getPowers();
+        this._powers = entity.getPowers().filter(function(power) {
+            return power.points;
+        });
         this._letters = 'abcdefghijklmnopqrstuvwxyz';
     },
     render: function(display) {
         var y = 0;
-        var text;
+        var text, powerName, active;
 
         text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + key%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.';
         display.drawText(0, y++, text);
@@ -1583,18 +1518,25 @@ Game.Screen.powersScreen = {
         display.drawText(0, y++, text);
 
         y++;
-        display.drawText(0, y++, 'Powers:');
+        if(this._powers.length) {
+            display.drawText(0, y++, 'Powers:');
 
-        // Iterate through each of our powers
-        for (var i = 0; i < this._powers.length; i++) {
-            var powerName = this._powers[i]['name'];
-            text = this._letters.substring(i, i + 1) + ' - %c{#585DF5}' + powerName;
-            if(this._powers[i] == this._entity.getPrimaryMelee())
+            // Iterate through each of our powers
+            for (var i = 0; i < this._powers.length; i++) {
+                powerName = this._powers[i].name;
+                active = this._powers[i].active ? '(active) ' : '';
+
+                text = this._letters.substring(i, i + 1) + ' - ' + active + '%c{#585DF5}' + powerName;
+
+                if(this._powers[i] == this._entity.getPrimaryMelee())
                 text += ' %c{}| %c{' + Game.Palette.lightBlue + '}Primary Melee';
-            if(this._powers[i] == this._entity.getPrimaryRanged())
+                if(this._powers[i] == this._entity.getPrimaryRanged())
                 text += ' %c{}| %c{' + Game.Palette.lightBlue + '}Primary Ranged';
 
-            display.drawText(0, y++, text);
+                display.drawText(0, y++, text);
+            }
+        } else {
+            display.drawText(0, y++, 'You have no powers! Purchase powers by pressing [%c{' + Game.Palette.blue + '}s%c{}] on the play screen.')
         }
     },
     handleInput: function(inputType, inputData) {
@@ -1607,11 +1549,19 @@ Game.Screen.powersScreen = {
             Game.refresh(this._entity);
     },
     activatePower: function(letter) {
-        var showScreenCommand = Game.Commands.showTargettingScreenCommand(Game.Screen.powerTargetScreen, Game.Screen.playScreen);
+        var showScreenCommand;
         var index = this._letters.indexOf(letter);
-        this._entity.setActivePower(index);
 
-        showScreenCommand(this._entity);
+        if (this._powers[index]) {
+            this._entity.setActivePower(this._powers[index]);
+
+            if(this._entity.getActivePower() && this._entity.getActivePower().range === 'self') {
+                return this._entity.usePower([this._entity]);
+            } else {
+                showScreenCommand = Game.Commands.showTargettingScreenCommand(Game.Screen.powerTargetScreen, Game.Screen.playScreen);
+                showScreenCommand(this._entity);
+            }
+        }
     },
     setPrimaryMelee: function(letter) {
         var currentPrimary = this._entity.getPrimaryMelee();
@@ -1620,7 +1570,7 @@ Game.Screen.powersScreen = {
         if(currentPrimary && this._entity.getPower(index) == currentPrimary)
             this._entity.setPrimaryMelee(null);
         else
-            this._entity.setPrimaryMelee(index);
+            this._entity.setPrimaryMelee(this._powers[index]);
     },
     setPrimaryRanged: function(letter) {
         var currentPrimary = this._entity.getPrimaryRanged();
@@ -1629,7 +1579,7 @@ Game.Screen.powersScreen = {
         if(currentPrimary && this._entity.getPower(index) == currentPrimary)
             this._entity.setPrimaryRanged(null);
         else
-            this._entity.setPrimaryRanged(index);
+            this._entity.setPrimaryRanged(this._powers[index]);
     }
 };
 

@@ -6,7 +6,10 @@ Game.TileRepository.define('null', {
 });
 Game.TileRepository.define('air', {
     name: 'air',
-    description: 'Empty space'
+    description: 'Empty space',
+    character: ' ',
+    background: Game.Palette.skyBlue,
+    flyable: true
 });
 Game.TileRepository.define('floor', {
     name: 'floor',
@@ -36,6 +39,8 @@ Game.TileRepository.define('stairsUp', {
     character: '<',
     foreground: 'white',
     walkable: true,
+    flyable: true,
+    descendable: true,
     blocksLight: false,
     description: 'A staircase leading upwards'
 });
@@ -44,6 +49,8 @@ Game.TileRepository.define('stairsDown', {
     character: '>',
     foreground: 'white',
     walkable: true,
+    flyable: true,
+    ascendable: true,
     blocksLight: false,
     description: 'A staircase leading downwards'
 });
@@ -140,6 +147,7 @@ Game.TileRepository.define('guard rail', {
     character: '#',
     foreground: Game.Palette.metalGrey,
     walkable: false,
+    flyable: true,
     blocksLight: false,
     description: 'A metal guard rail'
 });

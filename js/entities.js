@@ -37,7 +37,6 @@ Game.PlayerTemplate = {
         Game.EntityMixins.Sight,
         Game.EntityMixins.PlayerActor,
         Game.EntityMixins.Destructible,
-        Game.EntityMixins.Equipper,
         Game.EntityMixins.Attacker,
         Game.EntityMixins.InventoryHolder,
         Game.EntityMixins.MemoryMaker,
@@ -46,7 +45,8 @@ Game.PlayerTemplate = {
         Game.EntityMixins.PowerUser,
         Game.EntityMixins.PlayerStatGainer,
         Game.EntityMixins.Thrower,
-        Game.EntityMixins.ExperienceGainer
+        Game.EntityMixins.ExperienceGainer,
+        Game.EntityMixins.Walker
     ]
 };
 
@@ -79,7 +79,8 @@ Game.EntityRepository.define('person', {
         Game.EntityMixins.Sight,
         Game.EntityMixins.Targeting,
         Game.EntityMixins.RandomStatGainer,
-        Game.EntityMixins.Reactor
+        Game.EntityMixins.Reactor,
+        Game.EntityMixins.Walker
     ]
 });
 
@@ -88,7 +89,7 @@ Game.EntityRepository.define('robber', {
     name: 'robber', // Randomized with createEntity
     character: 'm', // Randomized with createEntity
     type: 'Event NPC - Robber',
-    foreground: 'white',
+    foreground: Game.Palette.red,
     maxHp: 10,
     basePoints: 8,
     STR: 8,
@@ -119,6 +120,7 @@ Game.EntityRepository.define('robber', {
         Game.EntityMixins.Sight,
         Game.EntityMixins.Targeting,
         Game.EntityMixins.RandomStatGainer,
-        Game.EntityMixins.Reactor
+        Game.EntityMixins.Reactor,
+        Game.EntityMixins.Walker
     ]
 });

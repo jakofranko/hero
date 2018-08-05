@@ -38,6 +38,15 @@ Game.Powers.EnergyBlastPowerRepository.define('energy blast', {
     missTargetMessage: "%s misses you with their energy blast!",
     missMessage: "Your energy blast goes wide!",
 });
+Game.Powers.EnergyBlastPowerRepository.define('sonic boom', {
+    name: 'Sonic Boom',
+    damageType: 'energy',
+    advantages: ['AOE_Blast_5'],
+    hitTargetMessage: "%s oscillates your organs with a sonic boom, doing %s STUN and %s BODY!",
+    hitMessage: "You clap your hands creating a deafening sonic boom, doing %s STUN and %s BODY to %s!",
+    missTargetMessage: "%s a sonic wave ripples past you, missing you!",
+    missMessage: "Your sonic boom misses your target!",
+});
 
 // Hand-to-Hand Attacks
 Game.Powers.HandToHandAttackPowerRepository = new Game.Repository('hand-to-hand attack powers', Game.BasePowers.handToHandAttack);
@@ -137,4 +146,35 @@ Game.Powers.ForceFieldPowerRepository.define('force field (physical damage)', {
 Game.Powers.ForceFieldPowerRepository.define('force field (energy damage)', {
     name: 'Force Field (Energy Damage)',
     damageType: 'energy'
+});
+
+// Movement Powers
+Game.Powers.TeleportationPowerRepository = new Game.Repository('teleportation powers', Game.BasePowers.teleportation);
+
+Game.Powers.TeleportationPowerRepository.define('teleport', {
+    name: 'Teleport'
+});
+
+Game.Powers.FlightPowerRepository = new Game.Repository('flight powers', Game.BasePowers.flight);
+
+Game.Powers.FlightPowerRepository.define('flight', {
+    name: 'Flight'
+});
+
+// EGO Powers
+Game.Powers.EgoAttackPowerRepository = new Game.Repository('ego attack powers', Game.BasePowers.egoAttack);
+
+Game.Powers.EgoAttackPowerRepository.define('mind spike', {
+    name: 'Mind Spike',
+    damageType: 'energy',
+    hitTargetMessage: "%s pierces your mind with excruciating pain, doing %s STUN!",
+    hitMessage: "You lance your targets mind, doing %s!",
+    missTargetMessage: "Your mind tingles as %s misses you with some psionic attack...",
+    missMessage: "Your target's mind elludes your mind spike!",
+});
+
+Game.Powers.TelepathyPowerRepository = new Game.Repository('telpathy powers', Game.BasePowers.telepathy);
+
+Game.Powers.TelepathyPowerRepository.define('telepathy', {
+    name: 'Telepathy'
 });

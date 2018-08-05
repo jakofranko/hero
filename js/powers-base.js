@@ -63,42 +63,50 @@ Game.BasePowers.energyBlast = function(options) {
         hitMessage: "You do %s STUN and %s BODY to %s!",
         missTargetMessage: "%s misses you!",
         missMessage: "You miss!",
-        effect: function(target) {
-            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
-                target.raiseEvent('onAttack', this.entity);
+        effect: function(targets) {
+            if(!targets || targets.length === 0) {
+                Game.sendMessage(this.entity, "There's nothing there!");
+                return false; // don't end turn
+            }
 
-                var hit = this.entity._attackRoll(target);
-                if(hit) {
-                    var dice = Math.floor(this.points / this.cost);
-                    var STUN = 0;
-                    var BODY = 0;
+            this.entity.adjustEND(-this.END());
 
-                    for(var i = 0; i < dice; i++) {
-                        var dieRoll = Game.rollDice("1d6");
+            targets.forEach(function(target) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                    target.raiseEvent('onAttack', this.entity);
 
-                        STUN += dieRoll;
-                        if(dieRoll == 6) {
-                            BODY += 2;
-                        } else if(dieRoll > 1) {
-                            BODY += 1;
+                    var hit = this.entity._attackRoll(target);
+                    if(hit) {
+                        var dice = Math.floor(this.points / this.cost);
+                        var STUN = 0;
+                        var BODY = 0;
+
+                        for(var i = 0; i < dice; i++) {
+                            var dieRoll = Game.rollDice("1d6");
+
+                            STUN += dieRoll;
+                            if(dieRoll == 6) {
+                                BODY += 2;
+                            } else if(dieRoll > 1) {
+                                BODY += 1;
+                            }
+
                         }
 
+                        target.takeSTUN(this.entity, STUN, this.damageType);
+                        target.takeBODY(this.entity, BODY, this.damageType);
+                        Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
+                        Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
+                    } else {
+                        Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
+                        Game.sendMessage(this.entity, this.missMessage);
                     }
-
-                    target.takeSTUN(this.entity, STUN, this.damageType);
-                    target.takeBODY(this.entity, BODY, this.damageType);
-                    Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
-                    Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
-                    return true;
                 } else {
-                    Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
-                    Game.sendMessage(this.entity, this.missMessage);
-                    return false;
+                    Game.sendMessage(this.entity, "% is out of range.", [target.getName()]);
                 }
-            } else {
-                Game.sendMessage(this.entity, "Out of range.");
-                return false;
-            }
+            }, this);
+
+            return true;
         }
     };
 
@@ -123,43 +131,50 @@ Game.BasePowers.handToHandAttack = function(options) {
         hitMessage: "You do %s STUN and %s BODY to %s!",
         missTargetMessage: "%s misses you!",
         missMessage: "You miss!",
-        effect: function(target) {
-            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
-                target.raiseEvent('onAttack', this.entity);
+        effect: function(targets) {
+            if(!targets) {
+                Game.sendMessage(this, "There's nothing there!");
+                return false; // don't end turn
+            }
 
-                var hit = this.entity._attackRoll(target);
-                if(hit) {
-                    debugger;
-                    var dice = Math.floor((this.points / this.cost) + (this.entity.getSTR() / this.cost));
-                    var STUN = 0;
-                    var BODY = 0;
+            this.entity.adjustEND(-this.END());
 
-                    for(var i = 0; i < dice; i++) {
-                        var dieRoll = Game.rollDice("1d6");
+            targets.forEach(function(target) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                    target.raiseEvent('onAttack', this.entity);
 
-                        STUN += dieRoll;
-                        if(dieRoll == 6) {
-                            BODY += 2;
-                        } else if(dieRoll > 1) {
-                            BODY += 1;
+                    var hit = this.entity._attackRoll(target);
+                    if(hit) {
+                        var dice = Math.floor((this.points / this.cost) + (this.entity.getSTR() / this.cost));
+                        var STUN = 0;
+                        var BODY = 0;
+
+                        for(var i = 0; i < dice; i++) {
+                            var dieRoll = Game.rollDice("1d6");
+
+                            STUN += dieRoll;
+                            if(dieRoll == 6) {
+                                BODY += 2;
+                            } else if(dieRoll > 1) {
+                                BODY += 1;
+                            }
+
                         }
 
+                        target.takeSTUN(this.entity, STUN, this.damageType);
+                        target.takeBODY(this.entity, BODY, this.damageType);
+                        Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
+                        Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
+                    } else {
+                        Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
+                        Game.sendMessage(this.entity, this.missMessage);
                     }
-
-                    target.takeSTUN(this.entity, STUN, this.damageType);
-                    target.takeBODY(this.entity, BODY, this.damageType);
-                    Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
-                    Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
-                    return true;
                 } else {
-                    Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
-                    Game.sendMessage(this.entity, this.missMessage);
-                    return false;
+                    Game.sendMessage(this.entity, "% is out of range.", [target.getName()]);
                 }
-            } else {
-                Game.sendMessage(this.entity, "Out of range.");
-                return false;
-            }
+            }, this);
+
+            return true;
         }
     };
 
@@ -183,38 +198,45 @@ Game.BasePowers.handToHandKillingAttack = function(options) {
         hitMessage: "You do %s STUN and %s BODY to %s!",
         missTargetMessage: "%s misses you!",
         missMessage: "You miss!",
-        effect: function(target) {
-            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
-                target.raiseEvent('onAttack', this.entity);
-
-                var hit = this.entity._attackRoll(target);
-                if(hit) {
-                    debugger;
-                    var dice = Math.floor((this.points / this.cost) + (this.entity.getSTR() / this.cost));
-                    var STUN = 0;
-                    var BODY = 0;
-
-                    // BODY is the number rolled on the dice
-                    for(var i = 0; i < dice; i++) {
-                        BODY += Game.rollDice("1d6");
-                    }
-
-                    STUN = BODY * Math.max(1, Game.rollDice("1d6") - 1);
-
-                    target.takeSTUN(this.entity, STUN, this.damageType, true);
-                    target.takeBODY(this.entity, BODY, this.damageType, true);
-                    Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
-                    Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
-                    return true;
-                } else {
-                    Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
-                    Game.sendMessage(this.entity, this.missMessage);
-                    return false;
-                }
-            } else {
-                Game.sendMessage(this.entity, "Out of range.");
-                return false;
+        effect: function(targets) {
+            if(!targets || targets.length === 0) {
+                Game.sendMessage(this, "There's nothing there!");
+                return false; // don't end turn
             }
+
+            this.entity.adjustEND(-this.END());
+
+            targets.forEach(function(target) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                    target.raiseEvent('onAttack', this.entity);
+
+                    var hit = this.entity._attackRoll(target);
+                    if(hit) {
+                        var dice = Math.floor((this.points / this.cost) + (this.entity.getSTR() / this.cost));
+                        var STUN = 0;
+                        var BODY = 0;
+
+                        // BODY is the number rolled on the dice
+                        for(var i = 0; i < dice; i++) {
+                            BODY += Game.rollDice("1d6");
+                        }
+
+                        STUN = BODY * Math.max(1, Game.rollDice("1d6") - 1);
+
+                        target.takeSTUN(this.entity, STUN, this.damageType, true);
+                        target.takeBODY(this.entity, BODY, this.damageType, true);
+                        Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
+                        Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
+                    } else {
+                        Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
+                        Game.sendMessage(this.entity, this.missMessage);
+                    }
+                } else {
+                    Game.sendMessage(this.entity, "% is out of range.", [target.getName()]);
+                }
+            }, this);
+
+            return true;
         }
     };
 
@@ -238,38 +260,46 @@ Game.BasePowers.rangedKillingAttack = function(options) {
         hitMessage: "You do %s STUN and %s BODY to %s!",
         missTargetMessage: "%s misses you!",
         missMessage: "You miss!",
-        effect: function(target) {
-            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
-                target.raiseEvent('onAttack', this.entity);
-
-                var hit = this.entity._attackRoll(target);
-                if(hit) {
-                    debugger;
-                    var dice = Math.floor(this.points / this.cost);
-                    var STUN = 0;
-                    var BODY = 0;
-
-                    // BODY is the number rolled on the dice
-                    for(var i = 0; i < dice; i++) {
-                        BODY += Game.rollDice("1d6");
-                    }
-
-                    STUN = BODY * Math.max(1, Game.rollDice("1d6") - 1);
-
-                    target.takeSTUN(this.entity, STUN, this.damageType, true);
-                    target.takeBODY(this.entity, BODY, this.damageType, true);
-                    Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
-                    Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
-                    return true;
-                } else {
-                    Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
-                    Game.sendMessage(this.entity, this.missMessage);
-                    return false;
-                }
-            } else {
-                Game.sendMessage(this.entity, "Out of range.");
-                return false;
+        effect: function(targets) {
+            if(!targets) {
+                Game.sendMessage(this, "There's nothing there!");
+                return false; // don't end turn
             }
+
+            this.entity.adjustEND(-this.END());
+
+            targets.forEach(function(target) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                    target.raiseEvent('onAttack', this.entity);
+
+                    var hit = this.entity._attackRoll(target);
+                    if(hit) {
+                        debugger;
+                        var dice = Math.floor(this.points / this.cost);
+                        var STUN = 0;
+                        var BODY = 0;
+
+                        // BODY is the number rolled on the dice
+                        for(var i = 0; i < dice; i++) {
+                            BODY += Game.rollDice("1d6");
+                        }
+
+                        STUN = BODY * Math.max(1, Game.rollDice("1d6") - 1);
+
+                        target.takeSTUN(this.entity, STUN, this.damageType, true);
+                        target.takeBODY(this.entity, BODY, this.damageType, true);
+                        Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN, BODY]);
+                        Game.sendMessage(this.entity, this.hitMessage, [STUN, BODY, target.describeThe()]);
+                    } else {
+                        Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
+                        Game.sendMessage(this.entity, this.missMessage);
+                    }
+                } else {
+                    Game.sendMessage(this.entity, "% is out of range.", [target.getName()]);
+                }
+            }, this);
+
+            return true;
         }
     };
 
@@ -293,16 +323,17 @@ Game.BasePowers.armor = function(options) {
         missMessage: 'You take off your armor',
         active: false, // special property for non-instant powers
         persistent: function(){}, // unused right now...
-        effect: function(target) {
-            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
-                if(this.active)
-                    Game.sendMessage(this.entity, this.hitMessage);
-                else
-                    Game.sendMessage(this.entity, this.missMessage);
-            } else {
-                Game.sendMessage(this.entity, "Out of range.");
-                return false;
-            }
+        effect: function(targets) {
+            targets.forEach(function(target) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                    if(this.active)
+                        Game.sendMessage(this.entity, this.hitMessage);
+                    else
+                        Game.sendMessage(this.entity, this.missMessage);
+                } else {
+                    Game.sendMessage(this.entity, "% is out of range.", [target.getName()]);
+                }
+            }, this);
         },
         enqueue: function() {
             if(!this.active) {
@@ -348,16 +379,23 @@ Game.BasePowers.forceField = function(options) {
             // Subtract END
             this.entity.adjustEND(-this.END());
         },
-        effect: function(target) {
-            if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
-                if(this.active)
-                    Game.sendMessage(this.entity, this.hitMessage);
-                else
-                    Game.sendMessage(this.entity, this.missMessage);
-            } else {
-                Game.sendMessage(this.entity, "Out of range.");
-                return false;
+        effect: function(targets) {
+            if(!targets) {
+                Game.sendMessage(this.entity, "There's nothing there!");
+                return false; // don't end turn
             }
+
+            targets.forEach(function(target) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                    if(this.active)
+                        Game.sendMessage(this.entity, this.hitMessage);
+                    else
+                        Game.sendMessage(this.entity, this.missMessage);
+                } else {
+                    Game.sendMessage(this.entity, "% is out of range.", [target.getName()]);
+                }
+            }, this);
+
         },
         enqueue: function() {
             if(!this.active) {
@@ -384,3 +422,171 @@ Game.BasePowers.forceField = function(options) {
     Game.BasePower.call(this, properties, options);
 };
 Game.BasePowers.forceField.extend(Game.BasePower);
+
+Game.BasePowers.teleportation = function(options) {
+    var properties = {
+        name: 'Teleportation',
+        type: 'Movement',
+        cost: 2,
+        duration: 'instant',
+        pointsMin: 1,
+        points: 0,
+        range: 'standard',
+        hitTargetMessage: '',
+        hitMessage: "You instantly appear somewhere else.",
+        missTargetMessage: 'Somebody just tried to teleport into you, ouch that hurt!!!',
+        missMessage: 'You instantly appear in something else, ouch that hurts!!! And then you\'re back where you came from',
+        effect: function(targets, coords) {
+            let tile, numD6, damage;
+
+            this.entity.adjustEND(-this.END());
+
+            targets.forEach(function(target) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), coords.x, coords.y)) {
+                    tile = this.entity.getMap().getTile(coords.x, coords.y, coords.z);
+
+                    if(tile.isWalkable() && !target) {
+                        this.entity.tryMove(coords.x, coords.y, coords.z);
+                    } else {
+                        Game.sendMessage(this.entity, this.missMessage);
+                        numD6 = Game.rollDice('2d6');
+                        damage = Game.rollDice('' + numD6 + 'd6');
+                        this.entity.takeSTUN(this.entity, damage);
+                        if(target) target.takeSTUN(this.entity, damage);
+                    }
+
+                } else {
+                    Game.sendMessage(this.entity, "% is out of range.", [target.getName()]);
+                }
+            }, this);
+
+            return true;
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.teleportation.extend(Game.BasePower);
+
+Game.BasePowers.flight = function(options) {
+    var properties = {
+        name: 'Flight',
+        type: 'Movement',
+        cost: 10,
+        duration: 'constant',
+        pointsMin: 10,
+        pointsMax: 10,
+        points: 0,
+        range: 'self',
+        hitTargetMessage: '',
+        hitMessage: "You take flight.",
+        missTargetMessage: '',
+        missMessage: 'You land.',
+        constant: function() {
+            this.entity.adjustEND(-this.END());
+        },
+        effect: function() {
+            return true;
+        },
+        enqueue: function() {
+            Game.sendMessage(this.entity, this.hitMessage);
+            this.active = true;
+        },
+        dequeue: function() {
+            Game.sendMessage(this.entity, this.missMessage);
+            this.active = false;
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.flight.extend(Game.BasePower);
+
+Game.BasePowers.egoAttack = function(options) {
+    if(!('damageType' in options))
+        throw new Error('An energyBlast must specify a damage type');
+
+    var properties = {
+        name: 'Ego Attack',
+        type: 'Attack',
+        cost: 5,
+        duration: 'instant',
+        pointsMin: 5,
+        points: 0,
+        range: 'LOS',
+        hitTargetMessage: "%s does %s STUN to you!",
+        hitMessage: "You do %s STUN to %s!",
+        missTargetMessage: "%s misses you!",
+        missMessage: "You miss!",
+        effect: function(targets) {
+            if(!targets || targets.length === 0) {
+                Game.sendMessage(this.entity, "There's nothing there!");
+                return false; // don't end turn
+            }
+
+            this.entity.adjustEND(-this.END());
+
+            targets.forEach(function(target) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                    target.raiseEvent('onAttack', this.entity);
+
+                    var hit = this.entity._egoAttackRoll(target);
+                    if(hit) {
+                        var dice = Math.floor(this.points / this.cost);
+                        var STUN = 0;
+
+                        for(var i = 0; i < dice; i++) {
+                            STUN += Game.rollDice("1d6");
+                        }
+
+                        target.takeSTUN(this.entity, STUN, this.damageType);
+                        Game.sendMessage(target, this.hitTargetMessage, [this.entity.describeThe(), STUN]);
+                        Game.sendMessage(this.entity, this.hitMessage, [STUN, target.describeThe()]);
+                    } else {
+                        Game.sendMessage(target, this.missTargetMessage, [this.entity.describeThe()]);
+                        Game.sendMessage(this.entity, this.missMessage);
+                    }
+                } else {
+                    Game.sendMessage(this.entity, "% is out of range.", [target.getName()]);
+                }
+            }, this);
+
+            return true;
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.egoAttack.extend(Game.BasePower);
+
+Game.BasePowers.telepathy = function(options) {
+    var properties = {
+        name: 'Telepathy',
+        type: 'Sense',
+        cost: 20,
+        duration: 'inherent',
+        pointsMin: 20,
+        pointsMax: 20,
+        points: 0,
+        range: 'self',
+        hitTargetMessage: '',
+        hitMessage: "You can sense the minds of others.",
+        missTargetMessage: '',
+        missMessage: 'You stop sensing the minds of others.',
+        inherent: function() {}, // inherent powers do not cost END
+        effect: function() {
+            return true;
+        },
+        enqueue: function() {
+            Game.sendMessage(this.entity, this.hitMessage);
+            this.active = true;
+        },
+        dequeue: function() {
+            Game.sendMessage(this.entity, this.missMessage);
+            this.active = false;
+        }
+    };
+
+    Game.BasePower.call(this, properties, options);
+};
+Game.BasePowers.telepathy.extend(Game.BasePower);

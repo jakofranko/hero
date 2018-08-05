@@ -50,8 +50,14 @@ Game.Power =  function(properties) {
     this.missMessage       = properties['missMessage'] || '';
     this.missTargetMessage = properties['missTargetMessage'] || '';
     this.active            = properties['active'] || false;
+    this.advantages        = Array.isArray(properties['advantages'])
+        ? properties['advantages'].map(function(advantage) {
+            return Game.PowerAdvantages[advantage];
+        })
+        : [];
 
     // If the power's duration is anything other than 'instant', assign the duration's function
+    // e.g., this.constant = properties['constant']; (a function)
     this[properties['duration']] = properties[properties['duration']];
 
     // Depending on the type of range, assign a different function to the range property
@@ -88,8 +94,46 @@ Game.Power =  function(properties) {
     // of active powers.
     this.effect = properties['effect'] || function() { console.error(`${this.name} needs to have an effect function defined.`); };
 
-    this.enqueue = properties['enqueue'] || function() {};
-    this.dequeue = properties['dequeue'] || function() {};
+    this.getTargets = properties['getTargets'] || function(x, y, z) {
+        var targets = null;
+        this.advantages.forEach(function(advantage) {
+            if(advantage.getTargets) {
+                if(targets === null) targets = [];
+                advantage.getTargets(x, y, z, this.entity.getMap()).forEach(function(target) {
+                    targets.push(target);
+                }, this);
+            }
+        }, this);
+
+        if(targets === null)
+            targets = [this.entity.getMap().getEntityAt(x, y, z)];
+
+        return targets;
+    };
+
+    this.getAOE = properties['getAOE'] || function(x, y) {
+        var points = []; // array of coords e.g., [x, y]
+        this.advantages.forEach(function(advantage) {
+            if(advantage.getAOE) {
+                advantage.getAOE(x, y, this.entity.getMap()).forEach(function(point) {
+                    if (points.indexOf(point) < 0)
+                        points.push(point);
+                }, this);
+            }
+        }, this);
+
+        if(points.length === 0)
+            points = [[x, y]];
+
+        return points;
+    };
+
+    this.enqueue = properties['enqueue'] || function() {
+        this.active = true;
+    };
+    this.dequeue = properties['dequeue'] || function() {
+        this.active = false;
+    };
 };
 Game.Power.prototype.setEntity = function(entity) {
     this.entity = entity;
@@ -120,10 +164,22 @@ Game.Power.prototype.subtractPoints = function(amount) {
     this.entity.addSpendablePoints(amount);
 };
 Game.Power.prototype.upgradePower = function() {
+    let wasActive;
+    // If the power is active, dequeue and then re-queue it in order
+    // to avoid bugs with dequeuing powers that are stronger than when
+    // they were last queued.
+    if(this.active) {
+        this.dequeue();
+        wasActive = true;
+    }
+
     try {
         this.addPoints(this.cost);
     } catch(e) {
         console.error(e);
+    } finally {
+        if(wasActive)
+            this.enqueue();
     }
 
     return false; // Don't end turn, refresh screen

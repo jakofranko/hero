@@ -28,6 +28,21 @@ Array.prototype.randomize = function() {
     return result;
 };
 
+if (!Array.prototype.flatten) {
+    Array.prototype.flatten = function() {
+        var flatArr = [];
+        this.forEach(function(arr) {
+            if (arr instanceof Array) {
+                arr.forEach(function(el) {
+                    flatArr.push(el);
+                }, arr);
+            }
+        }, this);
+
+        return flatArr;
+    }
+}
+
 if(!Object.prototype.randomKey) {
     /**
      * {JSDoc}
@@ -50,7 +65,7 @@ if(!Math.percent) {
     /**
      * {JSDoc}
      *
-     * The randomKey() method will fetch a random key from an object
+     * Math.percent will convert a fraction to a percent.
      * @param {Number} num smaller number.
      * @param {Number} denominator bigger number.
      * @this {Object}
