@@ -449,7 +449,7 @@ Game.Screen.playScreen = {
                     // visible, we want to change the foreground color to
                     // dark gray.
                     foreground = ROT.Color.toHex(ROT.Color.multiply([100,100,100], ROT.Color.fromString(glyph.getForeground())));
-                } else {
+                } else if(glyph) {
                     foreground = glyph.getForeground();
                 }
 
