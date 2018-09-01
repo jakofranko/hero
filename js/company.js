@@ -3,8 +3,22 @@
 // TODO: Add special generator for Banks
 Game.CompanyGenerator = function() {
 	this._totalJobs = Game.getAvailableJobs();
-	this._usedCorpNames = [];
-	this._usedStoreNames = [];
+	this._usedNames = [];
+    this._minMaxPositions = {
+        corp: {
+            min: 10,
+            max: 100
+        },
+        store: {
+            min: 1,
+            max: 20
+        },
+        warehouse: {
+            min: 3,
+            max: 8
+        }
+    }
+
 	this._corpNames = [
 		'Helix',
 		'Jasper',
@@ -25,7 +39,7 @@ Game.CompanyGenerator = function() {
 		'Ares',
 		'Poseidon'
 	];
-	this._corpIndustries = [
+	this._corpSuffixes = [
 		'R & D',
 		'Technology',
 		'Industries',
@@ -94,8 +108,28 @@ Game.CompanyGenerator = function() {
 		'Janitor',
 		'Technician'
 	];
+
+    this._warehouseNames = [
+        'Acme',
+        'Phil & Ned\'s',
+        'Plus Size',
+        'Joe & Sons',
+        'Tough Guy',
+        'Munder Difflin'
+    ];
+    this._warehouseSuffixes = [
+        'Storage',
+        'Merchandise Holding',
+        'Cargo',
+        'Wares',
+        'Product Transit'
+    ];
+    this._warehouseTitles = [
+        'Foreman',
+        'Worker'
+    ];
 };
-Game.CompanyGenerator.prototype.getTotalJobs = function(amount) {
+Game.CompanyGenerator.prototype.getTotalJobs = function() {
 	return this._totalJobs;
 };
 Game.CompanyGenerator.prototype.addTotalJobs = function(amount) {
@@ -106,43 +140,36 @@ Game.CompanyGenerator.prototype.decreaseTotalJobs = function(amount) {
 	this._totalJobs -= amount;
 	Game.decreaseAvailableJobs(amount);
 };
-Game.CompanyGenerator.prototype.addUsedCorpName = function(corpName) {
-	this._usedCorpNames.push(corpName);
+Game.CompanyGenerator.prototype.addUsedName = function(corpName) {
+	this._usedNames.push(corpName);
 };
-Game.CompanyGenerator.prototype.getUsedCorpNames = function() {
-	return this._usedCorpNames;
+Game.CompanyGenerator.prototype.getUsedNames = function() {
+	return this._usedNames;
 };
-Game.CompanyGenerator.prototype.addUsedStoreName = function(corpName) {
-	this._usedStoreNames.push(corpName);
-};
-Game.CompanyGenerator.prototype.getUsedStoreNames = function() {
-	return this._usedStoreNames;
-};
-Game.CompanyGenerator.prototype._generateStoreName = function() {
+Game.CompanyGenerator.prototype._generateName = function(company) {
+    if (!company) throw Error("Please specify type when generating a name");
+
 	var prefixChance = Math.round(Math.random()),
-		storeName = this._storeNames.random(),
-		storePrefix = prefixChance ? this._storePrefixes.random() : '';
+        suffixChance = Math.round(Math.random()),
+        typeChance = Math.round(Math.random()),
+        prefixes = this['_' + company + 'Prefixes'],
+        suffixes = this['_' + company + 'Suffixes'],
+        types = this['_' + company + 'Types'],
+		name = this['_' + company + 'Names'].random(),
+		prefix = prefixes && prefixChance ? prefixes.random() : false,
+        suffix = suffixes && suffixChance ? suffixes.random() : false,
+        type = types && typeChance ? types.random() : false;
 
-	var finalName = storeName;
-	if(prefixChance)
-		finalName = storePrefix + ' ' + finalName;
+	if (prefix)
+		name = prefix + ' ' + name;
 
-	return finalName;
-};
-Game.CompanyGenerator.prototype._generateCorpName = function() {
-	var industryChance = Math.round(Math.random()),
-		typeChance = Math.round(Math.random()),
-		corpName = this._corpNames.random(),
-		corpIndustry = industryChance ? this._corpIndustries.random() : '',
-		corpType = typeChance ? this._corpTypes.random() : '';
+    if (suffix)
+		name = name + ' ' + suffix;
 
-	var finalName = corpName;
-	if(industryChance)
-		finalName += ' ' + corpIndustry;
-	if(typeChance)
-		finalName += ' ' + corpType;
+    if (type)
+		name = name + ' ' + type;
 
-	return finalName;
+	return name;
 };
 Game.CompanyGenerator.prototype.generate = function(type) {
 	var company = {
@@ -222,55 +249,30 @@ Game.CompanyGenerator.prototype.generate = function(type) {
 			return this.jobLocations;
 		}
 	};
-	if(type === 'corp' && this.getTotalJobs() >= 10) {
-		var usedCorpNames = this.getUsedCorpNames();
-		// Set number of job positions
-		var positions = Game.getRandomInRange(10, Math.min(100, this.getTotalJobs()));
-		this.decreaseTotalJobs(positions);
 
-		// Generate name
-		var corpName, corpTries = 0;
-		do {
-			corpName = this._generateCorpName();
-			corpTries++;
-		} while(usedCorpNames.indexOf(corpName) >= 0 && corpTries < 100);
+    if (this._totalJobs > 0 && this._totalJobs >= this._minMaxPositions[type].min) {
+        var usedNames = this.getUsedNames();
+        var positions = Game.getRandomInRange(Math.min(this._totalJobs, this._minMaxPositions[type].min), Math.min(this._totalJobs, this._minMaxPositions[type].max));
+        var tries = 0;
+        var name;
 
-		if(corpTries >= 100) {
-			debugger;
-			return false;
-		}
-		else {
-			this.addUsedCorpName(corpName);
+        this.decreaseTotalJobs(positions);
+        do {
+            name = this._generateName(type);
+            tries++;
+        } while(usedNames.indexOf(name) > -1 && tries < 100);
 
-			company.positions = positions;
-			company.name = corpName;
-			company.titles = this._corpTitles;
-			return company;
-		}
-	} else if(type === 'store' && this.getTotalJobs() >= 4) {
-		var usedStoreNames = this.getUsedStoreNames();
-		// Set number of job positions
-		var storePositions = Game.getRandomInRange(4, Math.min(20, this.getTotalJobs()));
-		this.decreaseTotalJobs(storePositions);
+        if (tries >= 100) {
+            debugger;
+            return false;
+        }
 
-		// Generate name
-		var storeName, storeTries = 0;
-		do {
-			storeName = this._generateStoreName();
-			storeTries++;
-		} while(usedStoreNames.indexOf(storeName) >= 0 && storeTries < 100);
-
-		if(storeTries >= 100) 
-			return false;
-		else {
-			this.addUsedStoreName(storeName);
-
-			company.positions = storePositions;
-			company.name = storeName;
-			company.titles = this._storeTitles;
-			return company;
-		}
-	} else {
+        this.addUsedName(name);
+        company.positions = positions;
+        company.name = name;
+        company.titles = this['_' + type + 'Titles'];
+        return company;
+    } else {
 		return false;
 	}
 };
