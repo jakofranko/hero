@@ -21,7 +21,7 @@ Game.Lot = function(properties) {
 			var amount = this._buildingSpecs[spec].amount;
 			var type = this._buildingSpecs[spec].type;
 			var repo = this._buildingSpecs[spec].repo;
-			for(i = 0; i < amount; i++) {
+			for(var i = 0; i < amount; i++) {
 				this._buildings.push(Game[repo].create(type));
 			}
 		}
@@ -29,7 +29,7 @@ Game.Lot = function(properties) {
 
 	this.getTiles = null;
 	if(typeof properties['buildTiles'] === 'function') {
-		this.getTiles = properties['buildTiles'];	
+		this.getTiles = properties['buildTiles'];
 	} else {
 		this.getTiles = function() {
 			return this.fillLot('floor');

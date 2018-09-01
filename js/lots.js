@@ -53,7 +53,7 @@ Game.LotRepository.define('building', {
 		var buildingMidWidth = building.getMidWidth();
 		var buildingMidHeight = building.getMidHeight();
 		var b = building.getBlueprint();
-		
+
 		// Place the building in the center of the lot
 		// Find upper corner...
 		var cornerX = centerX - buildingMidWidth;
@@ -193,7 +193,7 @@ Game.LotRepository.define('road', {
 						}
 					} else if(this._orientation == 'intersection') {
 						if(
-							(x < sidewalkWidth && y < sidewalkWidth) || 
+							(x < sidewalkWidth && y < sidewalkWidth) ||
 							(x >= this._width - sidewalkWidth && y < sidewalkWidth) ||
 							(y >= this._height - sidewalkWidth && x < sidewalkWidth) ||
 							(x >= this._width - sidewalkWidth && y >= this._height - sidewalkWidth)
@@ -306,7 +306,7 @@ Game.LotRepository.define('houses', {
 		var tiles = this.fillLot('grass');
 		var buildings = this.getBuildings();
 		var w, h, i;
-		
+
 		// This is the number of buildings we can fit on each row and column
 		w = h = Math.sqrt(buildings.length);
 		i = 0;
@@ -349,7 +349,7 @@ Game.LotRepository.define('houses', {
 					}
 				}
 				i++;
-			}	
+			}
 		}
 		tiles = Game.spaceFill(tiles);
 
