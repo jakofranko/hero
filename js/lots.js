@@ -31,6 +31,11 @@ Game.LotRepository.define('building', {
 			type: 'office building',
 			amount: 1,
 			repo: 'BuildingRepository'
+		},
+        {
+			type: 'warehouse',
+			amount: 1,
+			repo: 'BuildingRepository'
 		}
 	],
 	buildTiles: function() {
@@ -43,7 +48,7 @@ Game.LotRepository.define('building', {
 		var centerX = this.getMidWidth();
 		var centerY = this.getMidHeight();
 
-		var building = this.getBuildings()[0];
+		var building = this.getBuildings().random();
 		building.build();
 
 		// Add building's job locaitons to lot job locations

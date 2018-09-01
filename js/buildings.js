@@ -64,6 +64,96 @@ Game.BuildingRepository.define('bank', {
 	}
 });
 
+Game.BuildingRepository.define('warehouse', {
+    name: 'Warehouse',
+    width: Game.getLotSize() / 1.5,
+    height: Game.getLotSize() / 1.5,
+    stories: 1,
+    placeDoors: function() {
+        var x, y,
+            offsetX = 0,
+            offsetY = 0;
+        // Just place in the middle of an outside wall randomly
+        switch([0, 1, 2, 3].random()) {
+            case 0:
+                x = Math.round((this.getWidth() - 1) / 2);
+                y = 0;
+                offsetX++;
+                break;
+            case 1:
+                x = this.getWidth() - 1;
+                y = Math.round((this.getHeight() - 1) / 2);
+                offsetY++;
+                break;
+            case 2:
+                x = Math.round((this.getWidth() - 1) / 2);
+                y = this.getHeight() - 1;
+                offsetX++;
+                break;
+            case 3:
+                x = 0;
+                y = Math.round((this.getHeight() - 1) / 2);
+                offsetY++;
+                break;
+        }
+
+        if(!this._blueprint[0][x][y]) debugger;
+
+        this._blueprint[0][x][y] = Game.TileRepository.create('door');
+        this._blueprint[0][x + offsetX][y + offsetY] = Game.TileRepository.create('door');
+    },
+    placeItems: function() {
+        var spacer = 3;
+        var itemChances = {
+            'furniture rack': 1,
+            'hardware rack': 0.5,
+            'weapons rack': 0.1
+        };
+        var itemKeys = Object.keys(itemChances);
+        var itemName, item;
+
+        function placeItem(x, y) {
+            var chance = Math.random();
+            itemKeys.every(function(item) {
+                if (chance < itemChances[item]) {
+                    itemName = item;
+                    return true;
+                } else {
+                    return false;
+                }
+
+            }, this)
+            item = Game.ItemRepository.create(itemName)
+            this.addItem(x, y, 0, item)
+        }
+
+        // Place rows of racks either vertically or horizontally
+        if (Math.random() > 0.5) {
+            for (var x = spacer, width = this.getWidth() - spacer; x < width; x += spacer) {
+                for (var y = spacer, height = this.getHeight() - spacer; y < height; y++) {
+                    placeItem.call(this, x, y);
+                }
+            }
+        } else {
+            for (var y = spacer, height = this.getHeight() - spacer; y < height; y += spacer) {
+                for (var x = spacer, width = this.getWidth() - spacer; x < width; x ++) {
+                    placeItem.call(this, x, y);
+                }
+            }
+        }
+
+        for (var i = 0; i < 5; i++) {
+            this.addJobLocation(Game.getRandomInRange(1, this.getWidth()) + "," + Game.getRandomInRange(1, this.getHeight()) + ",0");
+        }
+    },
+    build: function() {
+        this._createBlueprint();
+        this._placeItems();
+        this._placeDoors();
+        this._placeJobs('warehouse');
+    }
+});
+
 Game.BuildingRepository.define('apartment', {
 	name: 'Apartment Complex',
 	exactProperties: true,
