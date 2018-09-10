@@ -189,3 +189,9 @@ Game.ItemRepository.define('weapons crate', {
     mixins: [Game.ItemMixins.Container],
     items: []
 });
+
+Game.ItemRepository.define('bush', {
+    name: 'bush',
+    character: '*',
+    foreground: Game.Palette.leafGreen
+});

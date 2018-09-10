@@ -124,3 +124,27 @@ Game.EntityRepository.define('robber', {
         Game.EntityMixins.Walker
     ]
 });
+
+Game.EntityRepository.define('lost child', {
+    name: 'lost child',
+    character: 'c',
+    type: 'Event NPC - Lost Child',
+    foreground: Game.Palette.blue,
+    STR: 1,
+    DEX: 3,
+    CON: 1,
+    BODY: 1,
+    INT: 5,
+    EGO: 1,
+    PRE: 1,
+    reactionTypes: ['runAway'],
+    mixins: [
+        Game.EntityMixins.Characteristics,
+        Game.EntityMixins.EventParticipant,
+        Game.EntityMixins.Interactor,
+        Game.EntityMixins.JobActor,
+        Game.EntityMixins.Sight,
+        Game.EntityMixins.Reactor,
+        Game.EntityMixins.Walker
+    ]
+});

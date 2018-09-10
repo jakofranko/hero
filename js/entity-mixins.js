@@ -545,6 +545,47 @@ Game.EntityMixins.ExperienceGainer = {
         }
     }
 };
+Game.EntityMixins.Interactor = {
+    name: 'Interactor',
+    groupName: 'Actions',
+    init: function(template) {
+        this._interactions = template['interactions'] || {
+            greet: [
+                [Game.sendMessage, ['Hi there %s!']]
+            ]
+        };
+    },
+    listeners: {
+        action: function(actionTaker) {
+            // Can add a bit more custom logic, but for now, add actionTaker as the last
+            // arguement for all interaction functions, and also the first if the
+            // function is 'Game.sendMessage'
+            debugger;
+            var actions = Object.assign({}, this._interactions);
+            var actionNames = Object.keys(actions);
+
+            actionNames.forEach(name => {
+                actions[name] = actions[name].slice();
+
+                // For each action, add `actionTaker` to the arguments array
+                actions[name].forEach((action, i) => {
+                    // Clone arrays so as not to alter original interactions object
+                    actions[name][i] = actions[name][i].slice();
+                    actions[name][i][1] = actions[name][i][1].slice();
+
+                    if (actions[name][i][0] === Game.sendMessage) {
+                        actions[name][i][1].push([actionTaker.getName()]);
+                        actions[name][i][1].unshift(actionTaker);
+                    } else {
+                        actions[name][i][1].push(actionTaker);
+                    }
+                });
+            });
+
+            return actions;
+        }
+    }
+};
 Game.EntityMixins.InventoryHolder = {
     name: 'InventoryHolder',
     init: function(template) {

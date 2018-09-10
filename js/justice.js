@@ -1,5 +1,5 @@
 // This is the main mechanic for winning the game (and maybe losing).
-// The goal is to have a perfect justice meter. This doesn't mean that 
+// The goal is to have a perfect justice meter. This doesn't mean that
 // criminals will never spawn, that crime will never be committed or that
 // corrupt officials will never get into the system, or that outside forces
 // will never appear to make things difficult for your city. But it does
@@ -11,7 +11,7 @@
 // 2.	The Justice Level is affected by 'second tier' meters, which also
 //		cannot be directly affected. Some of these should be kept low,
 //		and some should be kept high.
-// 3.	These 'second tier' meters are directly affected by 'third tier' 
+// 3.	These 'second tier' meters are directly affected by 'third tier'
 //		levels/meters, and these ARE directly affected by the player.
 //		The resolution of these 'third tier' elements will thus be the
 //		main gameplay, such as defeating criminals, gaining arrests,
@@ -29,6 +29,7 @@ Game.Justice = function() {
 	// Third Tier meters
 	this._criminals = 0;
 	this._respect_for_law = 0;
+    this._good_deeds = 0;
 
 	// Initialize justice level based on other starting levels
 	this.updateJustice();
@@ -39,6 +40,7 @@ Game.Justice.prototype.getJustice = function() {
 Game.Justice.prototype.updateJustice = function() {
 	// Update second tier meters
 	this.updateCrime();
+    this.updateCorruption();
 
 	// Justice is a function of the second tier meters (crime and corruption)
 	// Neither Crime nor Corruption should be more that 50
@@ -64,6 +66,12 @@ Game.Justice.prototype.updateCrime = function() {
 		rflModifier = (this._respect_for_law / 100) + 1,
 		totalCrime = crimePercentage / rflModifier;
 	this._crime = totalCrime;
+};
+Game.Justice.prototype.getCorruption = function() {
+    return this._corruption;
+};
+Game.Justice.prototype.updateCorruption = function () {
+    this._corruption = 0 - this._good_deeds;
 };
 
 // Third Tier methods
@@ -91,5 +99,20 @@ Game.Justice.prototype.addRespectForLaw = function(respect) {
 };
 Game.Justice.prototype.removeRespectForLaw = function(respect) {
 	this._respect_for_law -= respect;
+	this.updateJustice();
+};
+
+Game.Justice.prototype.getGoodDeeds = function() {
+	return this._respect_for_law;
+};
+Game.Justice.prototype.addGoodDeeds = function(deeds) {
+	// Should not be more than 100
+	this._good_deeds += deeds;
+	if(this._good_deeds > 100)
+		this._good_deeds = 100;
+	this.updateJustice();
+};
+Game.Justice.prototype.removeGoodDeeds  = function(deeds) {
+	this._good_deeds -= deeds;
 	this.updateJustice();
 };

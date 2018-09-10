@@ -44,7 +44,14 @@ Game.City = function(size) {
 		spawnChance: 0.1,
 		// TODO: [EVENTS] add spawnCondition func
 	});
-	this._eventSources = [crimeEvents];
+    var lostChildEvents = new Game.EventSource({
+        name: 'lost children',
+        maxActiveEvents: 10,
+        eventTypes: ['lost child'],
+        spawChance: 0.5
+        // TODO: [EVENTS] add spawnCondition
+    })
+	this._eventSources = [crimeEvents, lostChildEvents];
 };
 // Getters and setters
 Game.City.prototype.getWidth = function() {
@@ -158,7 +165,7 @@ Game.City.prototype.init = function() {
 						} else {
 							this._lots[thisColumn][i] = Game.LotRepository.create('road', {
 								orientation: 'vertical'
-							});	
+							});
 						}
 					}
 				} else if(x === 0) {
@@ -191,7 +198,7 @@ Game.City.prototype.init = function() {
 			} else {
 				var lot = Game.LotRepository.createIf('willSpawn', this.neighborhood(x, y));
 				if(lot) {
-					this._lots[x][y] = lot;	
+					this._lots[x][y] = lot;
 				} else {
 					Game.LotRepository.create('empty');
 				}
@@ -226,7 +233,7 @@ Game.City.prototype.tilesFromLots = function() {
 				tiles = this._lots[cityX][cityY].getTiles();
 
 			// Now that the tiles have been instantiated, fetch the lot's companies,
-			// adjust their x and y values based on their location in the city, and 
+			// adjust their x and y values based on their location in the city, and
 			// then add them to the list of city companies.
 			var lotCompanies = this.adjustCompaniesLocations(this._lots[cityX][cityY].getCompanies(), lotOffsetX, lotOffsetY);
 			if(lotCompanies.length > 0)
