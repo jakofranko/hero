@@ -52,7 +52,7 @@ Game.Event = function(properties) {
     // 'Hooks' or 'Listeners' for when event entities do stuff
     this._onDeath  = properties['onDeath'] || function(victim, killer) { console.log(`Entity '${victim.getName()}' was kill by '${killer.getName()}'`); };
     this._onKill  = properties['onKill'] || function(killer, victim) { console.log(`Entity '${killer.getName()}' has killed '${victim.getName()}'`); };
-    this._onInteraction  = properties['onInteraction'] || function(entity, interaction) { console.log(`Entity '${entity.getName()}' was interacted with`); };
+    this._onInteraction  = properties['onInteraction'] || function(entity, interaction) { console.log(`Entity '${entity.getName()}' was interacted with (${interaction})`); };
     this._onTurn = properties['onTurn'] || function() { console.log('Turn: ' + this._turns); };
 
     // Cache objects for when the event starts
@@ -146,7 +146,7 @@ Game.Event.prototype.start = function() {
             spawnY = Number(splitLocation[1]) + Game.getRandomInRange(-spawnRadius, spawnRadius);
             numTimes++;
         } while(
-            (!this._map.isEmptyFloor(spawnX, spawnY, splitLocation[2]) ||
+            (!this._map.getTile(spawnX, spawnY, splitLocation[2]).isWalkable() ||
             this._map.getEntityAt(spawnX, spawnY, splitLocation[2]) ||
             spawnLocations.indexOf(`${spawnX},${spawnY},${splitLocation[2]}`) !== -1) &&
             numTimes < maxTimes

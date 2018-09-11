@@ -218,7 +218,7 @@ Game.Map.prototype.removeEntity = function(entity) {
         this._scheduler.remove(entity);
 
     // Add their livingLocation to the available list if applicable
-    var home = entity.recall('places', 'home');
+    var home = entity.hasMixin('MemoryMaker') ? entity.recall('places', 'home') : false;
     if(home) {
         var index = this._occupiedLivingLocations.indexOf(home);
         this.vacateLivingLocation(index);

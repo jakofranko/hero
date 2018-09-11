@@ -109,7 +109,7 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
     canMoveResults = this.raiseEvent('canMove', { x: x, y: y, z: z, tile: tile });
     canMove = canMoveResults.length && canMoveResults.some(isTrue);
     canAttackResults = this.raiseEvent('canAttack', target);
-    canAttack = target && canAttackResults.length && canAttackResults.some(isTrue);
+    canAttack = this.hasMixin('Attacker') && target && target.hasMixin('Characteristics') && canAttackResults.length && canAttackResults.some(isTrue);
 
 	if(canAttack) {
         if(this.hasMixin('PowerUser') && this.getPrimaryMelee())
