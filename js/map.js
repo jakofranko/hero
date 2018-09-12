@@ -278,8 +278,7 @@ Game.Map.prototype.post12Recovery = function() {
 Game.Map.prototype._generateEntities = function() {
     var criminals = 0,
         companies = this._city.getCompanies(),
-        currentCompany = 0,
-        addedWork = false;
+        currentCompany = 0;
 
     for (var i = 0; i < Game.getTotalEntities(); i++) {
         // The template has to be created each time, because making it once
@@ -400,12 +399,10 @@ Game.Map.prototype._createSortByDistance = function(coord) {
 };
 // TODO: Optimize these get path functions to sort the stairs by distance first, then find path. Additionally, most of this code is duplicated between the two functions, and could be reduced to a single function that takes a direction param
 Game.Map.prototype.getPathToNearestStair = function(x, y, z, type) {
-    var nearestIndex = null,
-        nearestDistance = null,
-        steps = [],
+    var steps = [],
         map = this,
         stairType = '_' + type + 'Stairs',
-        stairsX, stairsY, distance, pather;
+        stairsX, stairsY, pather;
 
     var canWalk = function(floorX, floorY) {
         return map.getTile(floorX, floorY, z).isWalkable();
@@ -421,7 +418,6 @@ Game.Map.prototype.getPathToNearestStair = function(x, y, z, type) {
     for (var i = 0; i < stairs.length; i++) {
         var split = stairs[i].split(",");
 
-        newSteps = [];
         stairsX = Number(split[0]);
         stairsY = Number(split[1]);
 
