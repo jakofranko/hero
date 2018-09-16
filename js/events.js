@@ -73,12 +73,7 @@ Game.EventRepository.define('lost child', {
     minEntities: 1,
     maxEntities: 1,
     successCondition: function() {
-        var entities = this.getEntities();
-
-        if(entities.length < 1)
-            return true;
-        else
-            return false;
+        return this._childRescued; // Set in onInteraction below
     },
     successEffect: function() {
         var map = this.getMap(),
@@ -89,9 +84,20 @@ Game.EventRepository.define('lost child', {
         entities.forEach(entity => { map.removeEntity(entity); });
     },
     lossCondition: function() {
-        return false; // never expires
+        if(this.getEntities().length < 1)
+            return true;
+        else
+            return false;
     },
-    lossEffect: function() {},
+    lossEffect: function() {
+        var map =  this.getMap();
+
+        map.getJustice().removeRespectForLaw(5);
+        this.getEntities().forEach(entity => { map.removeEntity(entity); });
+    },
+    onInteraction: function() {
+        this._childRescued = true;
+    },
     onDeath: function(victim, killer) {
         var entities = this.getEntities();
         for (var i = 0; i < entities.length; i++) {

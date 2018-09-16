@@ -138,6 +138,17 @@ Game.EntityRepository.define('lost child', {
     EGO: 1,
     PRE: 1,
     reactionTypes: ['runAway'],
+    interactions: {
+        greet: [
+            [Game.sendMessage, ['Hi there %s...can you help me find my parents?']]
+        ],
+        help: [
+            [Game.sendMessage, ['Thank you!!!']],
+            [function(interactor, thisEntity) {
+                thisEntity.getEvent().raiseEvent('onInteraction');
+            }, []]
+        ]
+    },
     mixins: [
         Game.EntityMixins.Characteristics,
         Game.EntityMixins.EventParticipant,
