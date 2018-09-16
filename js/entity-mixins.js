@@ -567,17 +567,23 @@ Game.EntityMixins.Interactor = {
             actionNames.forEach(name => {
                 actions[name] = actions[name].slice();
 
-                // For each action, add `actionTaker` to the arguments array
+                // For each action, add `actionTaker` and this entity to the arguments array
                 actions[name].forEach((action, i) => {
                     // Clone arrays so as not to alter original interactions object
                     actions[name][i] = actions[name][i].slice();
-                    actions[name][i][1] = actions[name][i][1].slice();
 
-                    if (actions[name][i][0] === Game.sendMessage) {
-                        actions[name][i][1].push([actionTaker.getName()]);
-                        actions[name][i][1].unshift(actionTaker);
-                    } else {
-                        actions[name][i][1].push(actionTaker);
+                    // Handle args if they exist
+                    if (actions[name][i][1]) {
+                        // Clone so as not to alter original
+                        actions[name][i][1] = actions[name][i][1].slice();
+
+                        if (actions[name][i][0] === Game.sendMessage) {
+                            actions[name][i][1].push([actionTaker.getName()]);
+                            actions[name][i][1].unshift(actionTaker);
+                        } else {
+                            actions[name][i][1].push(actionTaker);
+                            actions[name][i][1].push(this);
+                        }
                     }
                 });
             });

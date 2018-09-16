@@ -103,7 +103,7 @@ Game.Justice.prototype.removeRespectForLaw = function(respect) {
 };
 
 Game.Justice.prototype.getGoodDeeds = function() {
-	return this._respect_for_law;
+	return this._good_deeds;
 };
 Game.Justice.prototype.addGoodDeeds = function(deeds) {
 	// Should not be more than 100
