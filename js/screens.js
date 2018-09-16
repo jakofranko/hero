@@ -1377,19 +1377,21 @@ Game.Screen.justiceScreen = {
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, 0, 'Justice');
 
         var startX = 0;
+        var startY = 2;
         var title = 'Justice';
         // Draw Justice Meter
-        this._drawMeter(display, startX, 2, title, justice.getJustice() / 100);
+        this._drawMeter(display, startX, startY, title, justice.getJustice() / 100);
 
         startX += (title.length + this._padding);
         title = 'Crime';
         // Draw Crime Meter
-        this._drawMeter(display, startX, 2, title, justice.getCrime() / 100, true);
+        this._drawMeter(display, startX, startY, title, justice.getCrime() / 100, true);
 
-        // Number of Criminals
+        // Other stats
         startX += (title.length + this._padding);
-        title = 'Criminals';
-        display.drawText(startX, 2, title + ': ' + justice.getCriminals());
+        display.drawText(startX, startY++, 'Criminals: ' + justice.getCriminals());
+        display.drawText(startX, startY++, 'Respect for Law: ' + justice.getRespectForLaw());
+        display.drawText(startX, startY++, 'Good Deeds: ' + justice.getGoodDeeds());
     },
     handleInput: function(inputType, inputData) {
         if(inputType == 'keydown' && (inputData.keyCode === ROT.VK_ESCAPE || inputData.keyCode === ROT.VK_RETURN))
