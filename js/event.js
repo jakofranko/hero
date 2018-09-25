@@ -50,6 +50,7 @@ Game.Event = function(properties) {
     this._lossEffect       = properties['lossEffect'];
 
     // 'Hooks' or 'Listeners' for when event entities do stuff
+    this._onKO  = properties['onKO'] || function(victim, killer) { console.log(`Entity '${victim.getName()}' was knocked out by '${killer.getName()}'`); };
     this._onDeath  = properties['onDeath'] || function(victim, killer) { console.log(`Entity '${victim.getName()}' was kill by '${killer.getName()}'`); };
     this._onKill  = properties['onKill'] || function(killer, victim) { console.log(`Entity '${killer.getName()}' has killed '${victim.getName()}'`); };
     this._onInteraction  = properties['onInteraction'] || function(entity, interaction) { console.log(`Entity '${entity.getName()}' was interacted with (${interaction})`); };

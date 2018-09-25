@@ -513,6 +513,9 @@ Game.EntityMixins.EventParticipant = {
         return this._event;
     },
     listeners: {
+        onKO: function(attacker) {
+            this._event.raiseEvent('onKO', this, attacker);
+        },
         onDeath: function(killer) {
             this._event.raiseEvent('onDeath', this, killer);
         },
@@ -1183,7 +1186,7 @@ Game.EntityMixins.PowerUser = {
                 return true;
             else if (this.getMap().getTile(this.getX(), this.getY(), this.getZ()).isFlyable() && pos.z === 0)
                 return true;
-            else if (canFly)
+            else if (canFly && pos.z !== 0)
                 Game.sendMessage(this, "You can't fly there, something is blocking you.");
         },
         getVisibleEntities: function() {

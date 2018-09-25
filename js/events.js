@@ -15,9 +15,11 @@ Game.EventRepository.define('bank robbery', {
     minEntities: 2,
     maxEntities: 6,
     successCondition: function() {
-        var entities = this.getEntities();
+        debugger;
+        var entities = this.getEntities(),
+            conscious = entities.filter(entity => entity.isConscious());
 
-        if(entities.length < 1)
+        if(entities.length < 1 || conscious.length < 1)
             return true;
         else
             return false;
@@ -51,6 +53,9 @@ Game.EventRepository.define('bank robbery', {
             entity.remember('places', 'home', false, {location: availableLivingLocations[0]});
             map.occupyLivingLocation(0);
         }
+    },
+    onKO: function(victim, attacker) {
+
     },
     onDeath: function(victim, killer) {
         var entities = this.getEntities();
@@ -108,4 +113,53 @@ Game.EventRepository.define('lost child', {
         }
         console.log(`Entity '${victim.getName()}' was killed by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
     }
-})
+});
+
+Game.EventRepository.define('turf war', {
+    name: 'turf war',
+    message: 'A turf war has begun between two rival gangs',
+    successMessage: 'You stop the gangs from any further violence',
+    spawnLocations: ['weapon rack'],
+    entityTypes: ['thug', 'gunner', 'gang lieutenent'],
+    minEntities: 7,
+    maxEntities: 16,
+    successCondition: function() {
+        if(this.getEntities().length < 1)
+            return true;
+        else
+            return false;
+    },
+    successEffect: function() {
+        var map = this.getMap(),
+            justice = map.getJustice(),
+            entities = this.getEntities();
+
+        justice.addGoodDeeds(1);
+        entities.forEach(entity => { map.removeEntity(entity); });
+    },
+    lossCondition: function() {
+        if(this.getEntities().length < 1)
+            return true;
+        else
+            return false;
+    },
+    lossEffect: function() {
+        var map =  this.getMap();
+
+        map.getJustice().removeRespectForLaw(5);
+        this.getEntities().forEach(entity => { map.removeEntity(entity); });
+    },
+    onInteraction: function() {
+        this._childRescued = true;
+    },
+    onDeath: function(victim, killer) {
+        var entities = this.getEntities();
+        for (var i = 0; i < entities.length; i++) {
+            if(victim == entities[i]) {
+                this.removeEntity(i);
+                break;
+            }
+        }
+        console.log(`Entity '${victim.getName()}' was killed by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
+    }
+});
