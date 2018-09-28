@@ -41,7 +41,11 @@ Game.Event = function(properties) {
     this._entityTypes    = properties['entityTypes'];
     this._minEntities    = properties['minEntities'];
     this._maxEntities    = properties['maxEntities'];
-    this._onEntitySpawn  = properties['onEntitySpawn'] || function(entity){console.log(entity)};
+
+    // Event start hooks
+    this._onEventStart  = properties['onEventStart'] || function(){console.log(`The event '${this._name}' started`)}
+    this._onEventEnd  = properties['onEventEnd'] || function(){console.log(`The event '${this._name}' ended`)}
+    this._onEntitySpawn = properties['onEntitySpawn'] || function(entity){console.log(entity)};
 
     // Conditions for the event being a 'success' or a 'loss'
     this._successCondition = properties['successCondition'];
@@ -120,6 +124,8 @@ Game.Event.prototype.removeEntity = function(entityIndex) {
 Game.Event.prototype.start = function() {
     var numEntities = Game.getRandomInRange(this._minEntities, this._maxEntities),
         spawnItem = false;
+
+    this._onEventStart();
 
     // Try to grab a random spawn location
     var tries = 20;
