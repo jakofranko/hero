@@ -15,7 +15,6 @@ Game.EventRepository.define('bank robbery', {
     minEntities: 2,
     maxEntities: 6,
     successCondition: function() {
-        debugger;
         var entities = this.getEntities(),
             conscious = entities.filter(entity => entity.isConscious());
 
@@ -53,9 +52,6 @@ Game.EventRepository.define('bank robbery', {
             entity.remember('places', 'home', false, {location: availableLivingLocations[0]});
             map.occupyLivingLocation(0);
         }
-    },
-    onKO: function(victim, attacker) {
-
     },
     onDeath: function(victim, killer) {
         var entities = this.getEntities();
