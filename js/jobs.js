@@ -204,3 +204,14 @@ Game.Jobs.mugger = {
         return entity.getMoney() / Game.Jobs.survive.priority();
     }
 };
+
+Game.Jobs.gangWarrior = {
+    crime: true,
+    noise: 50,
+    doJob: function(entity) {
+
+    },
+    priority: function() {
+        return 1;
+    }
+};

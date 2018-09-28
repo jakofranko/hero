@@ -119,8 +119,8 @@ Game.EventRepository.define('turf war', {
     name: 'turf war',
     message: 'A turf war has begun between two rival gangs',
     successMessage: 'You stop the gangs from any further violence',
-    spawnLocations: ['weapon rack'],
-    entityTypes: ['thug', 'gunner', 'gang lieutenent'],
+    spawnLocations: ['weapon rack', 'bush'],
+    entityTypes: ['gang war bruiser', 'gang war gunner', 'gang war lieutenent'],
     minEntities: 7,
     maxEntities: 16,
     successCondition: function() {
@@ -134,7 +134,7 @@ Game.EventRepository.define('turf war', {
             justice = map.getJustice(),
             entities = this.getEntities();
 
-        justice.addGoodDeeds(1);
+        justice.addRespectForLaw(15);
         entities.forEach(entity => { map.removeEntity(entity); });
     },
     lossCondition: function() {
@@ -146,8 +146,15 @@ Game.EventRepository.define('turf war', {
     lossEffect: function() {
         var map =  this.getMap();
 
-        map.getJustice().removeRespectForLaw(5);
+        map.getJustice().removeRespectForLaw(15);
         this.getEntities().forEach(entity => { map.removeEntity(entity); });
+    },
+    onEventStart: function() {
+        var gangNameGenerator = new Game.GangNameGenerator();
+        this._gangName = gangNameGenerator.name();
+    },
+    onEntitySpawn: function(entity) {
+        entity._gangName = this._gangName;
     },
     onInteraction: function() {
         this._childRescued = true;
