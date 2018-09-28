@@ -21,7 +21,7 @@ Game.Jobs.survive = {
         // For now, just wander
          Game.Tasks.wander(entity);
     },
-    priority: function(entity) {
+    priority: function() {
         return 10;
     }
 };
@@ -91,7 +91,7 @@ Game.Jobs.robber = {
 
                 // Trigger the onCrime event for witnesses
                 var witnesses = entity.getMap().getEntitiesWithinRadius(entity.getX(), entity.getY(), entity.getZ(), this.noise);
-                for(var i = 0; i < witnesses.length; i++)
+                for(var j = 0; j < witnesses.length; j++)
                     witnesses[i].raiseEvent('onCrime', entity);
 
                 return true;
@@ -167,7 +167,7 @@ Game.Jobs.mugger = {
             if(success >= 10) {
                 this._attemptTheft(entity, target);
             } else {
-                var hit = entity.hthAttack(target);
+                entity.hthAttack(target);
                 if(!target.isConscious()) {
                     this._attemptTheft(entity, target);
                 }
