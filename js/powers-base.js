@@ -311,7 +311,7 @@ Game.BasePowers.rangedKillingAttack.extend(Game.BasePower);
 Game.BasePowers.armor = function(options) {
     var properties = {
         name: 'Armor',
-        type: 'Attack',
+        type: 'Defense',
         cost: 3,
         duration: 'persistent',
         pointsMin: 3,
