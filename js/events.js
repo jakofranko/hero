@@ -111,9 +111,9 @@ Game.EventRepository.define('lost child', {
     }
 });
 
-Game.EventRepository.define('turf war', {
-    name: 'turf war',
-    message: 'A turf war has begun between two rival gangs',
+Game.EventRepository.define('gang war', {
+    name: 'gang war',
+    message: 'A gang war has begun between two rival gangs',
     successMessage: 'You stop the gangs from any further violence',
     spawnLocations: ['weapon rack', 'bush'],
     entityTypes: ['gang war bruiser', 'gang war gunner', 'gang war lieutenent'],
@@ -151,6 +151,15 @@ Game.EventRepository.define('turf war', {
     },
     onEntitySpawn: function(entity) {
         entity._gangName = this._gangName;
+
+        if (entity.hasMixin('PowerUser')) {
+            // TODO: spend points on powers
+            entity.getPowers().forEach(function(power) {
+                if (power.name === 'Kevlar Body Armor') {
+                    entity.usePower([entity], power);
+                }
+            }, this);
+        }
     },
     onInteraction: function() {
         this._childRescued = true;

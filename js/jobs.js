@@ -209,7 +209,30 @@ Game.Jobs.gangWarrior = {
     crime: true,
     noise: 50,
     doJob: function(entity) {
+        if(!entity.hasMixin('Targeting'))
+            return;
 
+        var target = entity.getTarget();
+        var targetGang = entity.getEvent().targetGang;
+        if(target === false || target === null) {
+            // Try to find a rival gang member
+            target = Game.Tasks.findRivalGangMember(entity, targetGang);
+            if(target) {
+                entity.setTarget(target);
+                if (!targetGang) entity.getEvent().targetGang = target._gangName;
+            }
+        }
+
+        if (target && (target.isConscious() || target.isAlive())) {
+            // All ranged attacks will be powers, so check if entity is a PowerUser
+            if (entity.hasMixin('PowerUser')) {
+                Game.Tasks.attemptAttackPower(entity, target);
+            } else {
+                Game.Tasks.attemptMelee(entity, target);
+            }
+        } else {
+            Game.Tasks.wander(entity);
+        }
     },
     priority: function() {
         return 1;

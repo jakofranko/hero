@@ -335,15 +335,77 @@ Game.Tasks.retreat = function(self, target) {
 };
 
 Game.Tasks.findRandomEntityInSight = function(self) {
-	var entities = self.getMap().getEntitiesWithinRadius(self.getX(), self.getY(), self.getZ(), self.getSightRadius());
-	var randomized = entities.randomize();
-	var entity = randomized.pop();
+    var entities = self.getMap().getEntitiesWithinRadius(self.getX(), self.getY(), self.getZ(), self.getSightRadius());
+    var randomized = entities.randomize();
+    var entity = randomized.pop();
 
-	while(entity == self && randomized.length > 0)
-		entity = randomized.pop();
+    while(entity == self && randomized.length > 0)
+        entity = randomized.pop();
 
-	if(entity && entity != self)
-		return entity;
-	else
-		return false;	
+    if(entity && entity != self)
+        return entity;
+    else
+        return false;
 };
+
+Game.Tasks.findRivalGangMember = function(self, gangName) {
+    var entities = self.getMap().getEntities();
+    var coords = Object.keys(entities);
+    var target;
+    if (gangName) {
+        coords.some(function(coord) {
+            var entity = entities[coord];
+            if (entity._gangName && entity._gangName !== self._gangName && entity._gangName === gangName) {
+                target = entity;
+                return true;
+            } else {
+                return false;
+            }
+        }, this);
+    } else {
+        coords.some(function(coord) {
+            var entity = entities[coord];
+            if (entity._gangName && entity._gangName !== self._gangName) {
+                target = entity;
+                return true;
+            } else {
+                return false;
+            }
+        }, this);
+    }
+
+    return target;
+}
+Game.Tasks.attemptAttackPower = function(self, target) {
+    var powers = self.getPowers();
+    var inRange = true;
+    powers.forEach(function(power) {
+        if (power.type === "Attack") {
+            if (power.inRange(self.getX(), self.getY(), target.getX(), target.getY())) {
+                self.userPower([target], power);
+            } else {
+                inRange = false;
+            }
+        }
+    }, this);
+
+    if (!inRange) {
+        this.hunt(self);
+    }
+}
+
+Game.Tasks.attemptMelee = function(self, target) {
+    var adjacent;
+    if (self.canSee(target))
+        adjacent = this.approach(self, target);
+    else
+        this.hunt(self); // Will track target
+
+    if (adjacent) {
+        self.hthAttack(target);
+        var witnesses = self.getMap().getEntitiesWithinRadius(self.getX(), self.getY(), self.getZ(), this.noise);
+        for (var i = 0; i < witnesses.length; i++) {
+            witnesses[i].raiseEvent('onCrime', self);
+        }
+    }
+}

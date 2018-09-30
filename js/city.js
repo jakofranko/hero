@@ -50,8 +50,15 @@ Game.City = function(size) {
         eventTypes: ['lost child'],
         spawChance: 0.05
         // TODO: [EVENTS] add spawnCondition
-    })
-	this._eventSources = [crimeEvents, lostChildEvents];
+    });
+    var gangWarEvents = new Game.EventSource({
+        name: 'gang war',
+        maxActiveEvents: 4,
+        eventTypes: ['gang war'],
+        spawChance: 0.5
+        // TODO: [EVENTS] add spawnCondition
+    });
+	this._eventSources = [crimeEvents, lostChildEvents, gangWarEvents];
 };
 // Getters and setters
 Game.City.prototype.getWidth = function() {
