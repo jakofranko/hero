@@ -274,7 +274,6 @@ Game.BasePowers.rangedKillingAttack = function(options) {
 
                     var hit = this.entity._attackRoll(target);
                     if(hit) {
-                        debugger;
                         var dice = Math.floor(this.points / this.cost);
                         var STUN = 0;
                         var BODY = 0;

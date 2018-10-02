@@ -382,7 +382,7 @@ Game.Tasks.attemptAttackPower = function(self, target) {
     powers.forEach(function(power) {
         if (power.type === "Attack") {
             if (power.inRange(self.getX(), self.getY(), target.getX(), target.getY())) {
-                self.userPower([target], power);
+                self.usePower([target], power);
             } else {
                 inRange = false;
             }

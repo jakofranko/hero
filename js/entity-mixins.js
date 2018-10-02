@@ -284,7 +284,7 @@ Game.EntityMixins.Characteristics = {
         if(this._STUN <= 0) {
             Game.sendMessage(attacker, "You knocked %s unconscious", [this.getName()]);
             this.ko();
-            this.raiseEvent('onKO');
+            this.raiseEvent('onKO', attacker);
         }
 
         this.raiseEvent('onAttack', attacker);
@@ -727,7 +727,7 @@ Game.EntityMixins.JobActor = {
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0)
             this.reprioritizeJobs();
 
-        Game.Jobs[this._jobCurrent].doJob(this);
+        Game.Jobs[this._jobCurrent] ? Game.Jobs[this._jobCurrent].doJob(this) : Game.Jobs.survive.doJob(this);
 
         if(this.hasMixin('MemoryMaker'))
             this.processMemories();
@@ -1176,6 +1176,9 @@ Game.EntityMixins.PowerUser = {
     listeners: {
         canMove: function(pos) {
             var canFly;
+            if (!pos || !pos.tile)
+                return;
+                
             if(this._constantPowers.length) {
                 canFly = this._constantPowers.filter(function(power) {
                     return power.name === 'Flight';
