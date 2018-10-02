@@ -203,6 +203,7 @@ Game.EntityRepository.define('gang war gunner', {
     character: 'm',
     type: 'Event NPC - Gang War Gunner',
     foreground: Game.Palette.red,
+    basePoints: 30, // half this number needs to be enough for at least 1 upgrade of a RKA (15 points)
     STR: 4,
     DEX: 8,
     CON: 3,
@@ -219,6 +220,7 @@ Game.EntityRepository.define('gang war gunner', {
     },
     mixins: [
         Game.EntityMixins.Characteristics,
+        Game.EntityMixins.PowerUser,
         Game.EntityMixins.BasePoints,
         Game.EntityMixins.Attacker,
         Game.EntityMixins.CorpseDropper,
@@ -233,8 +235,7 @@ Game.EntityRepository.define('gang war gunner', {
         Game.EntityMixins.Targeting,
         Game.EntityMixins.RandomStatGainer,
         Game.EntityMixins.Reactor,
-        Game.EntityMixins.Walker,
-        Game.EntityMixins.PowerUser
+        Game.EntityMixins.Walker
     ]
 });
 
@@ -243,6 +244,7 @@ Game.EntityRepository.define('gang war lieutenent', {
     character: 'm',
     type: 'Event NPC - Gang War Lieutenent',
     foreground: Game.Palette.red,
+    basePoints: 90, // half this number needs to be enough for at least 1 upgrade of a RKA (15 points)
     STR: 8,
     DEX: 8,
     CON: 8,
@@ -259,6 +261,7 @@ Game.EntityRepository.define('gang war lieutenent', {
     },
     mixins: [
         Game.EntityMixins.Characteristics,
+        Game.EntityMixins.PowerUser,
         Game.EntityMixins.BasePoints,
         Game.EntityMixins.Attacker,
         Game.EntityMixins.CorpseDropper,
@@ -273,7 +276,6 @@ Game.EntityRepository.define('gang war lieutenent', {
         Game.EntityMixins.Targeting,
         Game.EntityMixins.RandomStatGainer,
         Game.EntityMixins.Reactor,
-        Game.EntityMixins.Walker,
-        Game.EntityMixins.PowerUser
+        Game.EntityMixins.Walker
     ]
 });

@@ -153,7 +153,6 @@ Game.EventRepository.define('gang war', {
         entity._gangName = this._gangName;
 
         if (entity.hasMixin('PowerUser')) {
-            // TODO: spend points on powers
             entity.getPowers().forEach(function(power) {
                 if (power.name === 'Kevlar Body Armor') {
                     entity.usePower([entity], power);

@@ -1282,7 +1282,12 @@ Game.EntityMixins.RandomStatGainer = {
     init: function() {
         if(this.hasMixin('BasePoints') && this.getSpendablePoints() > 0) {
             var characteristics = ['STR', 'DEX', 'BODY', 'INT', 'STUN'];
-            while(this.getSpendablePoints() > 0) {
+            var powers = this.hasMixin('PowerUser') ? this.getPowers() : false;
+            var tooExpensive = [];
+            var statPoints = powers ? this.getSpendablePoints() / 2 : this.getSpendablePoints();
+            var powerPoints;
+
+            while(statPoints > 0) {
                 // The only thing keeping this from being an infinite loop
                 // is the fact that STR and STUN only cost 1 character point
                 var characteristic = characteristics.random();
@@ -1293,6 +1298,21 @@ Game.EntityMixins.RandomStatGainer = {
 
                 this.increaseChar(characteristic);
                 this.subtractSpendablePoints(Game.Cost.Characteristics[characteristic]);
+                statPoints -= Game.Cost.Characteristics[characteristic];
+            }
+
+            if (powers) {
+                powerPoints = this.getSpendablePoints();
+                while(powerPoints && powers.length > tooExpensive.length) {
+                    powers.forEach(function(power) {
+                        if (ROT.RNG.getUniform() > 0.5 && power.cost <= powerPoints) {
+                            power.upgradePower();
+                            powerPoints = this.getSpendablePoints();     
+                        } else if (power.cost > powerPoints && tooExpensive.indexOf(power.name) < 0) {
+                            tooExpensive.push(power);
+                        }
+                    }, this);
+                }
             }
         }
     },
