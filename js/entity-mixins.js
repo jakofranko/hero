@@ -419,7 +419,7 @@ Game.EntityMixins.CorpseDropper = {
     listeners: {
         onDeath: function() {
             // Check if we should drop a corpse.
-            if (Math.round(Math.random() * 100) <= this._corpseDropRate) {
+            if (Math.round(ROT.RNG.getUniform() * 100) <= this._corpseDropRate) {
                 // Create a new corpse item and drop it.
                 this._map.addItem(
                     this.getX(),
@@ -830,7 +830,7 @@ Game.EntityMixins.JobActor = {
         onRegainConsciousness: function() {
             if(Game.Jobs[this._jobCurrent] && Game.Jobs[this._jobCurrent].crime) {
                 // TODO: upon waking up, the NPC loses 'petty crime' jobs?
-                if(Math.random() > 0.5) {
+                if(ROT.RNG.getUniform() > 0.5) {
                     Game.sendMessageNearby(
                         this.getMap(),
                         this.getX(),
@@ -1607,9 +1607,9 @@ Game.EntityMixins.TaskActor = {
     },
     wander: function() {
         // Flip coin to determine if moving by 1 in the positive or negative direction
-        var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
+        var moveOffset = (Math.round(ROT.RNG.getUniform()) === 1) ? 1 : -1;
         // Flip coin to determine if moving in x direction or y direction
-        if (Math.round(Math.random()) === 1) {
+        if (Math.round(ROT.RNG.getUniform()) === 1) {
             this.tryMove(this.getX() + moveOffset, this.getY(), this.getZ());
         } else {
             this.tryMove(this.getX(), this.getY() + moveOffset, this.getZ());

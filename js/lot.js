@@ -134,16 +134,16 @@ Game.Lot.prototype.willSpawn = function(neighborhood) {
 	var spawn;
 	switch(neighborhood) {
 		case 'downtown':
-			spawn = Math.random() <= this._downtown;
+			spawn = ROT.RNG.getUniform() <= this._downtown;
 			break;
 		case 'midtown':
-			spawn = Math.random() <= this._midtown;
+			spawn = ROT.RNG.getUniform() <= this._midtown;
 			break;
 		case 'uptown':
-			spawn = Math.random() <= this._uptown;
+			spawn = ROT.RNG.getUniform() <= this._uptown;
 			break;
 		case 'suburbs':
-			spawn = Math.random() <= this._suburbs;
+			spawn = ROT.RNG.getUniform() <= this._suburbs;
 			break;
 		default:
 			spawn = false;

@@ -343,8 +343,8 @@ Game.Map.prototype.isEmptyFloor = function(x, y, z) {
 Game.Map.prototype.getRandomFloorPosition = function(z) {
     var x, y;
     do {
-        x = Math.floor(Math.random() * (this._width - 1));
-        y = Math.floor(Math.random() * (this._height - 1));
+        x = Math.floor(ROT.RNG.getUniform() * (this._width - 1));
+        y = Math.floor(ROT.RNG.getUniform() * (this._height - 1));
     } while(!this.isEmptyFloor(x, y, z));
     return {x: x, y: y, z: z};
 };

@@ -138,7 +138,7 @@ Game.City.prototype.init = function() {
 			// don't let them be right next to each other,
 			// don't let them be within 2 units of each other,
 			// and don't put a road at 0,0
-			if((x === 0 || y === 0) && key != "0,0" && Math.random() < this._roadFrequency) {
+			if((x === 0 || y === 0) && key != "0,0" && ROT.RNG.getUniform() < this._roadFrequency) {
 				var lastX = x - 1;
 				var lastY = y - 1;
 				var lastRow = lastX + "," + y;

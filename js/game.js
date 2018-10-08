@@ -1,6 +1,7 @@
 var Game = {
     _player: null,
     _won: false,
+    _seed: null,
 
     // ROT.Displays
     _display: null,
@@ -78,6 +79,13 @@ var Game = {
     },
     getAvailableJobs: function() {
         return this._availableJobs;
+    },
+    getSeed: function() {
+        return this._seed;
+    },
+    setSeed: function(seed) {
+        this._seed = seed;
+        ROT.RNG.setSeed(seed);
     },
     addAvailableJobs: function(amount) {
         if(amount)
@@ -217,7 +225,6 @@ var Game = {
         }
     },
     resize: function(display, setSize, setFontSize, setScreenSize) {
-        var options = display.getOptions();
         var parent = display.getContainer().parentElement;
 
         if(setSize) {

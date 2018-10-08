@@ -11,16 +11,27 @@ Game.Screen.startScreen = {
     enter: function() { Game.resize(Game.getDisplay(), true, false, true); },
     exit: function() { console.log('Exited the start screen'); },
     render: function(display) {
+        var y = 2
         // Render prompt to the screen
         var w = Game.getScreenWidth();
         var text = "%c{" + Game.Palette.blue + "}Justice%c{}: A Superhero Roguelike";
-        display.drawText((w/2) - (30 / 2), 2, text);
+        display.drawText((w/2) - (30 / 2), y++, text);
 
+        y++;
         text = "Press [%c{" + Game.Palette.blue + "}Enter%c{}] to start!";
-        display.drawText((w/2) - (23 / 2), 4, text);
+        display.drawText((w/2) - (23 / 2), y++, text);
+
+        text = "Press [%c{" + Game.Palette.blue + "}s%c{}] to enter a world seed";
+        display.drawText((w/2) - (30 / 2), y++, text);
+
 
         text = "Press [%c{" + Game.Palette.blue + "}?%c{}] any time in game for help";
-        display.drawText((w/2) - (35 / 2), 5, text);
+        display.drawText((w/2) - (35 / 2), y++, text);
+        
+        if (Game.getSeed()) {
+            text = "Current Seed: %c{" + Game.Palette.blue + "}" + Game.getSeed();
+            display.drawText((w/2) - ((14 + Game.getSeed().length)/2), y++, text);
+        }
 
         var scalesASCII = [
                         ",ggg,                   gg                   ,ggg,",
@@ -48,8 +59,9 @@ Game.Screen.startScreen = {
                               "d8888888888888888888888888888888888888b"
         ];
 
+        y++;
         for (var i = 0; i < scalesASCII.length; i++) {
-            display.drawText((w / 2) - (scalesASCII[i].length / 2), i + 8, "%c{#F5F058}" + scalesASCII[i]);
+            display.drawText((w / 2) - (scalesASCII[i].length / 2), i + y, "%c{#F5F058}" + scalesASCII[i]);
         }
 
         //             ,ggg,                   gg                   ,ggg,
@@ -77,13 +89,48 @@ Game.Screen.startScreen = {
         //                   d8888888888888888888888888888888888888b
 
         var version = "v0.6";
-        display.drawText((w / 2) - (version.length / 2), scalesASCII.length + 8, version);
+        display.drawText((w / 2) - (version.length / 2), scalesASCII.length + y, version);
 
     },
     handleInput: function(inputType, inputData) {
         // When [Enter] is pressed, go to the play screen
-        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
+        if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
             Game.switchScreen(Game.Screen.characterSelectScreen);
+        } else if (inputType === 'keydown' && inputData.keyCode === ROT.VK_S) {
+            Game.switchScreen(Game.Screen.seedEntryScreen);
+        }
+    }
+};
+
+Game.Screen.seedEntryScreen = {
+    enter: function() {
+        this.seed = Game.getSeed() || "";
+    },
+    exit: function() {},
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var h = Game.getScreenHeight();
+        var blue = "%c{" + Game.Palette.blue + "}";
+        var text;
+
+        text = "Enter World " + blue + "Seed";
+        display.drawText((w / 2) - ((text.length / 2) - (blue.length / 2)), (h / 2) - 1, text);
+
+        text = blue + this.seed || "";
+        display.drawText((w / 2) - ((text.length / 2) - (blue.length / 2)), h / 2, text);
+    },
+    handleInput: function(inputType, inputData) {
+        if (inputType === 'keydown') {
+            if ((inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) || (inputData.keyCode >= ROT.VK_0 && inputData.keyCode <= ROT.VK_9)) {
+                this.seed += inputData.key;
+            } else if (inputData.keyCode === ROT.VK_BACK_SPACE) {
+                this.seed = this.seed.slice(0, -1);
+            } else if (inputData.keyCode === ROT.VK_ENTER || inputData.keyCode === ROT.VK_RETURN) {
+                Game.setSeed(this.seed);
+                Game.switchScreen(Game.Screen.startScreen);
+            }
+
+            Game.refresh();
         }
     }
 };

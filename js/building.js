@@ -525,7 +525,7 @@ Game.Building.prototype._sliceMethod = function(floor) {
     // Other wise, proceed slicing and flipping until the ammount of rooms desired is reached.
     var verticalWall = Game.TileRepository.create('indoor wall-vertical');
     var horizontalWall = Game.TileRepository.create('indoor wall-horizontal');
-    var sliceOrientation = Math.round(Math.random()) ? 'vertical' : 'horizontal';
+    var sliceOrientation = Math.round(ROT.RNG.getUniform()) ? 'vertical' : 'horizontal';
 
 
     // Since dividing a building will give it two rooms, there is no reason to start slicing
@@ -635,7 +635,7 @@ Game.Building.prototype._fillRooms = function(floor, z) {
     var startX, startY;
     if(z === 0) {
         var side = Game.getRandomInRange(0, 3);
-        var scanDirection = Math.round(Math.random()) ? 'forwards' : 'backwards';
+        var scanDirection = Math.round(ROT.RNG.getUniform()) ? 'forwards' : 'backwards';
         var firstPass = false;
         switch(side) {
             case 0:

@@ -45,7 +45,7 @@ Game.Tasks.approach = function(entity, target) {
 
         // No diagonals
         if(Math.abs(moveX) === 1 && Math.abs(moveY) === 1) {
-            moveX = Math.random() < 0.5 ? 0 : moveX;
+            moveX = ROT.RNG.getUniform() < 0.5 ? 0 : moveX;
             moveY = moveX === 0 ? moveY : 0;
         }
 
@@ -233,9 +233,9 @@ Game.Tasks.followPath = function(entity, endActions) {
 };
 Game.Tasks.wander = function(entity) {
     // Flip coin to determine if moving by 1 in the positive or negative direction
-    var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
+    var moveOffset = (Math.round(ROT.RNG.getUniform()) === 1) ? 1 : -1;
     // Flip coin to determine if moving in x direction or y direction
-    if (Math.round(Math.random()) === 1) {
+    if (Math.round(ROT.RNG.getUniform()) === 1) {
         entity.tryMove(Number(entity.getX()) + moveOffset, entity.getY(), entity.getZ());
     } else {
         entity.tryMove(entity.getX(), Number(entity.getY()) + moveOffset, entity.getZ());

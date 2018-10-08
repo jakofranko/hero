@@ -104,7 +104,7 @@ Game.extend = function(src, dest) {
 };
 
 Game.getRandomInRange = function(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return Math.floor(ROT.RNG.getUniform() * (max - min + 1)) + min;
 };
 
 Game.rollDice = function(XdX) {
@@ -113,7 +113,7 @@ Game.rollDice = function(XdX) {
     var sides = dice[1];
     var total = 0;
     for (var i = 0; i < num; i++) {
-        total += Math.floor(Math.random() * sides) + 1;
+        total += Math.floor(ROT.RNG.getUniform() * sides) + 1;
     }
     return total;
 };

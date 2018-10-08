@@ -149,9 +149,9 @@ Game.CompanyGenerator.prototype.getUsedNames = function() {
 Game.CompanyGenerator.prototype._generateName = function(company) {
     if (!company) throw Error("Please specify type when generating a name");
 
-	var prefixChance = Math.round(Math.random()),
-        suffixChance = Math.round(Math.random()),
-        typeChance = Math.round(Math.random()),
+	var prefixChance = Math.round(ROT.RNG.getUniform()),
+        suffixChance = Math.round(ROT.RNG.getUniform()),
+        typeChance = Math.round(ROT.RNG.getUniform()),
         prefixes = this['_' + company + 'Prefixes'],
         suffixes = this['_' + company + 'Suffixes'],
         types = this['_' + company + 'Types'],

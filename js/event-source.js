@@ -48,7 +48,7 @@ Game.EventSource.prototype.act = function() {
         }
     }
 
-    if(Math.random() < this._spawnChance)
+    if(ROT.RNG.getUniform() < this._spawnChance)
         this._spawn();
 };
 

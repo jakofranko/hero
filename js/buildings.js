@@ -113,7 +113,7 @@ Game.BuildingRepository.define('warehouse', {
         var itemName, item;
 
         function placeItem(x, y) {
-            var chance = Math.random();
+            var chance = ROT.RNG.getUniform();
             itemKeys.every(function(item) {
                 if (chance < itemChances[item]) {
                     itemName = item;
@@ -128,7 +128,7 @@ Game.BuildingRepository.define('warehouse', {
         }
 
         // Place rows of racks either vertically or horizontally
-        if (Math.random() > 0.5) {
+        if (ROT.RNG.getUniform() > 0.5) {
             for (var x = spacer, width = this.getWidth() - spacer; x < width; x += spacer) {
                 for (var y = spacer, height = this.getHeight() - spacer; y < height; y++) {
                     placeItem.call(this, x, y);
