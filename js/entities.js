@@ -46,7 +46,8 @@ Game.PlayerTemplate = {
         Game.EntityMixins.PlayerStatGainer,
         Game.EntityMixins.Thrower,
         Game.EntityMixins.ExperienceGainer,
-        Game.EntityMixins.Walker
+        Game.EntityMixins.Walker,
+        Game.EntityMixins.DoorOpener
     ]
 };
 

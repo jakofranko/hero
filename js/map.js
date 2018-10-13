@@ -361,6 +361,14 @@ Game.Map.prototype.getTile = function(x, y, z) {
     else
         return this._tiles[z][x][y] || Game.TileRepository.create('null');
 };
+Game.Map.prototype.setTile = function(x, y, z, tileName) {
+    // Make sure we are inside the bounds.
+    if (x >= 0 && x < this._width && y >= 0 && y < this._height && z >= 0 && z < this._depth) {
+        var newTile = Game.TileRepository.create(tileName);
+        if (!newTile) throw Error(tileName + ' doesn\'t exist');
+        this._tiles[z][x][y] = newTile;
+    }
+};
 Game.Map.prototype.getTileList = function(type) {
     var tileList = [];
     for(var z = 0; z < this._depth; z++) {

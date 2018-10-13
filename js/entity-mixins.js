@@ -502,6 +502,87 @@ Game.EntityMixins.Destructible = {
         }
     }
 };
+Game.EntityMixins.DoorOpener = {
+    listeners: {
+        action: function() {
+            var x = this.getX(),
+                y = this.getY(),
+                z = this.getZ(),
+                map = this.getMap();
+            var doorN = map.getTile(x, y - 1, z),
+                doorNName = doorN.getName(),
+                doorE = map.getTile(x + 1, y, z),
+                doorEName = doorE.getName(),
+                doorS = map.getTile(x, y + 1, z),
+                doorSName = doorS.getName(),
+                doorW = map.getTile(x - 1, y, z),
+                doorWName = doorW.getName();
+            var actions = {};
+
+            function stripOpen(str) {
+                return str.indexOf("open ") > -1 ? str.slice(5) : str;
+            }
+
+            if (doorN && doorNName.includes("door")) {
+                if (doorNName.includes("open")) {
+                    actions["Close Door N"] = [
+                        [map.setTile, [x, y - 1, z, stripOpen(doorNName)], map],
+                        [Game.sendMessage, [this, 'You close the door to the north']]
+                    ];
+                } else {
+                    actions["Open Door N"] = [
+                        [map.setTile, [x, y - 1, z, "open " + doorNName], map],
+                        [Game.sendMessage, [this, 'You open the door to the north']]
+                    ];
+                }
+            }
+
+            if (doorE && doorEName.includes("door")) {
+                if (doorEName.includes("open")) {
+                    actions["Close Door E"] = [
+                        [map.setTile, [x + 1, y, z, stripOpen(doorEName)], map],
+                        [Game.sendMessage, [this, 'You close the door to the east']]
+                    ];
+                } else {
+                    actions["Open Door E"] = [
+                        [map.setTile, [x + 1, y, z, "open " + doorEName], map],
+                        [Game.sendMessage, [this, 'You open the door to the east']]
+                    ];
+                }
+            }
+
+            if (doorS && doorSName.includes("door")) {
+                if (doorSName.includes("open")) {
+                    actions["Close Door S"] = [
+                        [map.setTile, [x, y + 1, z, stripOpen(doorSName)], map],
+                        [Game.sendMessage, [this, 'You close the door to the south']]
+                    ];
+                } else {
+                    actions["Open Door S"] = [
+                        [map.setTile, [x, y + 1, z, "open " + doorSName], map],
+                        [Game.sendMessage, [this, 'You open the door to the south']]
+                    ];
+                }
+            }
+
+            if (doorW && doorWName.includes("door")) {
+                if (doorWName.includes("open")) {
+                    actions["Close Door W"] = [
+                        [map.setTile, [x - 1, y, z, stripOpen(doorWName)], map],
+                        [Game.sendMessage, [this, 'You close the door to the west']]
+                    ];
+                } else {
+                    actions["Open Door W"] = [
+                        [map.setTile, [x - 1, y, z, "open " + doorWName], map],
+                        [Game.sendMessage, [this, 'You open the door to the west']]
+                    ];
+                }
+            }
+
+            return actions;
+        }
+    }
+}
 Game.EntityMixins.EventParticipant = {
     name: 'EventParticipant',
     groupName: 'Event',
@@ -1178,7 +1259,7 @@ Game.EntityMixins.PowerUser = {
             var canFly;
             if (!pos || !pos.tile)
                 return;
-                
+
             if(this._constantPowers.length) {
                 canFly = this._constantPowers.filter(function(power) {
                     return power.name === 'Flight';
@@ -1307,7 +1388,7 @@ Game.EntityMixins.RandomStatGainer = {
                     powers.forEach(function(power) {
                         if (ROT.RNG.getUniform() > 0.5 && power.cost <= powerPoints) {
                             power.upgradePower();
-                            powerPoints = this.getSpendablePoints();     
+                            powerPoints = this.getSpendablePoints();
                         } else if (power.cost > powerPoints && tooExpensive.indexOf(power.name) < 0) {
                             tooExpensive.push(power);
                         }

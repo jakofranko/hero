@@ -27,7 +27,7 @@ Game.Screen.startScreen = {
 
         text = "Press [%c{" + Game.Palette.blue + "}?%c{}] any time in game for help";
         display.drawText((w/2) - (35 / 2), y++, text);
-        
+
         if (Game.getSeed()) {
             text = "Current Seed: %c{" + Game.Palette.blue + "}" + Game.getSeed();
             display.drawText((w/2) - ((14 + Game.getSeed().length)/2), y++, text);
@@ -1347,6 +1347,9 @@ Game.Screen.actionMenu = new Game.Screen.MenuScreen({
             actions = [];
 
         // Populate a list of actions with which to build the menu
+        var playerActions = this._player.raiseEvent('action');
+        if (playerActions)
+            actions.push(playerActions);
         for(var i = 0; i < adjacentCoords.length; i++) {
             var coords = adjacentCoords[i].split(","),
                 x = coords[0],

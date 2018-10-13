@@ -151,7 +151,7 @@ var Game = {
     },
     sendMessage: function(recipient, message, args) {
         // Make sure the recipient can receive messages
-        if(recipient.hasMixin('MessageRecipient')) {
+        if(recipient && recipient.hasMixin('MessageRecipient')) {
             // If args were passed, format the message
             // Elsewise, don't format the message
             if(args) {

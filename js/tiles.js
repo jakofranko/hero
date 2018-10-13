@@ -130,17 +130,33 @@ Game.TileRepository.define('door', {
     name: 'door',
     character: '+',
     foreground: '#8b888d',
-    walkable: true,
+    walkable: false,
     blocksLight: true,
-    description: "A steel door"
+    description: "A door. Not a good window."
+});
+Game.TileRepository.define('open door', {
+    name: 'open door',
+    character: '-',
+    foreground: '#8b888d',
+    walkable: true,
+    blocksLight: false,
+    description: "An open door"
 });
 Game.TileRepository.define('glass door', {
     name: 'glass door',
     character: '+',
     foreground: '#aadfff',
-    walkable: true,
+    walkable: false,
     blocksLight: false,
     description: "A glass door"
+});
+Game.TileRepository.define('open glass door', {
+    name: 'open glass door',
+    character: '-',
+    foreground: '#aadfff',
+    walkable: true,
+    blocksLight: false,
+    description: "An open glass door"
 });
 Game.TileRepository.define('guard rail', {
     name: 'guard rail',
