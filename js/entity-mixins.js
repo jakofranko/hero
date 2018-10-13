@@ -1670,11 +1670,12 @@ Game.EntityMixins.TaskActor = {
         var z = source.getZ();
         var path = new ROT.Path.AStar(player.getX(), player.getY(), function(x, y) {
             // If an entity is present at the tile, can't move there.
-            var entity = source.getMap().getEntityAt(x, y, z);
+            var map = source.getMap();
+            var entity = map.getEntityAt(x, y, z);
             if (entity && entity !== player && entity !== source) {
                 return false;
             }
-            return source.getMap().getTile(x, y, z).isWalkable();
+            return map.getTile(x, y, z).isWalkable() || map.getTile().getName().includes("door");
         }, {topology: 4});
         // Once we've gotten the path, we want to move to the second cell that is
         // passed in the callback (the first is the entity's strting point)

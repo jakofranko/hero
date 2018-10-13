@@ -89,6 +89,13 @@ Game.Entity.prototype.getName = function() {
 Game.Entity.prototype.getType = function() {
     return this._type;
 };
+Game.Entity.prototype.openDoor = function(x, y, z) {
+    var map = this.getMap();
+    var tile = map.getTile(x, y, z);
+    var tileName = tile.getName();
+    if (tileName.includes("door") && !tileName.includes("open"))
+        map.setTile(x, y, z, "open " + tileName);
+};
 Game.Entity.prototype.tryMove = function(x, y, z, map) {
     var tile, target, canMoveResults,canAttackResults, canMove, canAttack, items;
 
@@ -133,6 +140,9 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
         }
 
 		return true;
+    } else if (!canMove && tile.getName().includes("door") && !tile.getName().includes("open")) {
+        this.openDoor(x, y, z);
+        return true;
     }
 
 	return false;

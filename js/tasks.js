@@ -143,7 +143,7 @@ Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
         return Game.Tasks.getPath(entity, ds[0], ds[1], destZ - 1, currentPath.concat(newPath));
     } else {
         var pathToDest = new ROT.Path.AStar(entity.getX(), entity.getY(), function(x, y) {
-            return map.getTile(x, y, destZ).isWalkable();
+            return map.getTile(x, y, destZ).isWalkable() || map.getTile(x, y, destZ).getName().includes("door");
         });
         pathToDest.compute(destX, destY, function(x, y) {
             newPath.push([x, y, destZ]);

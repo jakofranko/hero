@@ -413,7 +413,7 @@ Game.Map.prototype.getPathToNearestStair = function(x, y, z, type) {
         stairsX, stairsY, pather;
 
     var canWalk = function(floorX, floorY) {
-        return map.getTile(floorX, floorY, z).isWalkable();
+        return map.getTile(floorX, floorY, z).isWalkable() || map.getTile(floorX, floorY, z).getName().includes("door");
     };
 
     var pushSteps = function(floorX, floorY) {
