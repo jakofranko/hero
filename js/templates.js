@@ -49,11 +49,11 @@ Game.TemplateRepository.define('studio apartment', {
 		},
 		'|': {
 			repository: 'TileRepository',
-			name: 'indoor wall-vertical'
+			name: 'inside wall-vertical'
 		},
 		'-': {
 			repository: 'TileRepository',
-			name: 'indoor wall-horizontal'
+			name: 'inside wall-horizontal'
 		},
 		'&': {
 			repository: 'ItemRepository',
@@ -135,11 +135,11 @@ Game.TemplateRepository.define('one-bedroom apartment', {
 		},
 		'|': {
 			repository: 'TileRepository',
-			name: 'indoor wall-vertical'
+			name: 'inside wall-vertical'
 		},
 		'-': {
 			repository: 'TileRepository',
-			name: 'indoor wall-horizontal'
+			name: 'inside wall-horizontal'
 		},
 		'&': {
 			repository: 'ItemRepository',
@@ -225,11 +225,11 @@ Game.TemplateRepository.define('two-bedroom apartment', {
 		},
 		'|': {
 			repository: 'TileRepository',
-			name: 'indoor wall-vertical'
+			name: 'inside wall-vertical'
 		},
 		'-': {
 			repository: 'TileRepository',
-			name: 'indoor wall-horizontal'
+			name: 'inside wall-horizontal'
 		},
 		'&': {
 			repository: 'ItemRepository',

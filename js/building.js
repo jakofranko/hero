@@ -72,8 +72,8 @@ Game.Building = function(properties) {
     this._placeStairs = properties['placeStairs'] || function() {
         var stairsUp = Game.TileRepository.create('stairsUp');
         var stairsDown = Game.TileRepository.create('stairsDown');
-        var horizontalWall = Game.TileRepository.create('indoor wall-horizontal');
-        var verticalWall = Game.TileRepository.create('indoor wall-vertical');
+        var horizontalWall = Game.TileRepository.create('inside wall-horizontal');
+        var verticalWall = Game.TileRepository.create('inside wall-vertical');
 
         // Stairwell width and height, big enough to surround an up and down
         // stair with an inner wall on two sides
@@ -523,8 +523,8 @@ Game.Building.prototype._sliceMethod = function(floor) {
     // and repeat. When placing tiles, it is important to stop along outer walls. When an inner wall is
     // encountered, count the current number of rooms. If it is equal to the number desired, then stop.
     // Other wise, proceed slicing and flipping until the ammount of rooms desired is reached.
-    var verticalWall = Game.TileRepository.create('indoor wall-vertical');
-    var horizontalWall = Game.TileRepository.create('indoor wall-horizontal');
+    var verticalWall = Game.TileRepository.create('inside wall-vertical');
+    var horizontalWall = Game.TileRepository.create('inside wall-horizontal');
     var sliceOrientation = Math.round(ROT.RNG.getUniform()) ? 'vertical' : 'horizontal';
 
 

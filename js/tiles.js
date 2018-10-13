@@ -108,8 +108,8 @@ Game.TileRepository.define('window-horizontal', {
     blocksLight: false,
     description: "A glass window"
 });
-Game.TileRepository.define('indoor wall-vertical', {
-    name: 'indoor wall-vertical',
+Game.TileRepository.define('inside wall-vertical', {
+    name: 'inside wall-vertical',
     character: '|',
     foreground: '#ffffff',
     walkable: false,
@@ -117,8 +117,8 @@ Game.TileRepository.define('indoor wall-vertical', {
     innerWall: true,
     description: "A wall"
 });
-Game.TileRepository.define('indoor wall-horizontal', {
-    name: 'indoor wall-horizontal',
+Game.TileRepository.define('inside wall-horizontal', {
+    name: 'inside wall-horizontal',
     character: '-',
     foreground: '#ffffff',
     walkable: false,
