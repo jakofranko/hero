@@ -44,7 +44,7 @@ Game.Powers.EnergyBlastPowerRepository.define('sonic boom', {
     advantages: ['AOE_Blast_5'],
     hitTargetMessage: "%s oscillates your organs with a sonic boom, doing %s STUN and %s BODY!",
     hitMessage: "You clap your hands creating a deafening sonic boom, doing %s STUN and %s BODY to %s!",
-    missTargetMessage: "%s a sonic wave ripples past you, missing you!",
+    missTargetMessage: "A sonic wave ripples past you, missing you!",
     missMessage: "Your sonic boom misses your target!",
 });
 
