@@ -208,7 +208,7 @@ Game.Screen.characterSelectScreen = {
         var archtype = archtypes[this._index];
         switch(inputType.key) {
             case 'Enter':
-                Game.switchScreen(Game.Screen.loadScreen, [this._options[archtype]]);
+                Game.switchScreen(Game.Screen.namePlayerScreen, [this._options[archtype]]);
                 break;
             case 'ArrowDown':
                 this.incrementIndex();
@@ -233,6 +233,40 @@ Game.Screen.characterSelectScreen = {
         return false;
     },
     exit: function() {}
+}
+
+Game.Screen.namePlayerScreen = {
+    enter: function(playerArchtype) {
+        this.playerName = "";
+        this.playerArchtype = playerArchtype;
+    },
+    exit: function() {},
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var h = Game.getScreenHeight();
+        var blue = "%c{" + Game.Palette.blue + "}";
+        var text;
+
+        text = "Enter Player " + blue + "Name";
+        display.drawText((w / 2) - ((text.length / 2) - (blue.length / 2)), (h / 2) - 1, text);
+
+        text = blue + this.playerName || "";
+        display.drawText((w / 2) - ((text.length / 2) - (blue.length / 2)), h / 2, text);
+    },
+    handleInput: function(inputType, inputData) {
+        if (inputType === 'keydown') {
+            if (inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
+                this.playerName += inputData.key;
+            } else if (inputData.keyCode === ROT.VK_BACK_SPACE) {
+                this.playerName = this.playerName.slice(0, -1);
+            } else if (inputData.keyCode === ROT.VK_ENTER || inputData.keyCode === ROT.VK_RETURN) {
+                this.playerArchtype.name = this.playerName;
+                Game.switchScreen(Game.Screen.loadScreen, [this.playerArchtype]);
+            }
+
+            Game.refresh();
+        }
+    }
 }
 
 Game.Screen.loadScreen = {
