@@ -1159,7 +1159,9 @@ Game.EntityMixins.MessageRecipient = {
         this._messages = [];
     },
     receiveMessage: function(message) {
-        this._messages.push(message);
+        this._messages.push("> " + message);
+        if (this._messages.length > Game.getKeepNumMessages())
+            this._messages.shift();
     },
     getMessages: function() {
         return this._messages;
@@ -1337,7 +1339,6 @@ Game.EntityMixins.PlayerActor = {
         // Lock the engine and wait asynchronously
         // for the player to press a key.
         this.getMap().getEngine().lock();
-        this.clearMessages();
         this._acting = false;
     },
     listeners: {

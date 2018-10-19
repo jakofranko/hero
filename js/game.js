@@ -18,6 +18,7 @@ var Game = {
     _screenWidth: 80,
     _screenHeight: 24,
     _citySize: 10,
+    _keepNumMessages: 100,
 
     // How many in-game tiles a lot should comprise
     _lotSize: 40,
@@ -61,6 +62,9 @@ var Game = {
     },
     getCitySize: function() {
         return this._citySize;
+    },
+    getKeepNumMessages: function() {
+        return this._keepNumMessages;
     },
     getLotSize: function() {
         return this._lotSize;
@@ -177,12 +181,13 @@ var Game = {
         }
     },
     displayMessages: function(entity) {
+        var h = this._log.getOptions().height;
         this._log.clear();
         if(entity && entity.hasMixin('MessageRecipient')) {
             // Get the messages in the player's queue and render them
             var messages = entity.getMessages();
             var messageY = 0;
-            for (var i = 0; i < messages.length; i++) {
+            for (var i = messages.length - 1; messageY < h && i > -1; i--) {
                 // Draw each message, adding the number of lines
                 messageY += this._log.drawText(
                     0,
