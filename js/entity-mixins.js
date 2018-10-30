@@ -1476,8 +1476,12 @@ Game.EntityMixins.Reactor = {
         },
         onForget: function(memoryName, memory) {
             if(this._reacting) {
-                if((memoryName.search(/mugged by/) !== -1 || memoryName.search(/attacked by/) !== -1) && memory.entity == this.getTarget())
+                if((memoryName.search(/mugged by/) !== -1 || memoryName.search(/attacked by/) !== -1) && memory.entity == this.getTarget()) {
                     this.setReaction(false);
+
+                    if (this.hasMixin('JobActor'))
+                        this.setPath(); //clear out any pathing aquired from hunting
+                }
 
             }
         }

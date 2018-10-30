@@ -242,7 +242,7 @@ Game.Tasks.wander = function(entity) {
     }
 };
 
-Game.Tasks.hunt = function(entity) {
+Game.Tasks.hunt = function(entity, endActions) {
     if(!entity.hasMixin('Targeting'))
         throw new Error(`The '${entity.getType()}' entity needs to have the Targeting mixin assigned to do the hunt job`);
 
@@ -253,41 +253,18 @@ Game.Tasks.hunt = function(entity) {
         entity.setTarget(this.findRandomEntityInSight(entity));
     }
 
+    var path = entity.getPath();
+
     // If no one is around, then just wander
     if(!target) {
         this.wander(entity);
+    } else if (path && path.length) {
+        this.followPath(entity, endActions);
+    } else if (!path || !path.length) {
+        entity.setPath(this.getPath(entity, target.getX(), target.getY(), target.getZ()));
+        this.followPath(entity, endActions);
     } else {
-        // TODO: Update this to use the entities current path if it isn't set already
-        // If we are adjacent to the target, then attack instead of hunting.
-        // TODO: if I'm not mistaken, this enforces a topology 4 and doesn't account for diagnally adjacent
-        var offsets = Math.abs(target.getX() - entity.getX()) + Math.abs(target.getY() - entity.getY());
-        if (offsets === 1) {
-            if (entity.hasMixin('Attacker')) {
-                entity.hthAttack(target);
-                return;
-            }
-        }
-
-        // Generate the path and move to the first tile.
-        var source = entity;
-        var z = source.getZ();
-        var path = new ROT.Path.AStar(target.getX(), target.getY(), function(x, y) {
-            // If an entity is present at the tile, can't move there.
-            var entity = source.getMap().getEntityAt(x, y, z);
-            if (entity && entity !== target && entity !== source) {
-                return false;
-            }
-            return source.getMap().getTile(x, y, z).isWalkable();
-        }, {topology: 4});
-        // Once we've gotten the path, we want to move to the second cell that is
-        // passed in the callback (the first is the entity's starting point)
-        var count = 0;
-        path.compute(source.getX(), source.getY(), function(x, y) {
-            if (count == 1) {
-                source.tryMove(x, y, z);
-            }
-            count++;
-        });
+        this.wander(entity);
     }
 };
 
@@ -383,6 +360,7 @@ Game.Tasks.attemptAttackPower = function(self, target) {
         if (power.type === "Attack") {
             if (power.inRange(self.getX(), self.getY(), target.getX(), target.getY())) {
                 self.usePower([target], power);
+                self.setPath(); // clear existing path 
             } else {
                 inRange = false;
             }
@@ -407,5 +385,7 @@ Game.Tasks.attemptMelee = function(self, target) {
         for (var i = 0; i < witnesses.length; i++) {
             witnesses[i].raiseEvent('onCrime', self);
         }
+
+        self.setPath(); // clear any existing path
     }
 }
