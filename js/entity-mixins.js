@@ -434,7 +434,7 @@ Game.EntityMixins.CorpseDropper = {
         }
     }
 };
-Game.EntityMixins.Destructible = {
+Game.EntityMixins.Destructible = { // TODO: deprecated, delete
     name: 'Destructible',
     init: function(template) {
         this._maxHp = template['maxHp'] || 10;
@@ -488,18 +488,6 @@ Game.EntityMixins.Destructible = {
         this._maxHp += value;
         this._hp += value;
         Game.sendMessage(this, "You look healthier!");
-    },
-    listeners: {
-        onGainLevel: function() {
-            // Heal the entity.
-            this.setHp(this.getMaxHp());
-        },
-        details: function() {
-            return [
-                {key: 'defense', value: this.getDefenseValue()},
-                {key: 'hp', value: this.getHp()}
-            ];
-        }
     }
 };
 Game.EntityMixins.DoorOpener = {
@@ -868,8 +856,8 @@ Game.EntityMixins.JobActor = {
         if(this.hasMixin('MemoryMaker')) {
             var place = this.recall('places', highestPriority);
             if(place) {
-                if(!place.location)
-                    debugger;
+//                 if(!place.location)
+//                     debugger;
                 this._jobLocation = place.location;
             }
         }
