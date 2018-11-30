@@ -634,6 +634,8 @@ Game.Screen.playScreen = {
 // Item Listing
 // TODO: refactor this to support arrow key selection
 Game.Screen.ItemListScreen = function(template) {
+    this._enterMessage = template['enterMessage'] || '';
+
     // This is dependant on the number of letters we use as indices in the render function
     this._maxItems = 52;
 
@@ -658,6 +660,8 @@ Game.Screen.ItemListScreen = function(template) {
     this._hasNoItemOption = template['hasNoItemOption'];
 };
 Game.Screen.ItemListScreen.prototype.setup = function(player, items, altEntity, altItems) {
+    Game.sendMessage(player, this._enterMessage);
+
     if(items > this._maxItems || altItems > this._maxItems || items + altItems > this._maxItems)
         throw new Error("The item number max has been reached. Throw some rotten fruit at the developer and tell him that he needs to come up with a better solution for indexing items!");
 
@@ -874,10 +878,12 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
 // Inventory sub-screens
 Game.Screen.inventoryScreen = new Game.Screen.ItemListScreen({
     caption: 'Inventory',
+    enterMessage: 'You rifle through your belongings',
     canSelect: false
 });
 Game.Screen.pickupScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the items you wish to pickup',
+    enterMessage: 'You ponder what to pick up',
     canSelect: true,
     canSelectMultipleItems: true,
     ok: function(selectedItems) {
@@ -888,6 +894,7 @@ Game.Screen.pickupScreen = new Game.Screen.ItemListScreen({
 });
 Game.Screen.dropScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to drop',
+    enterMessage: 'You consider what to drop',
     canSelect: true,
     canSelectMultipleItems: false,
     ok: function(selectedItems) {
@@ -898,6 +905,7 @@ Game.Screen.dropScreen = new Game.Screen.ItemListScreen({
 });
 Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to examine',
+    enterMessage: 'You start to examin something you are holding',
     canSelect: true,
     canSelectMultipleItems: false,
     isAcceptable: function() {
@@ -947,6 +955,7 @@ Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
     }
 });
 Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
+    enterMessage: 'You look into the container',
     canSelect: true,
     canSelectMultipleItems: true,
     ok: function(selectedItems, altSelectedItems) {
@@ -968,6 +977,7 @@ Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
 Game.Screen.TargetBasedScreen = function(template) {
     template = template || {};
 
+    this._enterMessage = template['enterMessage'] || 'Choose target';
     this._targetNearest = template['targetNearest'] || false;
     this._visibleEntities = [];
     this._targetedEntity = 0;
@@ -1048,6 +1058,8 @@ Game.Screen.TargetBasedScreen = function(template) {
     };
 };
 Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
+    Game.sendMessage(player, this._enterMessage);
+
     this._player = player;
     this._visibleEntities = [];
     this._targetedEntity = 0;
@@ -1175,7 +1187,7 @@ Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputD
     if(unlock)
         this._player.getMap().getEngine().unlock();
     else
-        Game.refresh();
+        Game.refresh(this._player);
 };
 Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
     // Make sure we stay within bounds.
@@ -1218,6 +1230,7 @@ Game.Screen.TargetBasedScreen.prototype.prevEntity = function () {
 
 // Target-based screens
 Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
+    enterMessage: 'You begin to look at your surroundings',
     overlayFunction: function(x, y) {
         var z = this._player.getZ();
         var map = this._player.getMap();
