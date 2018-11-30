@@ -59,15 +59,7 @@ Game.Map = function(size, player) {
 
     // Add the Player
     this._player = player;
-    // var playerLoc = this._city.getLivingLocations()[0].split(",");
-    var floorLoc = this.getRandomFloorPosition(0);
-    var playerLoc = [floorLoc.x, floorLoc.y, floorLoc.z];
-    this.addEntityAt(player, playerLoc[0] - 1, playerLoc[1] - 1, 0);
-
-    // TODO: [EVENTS] Delete this after creating banks and such
-    // this.addItem(Number(playerLoc[0]) + 1, Number(playerLoc[1]), 0, Game.ItemRepository.create('safe'));
-    // this.addItem(Number(playerLoc[0]) + 2, Number(playerLoc[1]), 0, Game.ItemRepository.create('vault door'));
-    // this.addItem(Number(playerLoc[0]), Number(playerLoc[1]) + 1, 0, Game.ItemRepository.create('cash register'));
+    this.assignLivingLocation(player);
 };
 
 // Standard getters
@@ -117,6 +109,25 @@ Game.Map.prototype.getOccupiedLivingLocations = function() {
     return this._occupiedLivingLocations;
 };
 
+Game.Map.prototype.assignLivingLocation = function(entity) {
+    var livingLocation = this._availableLivingLocations[0];
+    var memory = {
+        location: livingLocation
+    };
+    var split;
+
+    if(livingLocation) {
+        entity.remember('places', 'home', false, memory);
+
+        split = livingLocation.split(",");
+        this.addEntityAt(entity, split[0], split[1], split[2]);
+
+        // Occupy the living location and then move to the next
+        this.occupyLivingLocation(0);
+    } else {
+        this.addEntityAtRandomPosition(entity, 0);
+    }
+};
 Game.Map.prototype.occupyLivingLocation = function(i) {
     // Add the value of the available location to the occupied location
     // and then splice it from the available locations
@@ -277,15 +288,16 @@ Game.Map.prototype.post12Recovery = function() {
 
 Game.Map.prototype._generateEntities = function() {
     var criminals = 0,
+        totalCriminals = Game.getTotalCriminals(),
         companies = this._city.getCompanies(),
         currentCompany = 0;
 
-    for (var i = 0; i < Game.getTotalEntities(); i++) {
+    for (var i = 0, te = Game.getTotalEntities(); i < te; i++) {
         // The template has to be created each time, because making it once
         // outside the loop and then changing it changes all entities
         // created with the template
         var template;
-        if(criminals <= Game.getTotalCriminals()) {
+        if(criminals <= totalCriminals) {
             template = {
                 // In order for mugging to rank higher than survive,
                 // their money / survive priority needs to be higher
@@ -303,28 +315,14 @@ Game.Map.prototype._generateEntities = function() {
         var entity = Game.EntityRepository.createEntity('person', template);
 
         // Give the entity a job
-        if(companies[currentCompany].getAvailablePositions() <= 0)
+        while (companies[currentCompany] && companies[currentCompany].getAvailablePositions() <= 0 || companies[currentCompany].getJobLocations().length === 0)
             currentCompany++;
 
         // Add the entity as an employee of the current company
         companies[currentCompany].addEmployee(entity);
 
         // Add the entity at a random position on the map
-        var livingLocation = this._availableLivingLocations[0];
-        if(livingLocation) {
-            // Make sure they remember where home is
-            var memory = {location: livingLocation};
-            entity.remember('places', 'home', false, memory);
-
-            // Spawn them at this location
-            var split = livingLocation.split(",");
-            this.addEntityAt(entity, split[0], split[1], split[2]);
-
-            // Occupy the living location and then move to the next
-            this.occupyLivingLocation(0);
-        } else {
-            this.addEntityAtRandomPosition(entity, 0);
-        }
+        this.assignLivingLocation(entity);
 
         if(template.jobs.indexOf('mugger') > -1)
             criminals++;
