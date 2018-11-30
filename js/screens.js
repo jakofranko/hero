@@ -1443,6 +1443,8 @@ Game.Screen.helpScreen = {
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Arrow keys%c{} to move');
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Ctrl + Arrow keys%c{} to swap positions with NPC');
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}<%c{} to go up stairs');
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}>%c{} to go down stairs');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '},%c{}] to pick up items');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}d%c{}] to drop items');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}x%c{}] to examine items');
