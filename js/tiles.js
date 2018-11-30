@@ -39,7 +39,7 @@ Game.TileRepository.define('stairsUp', {
     character: '<',
     foreground: 'white',
     walkable: true,
-    flyable: true,
+    flyable: false,
     descendable: true,
     blocksLight: false,
     description: 'A staircase leading upwards'
