@@ -109,12 +109,12 @@ Game.Tasks.goToJobLocation = function(entity) {
 
 // TODO: Improve this to support what happens if an entity cannot path someplace when they are on the same z-level
 // (I think the solution here would be to have them go to the ground level if they aren't already)
-Game.Tasks.getPath = function(entity, destX, destY, destZ, currentPath) {
+Game.Tasks.getPath = function(entity, dx, dy, dz, currentPath) {
     var map = entity.getMap(),
         newPath = [],
-        destX = Number(destX),
-        destY = Number(destY),
-        destZ = Number(destZ);
+        destX = Number(dx),
+        destY = Number(dy),
+        destZ = Number(dz);
     if(!currentPath)
         currentPath = [];
 
@@ -366,7 +366,7 @@ Game.Tasks.attemptAttackPower = function(self, target) {
         if (power.type === "Attack") {
             if (power.inRange(self.getX(), self.getY(), target.getX(), target.getY())) {
                 self.usePower([target], power);
-                self.setPath(); // clear existing path 
+                self.setPath(); // clear existing path
             } else {
                 inRange = false;
             }
