@@ -48,6 +48,8 @@ Game.Map = function(size, player) {
     this._eventSources = this._city.getEventSources();
     for(var i = 0; i < this._eventSources.length; i++)
         this.schedule(this._eventSources[i]);
+    this._batchProcessor = new Game.BatchProcessor();
+    this.schedule(this._batchProcessor);
 
     // Setup the explored array
     this._explored = new Array(this._depth);
@@ -89,6 +91,9 @@ Game.Map.prototype.getCity = function() {
 };
 Game.Map.prototype.getTime = function() {
     return this._time;
+};
+Game.Map.prototype.getBatchProcessor = function() {
+    return this._batchProcessor;
 };
 Game.Map.prototype.getJustice = function() {
     return this._justice;
