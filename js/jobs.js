@@ -36,7 +36,7 @@ Game.Jobs.work = {
     priority: function(entity) {
         var total = 10;
         var hour = entity.getMap().getTime().getHours();
-        if(hour >= 8 && hour < 17)
+        if(hour >= Game.getRandomInRange(6, 10) && hour < Game.getRandomInRange(15, 20))
             total -= 5;
         if(!entity.recall('places', 'work').location)
             total += 100;
@@ -54,7 +54,7 @@ Game.Jobs.home = {
     priority: function(entity) {
         var total = 10;
         var hour = entity.getMap().getTime().getHours();
-        if(hour >= 17)
+        if(hour >= Game.getRandomInRange(13, 20))
             total -= 5;
         return total;
     }
