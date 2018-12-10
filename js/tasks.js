@@ -59,31 +59,37 @@ Game.Tasks.doWork = function(entity) {
 Game.Tasks.goToJobLocation = function(entity) {
     var entityPath = entity.getPath(),
         jobLocation = entity.getJobLocation();
-    if(jobLocation && !entity.isAtJobLocation() && !entityPath.length) {
-        var split = jobLocation.split(","),
-            destX = split[0],
-            destY = split[1],
-            destZ = split[2];
+    if(jobLocation && !entity.isAtJobLocation() && !entityPath.length && !entity.isPathing) {
+        entity._isPathing = true;
+        entity.getMap().getBatchProcessor().add(function() {
+            // Since calculating a path can takea long time, make it asynchronous
+            var split = jobLocation.split(","),
+                destX = split[0],
+                destY = split[1],
+                destZ = split[2];
 
-        var pathToJob = this.getPath(entity, destX, destY, destZ);
+            var pathToJob = this.getPath(entity, destX, destY, destZ);
 
-        if(!pathToJob) {
-            // debugger;
-            console.log(entity.getName());
-            console.log("Dest:", destX, destY, destZ);
-            console.log("Entity:", entity.getX(), entity.getY(), entity.getZ());
-            // var debugPath = this.getPath(entity, destX, destY, destZ);
-            // Game.Screen.playScreen._player.tryMove(destX, destY, destZ);
-            // Game.Screen.playScreen._player.tryMove(entity.getX(), entity.getY(), entity.getZ());
-        }
+            if(!pathToJob) {
+                    debugger;
+                console.log(entity.getName());
+                console.log("Dest:", destX, destY, destZ);
+                console.log("Entity:", entity.getX(), entity.getY(), entity.getZ());
+                // var debugPath = this.getPath(entity, destX, destY, destZ);
+                // Game.Screen.playScreen._player.tryMove(destX, destY, destZ);
+                    Game.Screen.playScreen._player.tryMove(entity.getX() + 1, entity.getY() + 1, entity.getZ());
+            }
 
-        // If there isn't a path to work, go down to the ground floor and try again.
-        if(pathToJob)
-            entity.setPath(pathToJob);
-        else if(entity.getZ() !== 0)
-            entity.setPath(this.getPathToLevel(entity, 0));
-        else
-            this.wander(entity);
+            // If there isn't a path to work, go down to the ground floor and try again.
+            if(pathToJob)
+                entity.setPath(pathToJob);
+            else if(entity.getZ() !== 0)
+                entity.setPath(this.getPathToLevel(entity, 0));
+            else
+                this.wander(entity);
+
+                entity._isPathing = false;
+        }.bind(this));
     } else if(!entity.isAtJobLocation() && entityPath.length) {
         // TODO: [EVENTS] Implement the new follow path method either here, or at the job level
         var nextStep = entity.getNextStep();

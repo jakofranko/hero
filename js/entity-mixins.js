@@ -778,6 +778,7 @@ Game.EntityMixins.JobActor = {
         this._lastJobPrioritization = 0;
         this._jobLocation = template['jobLocation'] || null;
         this._path = [];
+        this._isPathing = false;
     },
     act: function() {
         if(Game.debug && Game.watchName == this.getName())
