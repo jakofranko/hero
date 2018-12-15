@@ -102,8 +102,6 @@ Game.Tasks.goToJobLocation = function(entity) {
             this.wander(entity);
         }
 
-    } else {
-        console.log(entity.getName() + ": I made it to work!");
     }
 };
 

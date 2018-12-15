@@ -58,7 +58,7 @@ Game.Event = function(properties) {
     this._onDeath  = properties['onDeath'] || function(victim, killer) { console.log(`Entity '${victim.getName()}' was kill by '${killer.getName()}'`); };
     this._onKill  = properties['onKill'] || function(killer, victim) { console.log(`Entity '${killer.getName()}' has killed '${victim.getName()}'`); };
     this._onInteraction  = properties['onInteraction'] || function(entity, interaction) { console.log(`Entity '${entity.getName()}' was interacted with (${interaction})`); };
-    this._onTurn = properties['onTurn'] || function() { console.log('Turn: ' + this._turns); };
+    this._onTurn = properties['onTurn'] || function() { /* console.log('Turn: ' + this._turns); */ };
 
     // Cache objects for when the event starts
     this._entities = [];

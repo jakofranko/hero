@@ -632,7 +632,6 @@ Game.EntityMixins.Interactor = {
             // Can add a bit more custom logic, but for now, add actionTaker as the last
             // arguement for all interaction functions, and also the first if the
             // function is 'Game.sendMessage'
-            debugger;
             var actions = Object.assign({}, this._interactions);
             var actionNames = Object.keys(actions);
 
