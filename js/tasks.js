@@ -59,36 +59,44 @@ Game.Tasks.doWork = function(entity) {
 Game.Tasks.goToJobLocation = function(entity) {
     var entityPath = entity.getPath(),
         jobLocation = entity.getJobLocation();
+
     if(jobLocation && !entity.isAtJobLocation() && !entityPath.length && !entity.isPathing) {
         entity._isPathing = true;
         entity.getMap().getBatchProcessor().add(function() {
             // Since calculating a path can takea long time, make it asynchronous
+            var entityZ = entity.getZ()
+            var pathToJob;
             var split = jobLocation.split(","),
-                destX = split[0],
-                destY = split[1],
-                destZ = split[2];
+                destX = Number(split[0]),
+                destY = Number(split[1]),
+                destZ = Number(split[2]);
 
-            var pathToJob = this.getPath(entity, destX, destY, destZ);
+            // If the entity is not on z level 0 and their
+            // destiniation is on a different z level than themselves,
+            // the chances of there being a direct path to their location
+            // are slim, so just go to the bottom floor and calculate
+            // the path from there.
+            if (entityZ !== 0 || entityZ !== destZ)
+                pathToJob = this.getPathToLevel(entity, 0);
+            else
+                pathToJob = this.getPath(entity, destX, destY, destZ);
 
-            if(!pathToJob) {
-                    debugger;
+            // If there isn't a path to work, go down to the ground floor and try again.
+            if(pathToJob)
+                entity.setPath(pathToJob);
+            else {
+                this.wander(entity);
+
+                // debugger;
                 console.log(entity.getName());
                 console.log("Dest:", destX, destY, destZ);
                 console.log("Entity:", entity.getX(), entity.getY(), entity.getZ());
                 // var debugPath = this.getPath(entity, destX, destY, destZ);
                 // Game.Screen.playScreen._player.tryMove(destX, destY, destZ);
-                    Game.Screen.playScreen._player.tryMove(entity.getX() + 1, entity.getY() + 1, entity.getZ());
+                // Game.Screen.playScreen._player.tryMove(entity.getX() + 1, entity.getY() + 1, entity.getZ());
             }
 
-            // If there isn't a path to work, go down to the ground floor and try again.
-            if(pathToJob)
-                entity.setPath(pathToJob);
-            else if(entity.getZ() !== 0)
-                entity.setPath(this.getPathToLevel(entity, 0));
-            else
-                this.wander(entity);
-
-                entity._isPathing = false;
+            entity._isPathing = false;
         }.bind(this));
     } else if(!entity.isAtJobLocation() && entityPath.length) {
         // TODO: [EVENTS] Implement the new follow path method either here, or at the job level
