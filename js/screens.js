@@ -1441,14 +1441,16 @@ Game.Screen.helpScreen = {
         var y = padding;
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
-        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Arrow keys%c{} to move');
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Arrow keys%c{} to move, attack or use primary melee power');
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Ctrl + Arrow keys%c{} to swap positions with NPC');
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}<%c{} to go up stairs');
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}>%c{} to go down stairs');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '},%c{}] to pick up items');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}d%c{}] to drop items');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}x%c{}] to examine items');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}t%c{}] to throw item');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}p%c{}] to use powers');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}f%c{}] to use primary ranged power');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '};%c{}] to look around you');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}.%c{}] to wait');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}j%c{}] to show city statistics');
@@ -1612,13 +1614,10 @@ Game.Screen.powersScreen = {
         var y = 0;
         var text, powerName, active;
 
-        text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + key%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.';
+        text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + key%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.\n Press [%c{' + Game.Palette.blue + '}Esc%c{}] or [%c{' + Game.Palette.blue + '}Enter%c{}] to leave this screen.';
         display.drawText(0, y++, text);
 
-        text = 'Press [%c{' + Game.Palette.blue + '}Esc%c{}] or [%c{' + Game.Palette.blue + '}Enter%c{}] to leave this screen.'
-        display.drawText(0, y++, text);
-
-        y++;
+        y += 4;
         if(this._powers.length) {
             display.drawText(0, y++, 'Powers:');
 
