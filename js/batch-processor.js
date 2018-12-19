@@ -1,6 +1,6 @@
 Game.BatchProcessor = function() {
     this._queue = [];
-    this._queueSize = 10;
+    this._queueSize = 5;
     this._speed = 1;
 }
 
