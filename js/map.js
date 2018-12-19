@@ -320,7 +320,7 @@ Game.Map.prototype._generateEntities = function() {
         var entity = Game.EntityRepository.createEntity('person', template);
 
         // Give the entity a job
-        while (companies[currentCompany] && companies[currentCompany].getAvailablePositions() <= 0 || companies[currentCompany].getJobLocations().length === 0)
+        while (companies[currentCompany] && (companies[currentCompany].getAvailablePositions() <= 0 || companies[currentCompany].getJobLocations().length === 0))
             currentCompany++;
 
         // Add the entity as an employee of the current company
@@ -357,10 +357,8 @@ Game.Map.prototype.getRandomFloorPosition = function(z) {
 Game.Map.prototype.getTile = function(x, y, z) {
     // Make sure we are inside the bounds.
     // If we aren't, return null tile.
-    if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth)
+    if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth || !this._tiles[z] || !this._tiles[z][x] || !this._tiles[z][x][y])
         return Game.TileRepository.create('null');
-    else if(!this._tiles[z][x] || !this._tiles[z][x][y])
-        debugger;
     else
         return this._tiles[z][x][y] || Game.TileRepository.create('null');
 };
