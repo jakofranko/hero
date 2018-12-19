@@ -410,30 +410,6 @@ Game.EntityMixins.BasePoints = {
         return pointTotal;
     }
 };
-Game.EntityMixins.CorpseDropper = {
-    name: 'CorpseDropper',
-    init: function(template) {
-        // Chance of dropping a corpse (out of 100).
-        this._corpseDropRate = template['corpseDropRate'] || 100;
-    },
-    listeners: {
-        onDeath: function() {
-            // Check if we should drop a corpse.
-            if (Math.round(ROT.RNG.getUniform() * 100) <= this._corpseDropRate) {
-                // Create a new corpse item and drop it.
-                this._map.addItem(
-                    this.getX(),
-                    this.getY(),
-                    this.getZ(),
-                    Game.ItemRepository.create('corpse', {
-                        name: this._name + ' corpse',
-                        foreground: this._foreground
-                    })
-                );
-            }
-        }
-    }
-};
 Game.EntityMixins.Destructible = { // TODO: deprecated, delete
     name: 'Destructible',
     init: function(template) {

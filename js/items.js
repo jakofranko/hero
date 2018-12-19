@@ -116,12 +116,6 @@ Game.ItemRepository.define('bookshelf', {
     mixins: [Game.ItemMixins.Fixture, Game.ItemMixins.Container]
 });
 
-Game.ItemRepository.define('corpse', {
-    name: 'corpse',
-    character: '%',
-    foreground: Game.Palette.white,
-});
-
 Game.ItemRepository.define('sign', {
     name: 'sign',
     character: '?',
