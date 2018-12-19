@@ -155,7 +155,8 @@ Game.Tasks.getPath = function(entity, dx, dy, dz, currentPath) {
         return Game.Tasks.getPath(entity, ds[0], ds[1], destZ - 1, currentPath.concat(newPath));
     } else {
         var pathToDest = new ROT.Path.AStar(entity.getX(), entity.getY(), function(x, y) {
-            return map.getTile(x, y, destZ).isWalkable() || map.getTile(x, y, destZ).getName().includes("door");
+            var tile = map.getTile(x, y, destZ);
+            return tile.isWalkable() || tile.getName().includes("door");
         });
         pathToDest.compute(destX, destY, function(x, y) {
             newPath.push([x, y, destZ]);
