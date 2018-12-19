@@ -9,7 +9,7 @@ Game.EventRepository = new Game.Repository('events', Game.Event);
 // an actor will have the map associated with it)
 Game.EventRepository.define('bank robbery', {
     name: 'bank robbery',
-    message: 'A bank robbery is underway',
+    startMessage: 'A bank robbery is underway',
     spawnLocations: ['vault door', 'cash register', 'safe'],
     entityTypes: ['robber'], // TODO: [EVENTS] Create specific templates for 'robbers', 'gunman' etc.
     minEntities: 2,
@@ -67,7 +67,7 @@ Game.EventRepository.define('bank robbery', {
 
 Game.EventRepository.define('lost child', {
     name: 'lost child',
-    message: 'A lost child was spotted',
+    startMessage: 'A lost child was spotted',
     successMessage: 'You help the child find their way back home',
     spawnLocations: ['bush'],
     entityTypes: ['lost child'],
@@ -113,7 +113,7 @@ Game.EventRepository.define('lost child', {
 
 Game.EventRepository.define('gang war', {
     name: 'gang war',
-    message: 'A gang war has begun between two rival gangs',
+    startMessage: 'A gang war has begun between two rival gangs',
     successMessage: 'You stop the gangs from any further violence',
     spawnLocations: ['weapon rack', 'bush'],
     entityTypes: ['gang war bruiser', 'gang war gunner', 'gang war lieutenent'],

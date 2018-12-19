@@ -41,21 +41,21 @@ Game.City = function(size) {
 		name: 'crime',
 		maxActiveEvents: 3,
 		eventTypes: ['bank robbery'],
-		spawnChance: 0.1,
+		spawnChance: 0.001,
 		// TODO: [EVENTS] add spawnCondition func
 	});
     var lostChildEvents = new Game.EventSource({
         name: 'lost children',
         maxActiveEvents: 5,
         eventTypes: ['lost child'],
-        spawChance: 0.05
+        spawChance: 0.005
         // TODO: [EVENTS] add spawnCondition
     });
     var gangWarEvents = new Game.EventSource({
         name: 'gang war',
         maxActiveEvents: 4,
         eventTypes: ['gang war'],
-        spawChance: 0.5
+        spawChance: 0.005
         // TODO: [EVENTS] add spawnCondition
     });
 	this._eventSources = [crimeEvents, lostChildEvents, gangWarEvents];
