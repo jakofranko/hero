@@ -29,7 +29,7 @@ Game.PlayerTemplate = {
     attackValue: 10,
     sightRadius: 20,
     inventorySlots: 22,
-    basePoints: 100,
+    basePoints: 0,
     powers: ['energy bolt', 'throwing star', 'bo staff', 'stun fist', 'katana', 'light lance', 'pistol', 'lightning bolt', 'kevlar', 'phase skin'],
     mixins: [
         Game.EntityMixins.Characteristics,

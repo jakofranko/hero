@@ -144,6 +144,7 @@ Game.Screen.characterSelectScreen = {
             "Brick": {
                 description: "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
                 powers: ['tough skin', 'flight', 'sonic boom'],
+                basePoints: 20,
                 STR: 50,
                 DEX: 8,
                 INT: 8,
@@ -153,6 +154,7 @@ Game.Screen.characterSelectScreen = {
             "Energy Projector": {
                 description: "You tend to fly around, loose bolts of lightning from your fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
                 powers: ['energy blast', 'force field (physical damage)', 'force field (energy damage)', 'teleport', 'flight'],
+                basePoints: 50,
                 CON: 6,
                 BODY: 8
             },
@@ -160,6 +162,7 @@ Game.Screen.characterSelectScreen = {
                 description: "What you lack in super-powers you make up for with super-moves. Martial artists tend to be hard to hit, and focus on physical melee and ranged attacks.",
                 // powers: ['bo staff', 'throwing star', 'deflect projectile'],
                 powers: ['bo staff', 'throwing star'],
+                basePoints: 30,
                 STR: 15,
                 DEX: 25,
                 CON: 20
@@ -167,6 +170,7 @@ Game.Screen.characterSelectScreen = {
             "Mentalist": {
                 description: "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
                 powers: ['mind spike', 'force field (physical damage)', 'flight', 'telepathy'],
+                basePoints: 40,
                 STR: 8,
                 DEX: 15,
                 EGO: 50,
@@ -176,7 +180,8 @@ Game.Screen.characterSelectScreen = {
             "Vigilante": {
                 description: "Vengence and Justice are the same, and the only important thing is that they are final. These 'heroes' don't have powers, they have guns and kevlar, and intend to get the job done by any means necessary.",
                 // powers: ['assault rifle', 'pistol', 'katana', 'kevlar']
-                powers: ['pistol', 'katana', 'kevlar']
+                powers: ['pistol', 'katana', 'kevlar'],
+                basePoints: 60,
             }
         };
     },
