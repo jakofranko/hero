@@ -60,7 +60,7 @@ Game.Tasks.goToJobLocation = function(entity) {
     var entityPath = entity.getPath(),
         jobLocation = entity.getJobLocation();
 
-    if(jobLocation && !entity.isAtJobLocation() && !entityPath.length && !entity.isPathing) {
+    if(jobLocation && !entity.isAtJobLocation() && !entityPath.length && !entity._isPathing) {
         entity._isPathing = true;
         entity.getMap().getBatchProcessor().add(function() {
             // Since calculating a path can takea long time, make it asynchronous
