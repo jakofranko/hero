@@ -120,7 +120,7 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
 
 	if(canAttack) {
         if(this.hasMixin('PowerUser') && this.getPrimaryMelee())
-            this.usePower(target, this.getPrimaryMelee());
+            this.usePower([target], this.getPrimaryMelee());
         else
             this.hthAttack(target);
 
