@@ -230,6 +230,9 @@ Game.Jobs.gangWarrior = {
             } else {
                 Game.Tasks.attemptMelee(entity, target);
             }
+        } else if (target && (!target.isConscious() || !target.isAlive())) {
+            entity.setTarget(null);
+            entity.setPath(); // clear path
         } else {
             Game.Tasks.wander(entity);
         }
