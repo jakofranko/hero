@@ -160,9 +160,6 @@ Game.EventRepository.define('gang war', {
             }, this);
         }
     },
-    onInteraction: function() {
-        this._childRescued = true;
-    },
     onDeath: function(victim, killer) {
         var entities = this.getEntities();
         for (var i = 0; i < entities.length; i++) {
