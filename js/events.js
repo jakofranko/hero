@@ -169,5 +169,16 @@ Game.EventRepository.define('gang war', {
             }
         }
         console.log(`Entity '${victim.getName()}' was killed by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
+    },
+    onKO: function(victim, agressor) {
+        var entities = this.getEntities();
+        for (var i = 0; i < entities.length; i++) {
+            if(victim == entities[i]) {
+                this.removeEntity(i);
+                victim.getMap().removeEntity(victim);
+                break;
+            }
+        }
+        console.log(`Entity '${victim.getName()}' was KO'd by '${agressor.getName()}' for event ${this.getName()} ${this.getId()}`);
     }
 });
