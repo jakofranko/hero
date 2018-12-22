@@ -169,6 +169,8 @@ Game.EntityMixins.Characteristics = {
         return this._BODY;
     },
     takeBODY: function(attacker, BODY, type, killing) {
+        var map = this.getMap();
+        var justice = map.getJustice();
         var defense;
         if(killing) {
             if(!type || type == 'physical') defense = this._rPD;
@@ -190,7 +192,11 @@ Game.EntityMixins.Characteristics = {
 
             this.kill();
             if(this.hasMixin('JobActor') && this.hasJob('mugger')) {
-                this.getMap().getJustice().removeCriminals(1);
+                justice.removeCriminals(1);
+            }
+
+            if (attacker == map.getPlayer()) {
+                justice.addInfamy(1);
             }
         }
 
