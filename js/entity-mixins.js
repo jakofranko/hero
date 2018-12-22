@@ -250,7 +250,7 @@ Game.EntityMixins.Characteristics = {
     adjustEND: function(amount) {
         this._END += amount;
         if (this._END < 0) {
-            this.takeSTUN(this, Math.abs(this._END));
+            this.takeSTUN(this, Math.abs(this._END), 'END spillover');
             this._END = 0;
         }
     },
