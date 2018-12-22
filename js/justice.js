@@ -30,6 +30,7 @@ Game.Justice = function() {
 	this._criminals = 0;
 	this._respect_for_law = 0;
     this._good_deeds = 0;
+    this._infamy = 0;
 
 	// Initialize justice level based on other starting levels
 	this.updateJustice();
@@ -71,7 +72,7 @@ Game.Justice.prototype.getCorruption = function() {
     return this._corruption;
 };
 Game.Justice.prototype.updateCorruption = function () {
-    this._corruption = 0 - this._good_deeds;
+    this._corruption = 0 - (this._good_deeds / this._infamy);
 };
 
 // Third Tier methods
@@ -115,4 +116,17 @@ Game.Justice.prototype.addGoodDeeds = function(deeds) {
 Game.Justice.prototype.removeGoodDeeds  = function(deeds) {
 	this._good_deeds -= deeds;
 	this.updateJustice();
+};
+
+Game.Justice.prototype.addInfamy = function (infamy) {
+    this._infamy += infamy;
+};
+Game.Justice.prototype.removeInfamy = function (infamy) {
+    this._infamy -= infamy;
+};
+Game.Justice.prototype.setInfamy = function (infamy) {
+    this._infamy = infamy;
+};
+Game.Justice.prototype.getInfamy = function () {
+    return this._infamy;
 };

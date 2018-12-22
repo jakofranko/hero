@@ -1498,6 +1498,7 @@ Game.Screen.justiceScreen = {
         display.drawText(startX, startY++, 'Criminals: ' + justice.getCriminals());
         display.drawText(startX, startY++, 'Respect for Law: ' + justice.getRespectForLaw());
         display.drawText(startX, startY++, 'Good Deeds: ' + justice.getGoodDeeds());
+        display.drawText(startX, startY++, 'Infamy: ' + justice.getInfamy());
     },
     handleInput: function(inputType, inputData) {
         if(inputType == 'keydown' && (inputData.keyCode === ROT.VK_ESCAPE || inputData.keyCode === ROT.VK_RETURN))
