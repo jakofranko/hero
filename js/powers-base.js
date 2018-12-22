@@ -518,7 +518,7 @@ Game.BasePowers.egoAttack = function(options) {
         missTargetMessage: "%s misses you!",
         missMessage: "You miss!",
         effect: function(targets) {
-            if(!targets || targets.length === 0) {
+            if(!targets || targets.length === 0 || !targets.some(target => target)) {
                 Game.sendMessage(this.entity, "There's nothing there!");
                 return false; // don't end turn
             }
@@ -526,7 +526,7 @@ Game.BasePowers.egoAttack = function(options) {
             this.entity.adjustEND(-this.END());
 
             targets.forEach(function(target) {
-                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+               if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
                     target.raiseEvent('onAttack', this.entity);
 
                     var hit = this.entity._egoAttackRoll(target);
