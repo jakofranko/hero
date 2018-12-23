@@ -187,11 +187,11 @@ Game.Event.prototype.raiseEvent = function(event, ...args) {
     this[hook].apply(this, args);
 
     // Check to see if the event is over (success or loss)
-    if(this._successCondition()) {
-        this._successEffect();
+    if(this._successCondition(event, args)) {
+        this._successEffect(event, args);
         this._won = true;
-    } else if(this._lossCondition()) {
-        this._lossEffect();
+    } else if(this._lossCondition(event, args)) {
+        this._lossEffect(event, args);
         this._lost = true;
     }
 
