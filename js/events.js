@@ -119,8 +119,13 @@ Game.EventRepository.define('gang war', {
     entityTypes: ['gang war bruiser', 'gang war gunner', 'gang war lieutenent'],
     minEntities: 7,
     maxEntities: 16,
-    successCondition: function() {
-        if(this.getEntities().length < 1)
+    successCondition: function(event, eventArgs) {
+        var attacker;
+        if (event === 'onDeath' || event === 'onKO') {
+            attacker = eventArgs[1];
+        }
+
+        if(this.getEntities().length < 1 && attacker && attacker._type == "Player")
             return true;
         else
             return false;
@@ -133,7 +138,7 @@ Game.EventRepository.define('gang war', {
         justice.addRespectForLaw(15);
         entities.forEach(entity => { map.removeEntity(entity); });
     },
-    lossCondition: function() {
+    lossCondition: function(event, eventArgs) {
         if(this.getEntities().length < 1)
             return true;
         else
