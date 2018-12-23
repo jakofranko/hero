@@ -41,7 +41,7 @@ Game.Commands.swapCommand = function(diffX, diffY, diffZ) {
         if(target)
             return entity.swapPosition(target);
         else
-            return entity.tryMove(entity.getX() - diffX, entity.getY() - diffY, entity.getZ() - diffZ);
+            return entity.tryMove(newX, newY, newZ);
     };
 };
 
