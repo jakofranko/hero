@@ -10,6 +10,8 @@ Game.EventRepository = new Game.Repository('events', Game.Event);
 Game.EventRepository.define('bank robbery', {
     name: 'bank robbery',
     startMessage: 'A bank robbery is underway',
+    successMessage: 'You stopped a bank robbery successfully',
+    failMessage: 'You failed to stop a bank robbery',
     spawnLocations: ['vault door', 'cash register', 'safe'],
     entityTypes: ['robber'], // TODO: [EVENTS] Create specific templates for 'robbers', 'gunman' etc.
     minEntities: 2,
@@ -113,8 +115,9 @@ Game.EventRepository.define('lost child', {
 
 Game.EventRepository.define('gang war', {
     name: 'gang war',
-    startMessage: 'A gang war has begun between two rival gangs',
-    successMessage: 'You stop the gangs from any further violence',
+    startMessage: 'A gang has been spotted looking for trouble in the area',
+    successMessage: 'You stop the gang from any further violence',
+    failMessage: 'A gang has been killed off by a rival gang. The city\'s respect continues to degrade...',
     spawnLocations: ['weapon rack', 'bush'],
     entityTypes: ['gang war bruiser', 'gang war gunner', 'gang war lieutenent'],
     minEntities: 7,
