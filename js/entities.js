@@ -154,6 +154,7 @@ Game.EntityRepository.define('lost child', {
         Game.EntityMixins.Interactor,
         Game.EntityMixins.JobActor,
         Game.EntityMixins.Sight,
+        Game.EntityMixins.Targeting,
         Game.EntityMixins.Reactor,
         Game.EntityMixins.Walker
     ]
