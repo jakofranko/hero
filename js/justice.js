@@ -64,17 +64,24 @@ Game.Justice.prototype.getCrime = function() {
 Game.Justice.prototype.updateCrime = function() {
 	// The Crime level should be a function of the number of criminals times
 	// respect for the law, such that when respect for the law is highest, crime
-	// is reduced by half. (other things later)
+	// is reduced by half. When respect for the law is lowest, crime is doubled.
 	var crimePercentage = Math.percent(this._criminals, Game.getTotalEntities()),
-		rflModifier = (this._respect_for_law / 100) + 1,
-		totalCrime = crimePercentage / rflModifier;
+		rflModifier = this._respect_for_law / 100;
+	var totalCrime;
+
+    if (rflModifier > 0)
+        totalCrime = crimePercentage / Math.max(1, rflModifier + 1);
+    else
+        totalCrime = crimePercentage * Math.abs(Math.min(-1, rflModifier - 1));
+
 	this._crime = totalCrime;
 };
 Game.Justice.prototype.getCorruption = function() {
     return this._corruption;
 };
 Game.Justice.prototype.updateCorruption = function () {
-    this._corruption = 0 - (this._good_deeds / this._infamy);
+	var infamy = this._infamy === 0 ? 1 : this._infamy
+    this._corruption = 0 - (this._good_deeds / infamy);
 };
 
 // Third Tier methods
