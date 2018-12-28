@@ -212,6 +212,13 @@ Game.Jobs.gangWarrior = {
         if(!entity.hasMixin('Targeting'))
             return;
 
+        var event = entity.getEvent();
+        var eventLocation = event.getLocation();
+        var eventLocationSplit = eventLocation.split(",");
+        var eventX = eventLocationSplit[0];
+        var eventY = eventLocationSplit[1];
+        var eventZ = eventLocationSplit[2];
+
         var target = entity.getTarget();
         var targetGang = entity.getEvent().targetGang;
         if(target === false || target === null) {
@@ -233,6 +240,9 @@ Game.Jobs.gangWarrior = {
         } else if (target && (!target.isConscious() || !target.isAlive())) {
             entity.setTarget(null);
             entity.setPath(); // clear path
+        } else if (entity.getSightRadius() < Game.Geometry.distance(entity.getX(), entity.getY(), eventX, eventY)) {
+            Game.Tasks.getPath(entity, eventX, eventY, eventZ);
+            Game.Tasks.followPath(entity);
         } else {
             Game.Tasks.wander(entity);
         }
