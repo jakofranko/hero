@@ -52,7 +52,9 @@ Game.Justice.prototype.updateJustice = function() {
 	{
 		Game.Screen.playScreen.setSubScreen(Game.Screen.winScreen);
 		Game.win();
-	}
+	} else if (this._justice <= 50 && !Game.won()) {
+        Game.Screen.playScreen.setSubScreen(Game.Screen.loseScreen);
+    }
 };
 
 // Second Tier methods
