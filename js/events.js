@@ -166,11 +166,14 @@ Game.EventRepository.define('gang war', {
         }
     },
     onDeath: function(victim, killer) {
-        var entities = this.getEntities();
-        for (var i = 0; i < entities.length; i++) {
-            if(victim == entities[i]) {
-                this.removeEntity(i);
-                break;
+        // If the victim is unconscious, they have already been removed by the 'onKO' event
+        if (victim.isConscious()) {
+            var entities = this.getEntities();
+            for (var i = 0; i < entities.length; i++) {
+                if(victim == entities[i]) {
+                    this.removeEntity(i);
+                    break;
+                }
             }
         }
         console.log(`Entity '${victim.getName()}' was killed by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
@@ -180,10 +183,10 @@ Game.EventRepository.define('gang war', {
         for (var i = 0; i < entities.length; i++) {
             if(victim == entities[i]) {
                 this.removeEntity(i);
-                victim.getMap().removeEntity(victim);
                 break;
             }
         }
+        victim.getMap().removeEntity(victim);
         console.log(`Entity '${victim.getName()}' was KO'd by '${agressor.getName()}' for event ${this.getName()} ${this.getId()}`);
     }
 });
