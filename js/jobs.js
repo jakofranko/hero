@@ -230,7 +230,7 @@ Game.Jobs.gangWarrior = {
             }
         }
 
-        if (target && (target.isConscious() || target.isAlive())) {
+        if (target && target.isConscious() && target.isAlive()) {
             // All ranged attacks will be powers, so check if entity is a PowerUser
             if (entity.hasMixin('PowerUser')) {
                 Game.Tasks.attemptAttackPower(entity, target);
