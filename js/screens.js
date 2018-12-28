@@ -570,7 +570,10 @@ Game.Screen.playScreen = {
         // If the game is over, enter will bring the user to the losing screen.
         if(this._gameEnded) {
             if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-                Game.switchScreen(Game.Screen.loseScreen);
+                if (this._player.isAlive())
+                    Game.switchScreen(Game.Screen.loseScreen);
+                else
+                    Game.switchScreen(Game.Screen.deathScreen);
             }
             // Return to make sure the user can't still play
             return;
@@ -1605,8 +1608,6 @@ Game.Screen.gainStatScreen = {
 };
 
 // Manage character powers screen
-// TODO: Highlight powers that are currently activated
-// TODO: Allow activated powers to be deactivated
 Game.Screen.powersScreen = {
     setup: function(entity) {
         // Must be called before rendering.
@@ -1713,7 +1714,6 @@ Game.Screen.errorScreen = {
     }
 };
 
-// Define our winning screen
 Game.Screen.winScreen = {
     enter: function() {    console.log("Entered win screen."); },
     exit: function() { console.log("Exited win screen."); },
@@ -1735,8 +1735,25 @@ Game.Screen.winScreen = {
     }
 };
 
-// Define our winning screen
 Game.Screen.loseScreen = {
+    enter: function() { console.log("Entered lose screen."); },
+    exit: function() { console.log("Exited lose screen."); },
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var text = "%c{#ea003b}The city has fallen to the criminals and the corrupt.";
+        display.drawText((w/2) - 10, 2, text);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to try again";
+        display.drawText((w/2) - 13, 4, text);
+    },
+    handleInput: function(inputType, inputData) {
+        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
+            location.reload();
+        }
+    }
+};
+
+Game.Screen.deathScreen = {
     enter: function() { console.log("Entered lose screen."); },
     exit: function() { console.log("Exited lose screen."); },
     render: function(display) {
