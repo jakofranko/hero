@@ -17,7 +17,7 @@ var Game = {
 
     _screenWidth: 80,
     _screenHeight: 24,
-    _citySize: 10,
+    _citySize: 7,
     _keepNumMessages: 100,
 
     // How many in-game tiles a lot should comprise
@@ -26,8 +26,8 @@ var Game = {
 
     // NPC Settings
     _totalEntities: 300,
-    _totalCriminals: 10,
-    _availableJobs: 300 - 30,
+    _totalCriminals: 60,
+    _availableJobs: 300 - 60,
 
     debug: true,
     watchName: null,
