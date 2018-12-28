@@ -75,7 +75,8 @@ Game.Power =  function(properties) {
             break;
         case 'standard':
             this.inRange = function(startX, startY, targetX, targetY) {
-                return Game.Geometry.distance(this.entity.getX(), this.entity.getY(), targetX, targetY) <= (5 * this.points);
+                let target = this.entity.getMap().getEntityAt(targetX, targetY, this.entity.getZ());
+                return Game.Geometry.distance(this.entity.getX(), this.entity.getY(), targetX, targetY) <= (5 * this.points) && this.entity.hasMixin('Sight') && this.entity.canSee(target);
             };
             break;
         case 'LOS':
