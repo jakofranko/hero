@@ -191,9 +191,6 @@ Game.EntityMixins.Characteristics = {
             attacker.raiseEvent('onKill', this);
 
             this.kill();
-            if(this.hasMixin('JobActor') && this.hasJob('mugger')) {
-                justice.removeCriminals(1);
-            }
 
             if (attacker == map.getPlayer()) {
                 justice.addInfamy(1);
