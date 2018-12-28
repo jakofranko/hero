@@ -180,6 +180,7 @@ Game.Event.prototype.start = function() {
 // Handling events
 Game.Event.prototype.raiseEvent = function(event, ...args) {
     var hook = `_${event}`;
+    
     if(!this[hook])
         throw new Error(`There is no hook for '${event}.' Please define one in the event definition`);
 

@@ -113,8 +113,6 @@ Game.Tasks.goToJobLocation = function(entity) {
     }
 };
 
-// TODO: Improve this to support what happens if an entity cannot path someplace when they are on the same z-level
-// (I think the solution here would be to have them go to the ground level if they aren't already)
 Game.Tasks.getPath = function(entity, dx, dy, dz, currentPath) {
     var map = entity.getMap(),
         newPath = [],

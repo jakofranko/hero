@@ -155,22 +155,21 @@ Game.Entity.prototype.isConscious = function() {
 };
 Game.Entity.prototype.kill = function(message) {
     // Only kill once!
-    if (!this._alive) {
+    if (!this._alive)
         return;
-    }
+
     this._alive = false;
-    if (message) {
+
+    if (message)
         Game.sendMessage(this, message);
-    } else {
+    else
         Game.sendMessage(this, "You have died!");
-    }
 
     // Check if the player died, and if so call their act method to prompt the user.
-    if (this.hasMixin(Game.EntityMixins.PlayerActor)) {
+    if (this.hasMixin(Game.EntityMixins.PlayerActor))
         this.act();
-    } else {
+    else
         this.getMap().removeEntity(this);
-    }
 };
 Game.Entity.prototype.ko = function(message) {
     // Only KO once
