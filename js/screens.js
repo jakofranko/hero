@@ -1496,6 +1496,11 @@ Game.Screen.justiceScreen = {
         // Draw Crime Meter
         this._drawMeter(display, startX, startY, title, justice.getCrime() / 100, true);
 
+        startX += (title.length + this._padding);
+        title = 'Corruption';
+        // Draw Corruption Meter
+        this._drawMeter(display, startX, startY, title, justice.getCorruption() / 100, true);
+
         // Other stats
         startX += (title.length + this._padding);
         display.drawText(startX, startY++, 'Criminals: ' + justice.getCriminals());
