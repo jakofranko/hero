@@ -63,7 +63,25 @@ Game.EventRepository.define('bank robbery', {
                 break;
             }
         }
+
+        if (killer._type == 'Player')
+            killer.addSpendablePoints(Math.max(0, Math.ceil(victim.getBasePoints() / 10)));
+
         console.log(`Entity '${victim.getName()}' was killed by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
+    },
+    onKO: function(victim, agressor) {
+        var entities = this.getEntities();
+        for (var i = 0; i < entities.length; i++) {
+            if(victim == entities[i]) {
+                this.removeEntity(i);
+                break;
+            }
+        }
+
+        if (agressor._type == 'Player')
+            agressor.addSpendablePoints(Math.max(0, Math.ceil(victim.getBasePoints() / 10)));
+
+        console.log(`Entity '${victim.getName()}' was killed by '${agressor.getName()}' for event ${this.getName()} ${this.getId()}`);
     }
 });
 
@@ -183,6 +201,10 @@ Game.EventRepository.define('gang war', {
                 }
             }
         }
+
+        if (killer._type == 'Player')
+            killer.addSpendablePoints(Math.max(0, Math.ceil(victim.getBasePoints() / 10)));
+
         console.log(`Entity '${victim.getName()}' was killed by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
     },
     onKO: function(victim, agressor) {
@@ -194,6 +216,10 @@ Game.EventRepository.define('gang war', {
             }
         }
         victim.getMap().removeEntity(victim);
+
+        if (agressor._type == 'Player')
+            agressor.addSpendablePoints(Math.max(0, Math.ceil(victim.getBasePoints() / 10)));
+
         console.log(`Entity '${victim.getName()}' was KO'd by '${agressor.getName()}' for event ${this.getName()} ${this.getId()}`);
     }
 });
