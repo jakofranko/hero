@@ -1523,8 +1523,11 @@ Game.EntityMixins.Sight = {
             }
         },
         onRepent: function(entity) {
-            if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
+            if (this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
                 this.forget('people', 'criminals', entity.getName());
+
+                if (entity._foreground == Game.Palette.red)
+                    entity._foreground = Game.Palette.white;
             }
         },
         getVisibleTiles: function() {
