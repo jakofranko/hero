@@ -569,6 +569,11 @@ Game.EntityMixins.EventParticipant = {
         },
         onKill: function(victim) {
             this._event.raiseEvent('onKill', this, victim);
+        },
+        details: function() {
+            if (this._gangName) {
+                return [{key: 'Gang', value: this._gangName}];
+            }
         }
     }
 };
