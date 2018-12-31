@@ -31,9 +31,6 @@ Game.Justice = function() {
 	this._respect_for_law = 0;
     this._good_deeds = 0;
     this._infamy = 0;
-
-	// Initialize justice level based on other starting levels
-	this.updateJustice();
 };
 Game.Justice.prototype.getJustice = function() {
 	return this._justice;
@@ -48,11 +45,11 @@ Game.Justice.prototype.updateJustice = function() {
 	this._justice = Math.ceil(100 - (this._crime / 2) - (this._corruption / 2));
 
 	// If Justice == 100, you win!
-	if(this._justice >= 100 && !Game.won())
+	if(this._justice >= 100 && Game.finishedLoading() && !Game.won())
 	{
 		Game.Screen.playScreen.setSubScreen(Game.Screen.winScreen);
 		Game.win();
-	} else if (this._justice <= 50 && !Game.won()) {
+	} else if (this._justice <= 50 && Game.finishedLoading()) {
         Game.Screen.playScreen.setSubScreen(Game.Screen.loseScreen);
     }
 };

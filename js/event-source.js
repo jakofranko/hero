@@ -61,12 +61,14 @@ Game.EventSource.prototype._spawn = function() {
     var type = this._eventTypes.random(),
         event = Game.EventRepository.create(type, {map: this._map});
 
-    event.start();
-    this._activeEvents.push(event);
-    this._map.addActiveEvent(event);
+    var started = event.start();
+    if (started) {
+        this._activeEvents.push(event);
+        this._map.addActiveEvent(event);
 
-    // Send an alert message to the player
-    Game.sendMessage(this._map.getPlayer(), event.getStartMessage());
+        // Send an alert message to the player
+        Game.sendMessage(this._map.getPlayer(), event.getStartMessage());
+    }
 
     return true;
 };

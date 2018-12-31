@@ -12,7 +12,7 @@ Game.EventRepository.define('bank robbery', {
     startMessage: 'A bank robbery is underway',
     successMessage: 'You stopped a bank robbery successfully',
     failMessage: 'You failed to stop a bank robbery',
-    spawnLocations: ['vault door', 'cash register', 'safe'],
+    spawnLocations: ['safe'],
     entityTypes: ['robber'], // TODO: [EVENTS] Create specific templates for 'robbers', 'gunman' etc.
     minEntities: 2,
     maxEntities: 6,
@@ -141,7 +141,7 @@ Game.EventRepository.define('gang war', {
         justice.addRespectForLaw(15);
         entities.forEach(entity => { map.removeEntity(entity); });
     },
-    lossCondition: function(event, eventArgs) {
+    lossCondition: function() {
         if(this.getEntities().length < 1)
             return true;
         else

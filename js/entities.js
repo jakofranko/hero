@@ -153,6 +153,7 @@ Game.EntityRepository.define('lost child', {
         Game.EntityMixins.EventParticipant,
         Game.EntityMixins.Interactor,
         Game.EntityMixins.JobActor,
+        Game.EntityMixins.MoneyHolder,
         Game.EntityMixins.Sight,
         Game.EntityMixins.Targeting,
         Game.EntityMixins.Reactor,

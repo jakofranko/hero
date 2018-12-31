@@ -1,6 +1,7 @@
 var Game = {
     _player: null,
     _won: false,
+    _loaded: false,
     _seed: null,
 
     // ROT.Displays
@@ -90,6 +91,12 @@ var Game = {
     setSeed: function(seed) {
         this._seed = seed;
         ROT.RNG.setSeed(seed);
+    },
+    setLoading: function(loading) {
+        this._loaded = loading;
+    },
+    finishedLoading: function() {
+        return this._loaded;
     },
     addAvailableJobs: function(amount) {
         if(amount)

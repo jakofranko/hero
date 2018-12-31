@@ -369,6 +369,7 @@ Game.Screen.loadScreen = {
     handleInput: function() {},
     exit: function() {
         clearInterval(this._intID);
+        Game.setLoading(true);
     }
 };
 
@@ -1195,7 +1196,7 @@ Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputD
     if(unlock)
         this._player.getMap().getEngine().unlock();
     else
-        Game.refresh(this._player);
+        Game.refresh(); // Don't display log messages so extra info can be put there instead
 };
 Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
     // Make sure we stay within bounds.
@@ -1745,8 +1746,8 @@ Game.Screen.loseScreen = {
     exit: function() { console.log("Exited lose screen."); },
     render: function(display) {
         var w = Game.getScreenWidth();
-        var text = "%c{#ea003b}The city has fallen to the criminals and the corrupt.";
-        display.drawText((w/2) - 10, 2, text);
+        var text = "The city has fallen to the criminals and the corrupt.";
+        display.drawText((w/2) - (text.length / 2), 2, "%c{" + Game.Palette.red + "}" + text);
 
         text = "Press [%c{#585DF5}Enter%c{}] to try again";
         display.drawText((w/2) - 13, 4, text);

@@ -134,8 +134,10 @@ Game.Event.prototype.start = function() {
         tries--;
     }
 
-    if(!spawnItem)
+    if(!spawnItem) {
         debugger;
+        return false;
+    }
 
     var spawnLocation = spawnItem.getLocation(),
         splitLocation = spawnLocation.split(","),
@@ -175,6 +177,8 @@ Game.Event.prototype.start = function() {
     }
 
     this._location = spawnLocation;
+
+    return true;
 };
 
 // Handling events

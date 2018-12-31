@@ -672,10 +672,6 @@ Game.EntityMixins.InventoryHolder = {
         if(!this._items[i])
             return false;
 
-        // If we can equip items, then make sure we unequip the item we are removing.
-        if(this._items[i] && this.hasMixin(Game.EntityMixins.Equipper))
-            this.unequip(this._items[i]);
-
         // If the item is in a stack, decrement the stack amount
         if(this._items[i].hasMixin('Stackable') && this._items[i].amount() > 1)
             this._items[i].removeFromStack(amount);
@@ -1565,7 +1561,7 @@ Game.EntityMixins.Sight = {
                 // Change foreground based on character's memory
                 if(Object.keys(criminals).length > 0) {
                     for(var key in visibleEntities) {
-                        if (visibleEntities.hasOwnProperty(visibleEntities[key])) {
+                        if (visibleEntities.hasOwnProperty(key)) {
                             var entity = visibleEntities[key];
                             var name = entity.getName();
                             if(criminals[name]) {
