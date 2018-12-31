@@ -41,10 +41,24 @@ Game.City = function(size) {
 		name: 'crime',
 		maxActiveEvents: 3,
 		eventTypes: ['bank robbery'],
-		spawnChance: 0.1,
+		spawnChance: 0.001,
 		// TODO: [EVENTS] add spawnCondition func
 	});
-	this._eventSources = [crimeEvents];
+    var lostChildEvents = new Game.EventSource({
+        name: 'lost children',
+        maxActiveEvents: 5,
+        eventTypes: ['lost child'],
+        spawChance: 0.005
+        // TODO: [EVENTS] add spawnCondition
+    });
+    var gangWarEvents = new Game.EventSource({
+        name: 'gang war',
+        maxActiveEvents: 4,
+        eventTypes: ['gang war'],
+        spawChance: 0.005
+        // TODO: [EVENTS] add spawnCondition
+    });
+	this._eventSources = [crimeEvents, lostChildEvents, gangWarEvents];
 };
 // Getters and setters
 Game.City.prototype.getWidth = function() {
@@ -124,7 +138,7 @@ Game.City.prototype.init = function() {
 			// don't let them be right next to each other,
 			// don't let them be within 2 units of each other,
 			// and don't put a road at 0,0
-			if((x === 0 || y === 0) && key != "0,0" && Math.random() < this._roadFrequency) {
+			if((x === 0 || y === 0) && key != "0,0" && ROT.RNG.getUniform() < this._roadFrequency) {
 				var lastX = x - 1;
 				var lastY = y - 1;
 				var lastRow = lastX + "," + y;
@@ -152,20 +166,18 @@ Game.City.prototype.init = function() {
 					// We are on the first row, so draw the roads directly down
 					var thisColumn = x;
 					for(var i = 1; i < this._height; i++) {
-						var roadKey = thisColumn + "," + i;
 						if(this._lots[thisColumn][i] && this._lots[thisColumn][i].getName() == 'road') {
 							this._lots[thisColumn][i].setOrientation('intersection');
 						} else {
 							this._lots[thisColumn][i] = Game.LotRepository.create('road', {
 								orientation: 'vertical'
-							});	
+							});
 						}
 					}
 				} else if(x === 0) {
 					// Otherwise, we are on the first column, so draw the road directly over
 					var thisRow = y;
 					for(var j = 1; j < this._width; j++) {
-						var roadKey = j + "," + thisRow;
 						if(this._lots[j][thisRow] && this._lots[j][thisRow].getName() == 'road') {
 							this._lots[j][thisRow].setOrientation('intersection');
 						} else {
@@ -191,7 +203,7 @@ Game.City.prototype.init = function() {
 			} else {
 				var lot = Game.LotRepository.createIf('willSpawn', this.neighborhood(x, y));
 				if(lot) {
-					this._lots[x][y] = lot;	
+					this._lots[x][y] = lot;
 				} else {
 					Game.LotRepository.create('empty');
 				}
@@ -226,7 +238,7 @@ Game.City.prototype.tilesFromLots = function() {
 				tiles = this._lots[cityX][cityY].getTiles();
 
 			// Now that the tiles have been instantiated, fetch the lot's companies,
-			// adjust their x and y values based on their location in the city, and 
+			// adjust their x and y values based on their location in the city, and
 			// then add them to the list of city companies.
 			var lotCompanies = this.adjustCompaniesLocations(this._lots[cityX][cityY].getCompanies(), lotOffsetX, lotOffsetY);
 			if(lotCompanies.length > 0)

@@ -384,8 +384,8 @@ Game.House.prototype._shiftTilesEast = function(amount, tiles) {
 Game.House.prototype._renderRoom = function(room, direction) {
     var w = room.width;
     var h = room.height;
-    var horizontalWall = Game.TileRepository.create('indoor wall-horizontal');
-    var verticalWall = Game.TileRepository.create('indoor wall-vertical');
+    var horizontalWall = Game.TileRepository.create('inside wall-horizontal');
+    var verticalWall = Game.TileRepository.create('inside wall-vertical');
     var floor = Game.TileRepository.create('floor');
     var tiles = new Array(w); // Initialize the x-length
 

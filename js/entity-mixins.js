@@ -169,6 +169,8 @@ Game.EntityMixins.Characteristics = {
         return this._BODY;
     },
     takeBODY: function(attacker, BODY, type, killing) {
+        var map = this.getMap();
+        var justice = map.getJustice();
         var defense;
         if(killing) {
             if(!type || type == 'physical') defense = this._rPD;
@@ -189,8 +191,9 @@ Game.EntityMixins.Characteristics = {
             attacker.raiseEvent('onKill', this);
 
             this.kill();
-            if(this.hasMixin('JobActor') && this.hasJob('mugger')) {
-                this.getMap().getJustice().removeCriminals(1);
+
+            if (attacker == map.getPlayer()) {
+                justice.addInfamy(1);
             }
         }
 
@@ -244,7 +247,7 @@ Game.EntityMixins.Characteristics = {
     adjustEND: function(amount) {
         this._END += amount;
         if (this._END < 0) {
-            this.takeSTUN(this, Math.abs(this._END));
+            this.takeSTUN(this, Math.abs(this._END), 'END spillover');
             this._END = 0;
         }
     },
@@ -284,7 +287,7 @@ Game.EntityMixins.Characteristics = {
         if(this._STUN <= 0) {
             Game.sendMessage(attacker, "You knocked %s unconscious", [this.getName()]);
             this.ko();
-            this.raiseEvent('onKO');
+            this.raiseEvent('onKO', attacker);
         }
 
         this.raiseEvent('onAttack', attacker);
@@ -410,31 +413,7 @@ Game.EntityMixins.BasePoints = {
         return pointTotal;
     }
 };
-Game.EntityMixins.CorpseDropper = {
-    name: 'CorpseDropper',
-    init: function(template) {
-        // Chance of dropping a corpse (out of 100).
-        this._corpseDropRate = template['corpseDropRate'] || 100;
-    },
-    listeners: {
-        onDeath: function() {
-            // Check if we should drop a corpse.
-            if (Math.round(Math.random() * 100) <= this._corpseDropRate) {
-                // Create a new corpse item and drop it.
-                this._map.addItem(
-                    this.getX(),
-                    this.getY(),
-                    this.getZ(),
-                    Game.ItemRepository.create('corpse', {
-                        name: this._name + ' corpse',
-                        foreground: this._foreground
-                    })
-                );
-            }
-        }
-    }
-};
-Game.EntityMixins.Destructible = {
+Game.EntityMixins.Destructible = { // TODO: deprecated, delete
     name: 'Destructible',
     init: function(template) {
         this._maxHp = template['maxHp'] || 10;
@@ -488,20 +467,89 @@ Game.EntityMixins.Destructible = {
         this._maxHp += value;
         this._hp += value;
         Game.sendMessage(this, "You look healthier!");
-    },
-    listeners: {
-        onGainLevel: function() {
-            // Heal the entity.
-            this.setHp(this.getMaxHp());
-        },
-        details: function() {
-            return [
-                {key: 'defense', value: this.getDefenseValue()},
-                {key: 'hp', value: this.getHp()}
-            ];
-        }
     }
 };
+Game.EntityMixins.DoorOpener = {
+    listeners: {
+        action: function() {
+            var x = this.getX(),
+                y = this.getY(),
+                z = this.getZ(),
+                map = this.getMap();
+            var doorN = map.getTile(x, y - 1, z),
+                doorNName = doorN.getName(),
+                doorE = map.getTile(x + 1, y, z),
+                doorEName = doorE.getName(),
+                doorS = map.getTile(x, y + 1, z),
+                doorSName = doorS.getName(),
+                doorW = map.getTile(x - 1, y, z),
+                doorWName = doorW.getName();
+            var actions = {};
+
+            function stripOpen(str) {
+                return str.indexOf("open ") > -1 ? str.slice(5) : str;
+            }
+
+            if (doorN && doorNName.includes("door")) {
+                if (doorNName.includes("open")) {
+                    actions["Close Door N"] = [
+                        [map.setTile, [x, y - 1, z, stripOpen(doorNName)], map],
+                        [Game.sendMessage, [this, 'You close the door to the north']]
+                    ];
+                } else {
+                    actions["Open Door N"] = [
+                        [map.setTile, [x, y - 1, z, "open " + doorNName], map],
+                        [Game.sendMessage, [this, 'You open the door to the north']]
+                    ];
+                }
+            }
+
+            if (doorE && doorEName.includes("door")) {
+                if (doorEName.includes("open")) {
+                    actions["Close Door E"] = [
+                        [map.setTile, [x + 1, y, z, stripOpen(doorEName)], map],
+                        [Game.sendMessage, [this, 'You close the door to the east']]
+                    ];
+                } else {
+                    actions["Open Door E"] = [
+                        [map.setTile, [x + 1, y, z, "open " + doorEName], map],
+                        [Game.sendMessage, [this, 'You open the door to the east']]
+                    ];
+                }
+            }
+
+            if (doorS && doorSName.includes("door")) {
+                if (doorSName.includes("open")) {
+                    actions["Close Door S"] = [
+                        [map.setTile, [x, y + 1, z, stripOpen(doorSName)], map],
+                        [Game.sendMessage, [this, 'You close the door to the south']]
+                    ];
+                } else {
+                    actions["Open Door S"] = [
+                        [map.setTile, [x, y + 1, z, "open " + doorSName], map],
+                        [Game.sendMessage, [this, 'You open the door to the south']]
+                    ];
+                }
+            }
+
+            if (doorW && doorWName.includes("door")) {
+                if (doorWName.includes("open")) {
+                    actions["Close Door W"] = [
+                        [map.setTile, [x - 1, y, z, stripOpen(doorWName)], map],
+                        [Game.sendMessage, [this, 'You close the door to the west']]
+                    ];
+                } else {
+                    actions["Open Door W"] = [
+                        [map.setTile, [x - 1, y, z, "open " + doorWName], map],
+                        [Game.sendMessage, [this, 'You open the door to the west']]
+                    ];
+                }
+            }
+
+            return actions;
+        }
+    }
+}
 Game.EntityMixins.EventParticipant = {
     name: 'EventParticipant',
     groupName: 'Event',
@@ -513,11 +561,19 @@ Game.EntityMixins.EventParticipant = {
         return this._event;
     },
     listeners: {
+        onKO: function(attacker) {
+            this._event.raiseEvent('onKO', this, attacker);
+        },
         onDeath: function(killer) {
             this._event.raiseEvent('onDeath', this, killer);
         },
         onKill: function(victim) {
             this._event.raiseEvent('onKill', this, victim);
+        },
+        details: function() {
+            if (this._gangName) {
+                return [{key: 'Gang', value: this._gangName}];
+            }
         }
     }
 };
@@ -542,6 +598,52 @@ Game.EntityMixins.ExperienceGainer = {
             if (xp > 0) {
                 this.giveExperiencePoints(xp);
             }
+        }
+    }
+};
+Game.EntityMixins.Interactor = {
+    name: 'Interactor',
+    groupName: 'Actions',
+    init: function(template) {
+        this._interactions = template['interactions'] || {
+            greet: [
+                [Game.sendMessage, ['Hi there %s!']]
+            ]
+        };
+    },
+    listeners: {
+        action: function(actionTaker) {
+            // Can add a bit more custom logic, but for now, add actionTaker as the last
+            // arguement for all interaction functions, and also the first if the
+            // function is 'Game.sendMessage'
+            var actions = Object.assign({}, this._interactions);
+            var actionNames = Object.keys(actions);
+
+            actionNames.forEach(name => {
+                actions[name] = actions[name].slice();
+
+                // For each action, add `actionTaker` and this entity to the arguments array
+                actions[name].forEach((action, i) => {
+                    // Clone arrays so as not to alter original interactions object
+                    actions[name][i] = actions[name][i].slice();
+
+                    // Handle args if they exist
+                    if (actions[name][i][1]) {
+                        // Clone so as not to alter original
+                        actions[name][i][1] = actions[name][i][1].slice();
+
+                        if (actions[name][i][0] === Game.sendMessage) {
+                            actions[name][i][1].push([actionTaker.getName()]);
+                            actions[name][i][1].unshift(actionTaker);
+                        } else {
+                            actions[name][i][1].push(actionTaker);
+                            actions[name][i][1].push(this);
+                        }
+                    }
+                });
+            });
+
+            return actions;
         }
     }
 };
@@ -574,10 +676,6 @@ Game.EntityMixins.InventoryHolder = {
     removeItem: function(i, amount) {
         if(!this._items[i])
             return false;
-
-        // If we can equip items, then make sure we unequip the item we are removing.
-        if(this._items[i] && this.hasMixin(Game.EntityMixins.Equipper))
-            this.unequip(this._items[i]);
 
         // If the item is in a stack, decrement the stack amount
         if(this._items[i].hasMixin('Stackable') && this._items[i].amount() > 1)
@@ -659,6 +757,7 @@ Game.EntityMixins.JobActor = {
         this._lastJobPrioritization = 0;
         this._jobLocation = template['jobLocation'] || null;
         this._path = [];
+        this._isPathing = false;
     },
     act: function() {
         if(Game.debug && Game.watchName == this.getName())
@@ -677,7 +776,7 @@ Game.EntityMixins.JobActor = {
         if(this._lastJobPrioritization != this._map.getTime().getHours() || this._lastJobPrioritization === 0)
             this.reprioritizeJobs();
 
-        Game.Jobs[this._jobCurrent].doJob(this);
+        Game.Jobs[this._jobCurrent] ? Game.Jobs[this._jobCurrent].doJob(this) : Game.Jobs.survive.doJob(this);
 
         if(this.hasMixin('MemoryMaker'))
             this.processMemories();
@@ -737,8 +836,8 @@ Game.EntityMixins.JobActor = {
         if(this.hasMixin('MemoryMaker')) {
             var place = this.recall('places', highestPriority);
             if(place) {
-                if(!place.location)
-                    debugger;
+//                 if(!place.location)
+//                     debugger;
                 this._jobLocation = place.location;
             }
         }
@@ -780,7 +879,7 @@ Game.EntityMixins.JobActor = {
         onRegainConsciousness: function() {
             if(Game.Jobs[this._jobCurrent] && Game.Jobs[this._jobCurrent].crime) {
                 // TODO: upon waking up, the NPC loses 'petty crime' jobs?
-                if(Math.random() > 0.5) {
+                if(ROT.RNG.getUniform() > 0.5) {
                     Game.sendMessageNearby(
                         this.getMap(),
                         this.getX(),
@@ -1028,7 +1127,9 @@ Game.EntityMixins.MessageRecipient = {
         this._messages = [];
     },
     receiveMessage: function(message) {
-        this._messages.push(message);
+        this._messages.push("> " + message);
+        if (this._messages.length > Game.getKeepNumMessages())
+            this._messages.shift();
     },
     getMessages: function() {
         return this._messages;
@@ -1126,6 +1227,9 @@ Game.EntityMixins.PowerUser = {
     listeners: {
         canMove: function(pos) {
             var canFly;
+            if (!pos || !pos.tile)
+                return;
+
             if(this._constantPowers.length) {
                 canFly = this._constantPowers.filter(function(power) {
                     return power.name === 'Flight';
@@ -1136,7 +1240,7 @@ Game.EntityMixins.PowerUser = {
                 return true;
             else if (this.getMap().getTile(this.getX(), this.getY(), this.getZ()).isFlyable() && pos.z === 0)
                 return true;
-            else if (canFly)
+            else if (canFly && pos.z !== 0)
                 Game.sendMessage(this, "You can't fly there, something is blocking you.");
         },
         getVisibleEntities: function() {
@@ -1203,7 +1307,6 @@ Game.EntityMixins.PlayerActor = {
         // Lock the engine and wait asynchronously
         // for the player to press a key.
         this.getMap().getEngine().lock();
-        this.clearMessages();
         this._acting = false;
     },
     listeners: {
@@ -1229,7 +1332,12 @@ Game.EntityMixins.RandomStatGainer = {
     init: function() {
         if(this.hasMixin('BasePoints') && this.getSpendablePoints() > 0) {
             var characteristics = ['STR', 'DEX', 'BODY', 'INT', 'STUN'];
-            while(this.getSpendablePoints() > 0) {
+            var powers = this.hasMixin('PowerUser') ? this.getPowers() : false;
+            var tooExpensive = [];
+            var statPoints = powers ? this.getSpendablePoints() / 2 : this.getSpendablePoints();
+            var powerPoints;
+
+            while(statPoints > 0) {
                 // The only thing keeping this from being an infinite loop
                 // is the fact that STR and STUN only cost 1 character point
                 var characteristic = characteristics.random();
@@ -1240,6 +1348,21 @@ Game.EntityMixins.RandomStatGainer = {
 
                 this.increaseChar(characteristic);
                 this.subtractSpendablePoints(Game.Cost.Characteristics[characteristic]);
+                statPoints -= Game.Cost.Characteristics[characteristic];
+            }
+
+            if (powers) {
+                powerPoints = this.getSpendablePoints();
+                while(powerPoints && powers.length > tooExpensive.length) {
+                    powers.forEach(function(power) {
+                        if (ROT.RNG.getUniform() > 0.5 && power.cost <= powerPoints) {
+                            power.upgradePower();
+                            powerPoints = this.getSpendablePoints();
+                        } else if (power.cost > powerPoints && tooExpensive.indexOf(power.name) < 0) {
+                            tooExpensive.push(power);
+                        }
+                    }, this);
+                }
             }
         }
     },
@@ -1321,8 +1444,12 @@ Game.EntityMixins.Reactor = {
         },
         onForget: function(memoryName, memory) {
             if(this._reacting) {
-                if((memoryName.search(/mugged by/) !== -1 || memoryName.search(/attacked by/) !== -1) && memory.entity == this.getTarget())
+                if((memoryName.search(/mugged by/) !== -1 || memoryName.search(/attacked by/) !== -1) && memory.entity == this.getTarget()) {
                     this.setReaction(false);
+
+                    if (this.hasMixin('JobActor'))
+                        this.setPath(); //clear out any pathing aquired from hunting
+                }
 
             }
         }
@@ -1396,8 +1523,11 @@ Game.EntityMixins.Sight = {
             }
         },
         onRepent: function(entity) {
-            if(this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
+            if (this.canSee(entity) && this.hasMixin('MemoryMaker') && this != entity) {
                 this.forget('people', 'criminals', entity.getName());
+
+                if (entity._foreground == Game.Palette.red)
+                    entity._foreground = Game.Palette.white;
             }
         },
         getVisibleTiles: function() {
@@ -1439,7 +1569,7 @@ Game.EntityMixins.Sight = {
                 // Change foreground based on character's memory
                 if(Object.keys(criminals).length > 0) {
                     for(var key in visibleEntities) {
-                        if (visibleEntities.hasOwnProperty(visibleEntities[key])) {
+                        if (visibleEntities.hasOwnProperty(key)) {
                             var entity = visibleEntities[key];
                             var name = entity.getName();
                             if(criminals[name]) {
@@ -1516,11 +1646,12 @@ Game.EntityMixins.TaskActor = {
         var z = source.getZ();
         var path = new ROT.Path.AStar(player.getX(), player.getY(), function(x, y) {
             // If an entity is present at the tile, can't move there.
-            var entity = source.getMap().getEntityAt(x, y, z);
+            var map = source.getMap();
+            var entity = map.getEntityAt(x, y, z);
             if (entity && entity !== player && entity !== source) {
                 return false;
             }
-            return source.getMap().getTile(x, y, z).isWalkable();
+            return map.getTile(x, y, z).isWalkable() || map.getTile().getName().includes("door");
         }, {topology: 4});
         // Once we've gotten the path, we want to move to the second cell that is
         // passed in the callback (the first is the entity's strting point)
@@ -1534,9 +1665,9 @@ Game.EntityMixins.TaskActor = {
     },
     wander: function() {
         // Flip coin to determine if moving by 1 in the positive or negative direction
-        var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
+        var moveOffset = (Math.round(ROT.RNG.getUniform()) === 1) ? 1 : -1;
         // Flip coin to determine if moving in x direction or y direction
-        if (Math.round(Math.random()) === 1) {
+        if (Math.round(ROT.RNG.getUniform()) === 1) {
             this.tryMove(this.getX() + moveOffset, this.getY(), this.getZ());
         } else {
             this.tryMove(this.getX(), this.getY() + moveOffset, this.getZ());

@@ -21,7 +21,7 @@ Game.Lot = function(properties) {
 			var amount = this._buildingSpecs[spec].amount;
 			var type = this._buildingSpecs[spec].type;
 			var repo = this._buildingSpecs[spec].repo;
-			for(i = 0; i < amount; i++) {
+			for(var i = 0; i < amount; i++) {
 				this._buildings.push(Game[repo].create(type));
 			}
 		}
@@ -29,7 +29,7 @@ Game.Lot = function(properties) {
 
 	this.getTiles = null;
 	if(typeof properties['buildTiles'] === 'function') {
-		this.getTiles = properties['buildTiles'];	
+		this.getTiles = properties['buildTiles'];
 	} else {
 		this.getTiles = function() {
 			return this.fillLot('floor');
@@ -134,16 +134,16 @@ Game.Lot.prototype.willSpawn = function(neighborhood) {
 	var spawn;
 	switch(neighborhood) {
 		case 'downtown':
-			spawn = Math.random() <= this._downtown;
+			spawn = ROT.RNG.getUniform() <= this._downtown;
 			break;
 		case 'midtown':
-			spawn = Math.random() <= this._midtown;
+			spawn = ROT.RNG.getUniform() <= this._midtown;
 			break;
 		case 'uptown':
-			spawn = Math.random() <= this._uptown;
+			spawn = ROT.RNG.getUniform() <= this._uptown;
 			break;
 		case 'suburbs':
-			spawn = Math.random() <= this._suburbs;
+			spawn = ROT.RNG.getUniform() <= this._suburbs;
 			break;
 		default:
 			spawn = false;

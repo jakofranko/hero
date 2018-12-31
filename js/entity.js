@@ -89,6 +89,13 @@ Game.Entity.prototype.getName = function() {
 Game.Entity.prototype.getType = function() {
     return this._type;
 };
+Game.Entity.prototype.openDoor = function(x, y, z) {
+    var map = this.getMap();
+    var tile = map.getTile(x, y, z);
+    var tileName = tile.getName();
+    if (tileName.includes("door") && !tileName.includes("open"))
+        map.setTile(x, y, z, "open " + tileName);
+};
 Game.Entity.prototype.tryMove = function(x, y, z, map) {
     var tile, target, canMoveResults,canAttackResults, canMove, canAttack, items;
 
@@ -109,11 +116,11 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
     canMoveResults = this.raiseEvent('canMove', { x: x, y: y, z: z, tile: tile });
     canMove = canMoveResults.length && canMoveResults.some(isTrue);
     canAttackResults = this.raiseEvent('canAttack', target);
-    canAttack = target && canAttackResults.length && canAttackResults.some(isTrue);
+    canAttack = this.hasMixin('Attacker') && target && target.hasMixin('Characteristics') && canAttackResults.length && canAttackResults.some(isTrue);
 
 	if(canAttack) {
         if(this.hasMixin('PowerUser') && this.getPrimaryMelee())
-            this.usePower(target, this.getPrimaryMelee());
+            this.usePower([target], this.getPrimaryMelee());
         else
             this.hthAttack(target);
 
@@ -133,6 +140,9 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
         }
 
 		return true;
+    } else if (!canMove && tile.getName().includes("door") && !tile.getName().includes("open")) {
+        this.openDoor(x, y, z);
+        return true;
     }
 
 	return false;
@@ -145,22 +155,21 @@ Game.Entity.prototype.isConscious = function() {
 };
 Game.Entity.prototype.kill = function(message) {
     // Only kill once!
-    if (!this._alive) {
+    if (!this._alive)
         return;
-    }
+
     this._alive = false;
-    if (message) {
+
+    if (message)
         Game.sendMessage(this, message);
-    } else {
+    else
         Game.sendMessage(this, "You have died!");
-    }
 
     // Check if the player died, and if so call their act method to prompt the user.
-    if (this.hasMixin(Game.EntityMixins.PlayerActor)) {
+    if (this.hasMixin(Game.EntityMixins.PlayerActor))
         this.act();
-    } else {
+    else
         this.getMap().removeEntity(this);
-    }
 };
 Game.Entity.prototype.ko = function(message) {
     // Only KO once

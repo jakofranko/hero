@@ -29,7 +29,7 @@ Game.PlayerTemplate = {
     attackValue: 10,
     sightRadius: 20,
     inventorySlots: 22,
-    basePoints: 100,
+    basePoints: 0,
     powers: ['energy bolt', 'throwing star', 'bo staff', 'stun fist', 'katana', 'light lance', 'pistol', 'lightning bolt', 'kevlar', 'phase skin'],
     mixins: [
         Game.EntityMixins.Characteristics,
@@ -46,7 +46,8 @@ Game.PlayerTemplate = {
         Game.EntityMixins.PlayerStatGainer,
         Game.EntityMixins.Thrower,
         Game.EntityMixins.ExperienceGainer,
-        Game.EntityMixins.Walker
+        Game.EntityMixins.Walker,
+        Game.EntityMixins.DoorOpener
     ]
 };
 
@@ -69,7 +70,6 @@ Game.EntityRepository.define('person', {
         Game.EntityMixins.Characteristics,
         Game.EntityMixins.BasePoints,
         Game.EntityMixins.Attacker,
-        Game.EntityMixins.CorpseDropper,
         Game.EntityMixins.Destructible,
         Game.EntityMixins.ExperienceGainer,
         Game.EntityMixins.InventoryHolder,
@@ -92,14 +92,14 @@ Game.EntityRepository.define('robber', {
     foreground: Game.Palette.red,
     maxHp: 10,
     basePoints: 8,
-    STR: 8,
-    DEX: 8,
-    CON: 8,
-    BODY: 8,
-    INT: 6,
-    EGO: 6,
-    PRE: 5,
-    COM: 5,
+    STR: 6,
+    DEX: 5,
+    CON: 6,
+    BODY: 6,
+    INT: 4,
+    EGO: 4,
+    PRE: 3,
+    COM: 3,
     jobs: ['robber', 'home'],
     reactionTypes: ['defend'],
     reactionMessages: {
@@ -109,7 +109,160 @@ Game.EntityRepository.define('robber', {
         Game.EntityMixins.Characteristics,
         Game.EntityMixins.BasePoints,
         Game.EntityMixins.Attacker,
-        Game.EntityMixins.CorpseDropper,
+        Game.EntityMixins.Destructible,
+        Game.EntityMixins.EventParticipant,
+        Game.EntityMixins.ExperienceGainer,
+        Game.EntityMixins.InventoryHolder,
+        Game.EntityMixins.JobActor,
+        Game.EntityMixins.MemoryMaker,
+        Game.EntityMixins.MoneyHolder,
+        Game.EntityMixins.Sight,
+        Game.EntityMixins.Targeting,
+        Game.EntityMixins.RandomStatGainer,
+        Game.EntityMixins.Reactor,
+        Game.EntityMixins.Walker
+    ]
+});
+
+Game.EntityRepository.define('lost child', {
+    name: 'lost child',
+    character: 'c',
+    type: 'Event NPC - Lost Child',
+    foreground: Game.Palette.blue,
+    STR: 1,
+    DEX: 3,
+    CON: 1,
+    BODY: 1,
+    INT: 5,
+    EGO: 1,
+    PRE: 1,
+    reactionTypes: ['runAway'],
+    interactions: {
+        greet: [
+            [Game.sendMessage, ['Hi there %s...can you help me find my parents?']]
+        ],
+        help: [
+            [Game.sendMessage, ['Thank you!!!']],
+            [function(interactor, thisEntity) {
+                thisEntity.getEvent().raiseEvent('onInteraction');
+            }, []]
+        ]
+    },
+    mixins: [
+        Game.EntityMixins.Characteristics,
+        Game.EntityMixins.EventParticipant,
+        Game.EntityMixins.Interactor,
+        Game.EntityMixins.JobActor,
+        Game.EntityMixins.MoneyHolder,
+        Game.EntityMixins.Sight,
+        Game.EntityMixins.Targeting,
+        Game.EntityMixins.Reactor,
+        Game.EntityMixins.Walker
+    ]
+});
+
+Game.EntityRepository.define('gang war bruiser', {
+    name: 'gang war bruiser',
+    character: 'm',
+    type: 'Event NPC - Gang War Bruiser',
+    foreground: Game.Palette.red,
+    STR: 8,
+    DEX: 3,
+    CON: 8,
+    BODY: 8,
+    INT: 2,
+    EGO: 2,
+    PRE: 8,
+    COM: 5,
+    jobs: ['gangWarrior'],
+    reactionTypes: ['defend'],
+    reactionMessages: {
+        defend: ['Imma bust you up!', 'These muscles ain\'t just for show!']
+    },
+    mixins: [
+        Game.EntityMixins.Characteristics,
+        Game.EntityMixins.BasePoints,
+        Game.EntityMixins.Attacker,
+        Game.EntityMixins.Destructible,
+        Game.EntityMixins.EventParticipant,
+        Game.EntityMixins.ExperienceGainer,
+        Game.EntityMixins.InventoryHolder,
+        Game.EntityMixins.JobActor,
+        Game.EntityMixins.MemoryMaker,
+        Game.EntityMixins.MoneyHolder,
+        Game.EntityMixins.Sight,
+        Game.EntityMixins.Targeting,
+        Game.EntityMixins.RandomStatGainer,
+        Game.EntityMixins.Reactor,
+        Game.EntityMixins.Walker
+    ]
+});
+
+Game.EntityRepository.define('gang war gunner', {
+    name: 'gang war gunner',
+    character: 'm',
+    type: 'Event NPC - Gang War Gunner',
+    foreground: Game.Palette.red,
+    basePoints: 30, // half this number needs to be enough for at least 1 upgrade of a RKA (15 points)
+    STR: 4,
+    DEX: 8,
+    CON: 3,
+    BODY: 5,
+    INT: 2,
+    EGO: 2,
+    PRE: 8,
+    COM: 5,
+    jobs: ['gangWarrior'],
+    powers: ['pistol'],
+    reactionTypes: ['defend'],
+    reactionMessages: {
+        defend: ['Imma bust a cap in you!', 'Hot lead is comin\' at ya!']
+    },
+    mixins: [
+        Game.EntityMixins.Characteristics,
+        Game.EntityMixins.PowerUser,
+        Game.EntityMixins.BasePoints,
+        Game.EntityMixins.Attacker,
+        Game.EntityMixins.Destructible,
+        Game.EntityMixins.EventParticipant,
+        Game.EntityMixins.ExperienceGainer,
+        Game.EntityMixins.InventoryHolder,
+        Game.EntityMixins.JobActor,
+        Game.EntityMixins.MemoryMaker,
+        Game.EntityMixins.MoneyHolder,
+        Game.EntityMixins.Sight,
+        Game.EntityMixins.Targeting,
+        Game.EntityMixins.RandomStatGainer,
+        Game.EntityMixins.Reactor,
+        Game.EntityMixins.Walker
+    ]
+});
+
+Game.EntityRepository.define('gang war lieutenent', {
+    name: 'gang war lieutenent',
+    character: 'm',
+    type: 'Event NPC - Gang War Lieutenent',
+    foreground: Game.Palette.red,
+    basePoints: 90, // half this number needs to be enough for at least 1 upgrade of a RKA (15 points)
+    STR: 8,
+    DEX: 8,
+    CON: 8,
+    BODY: 10,
+    INT: 5,
+    EGO: 5,
+    PRE: 8,
+    COM: 8,
+    jobs: ['gangWarrior'],
+    powers: ['pistol', 'kevlar'],
+    reactionTypes: ['defend'],
+    reactionMessages: {
+        defend: ['The boss sent me to make sure you don\'t mess this up!', 'I been in this town longer than you been alive, \'hero\'. Get out.']
+    },
+    mixins: [
+        Game.EntityMixins.Characteristics,
+        Game.EntityMixins.PowerUser,
+        Game.EntityMixins.BasePoints,
+        Game.EntityMixins.Attacker,
         Game.EntityMixins.Destructible,
         Game.EntityMixins.EventParticipant,
         Game.EntityMixins.ExperienceGainer,

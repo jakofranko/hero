@@ -116,12 +116,6 @@ Game.ItemRepository.define('bookshelf', {
     mixins: [Game.ItemMixins.Fixture, Game.ItemMixins.Container]
 });
 
-Game.ItemRepository.define('corpse', {
-    name: 'corpse',
-    character: '%',
-    foreground: Game.Palette.white,
-});
-
 Game.ItemRepository.define('sign', {
     name: 'sign',
     character: '?',
@@ -156,4 +150,42 @@ Game.ItemRepository.define('gold bullion', {
     name: 'gold bullion',
     character: '_',
     foreground: Game.Palette.yellow
+});
+
+Game.ItemRepository.define('furniture rack', {
+    name: 'furniture rack',
+    character: '=',
+    foreground: Game.Palette.metalGrey,
+    mixins: [Game.ItemMixins.Fixture, Game.ItemMixins.Container],
+    items: ['desk', 'chair', 'couch']
+});
+
+Game.ItemRepository.define('hardware rack', {
+    name: 'hardware rack',
+    character: '=',
+    foreground: Game.Palette.metalGrey,
+    mixins: [Game.ItemMixins.Fixture, Game.ItemMixins.Container],
+    items: ['toilet', 'sink', 'television']
+});
+
+Game.ItemRepository.define('weapons rack', {
+    name: 'weapons rack',
+    character: '=',
+    foreground: Game.Palette.metalGrey,
+    mixins: [Game.ItemMixins.Fixture, Game.ItemMixins.Container],
+    items: ['weapons crate', 'weapons crate', 'weapons crate']
+});
+
+Game.ItemRepository.define('weapons crate', {
+    name: 'weapons crate',
+    character: '=',
+    foreground: Game.Palette.metalGrey,
+    mixins: [Game.ItemMixins.Container],
+    items: []
+});
+
+Game.ItemRepository.define('bush', {
+    name: 'bush',
+    character: '*',
+    foreground: Game.Palette.leafGreen
 });

@@ -11,16 +11,27 @@ Game.Screen.startScreen = {
     enter: function() { Game.resize(Game.getDisplay(), true, false, true); },
     exit: function() { console.log('Exited the start screen'); },
     render: function(display) {
+        var y = 2
         // Render prompt to the screen
         var w = Game.getScreenWidth();
         var text = "%c{" + Game.Palette.blue + "}Justice%c{}: A Superhero Roguelike";
-        display.drawText((w/2) - (30 / 2), 2, text);
+        display.drawText((w/2) - (30 / 2), y++, text);
 
+        y++;
         text = "Press [%c{" + Game.Palette.blue + "}Enter%c{}] to start!";
-        display.drawText((w/2) - (23 / 2), 4, text);
+        display.drawText((w/2) - (23 / 2), y++, text);
+
+        text = "Press [%c{" + Game.Palette.blue + "}s%c{}] to enter a world seed";
+        display.drawText((w/2) - (30 / 2), y++, text);
+
 
         text = "Press [%c{" + Game.Palette.blue + "}?%c{}] any time in game for help";
-        display.drawText((w/2) - (35 / 2), 5, text);
+        display.drawText((w/2) - (35 / 2), y++, text);
+
+        if (Game.getSeed()) {
+            text = "Current Seed: %c{" + Game.Palette.blue + "}" + Game.getSeed();
+            display.drawText((w/2) - ((14 + Game.getSeed().length)/2), y++, text);
+        }
 
         var scalesASCII = [
                         ",ggg,                   gg                   ,ggg,",
@@ -48,8 +59,9 @@ Game.Screen.startScreen = {
                               "d8888888888888888888888888888888888888b"
         ];
 
+        y++;
         for (var i = 0; i < scalesASCII.length; i++) {
-            display.drawText((w / 2) - (scalesASCII[i].length / 2), i + 8, "%c{#F5F058}" + scalesASCII[i]);
+            display.drawText((w / 2) - (scalesASCII[i].length / 2), i + y, "%c{#F5F058}" + scalesASCII[i]);
         }
 
         //             ,ggg,                   gg                   ,ggg,
@@ -76,14 +88,49 @@ Game.Screen.startScreen = {
         //                     __,,aaaadd888888888888888bbaaaa,,__
         //                   d8888888888888888888888888888888888888b
 
-        var version = "v0.6";
-        display.drawText((w / 2) - (version.length / 2), scalesASCII.length + 8, version);
+        var version = "v1.0";
+        display.drawText((w / 2) - (version.length / 2), scalesASCII.length + y, version);
 
     },
     handleInput: function(inputType, inputData) {
         // When [Enter] is pressed, go to the play screen
-        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
+        if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
             Game.switchScreen(Game.Screen.characterSelectScreen);
+        } else if (inputType === 'keydown' && inputData.keyCode === ROT.VK_S) {
+            Game.switchScreen(Game.Screen.seedEntryScreen);
+        }
+    }
+};
+
+Game.Screen.seedEntryScreen = {
+    enter: function() {
+        this.seed = Game.getSeed() || "";
+    },
+    exit: function() {},
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var h = Game.getScreenHeight();
+        var blue = "%c{" + Game.Palette.blue + "}";
+        var text;
+
+        text = "Enter World " + blue + "Seed";
+        display.drawText((w / 2) - ((text.length / 2) - (blue.length / 2)), (h / 2) - 1, text);
+
+        text = blue + this.seed || "";
+        display.drawText((w / 2) - ((text.length / 2) - (blue.length / 2)), h / 2, text);
+    },
+    handleInput: function(inputType, inputData) {
+        if (inputType === 'keydown') {
+            if ((inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) || (inputData.keyCode >= ROT.VK_0 && inputData.keyCode <= ROT.VK_9)) {
+                this.seed += inputData.key;
+            } else if (inputData.keyCode === ROT.VK_BACK_SPACE) {
+                this.seed = this.seed.slice(0, -1);
+            } else if (inputData.keyCode === ROT.VK_ENTER || inputData.keyCode === ROT.VK_RETURN) {
+                Game.setSeed(this.seed);
+                Game.switchScreen(Game.Screen.startScreen);
+            }
+
+            Game.refresh();
         }
     }
 };
@@ -97,6 +144,7 @@ Game.Screen.characterSelectScreen = {
             "Brick": {
                 description: "A tough hero who is hard to hurt and hurts hard. A high-defense, melee-focused hero who can fly.",
                 powers: ['tough skin', 'flight', 'sonic boom'],
+                basePoints: 20,
                 STR: 50,
                 DEX: 8,
                 INT: 8,
@@ -106,6 +154,7 @@ Game.Screen.characterSelectScreen = {
             "Energy Projector": {
                 description: "You tend to fly around, loose bolts of lightning from your fingertips, and glow in the dark. A ranged-focused hero with low defenses.",
                 powers: ['energy blast', 'force field (physical damage)', 'force field (energy damage)', 'teleport', 'flight'],
+                basePoints: 50,
                 CON: 6,
                 BODY: 8
             },
@@ -113,6 +162,7 @@ Game.Screen.characterSelectScreen = {
                 description: "What you lack in super-powers you make up for with super-moves. Martial artists tend to be hard to hit, and focus on physical melee and ranged attacks.",
                 // powers: ['bo staff', 'throwing star', 'deflect projectile'],
                 powers: ['bo staff', 'throwing star'],
+                basePoints: 30,
                 STR: 15,
                 DEX: 25,
                 CON: 20
@@ -120,6 +170,7 @@ Game.Screen.characterSelectScreen = {
             "Mentalist": {
                 description: "The voices in your head are real, but the spiders you see crawling all over your flesh...are probably not. Mentalists can use powers that are not affected by normal defenses and that often do not need line-of-sight.",
                 powers: ['mind spike', 'force field (physical damage)', 'flight', 'telepathy'],
+                basePoints: 40,
                 STR: 8,
                 DEX: 15,
                 EGO: 50,
@@ -129,7 +180,8 @@ Game.Screen.characterSelectScreen = {
             "Vigilante": {
                 description: "Vengence and Justice are the same, and the only important thing is that they are final. These 'heroes' don't have powers, they have guns and kevlar, and intend to get the job done by any means necessary.",
                 // powers: ['assault rifle', 'pistol', 'katana', 'kevlar']
-                powers: ['pistol', 'katana', 'kevlar']
+                powers: ['pistol', 'katana', 'kevlar'],
+                basePoints: 60,
             }
         };
     },
@@ -161,7 +213,7 @@ Game.Screen.characterSelectScreen = {
         var archtype = archtypes[this._index];
         switch(inputType.key) {
             case 'Enter':
-                Game.switchScreen(Game.Screen.loadScreen, [this._options[archtype]]);
+                Game.switchScreen(Game.Screen.namePlayerScreen, [this._options[archtype]]);
                 break;
             case 'ArrowDown':
                 this.incrementIndex();
@@ -186,6 +238,40 @@ Game.Screen.characterSelectScreen = {
         return false;
     },
     exit: function() {}
+}
+
+Game.Screen.namePlayerScreen = {
+    enter: function(playerArchtype) {
+        this.playerName = "";
+        this.playerArchtype = playerArchtype;
+    },
+    exit: function() {},
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var h = Game.getScreenHeight();
+        var blue = "%c{" + Game.Palette.blue + "}";
+        var text;
+
+        text = "Enter Player " + blue + "Name";
+        display.drawText((w / 2) - ((text.length / 2) - (blue.length / 2)), (h / 2) - 1, text);
+
+        text = blue + this.playerName || "";
+        display.drawText((w / 2) - ((text.length / 2) - (blue.length / 2)), h / 2, text);
+    },
+    handleInput: function(inputType, inputData) {
+        if (inputType === 'keydown') {
+            if (inputData.keyCode >= ROT.VK_A && inputData.keyCode <= ROT.VK_Z) {
+                this.playerName += inputData.key;
+            } else if (inputData.keyCode === ROT.VK_BACK_SPACE) {
+                this.playerName = this.playerName.slice(0, -1);
+            } else if (inputData.keyCode === ROT.VK_ENTER || inputData.keyCode === ROT.VK_RETURN) {
+                this.playerArchtype.name = this.playerName;
+                Game.switchScreen(Game.Screen.loadScreen, [this.playerArchtype]);
+            }
+
+            Game.refresh();
+        }
+    }
 }
 
 Game.Screen.loadScreen = {
@@ -283,6 +369,7 @@ Game.Screen.loadScreen = {
     handleInput: function() {},
     exit: function() {
         clearInterval(this._intID);
+        Game.setLoading(true);
     }
 };
 
@@ -484,7 +571,10 @@ Game.Screen.playScreen = {
         // If the game is over, enter will bring the user to the losing screen.
         if(this._gameEnded) {
             if (inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
-                Game.switchScreen(Game.Screen.loseScreen);
+                if (this._player.isAlive())
+                    Game.switchScreen(Game.Screen.loseScreen);
+                else
+                    Game.switchScreen(Game.Screen.deathScreen);
             }
             // Return to make sure the user can't still play
             return;
@@ -553,6 +643,8 @@ Game.Screen.playScreen = {
 // Item Listing
 // TODO: refactor this to support arrow key selection
 Game.Screen.ItemListScreen = function(template) {
+    this._enterMessage = template['enterMessage'] || '';
+
     // This is dependant on the number of letters we use as indices in the render function
     this._maxItems = 52;
 
@@ -577,6 +669,8 @@ Game.Screen.ItemListScreen = function(template) {
     this._hasNoItemOption = template['hasNoItemOption'];
 };
 Game.Screen.ItemListScreen.prototype.setup = function(player, items, altEntity, altItems) {
+    Game.sendMessage(player, this._enterMessage);
+
     if(items > this._maxItems || altItems > this._maxItems || items + altItems > this._maxItems)
         throw new Error("The item number max has been reached. Throw some rotten fruit at the developer and tell him that he needs to come up with a better solution for indexing items!");
 
@@ -793,10 +887,12 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
 // Inventory sub-screens
 Game.Screen.inventoryScreen = new Game.Screen.ItemListScreen({
     caption: 'Inventory',
+    enterMessage: 'You rifle through your belongings',
     canSelect: false
 });
 Game.Screen.pickupScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the items you wish to pickup',
+    enterMessage: 'You ponder what to pick up',
     canSelect: true,
     canSelectMultipleItems: true,
     ok: function(selectedItems) {
@@ -807,6 +903,7 @@ Game.Screen.pickupScreen = new Game.Screen.ItemListScreen({
 });
 Game.Screen.dropScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to drop',
+    enterMessage: 'You consider what to drop',
     canSelect: true,
     canSelectMultipleItems: false,
     ok: function(selectedItems) {
@@ -817,6 +914,7 @@ Game.Screen.dropScreen = new Game.Screen.ItemListScreen({
 });
 Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
     caption: 'Choose the item you wish to examine',
+    enterMessage: 'You start to examin something you are holding',
     canSelect: true,
     canSelectMultipleItems: false,
     isAcceptable: function() {
@@ -866,6 +964,7 @@ Game.Screen.throwScreen = new Game.Screen.ItemListScreen({
     }
 });
 Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
+    enterMessage: 'You look into the container',
     canSelect: true,
     canSelectMultipleItems: true,
     ok: function(selectedItems, altSelectedItems) {
@@ -887,6 +986,7 @@ Game.Screen.containerScreen = new Game.Screen.ItemListScreen({
 Game.Screen.TargetBasedScreen = function(template) {
     template = template || {};
 
+    this._enterMessage = template['enterMessage'] || 'Choose target';
     this._targetNearest = template['targetNearest'] || false;
     this._visibleEntities = [];
     this._targetedEntity = 0;
@@ -967,6 +1067,8 @@ Game.Screen.TargetBasedScreen = function(template) {
     };
 };
 Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
+    Game.sendMessage(player, this._enterMessage);
+
     this._player = player;
     this._visibleEntities = [];
     this._targetedEntity = 0;
@@ -1094,7 +1196,7 @@ Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputD
     if(unlock)
         this._player.getMap().getEngine().unlock();
     else
-        Game.refresh();
+        Game.refresh(); // Don't display log messages so extra info can be put there instead
 };
 Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
     // Make sure we stay within bounds.
@@ -1137,6 +1239,7 @@ Game.Screen.TargetBasedScreen.prototype.prevEntity = function () {
 
 // Target-based screens
 Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
+    enterMessage: 'You begin to look at your surroundings',
     overlayFunction: function(x, y) {
         var z = this._player.getZ();
         var map = this._player.getMap();
@@ -1300,6 +1403,9 @@ Game.Screen.actionMenu = new Game.Screen.MenuScreen({
             actions = [];
 
         // Populate a list of actions with which to build the menu
+        var playerActions = this._player.raiseEvent('action');
+        if (playerActions)
+            actions.push(playerActions);
         for(var i = 0; i < adjacentCoords.length; i++) {
             var coords = adjacentCoords[i].split(","),
                 x = coords[0],
@@ -1340,23 +1446,33 @@ Game.Screen.helpScreen = {
     render: function(display) {
         var text = 'Help / Command List';
         var border = '-------------------';
-        var padding = 2;
+        var padding = 3;
         var y = padding;
+
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
-        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Arrow keys%c{} to move');
+        display.drawText(padding, y++, 'Your goal is to restore justice to this city by defeating %c{' + Game.Palette.red + '}criminals%c{} and doing good deeds. Knocking criminals out is often enough to change their minds, and there is a price to pay for killing them. Your location on the mini-map is %b{' + Game.Palette.grey + '}highlighted in grey%b{}. City events are in %c{' + Game.Palette.blue + '}blue%c{}.');
+
+        y += padding;
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Arrow keys%c{} to move, attack or use primary melee power');
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Ctrl + Arrow keys%c{} to swap positions with NPC');
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}<%c{} to go up stairs');
+        display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}>%c{} to go down stairs');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}Space%c{}] to use/interact with nearby items and entities');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}j%c{}] to show city statistics');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}s%c{}] to spend experience points');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}p%c{}] to use powers');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}f%c{}] to use primary ranged power');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}n or N%c{}] to cycle targets');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '},%c{}] to pick up items');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}d%c{}] to drop items');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}x%c{}] to examine items');
-        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}p%c{}] to use powers');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}t%c{}] to throw item');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '};%c{}] to look around you');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}.%c{}] to wait');
-        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}j%c{}] to show city statistics');
-        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}s%c{}] to spend experience points');
-        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}Space%c{}] to use/interact with nearby items and entities');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}?%c{}] to show this help screen');
-        y += 3;
+
+        y += padding;
         text = '--- press any key to continue ---';
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
     },
@@ -1377,19 +1493,27 @@ Game.Screen.justiceScreen = {
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, 0, 'Justice');
 
         var startX = 0;
+        var startY = 2;
         var title = 'Justice';
         // Draw Justice Meter
-        this._drawMeter(display, startX, 2, title, justice.getJustice() / 100);
+        this._drawMeter(display, startX, startY, title, justice.getJustice() / 100);
 
         startX += (title.length + this._padding);
         title = 'Crime';
         // Draw Crime Meter
-        this._drawMeter(display, startX, 2, title, justice.getCrime() / 100, true);
+        this._drawMeter(display, startX, startY, title, justice.getCrime() / 100, true);
 
-        // Number of Criminals
         startX += (title.length + this._padding);
-        title = 'Criminals';
-        display.drawText(startX, 2, title + ': ' + justice.getCriminals());
+        title = 'Corruption';
+        // Draw Corruption Meter
+        this._drawMeter(display, startX, startY, title, justice.getCorruption() / 100, true);
+
+        // Other stats
+        startX += (title.length + this._padding);
+        display.drawText(startX, startY++, 'Criminals: ' + justice.getCriminals());
+        display.drawText(startX, startY++, 'Respect for Law: ' + justice.getRespectForLaw());
+        display.drawText(startX, startY++, 'Good Deeds: ' + justice.getGoodDeeds());
+        display.drawText(startX, startY++, 'Infamy: ' + justice.getInfamy());
     },
     handleInput: function(inputType, inputData) {
         if(inputType == 'keydown' && (inputData.keyCode === ROT.VK_ESCAPE || inputData.keyCode === ROT.VK_RETURN))
@@ -1496,8 +1620,6 @@ Game.Screen.gainStatScreen = {
 };
 
 // Manage character powers screen
-// TODO: Highlight powers that are currently activated
-// TODO: Allow activated powers to be deactivated
 Game.Screen.powersScreen = {
     setup: function(entity) {
         // Must be called before rendering.
@@ -1511,13 +1633,10 @@ Game.Screen.powersScreen = {
         var y = 0;
         var text, powerName, active;
 
-        text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + key%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.';
+        text = 'Press [%c{' + Game.Palette.blue + '}key%c{}] to use power, [%c{' + Game.Palette.blue + '}shift + key%c{}] to make it your primary melee power, [%c{' + Game.Palette.blue + '}ctrl + key%c{}] to make it your primary ranged power.\n Press [%c{' + Game.Palette.blue + '}Esc%c{}] or [%c{' + Game.Palette.blue + '}Enter%c{}] to leave this screen.';
         display.drawText(0, y++, text);
 
-        text = 'Press [%c{' + Game.Palette.blue + '}Esc%c{}] or [%c{' + Game.Palette.blue + '}Enter%c{}] to leave this screen.'
-        display.drawText(0, y++, text);
-
-        y++;
+        y += 4;
         if(this._powers.length) {
             display.drawText(0, y++, 'Powers:');
 
@@ -1607,7 +1726,6 @@ Game.Screen.errorScreen = {
     }
 };
 
-// Define our winning screen
 Game.Screen.winScreen = {
     enter: function() {    console.log("Entered win screen."); },
     exit: function() { console.log("Exited win screen."); },
@@ -1629,8 +1747,25 @@ Game.Screen.winScreen = {
     }
 };
 
-// Define our winning screen
 Game.Screen.loseScreen = {
+    enter: function() { console.log("Entered lose screen."); },
+    exit: function() { console.log("Exited lose screen."); },
+    render: function(display) {
+        var w = Game.getScreenWidth();
+        var text = "The city has fallen to the criminals and the corrupt.";
+        display.drawText((w/2) - (text.length / 2), 2, "%c{" + Game.Palette.red + "}" + text);
+
+        text = "Press [%c{#585DF5}Enter%c{}] to try again";
+        display.drawText((w/2) - 13, 4, text);
+    },
+    handleInput: function(inputType, inputData) {
+        if(inputType === 'keydown' && inputData.keyCode === ROT.VK_RETURN) {
+            location.reload();
+        }
+    }
+};
+
+Game.Screen.deathScreen = {
     enter: function() { console.log("Entered lose screen."); },
     exit: function() { console.log("Exited lose screen."); },
     render: function(display) {

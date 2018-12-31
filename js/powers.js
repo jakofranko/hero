@@ -44,7 +44,7 @@ Game.Powers.EnergyBlastPowerRepository.define('sonic boom', {
     advantages: ['AOE_Blast_5'],
     hitTargetMessage: "%s oscillates your organs with a sonic boom, doing %s STUN and %s BODY!",
     hitMessage: "You clap your hands creating a deafening sonic boom, doing %s STUN and %s BODY to %s!",
-    missTargetMessage: "%s a sonic wave ripples past you, missing you!",
+    missTargetMessage: "A sonic wave ripples past you, missing you!",
     missMessage: "Your sonic boom misses your target!",
 });
 
@@ -168,7 +168,7 @@ Game.Powers.EgoAttackPowerRepository.define('mind spike', {
     name: 'Mind Spike',
     damageType: 'energy',
     hitTargetMessage: "%s pierces your mind with excruciating pain, doing %s STUN!",
-    hitMessage: "You lance your targets mind, doing %s!",
+    hitMessage: "You lance your targets mind, doing %s STUN!",
     missTargetMessage: "Your mind tingles as %s misses you with some psionic attack...",
     missMessage: "Your target's mind elludes your mind spike!",
 });

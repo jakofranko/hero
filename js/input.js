@@ -38,10 +38,10 @@ Game.Input.controlMaps.playScreen = {
     },
     ctrl: {
         keydown: {
-            'ArrowRight':   Game.Commands.swapCommand.bind(this, -1, 0, 0),
-            'ArrowLeft':    Game.Commands.swapCommand.bind(this, 1, 0, 0),
-            'ArrowDown':    Game.Commands.swapCommand.bind(this, 0, -1, 0),
-            'ArrowUp':      Game.Commands.swapCommand.bind(this, 0, 1, 0),
+            'ArrowRight':   Game.Commands.swapCommand.bind(this, 1, 0, 0),
+            'ArrowLeft':    Game.Commands.swapCommand.bind(this, -1, 0, 0),
+            'ArrowDown':    Game.Commands.swapCommand.bind(this, 0, 1, 0),
+            'ArrowUp':      Game.Commands.swapCommand.bind(this, 0, -1, 0),
         }
     }
 };

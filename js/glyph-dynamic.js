@@ -14,10 +14,10 @@ Game.DynamicGlyph = function(properties) {
     // Setup the object's mixins
     var mixins = properties['mixins'] || [];
     var ignoreKeys = [
-     'init',
-     'name',
-     'groupName',
-     'listeners'
+        'init',
+        'name',
+        'groupName',
+        'listeners'
     ];
     for(var i = 0; i < mixins.length; i++) {
         // Copy over all properties from each mixin as long
@@ -86,7 +86,7 @@ Game.DynamicGlyph.prototype.details = function() {
         for(var i = 0, l = detailGroups.length; i < l; i++) {
             if(detailGroups[i]) {
                 for(var j = 0; j < detailGroups[i].length; j++) {
-                    details.push(detailGroups[i][j].key + ': ' +  detailGroups[i][j].value);          
+                    details.push(detailGroups[i][j].key + ': ' +  detailGroups[i][j].value);
                 }
             }
         }

@@ -48,6 +48,8 @@ Game.Map = function(size, player) {
     this._eventSources = this._city.getEventSources();
     for(var i = 0; i < this._eventSources.length; i++)
         this.schedule(this._eventSources[i]);
+    this._batchProcessor = new Game.BatchProcessor();
+    this.schedule(this._batchProcessor);
 
     // Setup the explored array
     this._explored = new Array(this._depth);
@@ -59,15 +61,7 @@ Game.Map = function(size, player) {
 
     // Add the Player
     this._player = player;
-    // var playerLoc = this._city.getLivingLocations()[0].split(",");
-    var floorLoc = this.getRandomFloorPosition(0);
-    var playerLoc = [floorLoc.x, floorLoc.y, floorLoc.z];
-    this.addEntityAt(player, playerLoc[0] - 1, playerLoc[1] - 1, 0);
-
-    // TODO: [EVENTS] Delete this after creating banks and such
-    // this.addItem(Number(playerLoc[0]) + 1, Number(playerLoc[1]), 0, Game.ItemRepository.create('safe'));
-    // this.addItem(Number(playerLoc[0]) + 2, Number(playerLoc[1]), 0, Game.ItemRepository.create('vault door'));
-    // this.addItem(Number(playerLoc[0]), Number(playerLoc[1]) + 1, 0, Game.ItemRepository.create('cash register'));
+    this.assignLivingLocation(player);
 };
 
 // Standard getters
@@ -98,6 +92,9 @@ Game.Map.prototype.getCity = function() {
 Game.Map.prototype.getTime = function() {
     return this._time;
 };
+Game.Map.prototype.getBatchProcessor = function() {
+    return this._batchProcessor;
+};
 Game.Map.prototype.getJustice = function() {
     return this._justice;
 };
@@ -117,6 +114,25 @@ Game.Map.prototype.getOccupiedLivingLocations = function() {
     return this._occupiedLivingLocations;
 };
 
+Game.Map.prototype.assignLivingLocation = function(entity) {
+    var livingLocation = this._availableLivingLocations[0];
+    var memory = {
+        location: livingLocation
+    };
+    var split;
+
+    if(livingLocation) {
+        entity.remember('places', 'home', false, memory);
+
+        split = livingLocation.split(",");
+        this.addEntityAt(entity, split[0], split[1], split[2]);
+
+        // Occupy the living location and then move to the next
+        this.occupyLivingLocation(0);
+    } else {
+        this.addEntityAtRandomPosition(entity, 0);
+    }
+};
 Game.Map.prototype.occupyLivingLocation = function(i) {
     // Add the value of the available location to the occupied location
     // and then splice it from the available locations
@@ -218,7 +234,7 @@ Game.Map.prototype.removeEntity = function(entity) {
         this._scheduler.remove(entity);
 
     // Add their livingLocation to the available list if applicable
-    var home = entity.recall('places', 'home');
+    var home = entity.hasMixin('MemoryMaker') ? entity.recall('places', 'home') : false;
     if(home) {
         var index = this._occupiedLivingLocations.indexOf(home);
         this.vacateLivingLocation(index);
@@ -277,16 +293,16 @@ Game.Map.prototype.post12Recovery = function() {
 
 Game.Map.prototype._generateEntities = function() {
     var criminals = 0,
+        totalCriminals = Game.getTotalCriminals(),
         companies = this._city.getCompanies(),
-        currentCompany = 0,
-        addedWork = false;
+        currentCompany = 0;
 
-    for (var i = 0; i < Game.getTotalEntities(); i++) {
+    for (var i = 0, te = Game.getTotalEntities(); i < te; i++) {
         // The template has to be created each time, because making it once
         // outside the loop and then changing it changes all entities
         // created with the template
         var template;
-        if(criminals <= Game.getTotalCriminals()) {
+        if(criminals <= totalCriminals) {
             template = {
                 // In order for mugging to rank higher than survive,
                 // their money / survive priority needs to be higher
@@ -304,28 +320,14 @@ Game.Map.prototype._generateEntities = function() {
         var entity = Game.EntityRepository.createEntity('person', template);
 
         // Give the entity a job
-        if(companies[currentCompany].getAvailablePositions() <= 0)
+        while (companies[currentCompany] && (companies[currentCompany].getAvailablePositions() <= 0 || companies[currentCompany].getJobLocations().length === 0))
             currentCompany++;
 
         // Add the entity as an employee of the current company
         companies[currentCompany].addEmployee(entity);
 
         // Add the entity at a random position on the map
-        var livingLocation = this._availableLivingLocations[0];
-        if(livingLocation) {
-            // Make sure they remember where home is
-            var memory = {location: livingLocation};
-            entity.remember('places', 'home', false, memory);
-
-            // Spawn them at this location
-            var split = livingLocation.split(",");
-            this.addEntityAt(entity, split[0], split[1], split[2]);
-
-            // Occupy the living location and then move to the next
-            this.occupyLivingLocation(0);
-        } else {
-            this.addEntityAtRandomPosition(entity, 0);
-        }
+        this.assignLivingLocation(entity);
 
         if(template.jobs.indexOf('mugger') > -1)
             criminals++;
@@ -344,8 +346,8 @@ Game.Map.prototype.isEmptyFloor = function(x, y, z) {
 Game.Map.prototype.getRandomFloorPosition = function(z) {
     var x, y;
     do {
-        x = Math.floor(Math.random() * (this._width - 1));
-        y = Math.floor(Math.random() * (this._height - 1));
+        x = Math.floor(ROT.RNG.getUniform() * (this._width - 1));
+        y = Math.floor(ROT.RNG.getUniform() * (this._height - 1));
     } while(!this.isEmptyFloor(x, y, z));
     return {x: x, y: y, z: z};
 };
@@ -355,12 +357,18 @@ Game.Map.prototype.getRandomFloorPosition = function(z) {
 Game.Map.prototype.getTile = function(x, y, z) {
     // Make sure we are inside the bounds.
     // If we aren't, return null tile.
-    if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth)
+    if (x < 0 || x >= this._width || y < 0 || y >= this._height || z < 0 || z >= this._depth || !this._tiles[z] || !this._tiles[z][x] || !this._tiles[z][x][y])
         return Game.TileRepository.create('null');
-    else if(!this._tiles[z][x] || !this._tiles[z][x][y])
-        debugger;
     else
         return this._tiles[z][x][y] || Game.TileRepository.create('null');
+};
+Game.Map.prototype.setTile = function(x, y, z, tileName) {
+    // Make sure we are inside the bounds.
+    if (x >= 0 && x < this._width && y >= 0 && y < this._height && z >= 0 && z < this._depth) {
+        var newTile = Game.TileRepository.create(tileName);
+        if (!newTile) throw Error(tileName + ' doesn\'t exist');
+        this._tiles[z][x][y] = newTile;
+    }
 };
 Game.Map.prototype.getTileList = function(type) {
     var tileList = [];
@@ -400,15 +408,13 @@ Game.Map.prototype._createSortByDistance = function(coord) {
 };
 // TODO: Optimize these get path functions to sort the stairs by distance first, then find path. Additionally, most of this code is duplicated between the two functions, and could be reduced to a single function that takes a direction param
 Game.Map.prototype.getPathToNearestStair = function(x, y, z, type) {
-    var nearestIndex = null,
-        nearestDistance = null,
-        steps = [],
+    var steps = [],
         map = this,
         stairType = '_' + type + 'Stairs',
-        stairsX, stairsY, distance, pather;
+        stairsX, stairsY, pather;
 
     var canWalk = function(floorX, floorY) {
-        return map.getTile(floorX, floorY, z).isWalkable();
+        return map.getTile(floorX, floorY, z).isWalkable() || map.getTile(floorX, floorY, z).getName().includes("door");
     };
 
     var pushSteps = function(floorX, floorY) {
@@ -421,7 +427,6 @@ Game.Map.prototype.getPathToNearestStair = function(x, y, z, type) {
     for (var i = 0; i < stairs.length; i++) {
         var split = stairs[i].split(",");
 
-        newSteps = [];
         stairsX = Number(split[0]);
         stairsY = Number(split[1]);
 

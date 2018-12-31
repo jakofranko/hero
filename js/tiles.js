@@ -39,7 +39,7 @@ Game.TileRepository.define('stairsUp', {
     character: '<',
     foreground: 'white',
     walkable: true,
-    flyable: true,
+    flyable: false,
     descendable: true,
     blocksLight: false,
     description: 'A staircase leading upwards'
@@ -108,21 +108,21 @@ Game.TileRepository.define('window-horizontal', {
     blocksLight: false,
     description: "A glass window"
 });
-Game.TileRepository.define('indoor wall-vertical', {
-    name: 'indoor wall-vertical',
+Game.TileRepository.define('inside wall-vertical', {
+    name: 'inside wall-vertical',
     character: '|',
     foreground: '#ffffff',
     walkable: false,
-    blocksLight: false,
+    blocksLight: true,
     innerWall: true,
     description: "A wall"
 });
-Game.TileRepository.define('indoor wall-horizontal', {
-    name: 'indoor wall-horizontal',
+Game.TileRepository.define('inside wall-horizontal', {
+    name: 'inside wall-horizontal',
     character: '-',
     foreground: '#ffffff',
     walkable: false,
-    blocksLight: false,
+    blocksLight: true,
     innerWall: true,
     description: "A wall"
 });
@@ -130,17 +130,33 @@ Game.TileRepository.define('door', {
     name: 'door',
     character: '+',
     foreground: '#8b888d',
+    walkable: false,
+    blocksLight: true,
+    description: "A door. Not a good window."
+});
+Game.TileRepository.define('open door', {
+    name: 'open door',
+    character: '-',
+    foreground: '#8b888d',
     walkable: true,
     blocksLight: false,
-    description: "A steel door"
+    description: "An open door"
 });
 Game.TileRepository.define('glass door', {
     name: 'glass door',
     character: '+',
     foreground: '#aadfff',
-    walkable: true,
+    walkable: false,
     blocksLight: false,
     description: "A glass door"
+});
+Game.TileRepository.define('open glass door', {
+    name: 'open glass door',
+    character: '-',
+    foreground: '#aadfff',
+    walkable: true,
+    blocksLight: false,
+    description: "An open glass door"
 });
 Game.TileRepository.define('guard rail', {
     name: 'guard rail',

@@ -75,7 +75,7 @@ Game.Power =  function(properties) {
             break;
         case 'standard':
             this.inRange = function(startX, startY, targetX, targetY) {
-                return Game.Geometry.distance(this.entity.getX(), this.entity.getY(), targetX, targetY) <= (5 * this.points);
+                return Game.Geometry.distance(startX, startY, targetX, targetY) <= 5 * this.points;
             };
             break;
         case 'LOS':

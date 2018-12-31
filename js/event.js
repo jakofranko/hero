@@ -41,7 +41,11 @@ Game.Event = function(properties) {
     this._entityTypes    = properties['entityTypes'];
     this._minEntities    = properties['minEntities'];
     this._maxEntities    = properties['maxEntities'];
-    this._onEntitySpawn  = properties['onEntitySpawn'] || function(entity){console.log(entity)};
+
+    // Event start hooks
+    this._onEventStart  = properties['onEventStart'] || function(){console.log(`The event '${this._name}' started`)}
+    this._onEventEnd  = properties['onEventEnd'] || function(){console.log(`The event '${this._name}' ended`)}
+    this._onEntitySpawn = properties['onEntitySpawn'] || function(entity){console.log(entity)};
 
     // Conditions for the event being a 'success' or a 'loss'
     this._successCondition = properties['successCondition'];
@@ -50,10 +54,11 @@ Game.Event = function(properties) {
     this._lossEffect       = properties['lossEffect'];
 
     // 'Hooks' or 'Listeners' for when event entities do stuff
+    this._onKO  = properties['onKO'] || function(victim, killer) { console.log(`Entity '${victim.getName()}' was knocked out by '${killer.getName()}'`); };
     this._onDeath  = properties['onDeath'] || function(victim, killer) { console.log(`Entity '${victim.getName()}' was kill by '${killer.getName()}'`); };
     this._onKill  = properties['onKill'] || function(killer, victim) { console.log(`Entity '${killer.getName()}' has killed '${victim.getName()}'`); };
-    this._onInteraction  = properties['onInteraction'] || function(entity, interaction) { console.log(`Entity '${entity.getName()}' was interacted with`); };
-    this._onTurn = properties['onTurn'] || function() { console.log('Turn: ' + this._turns); };
+    this._onInteraction  = properties['onInteraction'] || function(entity, interaction) { console.log(`Entity '${entity.getName()}' was interacted with (${interaction})`); };
+    this._onTurn = properties['onTurn'] || function() { /* console.log('Turn: ' + this._turns); */ };
 
     // Cache objects for when the event starts
     this._entities = [];
@@ -120,6 +125,8 @@ Game.Event.prototype.start = function() {
     var numEntities = Game.getRandomInRange(this._minEntities, this._maxEntities),
         spawnItem = false;
 
+    this._onEventStart();
+
     // Try to grab a random spawn location
     var tries = 20;
     while(tries > 0 && !spawnItem) {
@@ -127,8 +134,10 @@ Game.Event.prototype.start = function() {
         tries--;
     }
 
-    if(!spawnItem)
+    if(!spawnItem) {
         debugger;
+        return false;
+    }
 
     var spawnLocation = spawnItem.getLocation(),
         splitLocation = spawnLocation.split(","),
@@ -146,7 +155,7 @@ Game.Event.prototype.start = function() {
             spawnY = Number(splitLocation[1]) + Game.getRandomInRange(-spawnRadius, spawnRadius);
             numTimes++;
         } while(
-            (!this._map.isEmptyFloor(spawnX, spawnY, splitLocation[2]) ||
+            (!this._map.getTile(spawnX, spawnY, splitLocation[2]).isWalkable() ||
             this._map.getEntityAt(spawnX, spawnY, splitLocation[2]) ||
             spawnLocations.indexOf(`${spawnX},${spawnY},${splitLocation[2]}`) !== -1) &&
             numTimes < maxTimes
@@ -168,11 +177,14 @@ Game.Event.prototype.start = function() {
     }
 
     this._location = spawnLocation;
+
+    return true;
 };
 
 // Handling events
 Game.Event.prototype.raiseEvent = function(event, ...args) {
     var hook = `_${event}`;
+    
     if(!this[hook])
         throw new Error(`There is no hook for '${event}.' Please define one in the event definition`);
 
@@ -180,11 +192,11 @@ Game.Event.prototype.raiseEvent = function(event, ...args) {
     this[hook].apply(this, args);
 
     // Check to see if the event is over (success or loss)
-    if(this._successCondition()) {
-        this._successEffect();
+    if(this._successCondition(event, args)) {
+        this._successEffect(event, args);
         this._won = true;
-    } else if(this._lossCondition()) {
-        this._lossEffect();
+    } else if(this._lossCondition(event, args)) {
+        this._lossEffect(event, args);
         this._lost = true;
     }
 

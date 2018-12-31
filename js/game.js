@@ -1,6 +1,8 @@
 var Game = {
     _player: null,
     _won: false,
+    _loaded: false,
+    _seed: null,
 
     // ROT.Displays
     _display: null,
@@ -16,16 +18,17 @@ var Game = {
 
     _screenWidth: 80,
     _screenHeight: 24,
-    _citySize: 10,
+    _citySize: 7,
+    _keepNumMessages: 100,
 
     // How many in-game tiles a lot should comprise
     _lotSize: 40,
     _startTime: '0700',
 
     // NPC Settings
-    _totalEntities: 150,
-    _totalCriminals: 10,
-    _availableJobs: 500 - 100,
+    _totalEntities: 300,
+    _totalCriminals: 60,
+    _availableJobs: 300 - 60,
 
     debug: true,
     watchName: null,
@@ -61,6 +64,9 @@ var Game = {
     getCitySize: function() {
         return this._citySize;
     },
+    getKeepNumMessages: function() {
+        return this._keepNumMessages;
+    },
     getLotSize: function() {
         return this._lotSize;
     },
@@ -78,6 +84,19 @@ var Game = {
     },
     getAvailableJobs: function() {
         return this._availableJobs;
+    },
+    getSeed: function() {
+        return this._seed;
+    },
+    setSeed: function(seed) {
+        this._seed = seed;
+        ROT.RNG.setSeed(seed);
+    },
+    setLoading: function(loading) {
+        this._loaded = loading;
+    },
+    finishedLoading: function() {
+        return this._loaded;
     },
     addAvailableJobs: function(amount) {
         if(amount)
@@ -143,7 +162,7 @@ var Game = {
     },
     sendMessage: function(recipient, message, args) {
         // Make sure the recipient can receive messages
-        if(recipient.hasMixin('MessageRecipient')) {
+        if(recipient && recipient.hasMixin('MessageRecipient')) {
             // If args were passed, format the message
             // Elsewise, don't format the message
             if(args) {
@@ -169,12 +188,13 @@ var Game = {
         }
     },
     displayMessages: function(entity) {
+        var h = this._log.getOptions().height;
         this._log.clear();
         if(entity && entity.hasMixin('MessageRecipient')) {
             // Get the messages in the player's queue and render them
             var messages = entity.getMessages();
             var messageY = 0;
-            for (var i = 0; i < messages.length; i++) {
+            for (var i = messages.length - 1; messageY < h && i > -1; i--) {
                 // Draw each message, adding the number of lines
                 messageY += this._log.drawText(
                     0,
@@ -217,7 +237,6 @@ var Game = {
         }
     },
     resize: function(display, setSize, setFontSize, setScreenSize) {
-        var options = display.getOptions();
         var parent = display.getContainer().parentElement;
 
         if(setSize) {

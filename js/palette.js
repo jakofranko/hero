@@ -5,6 +5,7 @@ Game.Palette = {
     skyBlue: "#84c0ff",
 	teal: "teal",
 	green: "#00ff78",
+    leafGreen: "#96bd90",
 
 	// Warm colors
 	red: "#ea003b",
