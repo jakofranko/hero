@@ -1446,27 +1446,33 @@ Game.Screen.helpScreen = {
     render: function(display) {
         var text = 'Help / Command List';
         var border = '-------------------';
-        var padding = 2;
+        var padding = 3;
         var y = padding;
+
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
+        display.drawText(padding, y++, 'Your goal is to restore justice to this city by defeating %c{' + Game.Palette.red + '}criminals%c{} and doing good deeds. Knocking criminals out is often enough to change their minds, and there is a price to pay for killing them. Your location on the mini-map is %b{' + Game.Palette.grey + '}highlighted in grey%b{}. City events are in %c{' + Game.Palette.blue + '}blue%c{}.');
+
+        y += padding;
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Arrow keys%c{} to move, attack or use primary melee power');
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}Ctrl + Arrow keys%c{} to swap positions with NPC');
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}<%c{} to go up stairs');
         display.drawText(padding, y++, '%c{' + Game.Palette.blue + '}>%c{} to go down stairs');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}Space%c{}] to use/interact with nearby items and entities');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}j%c{}] to show city statistics');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}s%c{}] to spend experience points');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}p%c{}] to use powers');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}f%c{}] to use primary ranged power');
+        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}n or N%c{}] to cycle targets');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '},%c{}] to pick up items');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}d%c{}] to drop items');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}x%c{}] to examine items');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}t%c{}] to throw item');
-        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}p%c{}] to use powers');
-        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}f%c{}] to use primary ranged power');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '};%c{}] to look around you');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}.%c{}] to wait');
-        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}j%c{}] to show city statistics');
-        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}s%c{}] to spend experience points');
-        display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}Space%c{}] to use/interact with nearby items and entities');
         display.drawText(padding, y++, '[%c{' + Game.Palette.blue + '}?%c{}] to show this help screen');
-        y += 3;
+
+        y += padding;
         text = '--- press any key to continue ---';
         display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
     },
