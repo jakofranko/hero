@@ -15,3 +15,18 @@ As I have been developing Justice, I pretty consistently start out to work on a 
 * 'Event source' entity mixin that allows NPCs to spawn events as long as they are alive
 * 'Projectile Deflection' power, which will entail a small refactor in how damage is done to entities (should use the `raiseEvent` method to get damage instead of directly calculating)
 * Add meaningful colors to game messages for easier readability/information gather (red means damage has been taken etc.)
+* Restaurants, Grocery Stores, Pharmacies, Fast Food places etc. Basically one-story locations that could be the target of robberies, or the 'hangout' of villains
+* More event types:
+    * "assassination" event where the hero gets ambushed by a bunch of bad guys
+    * "get the cat out of the tree" type events
+    * Hostage events on upper stories of office buildings and skyscrapers
+    * Long-running "super villain" events
+* More meaning to cleaning up the city; some events will only spawn when things are really bad, and some events will only spawn when things are really good e.g., more petty crime and gang-lord type events when things are really bad, and super-villain type events when things are really good etc.
+* Animations
+    * A component of an action during an entity's turn. Should be able to add Animation objects to an array if the player would be able to see any part of the animation, and then animate them sequentially on the player's turn.
+    * Add animations for things like gun shots, super-powers things like that.
+* SFX
+    * Streetlights
+    * day/night lighting changes
+    * Animations that aren't tied to actions, such as a torch flickering or a UI element pulsing
+* Reduce impact of/make it easier to find muggers. Right now they are really hard to find and there are a lot of them, driving up the criminal count of the city and this makes it feel like you aren't making progress (even though you are). It is currently possible to win just by stopping gang wars, bank robberies and rescuing lost children, but it doesn't feel like you're winning.
