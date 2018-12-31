@@ -78,7 +78,7 @@ Game.Justice.prototype.getCorruption = function() {
 };
 Game.Justice.prototype.updateCorruption = function () {
 	var infamy = this._infamy === 0 ? 1 : this._infamy
-    this._corruption = 0 - (this._good_deeds / infamy);
+    this._corruption = 0 - this._good_deeds + (infamy * 1.5);
 };
 
 // Third Tier methods

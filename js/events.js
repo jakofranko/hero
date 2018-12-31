@@ -30,7 +30,7 @@ Game.EventRepository.define('bank robbery', {
             justice = map.getJustice(),
             entities = this.getEntities();
 
-        justice.addRespectForLaw(5);
+        justice.addRespectForLaw(15);
         entities.forEach(entity => { map.removeEntity(entity); });
     },
     lossCondition: function() {
@@ -109,6 +109,10 @@ Game.EventRepository.define('lost child', {
                 break;
             }
         }
+
+        if (killer._type === 'Player')
+            this.getMap().getJustice().addInfamy(50);
+
         console.log(`Entity '${victim.getName()}' was killed by '${killer.getName()}' for event ${this.getName()} ${this.getId()}`);
     }
 });
@@ -150,7 +154,7 @@ Game.EventRepository.define('gang war', {
     lossEffect: function() {
         var map =  this.getMap();
 
-        map.getJustice().removeRespectForLaw(15);
+        map.getJustice().removeRespectForLaw(5);
         this.getEntities().forEach(entity => { map.removeEntity(entity); });
     },
     onEventStart: function() {
