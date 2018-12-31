@@ -72,7 +72,7 @@ Game.BasePowers.energyBlast = function(options) {
             this.entity.adjustEND(-this.END());
 
             targets.forEach(function(target) {
-                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY()) && this.entity.canSee(target)) {
                     target.raiseEvent('onAttack', this.entity);
 
                     var hit = this.entity._attackRoll(target);
@@ -140,7 +140,7 @@ Game.BasePowers.handToHandAttack = function(options) {
             this.entity.adjustEND(-this.END());
 
             targets.forEach(function(target) {
-                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY()) && this.entity.canSee(target)) {
                     target.raiseEvent('onAttack', this.entity);
 
                     var hit = this.entity._attackRoll(target);
@@ -207,7 +207,7 @@ Game.BasePowers.handToHandKillingAttack = function(options) {
             this.entity.adjustEND(-this.END());
 
             targets.forEach(function(target) {
-                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY()) && this.entity.canSee(target)) {
                     target.raiseEvent('onAttack', this.entity);
 
                     var hit = this.entity._attackRoll(target);
@@ -269,7 +269,7 @@ Game.BasePowers.rangedKillingAttack = function(options) {
             this.entity.adjustEND(-this.END());
 
             targets.forEach(function(target) {
-                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY())) {
+                if(this.inRange(this.entity.getX(), this.entity.getY(), target.getX(), target.getY()) && this.entity.canSee(target)) {
                     target.raiseEvent('onAttack', this.entity);
 
                     var hit = this.entity._attackRoll(target);
@@ -434,7 +434,7 @@ Game.BasePowers.teleportation = function(options) {
         hitTargetMessage: '',
         hitMessage: "You instantly appear somewhere else.",
         missTargetMessage: 'Somebody just tried to teleport into you, ouch that hurt!!!',
-        missMessage: 'You instantly appear in something else, ouch that hurts!!! And then you\'re back where you came from',
+        missMessage: 'You instantly appear in something else, ouch that hurts!!! And then you\'re back where you came from.',
         effect: function(targets, coords) {
             let tile, numD6, damage;
 
