@@ -88,7 +88,7 @@ Game.Screen.startScreen = {
         //                     __,,aaaadd888888888888888bbaaaa,,__
         //                   d8888888888888888888888888888888888888b
 
-        var version = "v1.0";
+        var version = "v1.1";
         display.drawText((w / 2) - (version.length / 2), scalesASCII.length + y, version);
 
     },
