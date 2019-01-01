@@ -241,7 +241,9 @@ Game.Jobs.gangWarrior = {
             entity.setTarget(null);
             entity.setPath(); // clear path
         } else if (entity.getSightRadius() < Game.Geometry.distance(entity.getX(), entity.getY(), eventX, eventY)) {
-            Game.Tasks.getPath(entity, eventX, eventY, eventZ);
+            if (entity.getPath().length === 0)
+                entity.setPath(Game.Tasks.getPath(entity, eventX, eventY, eventZ));
+                
             Game.Tasks.followPath(entity);
         } else {
             Game.Tasks.wander(entity);
