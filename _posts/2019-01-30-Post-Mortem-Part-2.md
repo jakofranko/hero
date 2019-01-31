@@ -1,5 +1,3 @@
-Post Mortem Part 2 for Justice
-
 ---
 title: Post Mortem Part 2 - What Went Poorly
 date: 2019-01-30 09:31pm
