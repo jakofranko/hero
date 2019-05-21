@@ -1,0 +1,18 @@
+ <svg
+    class="vector"
+    width="300px"
+    height="300px"
+    xmlns="http://www.w3.org/2000/svg"
+    baseProfile="full"
+    version="1.1"
+    style="width: 300px; height: 300px; stroke: #333; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; fill: none;">
+    <defs>
+        <radialGradient id="glow" r="40%">
+            <stop offset="20%" stop-color="gold"/>
+            <stop offset="80%" stop-color="#123"/>
+        </radialGradient>
+    </defs>
+    <g>
+        <path stroke="url('#glow')" id="layer_1" d="M90 60 A60 30 0 0 0 150 30 A60 30 0 0 0 210 60 M90 60 L90 60 L90 90 L90 90 L60 150 L120 150 L90 90 M210 60 L210 60 L210 90 L210 90 L180 150 L240 150 L210 90 M150 60 L150 60 L150 195 M75 225 A75 30 0 0 0 150 195 A75 30 0 0 0 225 225 Z M45 240 L45 240 L255 240 M45 165 L45 165 L135 165 M165 165 L165 165 L255 165 M150 0 A150 150 0 0 0 0 150 A150 150 0 0 0 150 300 A150 150 0 0 0 300 150 A150 150 0 0 0 150 0 M75 180 L75 180 L105 180 M195 180 L195 180 L225 180"></path>
+    </g>
+</svg>
